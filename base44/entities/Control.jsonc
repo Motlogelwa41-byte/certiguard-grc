@@ -1,0 +1,101 @@
+{
+  "name": "Control",
+  "type": "object",
+  "properties": {
+    "control_id": {
+      "type": "string",
+      "description": "Unique control identifier"
+    },
+    "title": {
+      "type": "string"
+    },
+    "description": {
+      "type": "string"
+    },
+    "category": {
+      "type": "string",
+      "enum": [
+        "access_control",
+        "data_protection",
+        "incident_response",
+        "change_management",
+        "risk_management",
+        "security_operations",
+        "business_continuity",
+        "network_security",
+        "physical_security",
+        "compliance",
+        "human_resources",
+        "asset_management"
+      ],
+      "default": "access_control"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "passing",
+        "failing",
+        "not_applicable",
+        "not_tested"
+      ],
+      "default": "not_tested"
+    },
+    "severity": {
+      "type": "string",
+      "enum": [
+        "critical",
+        "high",
+        "medium",
+        "low"
+      ],
+      "default": "medium"
+    },
+    "framework_ids": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "Frameworks this control maps to"
+    },
+    "framework_names": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "owner_name": {
+      "type": "string"
+    },
+    "owner_id": {
+      "type": "string"
+    },
+    "evidence_count": {
+      "type": "number",
+      "default": 0
+    },
+    "last_tested": {
+      "type": "string",
+      "format": "date"
+    },
+    "next_review": {
+      "type": "string",
+      "format": "date"
+    },
+    "automation_status": {
+      "type": "string",
+      "enum": [
+        "automated",
+        "manual",
+        "partially_automated"
+      ],
+      "default": "manual"
+    },
+    "notes": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "control_id",
+    "title"
+  ]
+}

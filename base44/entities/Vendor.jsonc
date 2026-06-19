@@ -1,0 +1,99 @@
+{
+  "name": "Vendor",
+  "type": "object",
+  "properties": {
+    "name": {
+      "type": "string"
+    },
+    "description": {
+      "type": "string"
+    },
+    "category": {
+      "type": "string",
+      "enum": [
+        "cloud_infrastructure",
+        "saas",
+        "data_processor",
+        "consulting",
+        "managed_services",
+        "hardware",
+        "other"
+      ],
+      "default": "saas"
+    },
+    "risk_level": {
+      "type": "string",
+      "enum": [
+        "critical",
+        "high",
+        "medium",
+        "low"
+      ],
+      "default": "medium"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "approved",
+        "pending_review",
+        "under_review",
+        "rejected",
+        "inactive"
+      ],
+      "default": "pending_review"
+    },
+    "contact_name": {
+      "type": "string"
+    },
+    "contact_email": {
+      "type": "string"
+    },
+    "website": {
+      "type": "string"
+    },
+    "contract_start": {
+      "type": "string",
+      "format": "date"
+    },
+    "contract_end": {
+      "type": "string",
+      "format": "date"
+    },
+    "data_access": {
+      "type": "string",
+      "enum": [
+        "none",
+        "limited",
+        "moderate",
+        "extensive"
+      ],
+      "default": "none"
+    },
+    "soc2_compliant": {
+      "type": "boolean",
+      "default": false
+    },
+    "iso27001_compliant": {
+      "type": "boolean",
+      "default": false
+    },
+    "gdpr_compliant": {
+      "type": "boolean",
+      "default": false
+    },
+    "last_assessment_date": {
+      "type": "string",
+      "format": "date"
+    },
+    "next_assessment_date": {
+      "type": "string",
+      "format": "date"
+    },
+    "notes": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "name"
+  ]
+}

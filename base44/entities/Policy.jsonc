@@ -1,0 +1,80 @@
+{
+  "name": "Policy",
+  "type": "object",
+  "properties": {
+    "title": {
+      "type": "string"
+    },
+    "description": {
+      "type": "string"
+    },
+    "content": {
+      "type": "string",
+      "description": "Full policy text"
+    },
+    "category": {
+      "type": "string",
+      "enum": [
+        "information_security",
+        "data_privacy",
+        "acceptable_use",
+        "access_control",
+        "incident_response",
+        "business_continuity",
+        "change_management",
+        "vendor_management",
+        "human_resources",
+        "physical_security"
+      ],
+      "default": "information_security"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "draft",
+        "in_review",
+        "approved",
+        "archived"
+      ],
+      "default": "draft"
+    },
+    "version": {
+      "type": "string",
+      "default": "1.0"
+    },
+    "owner_name": {
+      "type": "string"
+    },
+    "owner_id": {
+      "type": "string"
+    },
+    "approved_by": {
+      "type": "string"
+    },
+    "approved_date": {
+      "type": "string",
+      "format": "date"
+    },
+    "next_review_date": {
+      "type": "string",
+      "format": "date"
+    },
+    "framework_ids": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "acknowledgment_required": {
+      "type": "boolean",
+      "default": true
+    },
+    "acknowledgment_count": {
+      "type": "number",
+      "default": 0
+    }
+  },
+  "required": [
+    "title"
+  ]
+}

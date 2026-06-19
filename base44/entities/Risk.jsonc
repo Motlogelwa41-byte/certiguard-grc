@@ -1,0 +1,105 @@
+{
+  "name": "Risk",
+  "type": "object",
+  "properties": {
+    "risk_id": {
+      "type": "string"
+    },
+    "title": {
+      "type": "string"
+    },
+    "description": {
+      "type": "string"
+    },
+    "category": {
+      "type": "string",
+      "enum": [
+        "operational",
+        "technical",
+        "compliance",
+        "financial",
+        "strategic",
+        "reputational",
+        "third_party"
+      ],
+      "default": "operational"
+    },
+    "likelihood": {
+      "type": "number",
+      "enum": [
+        1,
+        2,
+        3,
+        4,
+        5
+      ],
+      "default": 3
+    },
+    "impact": {
+      "type": "number",
+      "enum": [
+        1,
+        2,
+        3,
+        4,
+        5
+      ],
+      "default": 3
+    },
+    "risk_score": {
+      "type": "number",
+      "default": 0
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "open",
+        "mitigating",
+        "accepted",
+        "transferred",
+        "closed"
+      ],
+      "default": "open"
+    },
+    "treatment": {
+      "type": "string",
+      "enum": [
+        "mitigate",
+        "accept",
+        "transfer",
+        "avoid"
+      ],
+      "default": "mitigate"
+    },
+    "owner_name": {
+      "type": "string"
+    },
+    "owner_id": {
+      "type": "string"
+    },
+    "mitigation_plan": {
+      "type": "string"
+    },
+    "related_control_ids": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "due_date": {
+      "type": "string",
+      "format": "date"
+    },
+    "residual_likelihood": {
+      "type": "number",
+      "default": 1
+    },
+    "residual_impact": {
+      "type": "number",
+      "default": 1
+    }
+  },
+  "required": [
+    "title"
+  ]
+}

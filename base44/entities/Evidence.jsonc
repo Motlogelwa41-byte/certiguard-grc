@@ -1,0 +1,65 @@
+{
+  "name": "Evidence",
+  "type": "object",
+  "properties": {
+    "title": {
+      "type": "string"
+    },
+    "description": {
+      "type": "string"
+    },
+    "file_url": {
+      "type": "string",
+      "description": "Uploaded evidence file"
+    },
+    "file_name": {
+      "type": "string"
+    },
+    "control_id": {
+      "type": "string"
+    },
+    "control_title": {
+      "type": "string"
+    },
+    "type": {
+      "type": "string",
+      "enum": [
+        "screenshot",
+        "document",
+        "report",
+        "log",
+        "certificate",
+        "configuration",
+        "other"
+      ],
+      "default": "document"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "pending_review",
+        "approved",
+        "rejected",
+        "expired"
+      ],
+      "default": "pending_review"
+    },
+    "collected_date": {
+      "type": "string",
+      "format": "date"
+    },
+    "expiry_date": {
+      "type": "string",
+      "format": "date"
+    },
+    "reviewer_name": {
+      "type": "string"
+    },
+    "notes": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "title"
+  ]
+}

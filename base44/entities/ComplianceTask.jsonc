@@ -1,0 +1,70 @@
+{
+  "name": "ComplianceTask",
+  "type": "object",
+  "properties": {
+    "title": {
+      "type": "string"
+    },
+    "description": {
+      "type": "string"
+    },
+    "type": {
+      "type": "string",
+      "enum": [
+        "control_implementation",
+        "evidence_collection",
+        "policy_review",
+        "risk_assessment",
+        "audit_preparation",
+        "remediation",
+        "training",
+        "vendor_review",
+        "other"
+      ],
+      "default": "other"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "todo",
+        "in_progress",
+        "in_review",
+        "completed",
+        "overdue"
+      ],
+      "default": "todo"
+    },
+    "priority": {
+      "type": "string",
+      "enum": [
+        "critical",
+        "high",
+        "medium",
+        "low"
+      ],
+      "default": "medium"
+    },
+    "assignee_name": {
+      "type": "string"
+    },
+    "assignee_id": {
+      "type": "string"
+    },
+    "due_date": {
+      "type": "string",
+      "format": "date"
+    },
+    "related_control_id": {
+      "type": "string"
+    },
+    "related_framework_id": {
+      "type": "string"
+    },
+    "notes": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "title"
+  ]
+}

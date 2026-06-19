@@ -1,0 +1,79 @@
+{
+  "name": "Audit",
+  "type": "object",
+  "properties": {
+    "title": {
+      "type": "string"
+    },
+    "description": {
+      "type": "string"
+    },
+    "framework_id": {
+      "type": "string"
+    },
+    "framework_name": {
+      "type": "string"
+    },
+    "type": {
+      "type": "string",
+      "enum": [
+        "internal",
+        "external",
+        "regulatory",
+        "certification"
+      ],
+      "default": "internal"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "planned",
+        "in_progress",
+        "completed",
+        "cancelled"
+      ],
+      "default": "planned"
+    },
+    "auditor_name": {
+      "type": "string"
+    },
+    "auditor_firm": {
+      "type": "string"
+    },
+    "start_date": {
+      "type": "string",
+      "format": "date"
+    },
+    "end_date": {
+      "type": "string",
+      "format": "date"
+    },
+    "findings_count": {
+      "type": "number",
+      "default": 0
+    },
+    "critical_findings": {
+      "type": "number",
+      "default": 0
+    },
+    "result": {
+      "type": "string",
+      "enum": [
+        "pass",
+        "pass_with_exceptions",
+        "fail",
+        "pending"
+      ],
+      "default": "pending"
+    },
+    "report_url": {
+      "type": "string"
+    },
+    "notes": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "title"
+  ]
+}
