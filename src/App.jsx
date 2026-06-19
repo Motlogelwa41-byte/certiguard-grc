@@ -21,6 +21,10 @@ import EvidenceManager from '@/pages/EvidenceManager';
 import Audits from '@/pages/Audits';
 import Vendors from '@/pages/Vendors';
 import Tasks from '@/pages/Tasks';
+import GapAnalysis from '@/pages/GapAnalysis';
+import AIAuditor from '@/pages/AIAuditor';
+import ComplianceRuns from '@/pages/ComplianceRuns';
+import ROPA from '@/pages/ROPA';
 
 const AuthenticatedApp = () => {
   const { isLoadingAuth, isLoadingPublicSettings, authError, navigateToLogin } = useAuth();
@@ -59,6 +63,10 @@ const AuthenticatedApp = () => {
           <Route path="/audits" element={<Audits />} />
           <Route path="/vendors" element={<Vendors />} />
           <Route path="/tasks" element={<Tasks />} />
+          <Route path="/gap-analysis" element={<GapAnalysis />} />
+          <Route path="/ai-auditor" element={<AIAuditor />} />
+          <Route path="/compliance-runs" element={<ComplianceRuns />} />
+          <Route path="/ropa" element={<ROPA />} />
         </Route>
       </Route>
       <Route path="*" element={<PageNotFound />} />

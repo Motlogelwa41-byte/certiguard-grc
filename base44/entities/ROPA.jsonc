@@ -1,0 +1,69 @@
+{
+  "name": "ROPA",
+  "type": "object",
+  "properties": {
+    "processing_activity": {
+      "type": "string"
+    },
+    "data_subjects": {
+      "type": "string"
+    },
+    "data_categories": {
+      "type": "string"
+    },
+    "purpose": {
+      "type": "string"
+    },
+    "legal_basis": {
+      "type": "string"
+    },
+    "data_controller": {
+      "type": "string"
+    },
+    "data_processor": {
+      "type": "string"
+    },
+    "third_party_recipients": {
+      "type": "string"
+    },
+    "cross_border_transfers": {
+      "type": "string"
+    },
+    "retention_period": {
+      "type": "string"
+    },
+    "security_measures": {
+      "type": "string"
+    },
+    "dpia_required": {
+      "type": "boolean",
+      "default": false
+    },
+    "dpia_completed": {
+      "type": "boolean",
+      "default": false
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "active",
+        "inactive",
+        "under_review"
+      ],
+      "default": "active"
+    },
+    "last_reviewed": {
+      "type": "string",
+      "format": "date"
+    },
+    "owner_name": {
+      "type": "string"
+    },
+    "notes": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "processing_activity"
+  ]
+}

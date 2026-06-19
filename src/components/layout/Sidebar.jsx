@@ -14,7 +14,11 @@ import {
   ChevronRight,
   LogOut,
   Settings,
-  ShieldCheck
+  ShieldCheck,
+  FileSearch,
+  Brain,
+  Play,
+  FileSpreadsheet
 } from "lucide-react";
 import { base44 } from "@/api/base44Client";
 
@@ -28,6 +32,10 @@ const navItems = [
   { label: "Audits", path: "/audits", icon: ClipboardList },
   { label: "Vendors", path: "/vendors", icon: Building2 },
   { label: "Tasks", path: "/tasks", icon: CheckSquare },
+  { label: "Gap Analysis", path: "/gap-analysis", icon: FileSearch },
+  { label: "AI Auditor", path: "/ai-auditor", icon: Brain },
+  { label: "Compliance Runs", path: "/compliance-runs", icon: Play },
+  { label: "ROPA", path: "/ropa", icon: FileSpreadsheet },
 ];
 
 export default function Sidebar() {

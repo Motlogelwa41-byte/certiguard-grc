@@ -1,0 +1,63 @@
+{
+  "name": "GapAnalysis",
+  "type": "object",
+  "properties": {
+    "title": {
+      "type": "string"
+    },
+    "framework_id": {
+      "type": "string"
+    },
+    "framework_name": {
+      "type": "string"
+    },
+    "description": {
+      "type": "string"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "draft",
+        "in_progress",
+        "completed"
+      ],
+      "default": "draft"
+    },
+    "total_gaps": {
+      "type": "number",
+      "default": 0
+    },
+    "critical_gaps": {
+      "type": "number",
+      "default": 0
+    },
+    "high_gaps": {
+      "type": "number",
+      "default": 0
+    },
+    "medium_gaps": {
+      "type": "number",
+      "default": 0
+    },
+    "low_gaps": {
+      "type": "number",
+      "default": 0
+    },
+    "remediation_plan": {
+      "type": "string"
+    },
+    "assigned_to": {
+      "type": "string"
+    },
+    "target_date": {
+      "type": "string",
+      "format": "date"
+    },
+    "findings": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "title"
+  ]
+}
