@@ -1,0 +1,89 @@
+{
+  "name": "Tenant",
+  "type": "object",
+  "properties": {
+    "name": {
+      "type": "string",
+      "description": "Company/organization name"
+    },
+    "slug": {
+      "type": "string",
+      "description": "URL-safe tenant identifier"
+    },
+    "industry": {
+      "type": "string"
+    },
+    "size": {
+      "type": "string",
+      "enum": [
+        "startup",
+        "smb",
+        "mid_market",
+        "enterprise"
+      ],
+      "default": "smb"
+    },
+    "country": {
+      "type": "string"
+    },
+    "subscription_tier": {
+      "type": "string",
+      "enum": [
+        "starter",
+        "professional",
+        "enterprise",
+        "trial"
+      ],
+      "default": "trial"
+    },
+    "subscription_status": {
+      "type": "string",
+      "enum": [
+        "active",
+        "past_due",
+        "cancelled",
+        "expired",
+        "trial"
+      ],
+      "default": "trial"
+    },
+    "trial_ends_at": {
+      "type": "string",
+      "format": "date"
+    },
+    "billing_email": {
+      "type": "string"
+    },
+    "max_users": {
+      "type": "number",
+      "default": 5
+    },
+    "max_frameworks": {
+      "type": "number",
+      "default": 2
+    },
+    "features": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "Active feature flags"
+    },
+    "admin_name": {
+      "type": "string"
+    },
+    "admin_email": {
+      "type": "string"
+    },
+    "logo_url": {
+      "type": "string"
+    },
+    "is_active": {
+      "type": "boolean",
+      "default": true
+    }
+  },
+  "required": [
+    "name"
+  ]
+}

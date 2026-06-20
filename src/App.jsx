@@ -31,6 +31,9 @@ import Incidents from '@/pages/Incidents';
 import Training from '@/pages/Training';
 import ComplianceCalendar from '@/pages/ComplianceCalendar';
 import Notifications from '@/pages/Notifications';
+import Pricing from '@/pages/Pricing';
+import TenantAdmin from '@/pages/TenantAdmin';
+import { TenantProvider } from '@/lib/TenantContext';
 
 const AuthenticatedApp = () => {
   const { isLoadingAuth, isLoadingPublicSettings, authError, navigateToLogin } = useAuth();
@@ -58,8 +61,9 @@ const AuthenticatedApp = () => {
       <Route path="/register" element={<Register />} />
       <Route path="/forgot-password" element={<ForgotPassword />} />
       <Route path="/reset-password" element={<ResetPassword />} />
+      <Route path="/pricing" element={<Pricing />} />
       <Route element={<ProtectedRoute unauthenticatedElement={<Navigate to="/login" replace />} />}>
-        <Route element={<AppLayout />}>
+        <Route element={<TenantProvider><AppLayout /></TenantProvider>}>
           <Route path="/" element={<Dashboard />} />
           <Route path="/frameworks" element={<Frameworks />} />
           <Route path="/controls" element={<Controls />} />
@@ -79,6 +83,7 @@ const AuthenticatedApp = () => {
           <Route path="/training" element={<Training />} />
           <Route path="/calendar" element={<ComplianceCalendar />} />
           <Route path="/notifications" element={<Notifications />} />
+          <Route path="/tenant-admin" element={<TenantAdmin />} />
         </Route>
       </Route>
       <Route path="*" element={<PageNotFound />} />
