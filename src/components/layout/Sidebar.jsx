@@ -48,6 +48,7 @@ const navItems = [
   { label: "Training", path: "/training", icon: GraduationCap },
   { label: "Calendar", path: "/calendar", icon: Calendar },
   { label: "Notifications", path: "/notifications", icon: Bell },
+  { label: "Tenants", path: "/tenant-admin", icon: Building2 },
 ];
 
 export default function Sidebar() {
