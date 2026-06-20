@@ -1,0 +1,72 @@
+{
+  "name": "ComplianceEvent",
+  "type": "object",
+  "properties": {
+    "title": {
+      "type": "string"
+    },
+    "type": {
+      "type": "string",
+      "enum": [
+        "audit",
+        "review",
+        "certification_expiry",
+        "training_deadline",
+        "policy_review",
+        "control_test",
+        "evidence_expiry",
+        "vendor_assessment",
+        "risk_review",
+        "other"
+      ],
+      "default": "review"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "upcoming",
+        "in_progress",
+        "completed",
+        "overdue"
+      ],
+      "default": "upcoming"
+    },
+    "start_date": {
+      "type": "string",
+      "format": "date"
+    },
+    "end_date": {
+      "type": "string",
+      "format": "date"
+    },
+    "framework_name": {
+      "type": "string"
+    },
+    "description": {
+      "type": "string"
+    },
+    "assigned_to": {
+      "type": "string"
+    },
+    "priority": {
+      "type": "string",
+      "enum": [
+        "critical",
+        "high",
+        "medium",
+        "low"
+      ],
+      "default": "medium"
+    },
+    "related_entity_id": {
+      "type": "string"
+    },
+    "color": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "title",
+    "start_date"
+  ]
+}

@@ -1,0 +1,109 @@
+{
+  "name": "Incident",
+  "type": "object",
+  "properties": {
+    "incident_id": {
+      "type": "string",
+      "description": "Unique incident identifier (e.g., INC-2024-001)"
+    },
+    "title": {
+      "type": "string"
+    },
+    "description": {
+      "type": "string"
+    },
+    "type": {
+      "type": "string",
+      "enum": [
+        "security_breach",
+        "data_leak",
+        "phishing",
+        "malware",
+        "unauthorized_access",
+        "denial_of_service",
+        "insider_threat",
+        "physical_security",
+        "policy_violation",
+        "third_party",
+        "other"
+      ],
+      "default": "security_breach"
+    },
+    "severity": {
+      "type": "string",
+      "enum": [
+        "critical",
+        "high",
+        "medium",
+        "low"
+      ],
+      "default": "medium"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "detected",
+        "investigating",
+        "contained",
+        "remediated",
+        "closed",
+        "false_positive"
+      ],
+      "default": "detected"
+    },
+    "reported_by": {
+      "type": "string"
+    },
+    "reported_date": {
+      "type": "string",
+      "format": "date"
+    },
+    "detected_date": {
+      "type": "string",
+      "format": "date"
+    },
+    "contained_date": {
+      "type": "string",
+      "format": "date"
+    },
+    "resolved_date": {
+      "type": "string",
+      "format": "date"
+    },
+    "affected_systems": {
+      "type": "string"
+    },
+    "affected_data": {
+      "type": "string"
+    },
+    "root_cause": {
+      "type": "string"
+    },
+    "response_summary": {
+      "type": "string"
+    },
+    "lessons_learned": {
+      "type": "string"
+    },
+    "notify_regulator": {
+      "type": "boolean",
+      "default": false
+    },
+    "regulator_notified_date": {
+      "type": "string",
+      "format": "date"
+    },
+    "assigned_to": {
+      "type": "string"
+    },
+    "related_control_ids": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    }
+  },
+  "required": [
+    "title"
+  ]
+}

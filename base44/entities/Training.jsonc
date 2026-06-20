@@ -1,0 +1,88 @@
+{
+  "name": "Training",
+  "type": "object",
+  "properties": {
+    "title": {
+      "type": "string"
+    },
+    "description": {
+      "type": "string"
+    },
+    "category": {
+      "type": "string",
+      "enum": [
+        "security_awareness",
+        "data_privacy",
+        "incident_response",
+        "compliance",
+        "anti_phishing",
+        "code_of_conduct",
+        "insider_threat",
+        "role_based",
+        "other"
+      ],
+      "default": "security_awareness"
+    },
+    "type": {
+      "type": "string",
+      "enum": [
+        "online_course",
+        "workshop",
+        "webinar",
+        "video",
+        "quiz",
+        "document",
+        "simulation"
+      ],
+      "default": "online_course"
+    },
+    "duration_minutes": {
+      "type": "number",
+      "default": 30
+    },
+    "mandatory": {
+      "type": "boolean",
+      "default": true
+    },
+    "renewal_period_months": {
+      "type": "number",
+      "default": 12
+    },
+    "assignee_count": {
+      "type": "number",
+      "default": 0
+    },
+    "completed_count": {
+      "type": "number",
+      "default": 0
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "active",
+        "draft",
+        "archived"
+      ],
+      "default": "draft"
+    },
+    "created_by_name": {
+      "type": "string"
+    },
+    "due_date": {
+      "type": "string",
+      "format": "date"
+    },
+    "content_url": {
+      "type": "string"
+    },
+    "framework_ids": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    }
+  },
+  "required": [
+    "title"
+  ]
+}

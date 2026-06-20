@@ -25,6 +25,12 @@ import GapAnalysis from '@/pages/GapAnalysis';
 import AIAuditor from '@/pages/AIAuditor';
 import ComplianceRuns from '@/pages/ComplianceRuns';
 import ROPA from '@/pages/ROPA';
+import Reports from '@/pages/Reports';
+import AuditTrail from '@/pages/AuditTrail';
+import Incidents from '@/pages/Incidents';
+import Training from '@/pages/Training';
+import ComplianceCalendar from '@/pages/ComplianceCalendar';
+import Notifications from '@/pages/Notifications';
 
 const AuthenticatedApp = () => {
   const { isLoadingAuth, isLoadingPublicSettings, authError, navigateToLogin } = useAuth();
@@ -67,6 +73,12 @@ const AuthenticatedApp = () => {
           <Route path="/ai-auditor" element={<AIAuditor />} />
           <Route path="/compliance-runs" element={<ComplianceRuns />} />
           <Route path="/ropa" element={<ROPA />} />
+          <Route path="/reports" element={<Reports />} />
+          <Route path="/audit-trail" element={<AuditTrail />} />
+          <Route path="/incidents" element={<Incidents />} />
+          <Route path="/training" element={<Training />} />
+          <Route path="/calendar" element={<ComplianceCalendar />} />
+          <Route path="/notifications" element={<Notifications />} />
         </Route>
       </Route>
       <Route path="*" element={<PageNotFound />} />

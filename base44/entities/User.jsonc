@@ -5,8 +5,13 @@
       "description": "The role of the user in the app",
       "enum": [
         "admin",
-        "user"
-      ]
+        "user",
+        "auditor",
+        "viewer",
+        "compliance_officer",
+        "risk_manager"
+      ],
+      "default": "user"
     }
   },
   "required": [

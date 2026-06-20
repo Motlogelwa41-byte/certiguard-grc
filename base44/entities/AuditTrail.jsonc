@@ -1,0 +1,49 @@
+{
+  "name": "AuditTrail",
+  "type": "object",
+  "properties": {
+    "action": {
+      "type": "string",
+      "enum": [
+        "create",
+        "update",
+        "delete",
+        "login",
+        "logout",
+        "export",
+        "approve",
+        "reject",
+        "view"
+      ]
+    },
+    "entity_type": {
+      "type": "string",
+      "description": "Which entity was affected (e.g., Control, Policy, Risk)"
+    },
+    "entity_id": {
+      "type": "string"
+    },
+    "entity_name": {
+      "type": "string"
+    },
+    "changes": {
+      "type": "string",
+      "description": "JSON diff of what changed"
+    },
+    "performed_by_name": {
+      "type": "string"
+    },
+    "performed_by_id": {
+      "type": "string"
+    },
+    "ip_address": {
+      "type": "string"
+    },
+    "metadata": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "action"
+  ]
+}

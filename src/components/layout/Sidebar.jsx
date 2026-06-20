@@ -18,7 +18,13 @@ import {
   FileSearch,
   Brain,
   Play,
-  FileSpreadsheet
+  FileSpreadsheet,
+  FileDown,
+  History,
+  ShieldAlert,
+  GraduationCap,
+  Calendar,
+  Bell
 } from "lucide-react";
 import { base44 } from "@/api/base44Client";
 
@@ -36,6 +42,12 @@ const navItems = [
   { label: "AI Auditor", path: "/ai-auditor", icon: Brain },
   { label: "Compliance Runs", path: "/compliance-runs", icon: Play },
   { label: "ROPA", path: "/ropa", icon: FileSpreadsheet },
+  { label: "Reports", path: "/reports", icon: FileDown },
+  { label: "Audit Trail", path: "/audit-trail", icon: History },
+  { label: "Incidents", path: "/incidents", icon: ShieldAlert },
+  { label: "Training", path: "/training", icon: GraduationCap },
+  { label: "Calendar", path: "/calendar", icon: Calendar },
+  { label: "Notifications", path: "/notifications", icon: Bell },
 ];
 
 export default function Sidebar() {
