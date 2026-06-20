@@ -1,0 +1,75 @@
+{
+  "name": "SecurityAlert",
+  "type": "object",
+  "properties": {
+    "title": {
+      "type": "string"
+    },
+    "description": {
+      "type": "string"
+    },
+    "type": {
+      "type": "string",
+      "enum": [
+        "anomalous_login",
+        "geo_anomaly",
+        "data_export_spike",
+        "permission_escalation",
+        "audit_chain_break",
+        "brute_force",
+        "unusual_api_usage",
+        "config_change",
+        "tenant_isolation_breach",
+        "other"
+      ],
+      "default": "other"
+    },
+    "severity": {
+      "type": "string",
+      "enum": [
+        "critical",
+        "high",
+        "medium",
+        "low"
+      ],
+      "default": "medium"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "open",
+        "investigating",
+        "resolved",
+        "false_positive"
+      ],
+      "default": "open"
+    },
+    "tenant_id": {
+      "type": "string"
+    },
+    "tenant_name": {
+      "type": "string"
+    },
+    "detected_at": {
+      "type": "string"
+    },
+    "resolved_at": {
+      "type": "string"
+    },
+    "source_ip": {
+      "type": "string"
+    },
+    "affected_user": {
+      "type": "string"
+    },
+    "details": {
+      "type": "string"
+    },
+    "resolution_notes": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "title"
+  ]
+}

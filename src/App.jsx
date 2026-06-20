@@ -31,6 +31,7 @@ import Incidents from '@/pages/Incidents';
 import Training from '@/pages/Training';
 import ComplianceCalendar from '@/pages/ComplianceCalendar';
 import Notifications from '@/pages/Notifications';
+import SecurityCenter from '@/pages/SecurityCenter';
 import Pricing from '@/pages/Pricing';
 import TenantAdmin from '@/pages/TenantAdmin';
 import { TenantProvider } from '@/lib/TenantContext';
@@ -83,6 +84,7 @@ const AuthenticatedApp = () => {
           <Route path="/training" element={<Training />} />
           <Route path="/calendar" element={<ComplianceCalendar />} />
           <Route path="/notifications" element={<Notifications />} />
+          <Route path="/security" element={<SecurityCenter />} />
           <Route path="/tenant-admin" element={<TenantAdmin />} />
         </Route>
       </Route>

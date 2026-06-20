@@ -13,7 +13,9 @@
         "export",
         "approve",
         "reject",
-        "view"
+        "view",
+        "import",
+        "export_data"
       ]
     },
     "entity_type": {
@@ -39,8 +41,41 @@
     "ip_address": {
       "type": "string"
     },
-    "metadata": {
+    "user_agent": {
       "type": "string"
+    },
+    "geo_location": {
+      "type": "string",
+      "description": "Approximate geolocation from IP"
+    },
+    "tenant_id": {
+      "type": "string",
+      "description": "Tenant isolation key"
+    },
+    "tenant_name": {
+      "type": "string"
+    },
+    "audit_hash": {
+      "type": "string",
+      "description": "Cryptographic chain hash \u2014 links to previous entry for immutability"
+    },
+    "prev_hash": {
+      "type": "string",
+      "description": "Previous entry's hash for chain verification"
+    },
+    "severity": {
+      "type": "string",
+      "enum": [
+        "info",
+        "warning",
+        "critical",
+        "alert"
+      ],
+      "default": "info"
+    },
+    "metadata": {
+      "type": "string",
+      "description": "Additional context"
     }
   },
   "required": [
