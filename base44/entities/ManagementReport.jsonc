@@ -1,0 +1,143 @@
+{
+  "name": "ManagementReport",
+  "type": "object",
+  "properties": {
+    "title": {
+      "type": "string"
+    },
+    "report_month": {
+      "type": "string",
+      "description": "Month this report covers (YYYY-MM)"
+    },
+    "tenant_id": {
+      "type": "string"
+    },
+    "tenant_name": {
+      "type": "string"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "generating",
+        "completed",
+        "failed"
+      ],
+      "default": "generating"
+    },
+    "total_tasks": {
+      "type": "number",
+      "default": 0
+    },
+    "completed_tasks": {
+      "type": "number",
+      "default": 0
+    },
+    "pending_tasks": {
+      "type": "number",
+      "default": 0
+    },
+    "overdue_tasks": {
+      "type": "number",
+      "default": 0
+    },
+    "critical_tasks": {
+      "type": "string",
+      "description": "JSON array of critical task titles"
+    },
+    "controls_passing": {
+      "type": "number",
+      "default": 0
+    },
+    "controls_failing": {
+      "type": "number",
+      "default": 0
+    },
+    "controls_total": {
+      "type": "number",
+      "default": 0
+    },
+    "risks_open": {
+      "type": "number",
+      "default": 0
+    },
+    "risks_closed": {
+      "type": "number",
+      "default": 0
+    },
+    "risks_new": {
+      "type": "number",
+      "default": 0
+    },
+    "login_successes": {
+      "type": "number",
+      "default": 0
+    },
+    "login_failures": {
+      "type": "number",
+      "default": 0
+    },
+    "login_anomalies": {
+      "type": "number",
+      "default": 0
+    },
+    "audit_entries": {
+      "type": "number",
+      "default": 0
+    },
+    "incidents_opened": {
+      "type": "number",
+      "default": 0
+    },
+    "incidents_closed": {
+      "type": "number",
+      "default": 0
+    },
+    "policies_approved": {
+      "type": "number",
+      "default": 0
+    },
+    "training_completed": {
+      "type": "number",
+      "default": 0
+    },
+    "framework_readiness_scores": {
+      "type": "string",
+      "description": "JSON map of framework name \u2192 readiness score"
+    },
+    "compliance_score": {
+      "type": "number",
+      "default": 0
+    },
+    "risk_score": {
+      "type": "number",
+      "default": 0
+    },
+    "top_risks": {
+      "type": "string",
+      "description": "JSON array of top risks with scores"
+    },
+    "improvement_recommendations": {
+      "type": "string",
+      "description": "Markdown improvement recommendations"
+    },
+    "executive_summary": {
+      "type": "string",
+      "description": "Executive summary"
+    },
+    "generated_by": {
+      "type": "string"
+    },
+    "generated_at": {
+      "type": "string",
+      "format": "date"
+    },
+    "visible_to_roles": {
+      "type": "string",
+      "default": "[\"admin\",\"compliance_officer\",\"risk_manager\"]"
+    }
+  },
+  "required": [
+    "title",
+    "report_month"
+  ]
+}

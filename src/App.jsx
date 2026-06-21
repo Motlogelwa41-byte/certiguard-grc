@@ -29,6 +29,7 @@ import Reports from '@/pages/Reports';
 import AuditTrail from '@/pages/AuditTrail';
 import Incidents from '@/pages/Incidents';
 import Training from '@/pages/Training';
+import ManagementReports from '@/pages/ManagementReports';
 import ComplianceCalendar from '@/pages/ComplianceCalendar';
 import Notifications from '@/pages/Notifications';
 import SecurityCenter from '@/pages/SecurityCenter';
@@ -82,6 +83,7 @@ const AuthenticatedApp = () => {
           <Route path="/audit-trail" element={<AuditTrail />} />
           <Route path="/incidents" element={<Incidents />} />
           <Route path="/training" element={<Training />} />
+          <Route path="/management-reports" element={<ManagementReports />} />
           <Route path="/calendar" element={<ComplianceCalendar />} />
           <Route path="/notifications" element={<Notifications />} />
           <Route path="/security" element={<SecurityCenter />} />
