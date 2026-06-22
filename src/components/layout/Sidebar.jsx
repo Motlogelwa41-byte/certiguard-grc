@@ -25,7 +25,8 @@ import {
   ShieldAlert,
   GraduationCap,
   Calendar,
-  Bell
+  Bell,
+  Users
 } from "lucide-react";
 import { base44 } from "@/api/base44Client";
 
@@ -51,6 +52,7 @@ const navItems = [
   { label: "Calendar", path: "/calendar", icon: Calendar },
   { label: "Notifications", path: "/notifications", icon: Bell },
   { label: "Security", path: "/security", icon: ShieldCheck },
+  { label: "Users", path: "/users", icon: Users },
   { label: "Tenants", path: "/tenant-admin", icon: Building2 },
 ];
 

@@ -13,10 +13,11 @@ import EmptyState from "@/components/shared/EmptyState";
 import { useToast } from "@/components/ui/use-toast";
 
 const riskCategories = ["operational","technical","compliance","financial","strategic","reputational","third_party"];
-const defaultForm = { risk_id: "", title: "", description: "", category: "operational", likelihood: 3, impact: 3, status: "open", treatment: "mitigate", owner_name: "", mitigation_plan: "", due_date: "" };
+const defaultForm = { risk_id: "", title: "", description: "", category: "operational", likelihood: 3, impact: 3, status: "open", treatment: "mitigate", owner_name: "", mitigation_plan: "", due_date: "", related_control_ids: [] };
 
 export default function Risks() {
   const [items, setItems] = useState([]);
+  const [controls, setControls] = useState([]);
   const [loading, setLoading] = useState(true);
   const [open, setOpen] = useState(false);
   const [form, setForm] = useState(defaultForm);
@@ -25,7 +26,12 @@ export default function Risks() {
   const [filterStatus, setFilterStatus] = useState("all");
   const { toast } = useToast();
 
-  const load = () => base44.entities.Risk.list().then((d) => { setItems(d); setLoading(false); });
+  const load = async () => {
+    const [risks, ctls] = await Promise.all([base44.entities.Risk.list(), base44.entities.Control.list()]);
+    setItems(risks);
+    setControls(ctls);
+    setLoading(false);
+  };
   useEffect(() => { load(); }, []);
 
   const handleSave = async () => {
@@ -39,8 +45,13 @@ export default function Risks() {
   };
 
   const handleEdit = (item) => {
-    setForm({ risk_id: item.risk_id || "", title: item.title || "", description: item.description || "", category: item.category || "operational", likelihood: item.likelihood || 3, impact: item.impact || 3, status: item.status || "open", treatment: item.treatment || "mitigate", owner_name: item.owner_name || "", mitigation_plan: item.mitigation_plan || "", due_date: item.due_date || "" });
+    setForm({ risk_id: item.risk_id || "", title: item.title || "", description: item.description || "", category: item.category || "operational", likelihood: item.likelihood || 3, impact: item.impact || 3, status: item.status || "open", treatment: item.treatment || "mitigate", owner_name: item.owner_name || "", mitigation_plan: item.mitigation_plan || "", due_date: item.due_date || "", related_control_ids: item.related_control_ids || [] });
     setEditId(item.id); setOpen(true);
+  };
+
+  const toggleControl = (ctlId) => {
+    const ids = form.related_control_ids || [];
+    setForm({ ...form, related_control_ids: ids.includes(ctlId) ? ids.filter(id => id !== ctlId) : [...ids, ctlId] });
   };
 
   const handleDelete = async (id) => { await base44.entities.Risk.delete(id); load(); toast({ title: "Risk deleted" }); };
@@ -137,6 +148,11 @@ export default function Risks() {
                   <div><span className="text-muted-foreground">Treatment: </span><span className="font-semibold capitalize">{r.treatment}</span></div>
                   <div><span className="text-muted-foreground">Category: </span><span className="font-semibold capitalize">{(r.category || "").replace(/_/g, " ")}</span></div>
                 </div>
+                {r.related_control_ids?.length > 0 && (
+                  <div className="text-xs text-muted-foreground">
+                    <span className="font-medium text-foreground">{r.related_control_ids.length} control{r.related_control_ids.length > 1 ? "s" : ""} linked</span>
+                  </div>
+                )}
                 <div className="flex items-center justify-between text-xs text-muted-foreground pt-2 border-t border-border">
                   <span>{r.owner_name || "Unassigned"}</span>
                   <div className="flex items-center gap-1">
@@ -197,6 +213,22 @@ export default function Risks() {
             <div><Label>Due Date</Label><Input type="date" value={form.due_date} onChange={(e) => setForm({ ...form, due_date: e.target.value })} /></div>
             <div><Label>Description</Label><Textarea value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })} rows={3} /></div>
             <div><Label>Mitigation Plan</Label><Textarea value={form.mitigation_plan} onChange={(e) => setForm({ ...form, mitigation_plan: e.target.value })} rows={3} /></div>
+            {controls.length > 0 && (
+              <div>
+                <Label>Linked Controls (Mitigating)</Label>
+                <div className="mt-1.5 border border-border rounded-lg p-3 max-h-40 overflow-y-auto space-y-1.5">
+                  {controls.map(ctl => {
+                    const checked = (form.related_control_ids || []).includes(ctl.id);
+                    return (
+                      <label key={ctl.id} className="flex items-center gap-2 cursor-pointer hover:bg-muted/50 px-1 py-0.5 rounded">
+                        <input type="checkbox" checked={checked} onChange={() => toggleControl(ctl.id)} className="rounded" />
+                        <span className="text-sm">{ctl.control_id ? <span className="font-mono text-xs text-muted-foreground mr-1">{ctl.control_id}</span> : null}{ctl.title}</span>
+                      </label>
+                    );
+                  })}
+                </div>
+              </div>
+            )}
             <Button className="w-full" onClick={handleSave} disabled={!form.title}>{editId ? "Update" : "Create"}</Button>
           </div>
         </DialogContent>

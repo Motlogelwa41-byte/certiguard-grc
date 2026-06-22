@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
-import { Paperclip, Plus, Pencil, Trash2, Search, Upload, ExternalLink } from "lucide-react";
+import { Paperclip, Plus, Pencil, Trash2, Search, Upload, ExternalLink, Link2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
@@ -13,10 +13,11 @@ import EmptyState from "@/components/shared/EmptyState";
 import { useToast } from "@/components/ui/use-toast";
 
 const evidenceTypes = ["screenshot","document","report","log","certificate","configuration","other"];
-const defaultForm = { title: "", description: "", type: "document", status: "pending_review", control_title: "", collected_date: "", expiry_date: "", reviewer_name: "", notes: "", file_url: "", file_name: "" };
+const defaultForm = { title: "", description: "", type: "document", status: "pending_review", control_id: "", control_title: "", collected_date: "", expiry_date: "", reviewer_name: "", notes: "", file_url: "", file_name: "" };
 
 export default function EvidenceManager() {
   const [items, setItems] = useState([]);
+  const [controls, setControls] = useState([]);
   const [loading, setLoading] = useState(true);
   const [open, setOpen] = useState(false);
   const [form, setForm] = useState(defaultForm);
@@ -25,7 +26,12 @@ export default function EvidenceManager() {
   const [uploading, setUploading] = useState(false);
   const { toast } = useToast();
 
-  const load = () => base44.entities.Evidence.list().then((d) => { setItems(d); setLoading(false); });
+  const load = async () => {
+    const [evidence, ctls] = await Promise.all([base44.entities.Evidence.list(), base44.entities.Control.list()]);
+    setItems(evidence);
+    setControls(ctls);
+    setLoading(false);
+  };
   useEffect(() => { load(); }, []);
 
   const handleFileUpload = async (e) => {
@@ -51,7 +57,7 @@ export default function EvidenceManager() {
   };
 
   const handleEdit = (item) => {
-    setForm({ title: item.title || "", description: item.description || "", type: item.type || "document", status: item.status || "pending_review", control_title: item.control_title || "", collected_date: item.collected_date || "", expiry_date: item.expiry_date || "", reviewer_name: item.reviewer_name || "", notes: item.notes || "", file_url: item.file_url || "", file_name: item.file_name || "" });
+    setForm({ title: item.title || "", description: item.description || "", type: item.type || "document", status: item.status || "pending_review", control_id: item.control_id || "", control_title: item.control_title || "", collected_date: item.collected_date || "", expiry_date: item.expiry_date || "", reviewer_name: item.reviewer_name || "", notes: item.notes || "", file_url: item.file_url || "", file_name: item.file_name || "" });
     setEditId(item.id); setOpen(true);
   };
 
@@ -93,7 +99,11 @@ export default function EvidenceManager() {
                   <tr key={e.id} className="border-b border-border last:border-0 hover:bg-muted/30 transition-colors">
                     <td className="px-4 py-3 font-medium text-foreground">{e.title}</td>
                     <td className="px-4 py-3 text-muted-foreground capitalize">{(e.type || "").replace(/_/g, " ")}</td>
-                    <td className="px-4 py-3 text-muted-foreground">{e.control_title || "—"}</td>
+                    <td className="px-4 py-3 text-muted-foreground">
+                      {e.control_title ? (
+                        <span className="flex items-center gap-1"><Link2 className="w-3 h-3 text-primary" />{e.control_title}</span>
+                      ) : "—"}
+                    </td>
                     <td className="px-4 py-3"><StatusBadge status={e.status} /></td>
                     <td className="px-4 py-3">{e.file_url ? <a href={e.file_url} target="_blank" rel="noopener noreferrer" className="text-primary hover:underline flex items-center gap-1 text-xs"><ExternalLink className="w-3 h-3" />{e.file_name || "View"}</a> : <span className="text-muted-foreground text-xs">—</span>}</td>
                     <td className="px-4 py-3 text-right">
@@ -134,7 +144,20 @@ export default function EvidenceManager() {
                 </Select>
               </div>
             </div>
-            <div><Label>Related Control</Label><Input value={form.control_title} onChange={(e) => setForm({ ...form, control_title: e.target.value })} placeholder="Control name" /></div>
+            <div>
+              <Label>Related Control</Label>
+              <Select value={form.control_id || "__none__"} onValueChange={(v) => {
+                if (v === "__none__") { setForm({ ...form, control_id: "", control_title: "" }); return; }
+                const ctl = controls.find(c => c.id === v);
+                setForm({ ...form, control_id: v, control_title: ctl?.title || "" });
+              }}>
+                <SelectTrigger><SelectValue placeholder="Select control..." /></SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="__none__">— None —</SelectItem>
+                  {controls.map(c => <SelectItem key={c.id} value={c.id}>{c.control_id ? `[${c.control_id}] ` : ""}{c.title}</SelectItem>)}
+                </SelectContent>
+              </Select>
+            </div>
             <div className="grid grid-cols-2 gap-3">
               <div><Label>Collected Date</Label><Input type="date" value={form.collected_date} onChange={(e) => setForm({ ...form, collected_date: e.target.value })} /></div>
               <div><Label>Expiry Date</Label><Input type="date" value={form.expiry_date} onChange={(e) => setForm({ ...form, expiry_date: e.target.value })} /></div>

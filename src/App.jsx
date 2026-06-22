@@ -30,6 +30,8 @@ import AuditTrail from '@/pages/AuditTrail';
 import Incidents from '@/pages/Incidents';
 import Training from '@/pages/Training';
 import ManagementReports from '@/pages/ManagementReports';
+import UserManagement from '@/pages/UserManagement';
+import PolicyAcknowledgments from '@/pages/PolicyAcknowledgments';
 import ComplianceCalendar from '@/pages/ComplianceCalendar';
 import Notifications from '@/pages/Notifications';
 import SecurityCenter from '@/pages/SecurityCenter';
@@ -88,6 +90,8 @@ const AuthenticatedApp = () => {
           <Route path="/notifications" element={<Notifications />} />
           <Route path="/security" element={<SecurityCenter />} />
           <Route path="/tenant-admin" element={<TenantAdmin />} />
+          <Route path="/users" element={<UserManagement />} />
+          <Route path="/policy-acknowledgments" element={<PolicyAcknowledgments />} />
         </Route>
       </Route>
       <Route path="*" element={<PageNotFound />} />

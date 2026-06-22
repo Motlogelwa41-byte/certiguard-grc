@@ -13,10 +13,11 @@ import EmptyState from "@/components/shared/EmptyState";
 import { useToast } from "@/components/ui/use-toast";
 
 const categories = ["access_control","data_protection","incident_response","change_management","risk_management","security_operations","business_continuity","network_security","physical_security","compliance","human_resources","asset_management"];
-const defaultForm = { control_id: "", title: "", description: "", category: "access_control", status: "not_tested", severity: "medium", automation_status: "manual", owner_name: "", notes: "" };
+const defaultForm = { control_id: "", title: "", description: "", category: "access_control", status: "not_tested", severity: "medium", automation_status: "manual", owner_name: "", notes: "", framework_ids: [], framework_names: [] };
 
 export default function Controls() {
   const [items, setItems] = useState([]);
+  const [frameworks, setFrameworks] = useState([]);
   const [loading, setLoading] = useState(true);
   const [open, setOpen] = useState(false);
   const [form, setForm] = useState(defaultForm);
@@ -26,7 +27,12 @@ export default function Controls() {
   const [filterCategory, setFilterCategory] = useState("all");
   const { toast } = useToast();
 
-  const load = () => base44.entities.Control.list().then((d) => { setItems(d); setLoading(false); });
+  const load = async () => {
+    const [ctls, fws] = await Promise.all([base44.entities.Control.list(), base44.entities.Framework.list()]);
+    setItems(ctls);
+    setFrameworks(fws);
+    setLoading(false);
+  };
   useEffect(() => { load(); }, []);
 
   const handleSave = async () => {
@@ -39,8 +45,18 @@ export default function Controls() {
   };
 
   const handleEdit = (item) => {
-    setForm({ control_id: item.control_id || "", title: item.title || "", description: item.description || "", category: item.category || "access_control", status: item.status || "not_tested", severity: item.severity || "medium", automation_status: item.automation_status || "manual", owner_name: item.owner_name || "", notes: item.notes || "" });
+    setForm({ control_id: item.control_id || "", title: item.title || "", description: item.description || "", category: item.category || "access_control", status: item.status || "not_tested", severity: item.severity || "medium", automation_status: item.automation_status || "manual", owner_name: item.owner_name || "", notes: item.notes || "", framework_ids: item.framework_ids || [], framework_names: item.framework_names || [] });
     setEditId(item.id); setOpen(true);
+  };
+
+  const toggleFramework = (fw) => {
+    const ids = form.framework_ids || [];
+    const names = form.framework_names || [];
+    if (ids.includes(fw.id)) {
+      setForm({ ...form, framework_ids: ids.filter(id => id !== fw.id), framework_names: names.filter(n => n !== fw.name) });
+    } else {
+      setForm({ ...form, framework_ids: [...ids, fw.id], framework_names: [...names, fw.name] });
+    }
   };
 
   const handleDelete = async (id) => { await base44.entities.Control.delete(id); load(); toast({ title: "Control deleted" }); };
@@ -178,6 +194,23 @@ export default function Controls() {
             </div>
             <div><Label>Description</Label><Textarea value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })} rows={3} /></div>
             <div><Label>Notes</Label><Textarea value={form.notes} onChange={(e) => setForm({ ...form, notes: e.target.value })} rows={2} /></div>
+            {frameworks.length > 0 && (
+              <div>
+                <Label>Frameworks</Label>
+                <div className="mt-1.5 border border-border rounded-lg p-3 max-h-40 overflow-y-auto space-y-1.5">
+                  {frameworks.map(fw => {
+                    const checked = (form.framework_ids || []).includes(fw.id);
+                    return (
+                      <label key={fw.id} className="flex items-center gap-2 cursor-pointer hover:bg-muted/50 px-1 py-0.5 rounded">
+                        <input type="checkbox" checked={checked} onChange={() => toggleFramework(fw)} className="rounded" />
+                        <span className="text-sm">{fw.name}</span>
+                        {fw.version && <span className="text-xs text-muted-foreground">v{fw.version}</span>}
+                      </label>
+                    );
+                  })}
+                </div>
+              </div>
+            )}
             <Button className="w-full" onClick={handleSave} disabled={!form.title || !form.control_id}>{editId ? "Update" : "Create"}</Button>
           </div>
         </DialogContent>

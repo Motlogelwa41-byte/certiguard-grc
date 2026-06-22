@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
-import { FileText, Plus, Pencil, Trash2, Search, Eye } from "lucide-react";
+import { FileText, Plus, Pencil, Trash2, Search, Eye, CheckSquare } from "lucide-react";
+import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
@@ -52,7 +53,18 @@ export default function Policies() {
 
   return (
     <div>
-      <PageHeader title="Policies" subtitle="Create, manage, and track policy compliance" actions={<Button size="sm" onClick={() => { setForm(defaultForm); setEditId(null); setOpen(true); }}><Plus className="w-4 h-4 mr-1" /> Add Policy</Button>} />
+      <PageHeader
+        title="Policies"
+        subtitle="Create, manage, and track policy compliance"
+        actions={
+          <div className="flex items-center gap-2">
+            <Link to="/policy-acknowledgments">
+              <Button variant="outline" size="sm"><CheckSquare className="w-4 h-4 mr-1" /> Acknowledgments</Button>
+            </Link>
+            <Button size="sm" onClick={() => { setForm(defaultForm); setEditId(null); setOpen(true); }}><Plus className="w-4 h-4 mr-1" /> Add Policy</Button>
+          </div>
+        }
+      />
 
       <div className="flex items-center gap-3 mb-6">
         <div className="relative flex-1 max-w-sm">
