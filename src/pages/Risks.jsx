@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
-import { AlertTriangle, Plus, Pencil, Trash2, Search } from "lucide-react";
+import { AlertTriangle, Plus, Pencil, Trash2, Search, Download, Upload } from "lucide-react";
+import { exportToCsv } from "@/lib/exportCsv";
+import BulkImportModal from "@/components/shared/BulkImportModal";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
@@ -24,7 +26,21 @@ export default function Risks() {
   const [editId, setEditId] = useState(null);
   const [search, setSearch] = useState("");
   const [filterStatus, setFilterStatus] = useState("all");
+  const [importOpen, setImportOpen] = useState(false);
   const { toast } = useToast();
+
+  const handleExport = () => exportToCsv(items, "risks", ["risk_id", "title", "category", "status", "likelihood", "impact", "risk_score", "treatment", "owner_name"]);
+
+  const importColumns = [
+    { key: "risk_id", label: "Risk ID" },
+    { key: "title", label: "Title", required: true },
+    { key: "category", label: "Category" },
+    { key: "status", label: "Status" },
+    { key: "likelihood", label: "Likelihood", transform: (v) => parseInt(v) || 3 },
+    { key: "impact", label: "Impact", transform: (v) => parseInt(v) || 3 },
+    { key: "treatment", label: "Treatment" },
+    { key: "owner_name", label: "Owner" },
+  ];
 
   const load = async () => {
     const [risks, ctls] = await Promise.all([base44.entities.Risk.list(), base44.entities.Control.list()]);
@@ -73,7 +89,13 @@ export default function Risks() {
 
   return (
     <div>
-      <PageHeader title="Risk Register" subtitle="Identify, assess, and manage organizational risks" actions={<Button size="sm" onClick={() => { setForm(defaultForm); setEditId(null); setOpen(true); }}><Plus className="w-4 h-4 mr-1" /> Add Risk</Button>} />
+      <PageHeader title="Risk Register" subtitle="Identify, assess, and manage organizational risks" actions={
+        <div className="flex items-center gap-2">
+          <Button variant="outline" size="sm" onClick={handleExport}><Download className="w-4 h-4 mr-1" /> Export</Button>
+          <Button variant="outline" size="sm" onClick={() => setImportOpen(true)}><Upload className="w-4 h-4 mr-1" /> Import</Button>
+          <Button size="sm" onClick={() => { setForm(defaultForm); setEditId(null); setOpen(true); }}><Plus className="w-4 h-4 mr-1" /> Add Risk</Button>
+        </div>
+      } />
 
       {/* Risk Heatmap */}
       {items.length > 0 && (
@@ -165,6 +187,8 @@ export default function Risks() {
           })}
         </div>
       )}
+
+      <BulkImportModal open={importOpen} onOpenChange={setImportOpen} entityName="Risk" columns={importColumns} onSuccess={load} />
 
       <Dialog open={open} onOpenChange={setOpen}>
         <DialogContent className="max-w-lg">

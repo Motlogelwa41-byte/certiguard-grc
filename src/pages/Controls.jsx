@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
-import { FileCheck, Plus, Pencil, Trash2, Search, Filter } from "lucide-react";
+import { FileCheck, Plus, Pencil, Trash2, Search, Filter, Download, Upload } from "lucide-react";
+import { exportToCsv } from "@/lib/exportCsv";
+import BulkImportModal from "@/components/shared/BulkImportModal";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
@@ -25,7 +27,20 @@ export default function Controls() {
   const [search, setSearch] = useState("");
   const [filterStatus, setFilterStatus] = useState("all");
   const [filterCategory, setFilterCategory] = useState("all");
+  const [importOpen, setImportOpen] = useState(false);
   const { toast } = useToast();
+
+  const handleExport = () => exportToCsv(items, "controls", ["control_id", "title", "category", "status", "severity", "automation_status", "owner_name", "description"]);
+
+  const importColumns = [
+    { key: "control_id", label: "Control ID", required: true },
+    { key: "title", label: "Title", required: true },
+    { key: "category", label: "Category" },
+    { key: "status", label: "Status" },
+    { key: "severity", label: "Severity" },
+    { key: "owner_name", label: "Owner" },
+    { key: "description", label: "Description" },
+  ];
 
   const load = async () => {
     const [ctls, fws] = await Promise.all([base44.entities.Control.list(), base44.entities.Framework.list()]);
@@ -72,7 +87,13 @@ export default function Controls() {
 
   return (
     <div>
-      <PageHeader title="Controls" subtitle="Manage and monitor compliance controls" actions={<Button size="sm" onClick={() => { setForm(defaultForm); setEditId(null); setOpen(true); }}><Plus className="w-4 h-4 mr-1" /> Add Control</Button>} />
+      <PageHeader title="Controls" subtitle="Manage and monitor compliance controls" actions={
+        <div className="flex items-center gap-2">
+          <Button variant="outline" size="sm" onClick={handleExport}><Download className="w-4 h-4 mr-1" /> Export</Button>
+          <Button variant="outline" size="sm" onClick={() => setImportOpen(true)}><Upload className="w-4 h-4 mr-1" /> Import</Button>
+          <Button size="sm" onClick={() => { setForm(defaultForm); setEditId(null); setOpen(true); }}><Plus className="w-4 h-4 mr-1" /> Add Control</Button>
+        </div>
+      } />
       
       {/* Filters */}
       <div className="flex flex-wrap items-center gap-3 mb-6">
@@ -142,6 +163,8 @@ export default function Controls() {
           </div>
         </div>
       )}
+
+      <BulkImportModal open={importOpen} onOpenChange={setImportOpen} entityName="Control" columns={importColumns} onSuccess={load} />
 
       <Dialog open={open} onOpenChange={setOpen}>
         <DialogContent className="max-w-lg">

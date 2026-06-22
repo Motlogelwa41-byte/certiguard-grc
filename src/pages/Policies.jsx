@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
-import { FileText, Plus, Pencil, Trash2, Search, Eye, CheckSquare } from "lucide-react";
+import { FileText, Plus, Pencil, Trash2, Search, Eye, CheckSquare, Download, Upload } from "lucide-react";
+import { exportToCsv } from "@/lib/exportCsv";
+import BulkImportModal from "@/components/shared/BulkImportModal";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
@@ -26,7 +28,19 @@ export default function Policies() {
   const [form, setForm] = useState(defaultForm);
   const [editId, setEditId] = useState(null);
   const [search, setSearch] = useState("");
+  const [importOpen, setImportOpen] = useState(false);
   const { toast } = useToast();
+
+  const handleExport = () => exportToCsv(items, "policies", ["title", "category", "status", "version", "owner_name", "next_review_date"]);
+
+  const importColumns = [
+    { key: "title", label: "Title", required: true },
+    { key: "category", label: "Category" },
+    { key: "status", label: "Status" },
+    { key: "version", label: "Version" },
+    { key: "owner_name", label: "Owner" },
+    { key: "description", label: "Description" },
+  ];
 
   const load = () => base44.entities.Policy.list().then((d) => { setItems(d); setLoading(false); });
   useEffect(() => { load(); }, []);
@@ -61,6 +75,8 @@ export default function Policies() {
             <Link to="/policy-acknowledgments">
               <Button variant="outline" size="sm"><CheckSquare className="w-4 h-4 mr-1" /> Acknowledgments</Button>
             </Link>
+            <Button variant="outline" size="sm" onClick={handleExport}><Download className="w-4 h-4 mr-1" /> Export</Button>
+            <Button variant="outline" size="sm" onClick={() => setImportOpen(true)}><Upload className="w-4 h-4 mr-1" /> Import</Button>
             <Button size="sm" onClick={() => { setForm(defaultForm); setEditId(null); setOpen(true); }}><Plus className="w-4 h-4 mr-1" /> Add Policy</Button>
           </div>
         }
@@ -103,6 +119,8 @@ export default function Policies() {
           ))}
         </div>
       )}
+
+      <BulkImportModal open={importOpen} onOpenChange={setImportOpen} entityName="Policy" columns={importColumns} onSuccess={load} />
 
       {/* View Dialog */}
       <Dialog open={viewOpen} onOpenChange={setViewOpen}>

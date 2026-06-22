@@ -32,6 +32,8 @@ import Training from '@/pages/Training';
 import ManagementReports from '@/pages/ManagementReports';
 import UserManagement from '@/pages/UserManagement';
 import PolicyAcknowledgments from '@/pages/PolicyAcknowledgments';
+import VendorAssessments from '@/pages/VendorAssessments';
+import FrameworkControlMap from '@/pages/FrameworkControlMap';
 import ComplianceCalendar from '@/pages/ComplianceCalendar';
 import Notifications from '@/pages/Notifications';
 import SecurityCenter from '@/pages/SecurityCenter';
@@ -92,6 +94,8 @@ const AuthenticatedApp = () => {
           <Route path="/tenant-admin" element={<TenantAdmin />} />
           <Route path="/users" element={<UserManagement />} />
           <Route path="/policy-acknowledgments" element={<PolicyAcknowledgments />} />
+          <Route path="/vendor-assessments" element={<VendorAssessments />} />
+          <Route path="/framework-map" element={<FrameworkControlMap />} />
         </Route>
       </Route>
       <Route path="*" element={<PageNotFound />} />

@@ -1,0 +1,75 @@
+{
+  "name": "VendorAssessment",
+  "type": "object",
+  "properties": {
+    "vendor_id": {
+      "type": "string"
+    },
+    "vendor_name": {
+      "type": "string"
+    },
+    "title": {
+      "type": "string"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "draft",
+        "sent",
+        "in_progress",
+        "submitted",
+        "reviewed",
+        "completed"
+      ],
+      "default": "draft"
+    },
+    "risk_score": {
+      "type": "number",
+      "default": 0
+    },
+    "risk_level": {
+      "type": "string",
+      "enum": [
+        "critical",
+        "high",
+        "medium",
+        "low"
+      ],
+      "default": "medium"
+    },
+    "sent_date": {
+      "type": "string",
+      "format": "date"
+    },
+    "due_date": {
+      "type": "string",
+      "format": "date"
+    },
+    "completed_date": {
+      "type": "string",
+      "format": "date"
+    },
+    "answers": {
+      "type": "string",
+      "description": "JSON array of {question, answer, score, category}"
+    },
+    "notes": {
+      "type": "string"
+    },
+    "reviewer_name": {
+      "type": "string"
+    },
+    "total_questions": {
+      "type": "number",
+      "default": 0
+    },
+    "answered_questions": {
+      "type": "number",
+      "default": 0
+    }
+  },
+  "required": [
+    "vendor_id",
+    "title"
+  ]
+}
