@@ -34,12 +34,18 @@ export default function Policies() {
   const handleExport = () => exportToCsv(items, "policies", ["title", "category", "status", "version", "owner_name", "next_review_date"]);
 
   const importColumns = [
-    { key: "title", label: "Title", required: true },
-    { key: "category", label: "Category" },
-    { key: "status", label: "Status" },
-    { key: "version", label: "Version" },
-    { key: "owner_name", label: "Owner" },
-    { key: "description", label: "Description" },
+    { key: "title", label: "Title", required: true, example: "Information Security Policy" },
+    { key: "category", label: "Category", example: "information_security" },
+    { key: "status", label: "Status", example: "draft" },
+    { key: "version", label: "Version", example: "1.0" },
+    { key: "owner_name", label: "Owner", example: "CISO" },
+    { key: "description", label: "Description", example: "Defines security controls and responsibilities" },
+  ];
+
+  const importSampleRows = [
+    { "Title": "Information Security Policy", "Category": "information_security", "Status": "approved", "Version": "2.1", "Owner": "CISO", "Description": "Defines security controls and responsibilities" },
+    { "Title": "Data Privacy Policy", "Category": "data_privacy", "Status": "draft", "Version": "1.0", "Owner": "DPO", "Description": "POPIA and GDPR compliance requirements" },
+    { "Title": "Acceptable Use Policy", "Category": "acceptable_use", "Status": "approved", "Version": "1.3", "Owner": "HR Manager", "Description": "Rules for use of company IT resources" },
   ];
 
   const load = () => base44.entities.Policy.list().then((d) => { setItems(d); setLoading(false); });
@@ -120,7 +126,7 @@ export default function Policies() {
         </div>
       )}
 
-      <BulkImportModal open={importOpen} onOpenChange={setImportOpen} entityName="Policy" columns={importColumns} onSuccess={load} />
+      <BulkImportModal open={importOpen} onOpenChange={setImportOpen} entityName="Policy" columns={importColumns} sampleRows={importSampleRows} onSuccess={load} />
 
       {/* View Dialog */}
       <Dialog open={viewOpen} onOpenChange={setViewOpen}>

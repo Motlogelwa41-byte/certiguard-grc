@@ -32,14 +32,20 @@ export default function Risks() {
   const handleExport = () => exportToCsv(items, "risks", ["risk_id", "title", "category", "status", "likelihood", "impact", "risk_score", "treatment", "owner_name"]);
 
   const importColumns = [
-    { key: "risk_id", label: "Risk ID" },
-    { key: "title", label: "Title", required: true },
-    { key: "category", label: "Category" },
-    { key: "status", label: "Status" },
-    { key: "likelihood", label: "Likelihood", transform: (v) => parseInt(v) || 3 },
-    { key: "impact", label: "Impact", transform: (v) => parseInt(v) || 3 },
-    { key: "treatment", label: "Treatment" },
-    { key: "owner_name", label: "Owner" },
+    { key: "risk_id", label: "Risk ID", example: "RSK-001" },
+    { key: "title", label: "Title", required: true, example: "Unauthorised Data Access" },
+    { key: "category", label: "Category", example: "technical" },
+    { key: "status", label: "Status", example: "open" },
+    { key: "likelihood", label: "Likelihood", example: "3", transform: (v) => parseInt(v) || 3 },
+    { key: "impact", label: "Impact", example: "4", transform: (v) => parseInt(v) || 3 },
+    { key: "treatment", label: "Treatment", example: "mitigate" },
+    { key: "owner_name", label: "Owner", example: "Risk Manager" },
+  ];
+
+  const importSampleRows = [
+    { "Risk ID": "RSK-001", "Title": "Unauthorised Data Access", "Category": "technical", "Status": "open", "Likelihood": "4", "Impact": "5", "Treatment": "mitigate", "Owner": "CISO" },
+    { "Risk ID": "RSK-002", "Title": "Third-Party Vendor Breach", "Category": "third_party", "Status": "mitigating", "Likelihood": "3", "Impact": "4", "Treatment": "transfer", "Owner": "Risk Manager" },
+    { "Risk ID": "RSK-003", "Title": "Regulatory Non-Compliance", "Category": "compliance", "Status": "open", "Likelihood": "2", "Impact": "5", "Treatment": "mitigate", "Owner": "Compliance Officer" },
   ];
 
   const load = async () => {
@@ -188,7 +194,7 @@ export default function Risks() {
         </div>
       )}
 
-      <BulkImportModal open={importOpen} onOpenChange={setImportOpen} entityName="Risk" columns={importColumns} onSuccess={load} />
+      <BulkImportModal open={importOpen} onOpenChange={setImportOpen} entityName="Risk" columns={importColumns} sampleRows={importSampleRows} onSuccess={load} />
 
       <Dialog open={open} onOpenChange={setOpen}>
         <DialogContent className="max-w-lg">

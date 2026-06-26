@@ -33,13 +33,19 @@ export default function Controls() {
   const handleExport = () => exportToCsv(items, "controls", ["control_id", "title", "category", "status", "severity", "automation_status", "owner_name", "description"]);
 
   const importColumns = [
-    { key: "control_id", label: "Control ID", required: true },
-    { key: "title", label: "Title", required: true },
-    { key: "category", label: "Category" },
-    { key: "status", label: "Status" },
-    { key: "severity", label: "Severity" },
-    { key: "owner_name", label: "Owner" },
-    { key: "description", label: "Description" },
+    { key: "control_id", label: "Control ID", required: true, example: "AC-001" },
+    { key: "title", label: "Title", required: true, example: "Multi-Factor Authentication" },
+    { key: "category", label: "Category", example: "access_control" },
+    { key: "status", label: "Status", example: "not_tested" },
+    { key: "severity", label: "Severity", example: "high" },
+    { key: "owner_name", label: "Owner", example: "Jane Smith" },
+    { key: "description", label: "Description", example: "Enforce MFA for all privileged users" },
+  ];
+
+  const importSampleRows = [
+    { "Control ID": "AC-001", "Title": "Multi-Factor Authentication", "Category": "access_control", "Status": "passing", "Severity": "critical", "Owner": "Jane Smith", "Description": "Enforce MFA for all privileged users" },
+    { "Control ID": "AC-002", "Title": "Password Complexity Policy", "Category": "access_control", "Status": "not_tested", "Severity": "high", "Owner": "IT Security", "Description": "Require strong passwords across all systems" },
+    { "Control ID": "DP-001", "Title": "Data Encryption at Rest", "Category": "data_protection", "Status": "passing", "Severity": "critical", "Owner": "John Doe", "Description": "AES-256 encryption for all sensitive data" },
   ];
 
   const load = async () => {
@@ -164,7 +170,7 @@ export default function Controls() {
         </div>
       )}
 
-      <BulkImportModal open={importOpen} onOpenChange={setImportOpen} entityName="Control" columns={importColumns} onSuccess={load} />
+      <BulkImportModal open={importOpen} onOpenChange={setImportOpen} entityName="Control" columns={importColumns} sampleRows={importSampleRows} onSuccess={load} />
 
       <Dialog open={open} onOpenChange={setOpen}>
         <DialogContent className="max-w-lg">

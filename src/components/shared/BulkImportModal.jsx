@@ -91,13 +91,16 @@ export default function BulkImportModal({ open, onOpenChange, entityName, column
 
   const downloadTemplate = () => {
     const header = columns.map((c) => c.label).join(",");
-    const sample = (sampleRows || [columns.reduce((a, c) => ({ ...a, [c.label]: c.example || "" }), {})]);
-    const rows = sample.map((r) => columns.map((c) => r[c.label] ?? "").join(","));
+    const samples = sampleRows || [columns.reduce((a, c) => ({ ...a, [c.label]: c.example || "" }), {})];
+    const rows = samples.map((r) => columns.map((c) => {
+      const val = String(r[c.label] ?? "");
+      return val.includes(",") ? `"${val}"` : val;
+    }).join(","));
     const csv = [header, ...rows].join("\n");
     const blob = new Blob([csv], { type: "text/csv" });
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
-    a.href = url; a.download = `${entityName.toLowerCase()}_template.csv`; a.click();
+    a.href = url; a.download = `${entityName.toLowerCase()}_import_template.csv`; a.click();
     URL.revokeObjectURL(url);
   };
 
