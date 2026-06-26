@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
-import { Bell, Mail, Clock, AlertTriangle, FileText, Shield, ChevronRight, CheckCircle, Loader2 } from "lucide-react";
+import { Bell, Mail, AlertTriangle, FileText, Shield, CheckCircle, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";

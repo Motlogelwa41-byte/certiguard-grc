@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
-import { FileCheck, Plus, Pencil, Trash2, Search, Filter, Download, Upload } from "lucide-react";
+import { FileCheck, Plus, Pencil, Trash2, Search, Download, Upload } from "lucide-react";
 import { exportToCsv } from "@/lib/exportCsv";
 import BulkImportModal from "@/components/shared/BulkImportModal";
 import { Button } from "@/components/ui/button";
