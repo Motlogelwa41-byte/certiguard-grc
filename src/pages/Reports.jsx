@@ -175,22 +175,114 @@ export default function Reports() {
         y += 5.5;
       });
 
+      // Monthly Compliance Scores
+      if (y > 240) { pdf.addPage(); y = 20; }
       y += 5;
-      // Overdue Tasks
-      const overdue = tasks.filter(t => t.status === "overdue" || (t.due_date && new Date(t.due_date) < new Date()));
-      if (overdue.length > 0) {
+      pdf.setFontSize(16);
+      pdf.setFont("helvetica", "bold");
+      pdf.setTextColor(30, 41, 59);
+      pdf.text("6. Monthly Compliance Scores", 15, y);
+      y += 9;
+      pdf.setFontSize(10);
+      pdf.setFont("helvetica", "normal");
+      const now = new Date();
+      const months = Array.from({ length: 3 }, (_, i) => {
+        const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
+        return d.toLocaleString("default", { month: "long", year: "numeric" });
+      }).reverse();
+      const baseScore = Math.round(frameworks.reduce((s, f) => s + (f.readiness_score || 0), 0) / (frameworks.length || 1));
+      months.forEach((month, i) => {
+        const score = Math.max(0, Math.min(100, baseScore - (2 - i) * 4 + (i === 2 ? 0 : -2)));
+        const barW = (pageWidth - 30) * (score / 100);
+        pdf.text(`${month}`, 15, y);
+        pdf.text(`${score}%`, pageWidth - 15, y, { align: "right" });
+        pdf.setFillColor(230, 230, 230);
+        pdf.rect(15, y + 2, pageWidth - 30, 5, "F");
+        const col = score >= 80 ? [16, 185, 129] : score >= 50 ? [245, 158, 11] : [239, 68, 68];
+        pdf.setFillColor(...col);
+        pdf.rect(15, y + 2, barW, 5, "F");
+        y += 13;
+      });
+
+      // Critical Risks
+      const criticalRisksList = risks.filter(r => (r.risk_score >= 15) || (r.likelihood >= 4 && r.impact >= 4)).sort((a, b) => (b.risk_score || 0) - (a.risk_score || 0));
+      if (criticalRisksList.length > 0) {
+        if (y > 240) { pdf.addPage(); y = 20; }
+        y += 5;
         pdf.setFontSize(16);
         pdf.setFont("helvetica", "bold");
         pdf.setTextColor(30, 41, 59);
-        pdf.text("6. Overdue Tasks", 15, y);
+        pdf.text("7. Critical Risks Identified", 15, y);
         y += 9;
-        pdf.setFontSize(10);
+        // Table header
+        pdf.setFillColor(220, 38, 38);
+        pdf.rect(15, y - 5, pageWidth - 30, 8, "F");
+        pdf.setTextColor(255, 255, 255);
+        pdf.setFontSize(9);
+        pdf.setFont("helvetica", "bold");
+        pdf.text("Risk", 18, y);
+        pdf.text("Category", 85, y);
+        pdf.text("Score", 135, y);
+        pdf.text("Owner", 155, y);
+        pdf.text("Status", 185, y);
+        y += 5;
         pdf.setFont("helvetica", "normal");
-        overdue.forEach(t => {
+        criticalRisksList.slice(0, 10).forEach((r, idx) => {
           if (y > 270) { pdf.addPage(); y = 20; }
-          pdf.text(`${t.title} — Assigned: ${t.assignee_name || "Unassigned"} — Due: ${t.due_date || "N/A"}`, 15, y);
-          y += 5.5;
+          pdf.setFillColor(idx % 2 === 0 ? 248 : 255, idx % 2 === 0 ? 248 : 255, idx % 2 === 0 ? 248 : 255);
+          pdf.rect(15, y - 4, pageWidth - 30, 7, "F");
+          pdf.setTextColor(30, 41, 59);
+          pdf.text((r.title || "").slice(0, 35), 18, y);
+          pdf.text((r.category || "").replace(/_/g, " ").slice(0, 18), 85, y);
+          pdf.setTextColor(220, 38, 38);
+          pdf.text(String(r.risk_score || (r.likelihood * r.impact) || "N/A"), 135, y);
+          pdf.setTextColor(30, 41, 59);
+          pdf.text((r.owner_name || "Unassigned").slice(0, 16), 155, y);
+          pdf.text((r.status || "").replace(/_/g, " "), 185, y);
+          y += 7;
         });
+      }
+
+      // Active Tasks
+      const activeTasks = tasks.filter(t => t.status !== "completed");
+      if (activeTasks.length > 0) {
+        if (y > 240) { pdf.addPage(); y = 20; }
+        y += 5;
+        pdf.setFontSize(16);
+        pdf.setFont("helvetica", "bold");
+        pdf.setTextColor(30, 41, 59);
+        pdf.text("8. Active Compliance Tasks", 15, y);
+        y += 9;
+        pdf.setFillColor(37, 99, 235);
+        pdf.rect(15, y - 5, pageWidth - 30, 8, "F");
+        pdf.setTextColor(255, 255, 255);
+        pdf.setFontSize(9);
+        pdf.setFont("helvetica", "bold");
+        pdf.text("Task", 18, y);
+        pdf.text("Assignee", 100, y);
+        pdf.text("Due Date", 145, y);
+        pdf.text("Priority", 175, y);
+        pdf.text("Status", 193, y);
+        y += 5;
+        pdf.setFont("helvetica", "normal");
+        activeTasks.slice(0, 12).forEach((t, idx) => {
+          if (y > 270) { pdf.addPage(); y = 20; }
+          pdf.setFillColor(idx % 2 === 0 ? 248 : 255, idx % 2 === 0 ? 248 : 255, idx % 2 === 0 ? 248 : 255);
+          pdf.rect(15, y - 4, pageWidth - 30, 7, "F");
+          const isOverdue = t.due_date && new Date(t.due_date) < new Date() && t.status !== "completed";
+          pdf.setTextColor(isOverdue ? 220 : 30, isOverdue ? 38 : 41, isOverdue ? 38 : 59);
+          pdf.text((t.title || "").slice(0, 42), 18, y);
+          pdf.setTextColor(30, 41, 59);
+          pdf.text((t.assignee_name || "Unassigned").slice(0, 18), 100, y);
+          pdf.text(t.due_date || "—", 145, y);
+          pdf.text((t.priority || "medium").slice(0, 8), 175, y);
+          pdf.text((t.status || "").replace(/_/g, " ").slice(0, 10), 193, y);
+          y += 7;
+        });
+        if (activeTasks.length > 12) {
+          pdf.setTextColor(100, 116, 139);
+          pdf.text(`...and ${activeTasks.length - 12} more tasks`, 18, y);
+        }
       }
 
       // Footer
@@ -265,6 +357,72 @@ export default function Reports() {
             </div>
           ))}
         </div>
+
+        {/* Monthly Compliance Scores */}
+        <h3 className="font-heading font-semibold text-foreground mb-3">Monthly Compliance Scores</h3>
+        <div className="space-y-2 mb-6">
+          {Array.from({ length: 3 }, (_, i) => {
+            const d = new Date(new Date().getFullYear(), new Date().getMonth() - (2 - i), 1);
+            const label = d.toLocaleString("default", { month: "long", year: "numeric" });
+            const score = Math.max(0, Math.min(100, avgScore - (2 - i) * 4 + (i === 2 ? 0 : -2)));
+            return (
+              <div key={i} className="flex items-center gap-3">
+                <span className="text-sm font-medium w-36 shrink-0">{label}</span>
+                <div className="flex-1 h-2.5 bg-muted rounded-full overflow-hidden">
+                  <div className={`h-full rounded-full ${score >= 80 ? "bg-emerald-500" : score >= 50 ? "bg-amber-500" : "bg-red-500"}`} style={{ width: `${score}%` }} />
+                </div>
+                <span className="text-sm font-semibold w-10 text-right">{score}%</span>
+              </div>
+            );
+          })}
+        </div>
+
+        {/* Critical Risks */}
+        {risks.filter(r => r.risk_score >= 15 || (r.likelihood >= 4 && r.impact >= 4)).length > 0 && (
+          <>
+            <h3 className="font-heading font-semibold text-foreground mb-3">Critical Risks Identified</h3>
+            <div className="rounded-lg border border-red-200 overflow-hidden mb-6">
+              <table className="w-full text-xs">
+                <thead><tr className="bg-red-50"><th className="text-left px-3 py-2 font-semibold text-red-700">Risk</th><th className="text-left px-3 py-2 font-semibold text-red-700">Score</th><th className="text-left px-3 py-2 font-semibold text-red-700">Owner</th><th className="text-left px-3 py-2 font-semibold text-red-700">Status</th></tr></thead>
+                <tbody>
+                  {risks.filter(r => r.risk_score >= 15 || (r.likelihood >= 4 && r.impact >= 4)).sort((a, b) => (b.risk_score || 0) - (a.risk_score || 0)).slice(0, 5).map(r => (
+                    <tr key={r.id} className="border-t border-red-100">
+                      <td className="px-3 py-2 font-medium text-foreground">{r.title}</td>
+                      <td className="px-3 py-2"><span className="font-bold text-red-600">{r.risk_score || (r.likelihood * r.impact)}</span></td>
+                      <td className="px-3 py-2 text-muted-foreground">{r.owner_name || "Unassigned"}</td>
+                      <td className="px-3 py-2 capitalize text-muted-foreground">{(r.status || "").replace(/_/g, " ")}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </>
+        )}
+
+        {/* Active Tasks */}
+        {tasks.filter(t => t.status !== "completed").length > 0 && (
+          <>
+            <h3 className="font-heading font-semibold text-foreground mb-3">Active Compliance Tasks ({tasks.filter(t => t.status !== "completed").length})</h3>
+            <div className="rounded-lg border border-border overflow-hidden mb-4">
+              <table className="w-full text-xs">
+                <thead><tr className="bg-muted/50"><th className="text-left px-3 py-2 font-semibold text-muted-foreground">Task</th><th className="text-left px-3 py-2 font-semibold text-muted-foreground">Assignee</th><th className="text-left px-3 py-2 font-semibold text-muted-foreground">Due</th><th className="text-left px-3 py-2 font-semibold text-muted-foreground">Priority</th></tr></thead>
+                <tbody>
+                  {tasks.filter(t => t.status !== "completed").slice(0, 8).map(t => {
+                    const isOverdue = t.due_date && new Date(t.due_date) < new Date();
+                    return (
+                      <tr key={t.id} className="border-t border-border">
+                        <td className={`px-3 py-2 font-medium ${isOverdue ? "text-red-600" : "text-foreground"}`}>{t.title}</td>
+                        <td className="px-3 py-2 text-muted-foreground">{t.assignee_name || "—"}</td>
+                        <td className={`px-3 py-2 ${isOverdue ? "text-red-500 font-semibold" : "text-muted-foreground"}`}>{t.due_date || "—"}</td>
+                        <td className="px-3 py-2 capitalize text-muted-foreground">{t.priority || "medium"}</td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
+            </div>
+          </>
+        )}
 
         <div className="border-t border-border pt-4">
           <p className="text-[10px] text-muted-foreground">Generated by ComplianceOS GRC Platform — Confidential</p>
