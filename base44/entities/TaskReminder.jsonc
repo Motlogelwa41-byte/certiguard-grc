@@ -1,0 +1,44 @@
+{
+  "name": "TaskReminder",
+  "type": "object",
+  "properties": {
+    "task_id": {
+      "type": "string"
+    },
+    "task_title": {
+      "type": "string"
+    },
+    "assignee_name": {
+      "type": "string"
+    },
+    "assignee_email": {
+      "type": "string"
+    },
+    "due_date": {
+      "type": "string",
+      "format": "date"
+    },
+    "days_before": {
+      "type": "number",
+      "description": "How many days before due date the reminder was sent"
+    },
+    "sent_at": {
+      "type": "string"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "sent",
+        "failed"
+      ],
+      "default": "sent"
+    },
+    "priority": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "task_id",
+    "assignee_email"
+  ]
+}

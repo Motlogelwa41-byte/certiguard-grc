@@ -43,6 +43,7 @@ import Pricing from '@/pages/Pricing';
 import TenantAdmin from '@/pages/TenantAdmin';
 import { TenantProvider } from '@/lib/TenantContext';
 import VendorQuestionnaire from '@/pages/VendorQuestionnaire';
+import TaskReminders from '@/pages/TaskReminders';
 
 const AuthenticatedApp = () => {
   const { isLoadingAuth, isLoadingPublicSettings, authError, navigateToLogin } = useAuth();
@@ -102,6 +103,7 @@ const AuthenticatedApp = () => {
           <Route path="/framework-map" element={<FrameworkControlMap />} />
           <Route path="/policy-templates" element={<PolicyTemplates />} />
           <Route path="/notification-preferences" element={<NotificationPreferences />} />
+          <Route path="/task-reminders" element={<TaskReminders />} />
         </Route>
       </Route>
       <Route path="*" element={<PageNotFound />} />

@@ -44,6 +44,7 @@ const navItems = [
   { label: "Vendor Assessments", path: "/vendor-assessments", icon: ClipboardList },
   { label: "Framework Map", path: "/framework-map", icon: Shield },
   { label: "Tasks", path: "/tasks", icon: CheckSquare },
+  { label: "Task Reminders", path: "/task-reminders", icon: Bell },
   { label: "Gap Analysis", path: "/gap-analysis", icon: FileSearch },
   { label: "AI Auditor", path: "/ai-auditor", icon: Brain },
   { label: "Compliance Runs", path: "/compliance-runs", icon: Play },
