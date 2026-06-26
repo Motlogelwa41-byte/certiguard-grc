@@ -44,6 +44,7 @@ import TenantAdmin from '@/pages/TenantAdmin';
 import { TenantProvider } from '@/lib/TenantContext';
 import VendorQuestionnaire from '@/pages/VendorQuestionnaire';
 import TaskReminders from '@/pages/TaskReminders';
+import RiskHeatmap from '@/pages/RiskHeatmap';
 
 const AuthenticatedApp = () => {
   const { isLoadingAuth, isLoadingPublicSettings, authError, navigateToLogin } = useAuth();
@@ -104,6 +105,7 @@ const AuthenticatedApp = () => {
           <Route path="/policy-templates" element={<PolicyTemplates />} />
           <Route path="/notification-preferences" element={<NotificationPreferences />} />
           <Route path="/task-reminders" element={<TaskReminders />} />
+          <Route path="/risk-heatmap" element={<RiskHeatmap />} />
         </Route>
       </Route>
       <Route path="*" element={<PageNotFound />} />

@@ -28,7 +28,8 @@ import {
   Bell,
   Users,
   Copy,
-  SlidersHorizontal
+  SlidersHorizontal,
+  Target
 } from "lucide-react";
 import { base44 } from "@/api/base44Client";
 
@@ -37,6 +38,7 @@ const navItems = [
   { label: "Frameworks", path: "/frameworks", icon: Shield },
   { label: "Controls", path: "/controls", icon: FileCheck },
   { label: "Risks", path: "/risks", icon: AlertTriangle },
+  { label: "Risk Heatmap", path: "/risk-heatmap", icon: Target },
   { label: "Policies", path: "/policies", icon: FileText },
   { label: "Evidence", path: "/evidence", icon: Paperclip },
   { label: "Audits", path: "/audits", icon: ClipboardList },
