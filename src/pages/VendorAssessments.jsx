@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
-import { ClipboardList, Plus, Eye, Trash2, Send, CheckCircle } from "lucide-react";
+import { ClipboardList, Plus, Eye, Trash2, Send, CheckCircle, Copy, ExternalLink } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
@@ -44,7 +44,14 @@ export default function VendorAssessments() {
   const [selected, setSelected] = useState(null);
   const [answers, setAnswers] = useState({});
   const [createForm, setCreateForm] = useState({ vendor_id: "", title: "", due_date: "" });
+  const [sendOpen, setSendOpen] = useState(false);
+  const [sendTarget, setSendTarget] = useState(null);
+  const [recipientEmail, setRecipientEmail] = useState("");
+  const [sending, setSending] = useState(false);
   const { toast } = useToast();
+
+  const getQuestionnaireUrl = (id) =>
+    `${window.location.origin}/vendor-questionnaire?id=${id}`;
 
   const load = async () => {
     const [a, v] = await Promise.all([base44.entities.VendorAssessment.list(), base44.entities.Vendor.list()]);
@@ -104,6 +111,31 @@ export default function VendorAssessments() {
 
   const handleDelete = async (id) => { await base44.entities.VendorAssessment.delete(id); load(); toast({ title: "Assessment deleted" }); };
 
+  const handleOpenSend = (a) => { setSendTarget(a); setRecipientEmail(""); setSendOpen(true); };
+
+  const handleCopyLink = (a) => {
+    navigator.clipboard.writeText(getQuestionnaireUrl(a.id));
+    toast({ title: "Link copied to clipboard" });
+  };
+
+  const handleSendEmail = async () => {
+    setSending(true);
+    const url = getQuestionnaireUrl(sendTarget.id);
+    await base44.integrations.Core.SendEmail({
+      to: recipientEmail,
+      subject: `Security Questionnaire: ${sendTarget.title}`,
+      body: `Dear ${sendTarget.vendor_name} team,\n\nPlease complete the security questionnaire below at your earliest convenience.\n\nAssessment: ${sendTarget.title}\nDue Date: ${sendTarget.due_date || "As soon as possible"}\n\nClick here to begin: ${url}\n\nThank you,\nCompliance Team`,
+    });
+    await base44.entities.VendorAssessment.update(sendTarget.id, {
+      status: "sent",
+      sent_date: new Date().toISOString().split("T")[0],
+    });
+    setSending(false);
+    setSendOpen(false);
+    load();
+    toast({ title: "Questionnaire sent", description: `Email sent to ${recipientEmail}` });
+  };
+
   if (loading) return <div className="flex items-center justify-center h-64"><div className="w-8 h-8 border-4 border-primary/20 border-t-primary rounded-full animate-spin" /></div>;
 
   return (
@@ -157,6 +189,8 @@ export default function VendorAssessments() {
                     <td className="px-4 py-3 text-muted-foreground">{a.due_date || "—"}</td>
                     <td className="px-4 py-3 text-right">
                       <div className="flex items-center justify-end gap-1">
+                        <button onClick={() => handleCopyLink(a)} className="p-1.5 rounded hover:bg-muted" title="Copy link"><Copy className="w-3.5 h-3.5 text-muted-foreground" /></button>
+                        <button onClick={() => handleOpenSend(a)} className="p-1.5 rounded hover:bg-muted" title="Send to vendor"><Send className="w-3.5 h-3.5 text-blue-500" /></button>
                         <button onClick={() => handleOpen(a)} className="p-1.5 rounded hover:bg-muted" title="Fill / Review"><Eye className="w-3.5 h-3.5 text-muted-foreground" /></button>
                         <button onClick={() => handleDelete(a.id)} className="p-1.5 rounded hover:bg-muted"><Trash2 className="w-3.5 h-3.5 text-destructive" /></button>
                       </div>
@@ -183,6 +217,31 @@ export default function VendorAssessments() {
             <div><Label>Assessment Title</Label><Input value={createForm.title} onChange={(e) => setCreateForm({ ...createForm, title: e.target.value })} placeholder="e.g. Annual Security Review 2026" /></div>
             <div><Label>Due Date</Label><Input type="date" value={createForm.due_date} onChange={(e) => setCreateForm({ ...createForm, due_date: e.target.value })} /></div>
             <Button className="w-full" onClick={handleCreate} disabled={!createForm.vendor_id || !createForm.title}>Create Assessment</Button>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Send dialog */}
+      <Dialog open={sendOpen} onOpenChange={setSendOpen}>
+        <DialogContent className="max-w-md">
+          <DialogHeader><DialogTitle>Send Questionnaire — {sendTarget?.vendor_name}</DialogTitle></DialogHeader>
+          <div className="space-y-4">
+            <div className="bg-muted/50 rounded-lg p-3">
+              <p className="text-xs text-muted-foreground mb-1">Shareable link</p>
+              <div className="flex items-center gap-2">
+                <p className="text-xs text-foreground truncate flex-1 font-mono">{sendTarget ? getQuestionnaireUrl(sendTarget.id) : ""}</p>
+                <button onClick={() => handleCopyLink(sendTarget)} className="p-1.5 rounded hover:bg-muted shrink-0"><Copy className="w-3.5 h-3.5 text-muted-foreground" /></button>
+                <a href={sendTarget ? getQuestionnaireUrl(sendTarget.id) : "#"} target="_blank" rel="noreferrer" className="p-1.5 rounded hover:bg-muted shrink-0"><ExternalLink className="w-3.5 h-3.5 text-muted-foreground" /></a>
+              </div>
+            </div>
+            <div className="relative"><div className="absolute inset-0 flex items-center"><span className="w-full border-t border-border" /></div><div className="relative flex justify-center text-xs"><span className="bg-background px-2 text-muted-foreground">or send via email</span></div></div>
+            <div>
+              <Label>Vendor Contact Email</Label>
+              <Input type="email" value={recipientEmail} onChange={(e) => setRecipientEmail(e.target.value)} placeholder="vendor@example.com" />
+            </div>
+            <Button className="w-full" onClick={handleSendEmail} disabled={!recipientEmail || sending}>
+              <Send className="w-4 h-4 mr-1" />{sending ? "Sending..." : "Send Email & Mark as Sent"}
+            </Button>
           </div>
         </DialogContent>
       </Dialog>

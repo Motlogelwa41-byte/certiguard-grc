@@ -42,6 +42,7 @@ import SecurityCenter from '@/pages/SecurityCenter';
 import Pricing from '@/pages/Pricing';
 import TenantAdmin from '@/pages/TenantAdmin';
 import { TenantProvider } from '@/lib/TenantContext';
+import VendorQuestionnaire from '@/pages/VendorQuestionnaire';
 
 const AuthenticatedApp = () => {
   const { isLoadingAuth, isLoadingPublicSettings, authError, navigateToLogin } = useAuth();
@@ -70,6 +71,7 @@ const AuthenticatedApp = () => {
       <Route path="/forgot-password" element={<ForgotPassword />} />
       <Route path="/reset-password" element={<ResetPassword />} />
       <Route path="/pricing" element={<Pricing />} />
+      <Route path="/vendor-questionnaire" element={<VendorQuestionnaire />} />
       <Route element={<ProtectedRoute unauthenticatedElement={<Navigate to="/login" replace />} />}>
         <Route element={<TenantProvider><AppLayout /></TenantProvider>}>
           <Route path="/" element={<Dashboard />} />

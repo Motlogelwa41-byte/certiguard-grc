@@ -9,6 +9,7 @@ import { PieChart, Pie, Cell, ResponsiveContainer, BarChart, Bar, XAxis, YAxis, 
 import PageHeader from "@/components/shared/PageHeader";
 import StatCard from "@/components/shared/StatCard";
 import StatusBadge from "@/components/shared/StatusBadge";
+import VendorAssessmentWidget from "@/components/dashboard/VendorAssessmentWidget";
 
 const COLORS = ["#3b82f6", "#10b981", "#f59e0b", "#ef4444", "#8b5cf6", "#6b7280"];
 
@@ -18,6 +19,7 @@ export default function Dashboard() {
   const [risks, setRisks] = useState([]);
   const [tasks, setTasks] = useState([]);
   const [vendors, setVendors] = useState([]);
+  const [assessments, setAssessments] = useState([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -27,12 +29,14 @@ export default function Dashboard() {
       base44.entities.Risk.list(),
       base44.entities.ComplianceTask.list(),
       base44.entities.Vendor.list(),
-    ]).then(([f, c, r, t, v]) => {
+      base44.entities.VendorAssessment.list(),
+    ]).then(([f, c, r, t, v, a]) => {
       setFrameworks(f);
       setControls(c);
       setRisks(r);
       setTasks(t);
       setVendors(v);
+      setAssessments(a);
       setLoading(false);
     });
   }, []);
@@ -189,30 +193,7 @@ export default function Dashboard() {
           )}
         </div>
 
-        {/* High Risk Vendors */}
-        <div className="bg-card rounded-xl border border-border p-6">
-          <div className="flex items-center justify-between mb-4">
-            <h3 className="font-heading font-semibold text-foreground">Vendor Risk Summary</h3>
-            <Link to="/vendors" className="text-xs text-primary hover:underline flex items-center gap-1">
-              View all <ArrowRight className="w-3 h-3" />
-            </Link>
-          </div>
-          {vendors.length > 0 ? (
-            <div className="space-y-2">
-              {vendors.slice(0, 5).map((v) => (
-                <div key={v.id} className="flex items-center justify-between py-2 border-b border-border last:border-0">
-                  <div className="min-w-0">
-                    <p className="text-sm font-medium text-foreground truncate">{v.name}</p>
-                    <p className="text-xs text-muted-foreground capitalize">{(v.category || "").replace(/_/g, " ")}</p>
-                  </div>
-                  <StatusBadge status={v.risk_level} />
-                </div>
-              ))}
-            </div>
-          ) : (
-            <p className="text-sm text-muted-foreground py-4 text-center">No vendors added yet</p>
-          )}
-        </div>
+        <VendorAssessmentWidget assessments={assessments} />
       </div>
     </div>
   );
