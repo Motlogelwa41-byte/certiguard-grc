@@ -26,7 +26,9 @@ import {
   GraduationCap,
   Calendar,
   Bell,
-  Users
+  Users,
+  Copy,
+  SlidersHorizontal
 } from "lucide-react";
 import { base44 } from "@/api/base44Client";
 
@@ -53,6 +55,8 @@ const navItems = [
   { label: "Mgmt Reports", path: "/management-reports", icon: BarChart3 },
   { label: "Calendar", path: "/calendar", icon: Calendar },
   { label: "Notifications", path: "/notifications", icon: Bell },
+  { label: "Notif. Preferences", path: "/notification-preferences", icon: SlidersHorizontal },
+  { label: "Policy Templates", path: "/policy-templates", icon: Copy },
   { label: "Security", path: "/security", icon: ShieldCheck },
   { label: "Users", path: "/users", icon: Users },
   { label: "Tenants", path: "/tenant-admin", icon: Building2 },

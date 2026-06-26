@@ -35,6 +35,8 @@ import PolicyAcknowledgments from '@/pages/PolicyAcknowledgments';
 import VendorAssessments from '@/pages/VendorAssessments';
 import FrameworkControlMap from '@/pages/FrameworkControlMap';
 import ComplianceCalendar from '@/pages/ComplianceCalendar';
+import PolicyTemplates from '@/pages/PolicyTemplates';
+import NotificationPreferences from '@/pages/NotificationPreferences';
 import Notifications from '@/pages/Notifications';
 import SecurityCenter from '@/pages/SecurityCenter';
 import Pricing from '@/pages/Pricing';
@@ -96,6 +98,8 @@ const AuthenticatedApp = () => {
           <Route path="/policy-acknowledgments" element={<PolicyAcknowledgments />} />
           <Route path="/vendor-assessments" element={<VendorAssessments />} />
           <Route path="/framework-map" element={<FrameworkControlMap />} />
+          <Route path="/policy-templates" element={<PolicyTemplates />} />
+          <Route path="/notification-preferences" element={<NotificationPreferences />} />
         </Route>
       </Route>
       <Route path="*" element={<PageNotFound />} />
