@@ -13,7 +13,7 @@ import EmptyState from "@/components/shared/EmptyState";
 import { useToast } from "@/components/ui/use-toast";
 
 const taskTypes = ["control_implementation","evidence_collection","policy_review","risk_assessment","audit_preparation","remediation","training","vendor_review","other"];
-const defaultForm = { title: "", description: "", type: "other", status: "todo", priority: "medium", assignee_name: "", due_date: "", notes: "" };
+const defaultForm = { title: "", description: "", type: "other", status: "todo", priority: "medium", assignee_name: "", assignee_email: "", due_date: "", notes: "" };
 
 export default function Tasks() {
   const [items, setItems] = useState([]);
@@ -29,17 +29,57 @@ export default function Tasks() {
   const load = () => base44.entities.ComplianceTask.list().then((d) => { setItems(d); setLoading(false); });
   useEffect(() => { load(); }, []);
 
+  const sendAssignmentEmail = async (task) => {
+    if (!task.assignee_email && !task.assignee_name) return;
+    // Only send if there's an email — assignee_email may not be on the entity, so we use a stored value
+    const email = task.assignee_email;
+    if (!email) return;
+    await base44.integrations.Core.SendEmail({
+      to: email,
+      subject: `📋 New Compliance Task Assigned: "${task.title}"`,
+      body: `
+<div style="font-family: sans-serif; max-width: 600px; margin: 0 auto; padding: 24px; background: #f8fafc; border-radius: 8px;">
+  <div style="background: #1e293b; color: white; padding: 20px 24px; border-radius: 8px 8px 0 0;">
+    <h2 style="margin: 0; font-size: 18px;">📋 New Task Assigned to You</h2>
+  </div>
+  <div style="background: white; padding: 24px; border-radius: 0 0 8px 8px; border: 1px solid #e2e8f0;">
+    <p>Hi ${task.assignee_name || "Team Member"},</p>
+    <p>A new compliance task has been assigned to you:</p>
+    <div style="background: #f1f5f9; border-left: 4px solid #6366f1; padding: 16px; margin: 16px 0; border-radius: 4px;">
+      <h3 style="margin: 0 0 8px 0; color: #1e293b;">${task.title}</h3>
+      ${task.due_date ? `<p style="margin: 4px 0; color: #64748b;"><strong>Due Date:</strong> ${task.due_date}</p>` : ""}
+      <p style="margin: 4px 0; color: #64748b;"><strong>Priority:</strong> ${(task.priority || "medium").toUpperCase()}</p>
+      <p style="margin: 4px 0; color: #64748b;"><strong>Type:</strong> ${(task.type || "").replace(/_/g, " ")}</p>
+      ${task.description ? `<p style="margin: 8px 0 0 0; color: #475569;">${task.description}</p>` : ""}
+    </div>
+    <p>Please log in to ComplianceOS to view and update this task.</p>
+    <p style="color: #94a3b8; font-size: 13px; margin-top: 24px; border-top: 1px solid #e2e8f0; padding-top: 16px;">
+      This notification was sent by ComplianceOS. Do not reply to this email.
+    </p>
+  </div>
+</div>`,
+    });
+  };
+
   const handleSave = async () => {
     try {
-      if (editId) await base44.entities.ComplianceTask.update(editId, form);
-      else await base44.entities.ComplianceTask.create(form);
+      if (editId) {
+        await base44.entities.ComplianceTask.update(editId, form);
+        toast({ title: "Task updated" });
+      } else {
+        const created = await base44.entities.ComplianceTask.create(form);
+        toast({ title: "Task created" });
+        // Send assignment notification email if assignee email is provided
+        if (form.assignee_email) {
+          sendAssignmentEmail({ ...form }).catch(() => {});
+        }
+      }
       setOpen(false); setForm(defaultForm); setEditId(null); load();
-      toast({ title: editId ? "Task updated" : "Task created" });
     } catch (e) { toast({ title: "Error", description: e.message, variant: "destructive" }); }
   };
 
   const handleEdit = (item) => {
-    setForm({ title: item.title || "", description: item.description || "", type: item.type || "other", status: item.status || "todo", priority: item.priority || "medium", assignee_name: item.assignee_name || "", due_date: item.due_date || "", notes: item.notes || "" });
+    setForm({ title: item.title || "", description: item.description || "", type: item.type || "other", status: item.status || "todo", priority: item.priority || "medium", assignee_name: item.assignee_name || "", assignee_email: item.assignee_email || "", due_date: item.due_date || "", notes: item.notes || "" });
     setEditId(item.id); setOpen(true);
   };
 
@@ -160,9 +200,10 @@ export default function Tasks() {
               </Select>
             </div>
             <div className="grid grid-cols-2 gap-3">
-              <div><Label>Assignee</Label><Input value={form.assignee_name} onChange={(e) => setForm({ ...form, assignee_name: e.target.value })} /></div>
+              <div><Label>Assignee Name</Label><Input value={form.assignee_name} onChange={(e) => setForm({ ...form, assignee_name: e.target.value })} /></div>
               <div><Label>Due Date</Label><Input type="date" value={form.due_date} onChange={(e) => setForm({ ...form, due_date: e.target.value })} /></div>
             </div>
+            <div><Label>Assignee Email <span className="text-muted-foreground text-xs">(for notifications)</span></Label><Input type="email" placeholder="assignee@company.com" value={form.assignee_email} onChange={(e) => setForm({ ...form, assignee_email: e.target.value })} /></div>
             <div><Label>Description</Label><Textarea value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })} rows={3} /></div>
             <div><Label>Notes</Label><Textarea value={form.notes} onChange={(e) => setForm({ ...form, notes: e.target.value })} rows={2} /></div>
             <Button className="w-full" onClick={handleSave} disabled={!form.title}>{editId ? "Update" : "Create"}</Button>

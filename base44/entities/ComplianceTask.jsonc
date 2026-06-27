@@ -50,6 +50,10 @@
     "assignee_id": {
       "type": "string"
     },
+    "assignee_email": {
+      "type": "string",
+      "description": "Email address for notifications"
+    },
     "due_date": {
       "type": "string",
       "format": "date"

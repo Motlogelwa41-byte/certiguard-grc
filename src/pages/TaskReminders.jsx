@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
-import { Bell, Send, CheckCircle, XCircle, Clock, AlertTriangle, Mail, Loader2 } from "lucide-react";
+import { Bell, Send, CheckCircle, XCircle, Clock, AlertTriangle, Mail, Loader2, Zap } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -172,6 +172,16 @@ export default function TaskReminders() {
     load();
   };
 
+  // Tasks with deadlines in ≤7 days that haven't been reminded in 24h
+  const alertTasks = upcomingTasks.filter((t) => {
+    const days = daysUntil(t.due_date);
+    if (days === null || days > 7 || days < 0) return false;
+    const sent = getRemindersSentFor(t.id);
+    if (sent.length === 0) return true;
+    const lastSent = new Date(sent[0].sent_at);
+    return (Date.now() - lastSent.getTime()) > 24 * 60 * 60 * 1000;
+  });
+
   if (loading) return (
     <div className="flex items-center justify-center h-64">
       <div className="w-8 h-8 border-4 border-primary/20 border-t-primary rounded-full animate-spin" />
@@ -190,6 +200,21 @@ export default function TaskReminders() {
           </Button>
         }
       />
+
+      {/* Deadline alert banner */}
+      {alertTasks.length > 0 && (
+        <div className="bg-amber-500/10 border border-amber-500/30 rounded-xl p-4 flex items-start gap-3">
+          <Zap className="w-5 h-5 text-amber-500 shrink-0 mt-0.5" />
+          <div className="flex-1">
+            <p className="text-sm font-semibold text-amber-600 dark:text-amber-400">
+              {alertTasks.length} task{alertTasks.length > 1 ? "s" : ""} approaching deadline — reminder not yet sent
+            </p>
+            <p className="text-xs text-muted-foreground mt-0.5">
+              {alertTasks.map(t => t.title).join(", ")}
+            </p>
+          </div>
+        </div>
+      )}
 
       {/* Reminder window config */}
       <div className="bg-card rounded-xl border border-border p-5">
