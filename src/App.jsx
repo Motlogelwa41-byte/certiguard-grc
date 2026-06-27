@@ -46,6 +46,7 @@ import VendorQuestionnaire from '@/pages/VendorQuestionnaire';
 import TaskReminders from '@/pages/TaskReminders';
 import RiskHeatmap from '@/pages/RiskHeatmap';
 import BulkEvidenceUploader from '@/pages/BulkEvidenceUploader';
+import PostureDashboard from '@/pages/PostureDashboard';
 
 const AuthenticatedApp = () => {
   const { isLoadingAuth, isLoadingPublicSettings, authError, navigateToLogin } = useAuth();
@@ -108,6 +109,7 @@ const AuthenticatedApp = () => {
           <Route path="/task-reminders" element={<TaskReminders />} />
           <Route path="/risk-heatmap" element={<RiskHeatmap />} />
           <Route path="/bulk-evidence" element={<BulkEvidenceUploader />} />
+          <Route path="/posture" element={<PostureDashboard />} />
         </Route>
       </Route>
       <Route path="*" element={<PageNotFound />} />

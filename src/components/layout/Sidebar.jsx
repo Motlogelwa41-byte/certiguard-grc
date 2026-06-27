@@ -36,6 +36,7 @@ import { base44 } from "@/api/base44Client";
 
 const navItems = [
   { label: "Dashboard", path: "/", icon: LayoutDashboard },
+  { label: "Posture Dashboard", path: "/posture", icon: BarChart3 },
   { label: "Frameworks", path: "/frameworks", icon: Shield },
   { label: "Controls", path: "/controls", icon: FileCheck },
   { label: "Risks", path: "/risks", icon: AlertTriangle },
