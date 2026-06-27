@@ -2,14 +2,17 @@ import React, { useState, useEffect, useMemo } from "react";
 import { base44 } from "@/api/base44Client";
 import {
   CheckCircle, AlertTriangle, ShieldAlert, FileCheck, Upload,
-  TrendingUp, TrendingDown, Minus, Clock, Shield
+  TrendingUp, TrendingDown, Minus, Clock, Shield, Download, RefreshCw
 } from "lucide-react";
 import {
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
   PieChart, Pie, Cell, LineChart, Line, Legend
 } from "recharts";
 import PageHeader from "@/components/shared/PageHeader";
+import { Button } from "@/components/ui/button";
 import { subMonths, format, startOfMonth, endOfMonth, parseISO } from "date-fns";
+import { generatePostureReportHTML, downloadPostureReport } from "@/lib/postureReportExport";
+import { useToast } from "@/components/ui/use-toast";
 
 const COLORS = {
   passing: "#10b981", failing: "#ef4444", not_tested: "#94a3b8", not_applicable: "#cbd5e1",
@@ -50,6 +53,21 @@ function MetricCard({ icon: Icon, label, value, sub, color = "blue", trend }) {
 export default function PostureDashboard() {
   const [data, setData] = useState({ controls: [], risks: [], evidence: [], tasks: [], frameworks: [] });
   const [loading, setLoading] = useState(true);
+  const [exporting, setExporting] = useState(false);
+  const { toast } = useToast();
+
+  const handleExport = () => {
+    setExporting(true);
+    try {
+      const html = generatePostureReportHTML({ ...data });
+      const filename = `compliance-posture-report-${format(new Date(), "yyyy-MM-dd")}.html`;
+      downloadPostureReport(html, filename);
+      toast({ title: "Report exported", description: "Open the downloaded HTML file in any browser to print as PDF." });
+    } catch (e) {
+      toast({ title: "Export failed", description: e.message, variant: "destructive" });
+    }
+    setExporting(false);
+  };
 
   useEffect(() => {
     Promise.all([
@@ -139,6 +157,14 @@ export default function PostureDashboard() {
       <PageHeader
         title="Compliance Posture Dashboard"
         subtitle="Real-time overview of your organisation's compliance health, risk exposure, and evidence coverage"
+        actions={
+          <Button size="sm" onClick={handleExport} disabled={exporting}>
+            {exporting
+              ? <RefreshCw className="w-4 h-4 mr-1 animate-spin" />
+              : <Download className="w-4 h-4 mr-1" />}
+            Export Report
+          </Button>
+        }
       />
 
       {/* KPI Cards */}

@@ -44,6 +44,7 @@ const navItems = [
   { label: "Policies", path: "/policies", icon: FileText },
   { label: "Evidence", path: "/evidence", icon: Paperclip },
   { label: "Bulk Evidence Upload", path: "/bulk-evidence", icon: Upload },
+  { label: "Evidence Reminders", path: "/evidence-reminders", icon: Bell },
   { label: "Audits", path: "/audits", icon: ClipboardList },
   { label: "Vendors", path: "/vendors", icon: Building2 },
   { label: "Vendor Assessments", path: "/vendor-assessments", icon: ClipboardList },
