@@ -31,7 +31,8 @@ import {
   SlidersHorizontal,
   Target,
   Upload,
-  Send
+  Send,
+  Globe
 } from "lucide-react";
 import { base44 } from "@/api/base44Client";
 
@@ -70,6 +71,7 @@ const navItems = [
   { label: "Security", path: "/security", icon: ShieldCheck },
   { label: "Users", path: "/users", icon: Users },
   { label: "Tenants", path: "/tenant-admin", icon: Building2 },
+  { label: "Trust Center", path: "/trust-center-settings", icon: Globe },
 ];
 
 export default function Sidebar() {

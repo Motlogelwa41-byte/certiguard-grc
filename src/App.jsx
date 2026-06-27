@@ -50,6 +50,8 @@ import PostureDashboard from '@/pages/PostureDashboard';
 import EvidenceReminders from '@/pages/EvidenceReminders';
 import ScheduledReports from '@/pages/ScheduledReports';
 import AuditChecklist from '@/pages/AuditChecklist';
+import TrustCenterSettings from '@/pages/TrustCenterSettings';
+import TrustCenterPublic from '@/pages/TrustCenterPublic';
 
 const AuthenticatedApp = () => {
   const { isLoadingAuth, isLoadingPublicSettings, authError, navigateToLogin } = useAuth();
@@ -79,6 +81,7 @@ const AuthenticatedApp = () => {
       <Route path="/reset-password" element={<ResetPassword />} />
       <Route path="/pricing" element={<Pricing />} />
       <Route path="/vendor-questionnaire" element={<VendorQuestionnaire />} />
+      <Route path="/trust-center" element={<TrustCenterPublic />} />
       <Route element={<ProtectedRoute unauthenticatedElement={<Navigate to="/login" replace />} />}>
         <Route element={<TenantProvider><AppLayout /></TenantProvider>}>
           <Route path="/" element={<Dashboard />} />
@@ -116,6 +119,7 @@ const AuthenticatedApp = () => {
           <Route path="/evidence-reminders" element={<EvidenceReminders />} />
           <Route path="/scheduled-reports" element={<ScheduledReports />} />
           <Route path="/audit-checklists" element={<AuditChecklist />} />
+          <Route path="/trust-center-settings" element={<TrustCenterSettings />} />
         </Route>
       </Route>
       <Route path="*" element={<PageNotFound />} />

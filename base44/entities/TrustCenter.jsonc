@@ -1,0 +1,78 @@
+{
+  "name": "TrustCenter",
+  "type": "object",
+  "properties": {
+    "company_name": {
+      "type": "string"
+    },
+    "company_tagline": {
+      "type": "string"
+    },
+    "company_description": {
+      "type": "string"
+    },
+    "logo_url": {
+      "type": "string"
+    },
+    "website_url": {
+      "type": "string"
+    },
+    "contact_email": {
+      "type": "string"
+    },
+    "is_published": {
+      "type": "boolean",
+      "default": false
+    },
+    "show_frameworks": {
+      "type": "boolean",
+      "default": true
+    },
+    "show_controls_count": {
+      "type": "boolean",
+      "default": true
+    },
+    "show_uptime": {
+      "type": "boolean",
+      "default": true
+    },
+    "uptime_percentage": {
+      "type": "number",
+      "default": 99.9
+    },
+    "show_pentest": {
+      "type": "boolean",
+      "default": false
+    },
+    "pentest_date": {
+      "type": "string",
+      "format": "date"
+    },
+    "pentest_firm": {
+      "type": "string"
+    },
+    "show_subprocessors": {
+      "type": "boolean",
+      "default": true
+    },
+    "subprocessors": {
+      "type": "string",
+      "description": "JSON array of {name, purpose, location}"
+    },
+    "custom_sections": {
+      "type": "string",
+      "description": "JSON array of {title, content}"
+    },
+    "accent_color": {
+      "type": "string",
+      "default": "#2563eb"
+    },
+    "slug": {
+      "type": "string",
+      "description": "Public URL slug e.g. trust"
+    }
+  },
+  "required": [
+    "company_name"
+  ]
+}
