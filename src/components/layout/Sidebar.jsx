@@ -13,7 +13,6 @@ import {
   ChevronLeft,
   ChevronRight,
   LogOut,
-  Settings,
   ShieldCheck,
   FileSearch,
   Brain,
@@ -35,49 +34,107 @@ import {
   Globe,
   Users2,
   MapPin,
-  Zap
+  Zap,
+  ListChecks,
+  BellRing,
+  PieChart,
+  Radar,
+  Landmark,
+  BarChart2,
+  Network
 } from "lucide-react";
 import { base44 } from "@/api/base44Client";
 
-const navItems = [
-  { label: "Dashboard", path: "/", icon: LayoutDashboard },
-  { label: "Posture Dashboard", path: "/posture", icon: BarChart3 },
-  { label: "Frameworks", path: "/frameworks", icon: Shield },
-  { label: "Controls", path: "/controls", icon: FileCheck },
-  { label: "Risks", path: "/risks", icon: AlertTriangle },
-  { label: "Risk Heatmap", path: "/risk-heatmap", icon: Target },
-  { label: "Policies", path: "/policies", icon: FileText },
-  { label: "Evidence", path: "/evidence", icon: Paperclip },
-  { label: "Bulk Evidence Upload", path: "/bulk-evidence", icon: Upload },
-  { label: "Evidence Reminders", path: "/evidence-reminders", icon: Bell },
-  { label: "Audits", path: "/audits", icon: ClipboardList },
-  { label: "Audit Checklists", path: "/audit-checklists", icon: CheckSquare },
-  { label: "Vendors", path: "/vendors", icon: Building2 },
-  { label: "Vendor Assessments", path: "/vendor-assessments", icon: ClipboardList },
-  { label: "Framework Map", path: "/framework-map", icon: Shield },
-  { label: "Tasks", path: "/tasks", icon: CheckSquare },
-  { label: "Task Reminders", path: "/task-reminders", icon: Bell },
-  { label: "Gap Analysis", path: "/gap-analysis", icon: FileSearch },
-  { label: "AI Auditor", path: "/ai-auditor", icon: Brain },
-  { label: "AI Control Mapper", path: "/ai-control-mapper", icon: Zap },
-  { label: "Compliance Runs", path: "/compliance-runs", icon: Play },
-  { label: "ROPA", path: "/ropa", icon: FileSpreadsheet },
-  { label: "Reports", path: "/reports", icon: FileDown },
-  { label: "Audit Trail", path: "/audit-trail", icon: History },
-  { label: "Incidents", path: "/incidents", icon: ShieldAlert },
-  { label: "Training", path: "/training", icon: GraduationCap },
-  { label: "Mgmt Reports", path: "/management-reports", icon: BarChart3 },
-  { label: "Scheduled Reports", path: "/scheduled-reports", icon: Send },
-  { label: "Calendar", path: "/calendar", icon: Calendar },
-  { label: "Notifications", path: "/notifications", icon: Bell },
-  { label: "Notif. Preferences", path: "/notification-preferences", icon: SlidersHorizontal },
-  { label: "Policy Templates", path: "/policy-templates", icon: Copy },
-  { label: "Security", path: "/security", icon: ShieldCheck },
-  { label: "Users", path: "/users", icon: Users },
-  { label: "Tenants", path: "/tenant-admin", icon: Building2 },
-  { label: "SADC Frameworks", path: "/sadc-frameworks", icon: MapPin },
-  { label: "People Compliance", path: "/people", icon: Users2 },
-  { label: "Trust Center", path: "/trust-center-settings", icon: Globe },
+const navSections = [
+  {
+    label: "Overview",
+    items: [
+      { label: "Dashboard", path: "/", icon: LayoutDashboard },
+      { label: "Posture Dashboard", path: "/posture", icon: BarChart3 },
+    ]
+  },
+  {
+    label: "Compliance",
+    items: [
+      { label: "Frameworks", path: "/frameworks", icon: Shield },
+      { label: "Controls", path: "/controls", icon: FileCheck },
+      { label: "Gap Analysis", path: "/gap-analysis", icon: FileSearch },
+      { label: "Framework Map", path: "/framework-map", icon: Network },
+      { label: "SADC Frameworks", path: "/sadc-frameworks", icon: MapPin },
+      { label: "Audit Checklists", path: "/audit-checklists", icon: ListChecks },
+    ]
+  },
+  {
+    label: "Risk",
+    items: [
+      { label: "Risk Register", path: "/risks", icon: AlertTriangle },
+      { label: "Risk Heatmap", path: "/risk-heatmap", icon: Target },
+    ]
+  },
+  {
+    label: "Policies & Evidence",
+    items: [
+      { label: "Policies", path: "/policies", icon: FileText },
+      { label: "Policy Templates", path: "/policy-templates", icon: Copy },
+      { label: "Evidence", path: "/evidence", icon: Paperclip },
+      { label: "Bulk Evidence", path: "/bulk-evidence", icon: Upload },
+      { label: "Evidence Reminders", path: "/evidence-reminders", icon: BellRing },
+    ]
+  },
+  {
+    label: "AI & Automation",
+    items: [
+      { label: "AI Auditor", path: "/ai-auditor", icon: Brain },
+      { label: "AI Control Mapper", path: "/ai-control-mapper", icon: Zap },
+      { label: "Compliance Runs", path: "/compliance-runs", icon: Play },
+    ]
+  },
+  {
+    label: "Operations",
+    items: [
+      { label: "Tasks", path: "/tasks", icon: CheckSquare },
+      { label: "Task Reminders", path: "/task-reminders", icon: Bell },
+      { label: "Calendar", path: "/calendar", icon: Calendar },
+      { label: "Incidents", path: "/incidents", icon: ShieldAlert },
+      { label: "Training", path: "/training", icon: GraduationCap },
+    ]
+  },
+  {
+    label: "Vendors & Third Parties",
+    items: [
+      { label: "Vendors", path: "/vendors", icon: Building2 },
+      { label: "Vendor Assessments", path: "/vendor-assessments", icon: ClipboardList },
+    ]
+  },
+  {
+    label: "Privacy & Governance",
+    items: [
+      { label: "ROPA", path: "/ropa", icon: FileSpreadsheet },
+      { label: "Audits", path: "/audits", icon: Landmark },
+      { label: "Audit Trail", path: "/audit-trail", icon: History },
+      { label: "People Compliance", path: "/people", icon: Users2 },
+    ]
+  },
+  {
+    label: "Reporting",
+    items: [
+      { label: "Reports", path: "/reports", icon: FileDown },
+      { label: "Mgmt Reports", path: "/management-reports", icon: BarChart2 },
+      { label: "Scheduled Reports", path: "/scheduled-reports", icon: Send },
+    ]
+  },
+  {
+    label: "Settings",
+    items: [
+      { label: "Trust Center", path: "/trust-center-settings", icon: Globe },
+      { label: "Security", path: "/security", icon: ShieldCheck },
+      { label: "Users", path: "/users", icon: Users },
+      { label: "Tenants", path: "/tenant-admin", icon: PieChart },
+      { label: "Policy Acknowledgments", path: "/policy-acknowledgments", icon: FileCheck },
+      { label: "Notifications", path: "/notifications", icon: Bell },
+      { label: "Notif. Preferences", path: "/notification-preferences", icon: SlidersHorizontal },
+    ]
+  },
 ];
 
 export default function Sidebar() {
@@ -102,32 +159,43 @@ export default function Sidebar() {
         </div>
         {!collapsed && (
           <span className="font-heading font-bold text-base tracking-tight truncate">
-            ComplianceOS
+            CertiGuard GRC
           </span>
         )}
       </div>
 
       {/* Nav */}
-      <nav className="flex-1 py-3 px-2 space-y-0.5 overflow-y-auto">
-        {navItems.map((item) => {
-          const Icon = item.icon;
-          const active = isActive(item.path);
-          return (
-            <Link
-              key={item.path}
-              to={item.path}
-              className={`flex items-center gap-2.5 px-2.5 py-2 rounded-md text-sm font-medium transition-colors ${
-                active
-                  ? "bg-sidebar-accent text-sidebar-primary-foreground"
-                  : "text-sidebar-foreground/70 hover:text-sidebar-foreground hover:bg-sidebar-accent/50"
-              }`}
-              title={collapsed ? item.label : undefined}
-            >
-              <Icon className={`w-[18px] h-[18px] shrink-0 ${active ? "text-primary" : ""}`} />
-              {!collapsed && <span className="truncate">{item.label}</span>}
-            </Link>
-          );
-        })}
+      <nav className="flex-1 py-3 px-2 overflow-y-auto">
+        {navSections.map((section) => (
+          <div key={section.label} className="mb-3">
+            {!collapsed && (
+              <p className="text-[10px] font-bold uppercase tracking-widest text-sidebar-foreground/30 px-2.5 mb-1">
+                {section.label}
+              </p>
+            )}
+            <div className="space-y-0.5">
+              {section.items.map((item) => {
+                const Icon = item.icon;
+                const active = isActive(item.path);
+                return (
+                  <Link
+                    key={item.path}
+                    to={item.path}
+                    className={`flex items-center gap-2.5 px-2.5 py-2 rounded-md text-sm font-medium transition-colors ${
+                      active
+                        ? "bg-sidebar-accent text-sidebar-primary-foreground"
+                        : "text-sidebar-foreground/70 hover:text-sidebar-foreground hover:bg-sidebar-accent/50"
+                    }`}
+                    title={collapsed ? item.label : undefined}
+                  >
+                    <Icon className={`w-[18px] h-[18px] shrink-0 ${active ? "text-primary" : ""}`} />
+                    {!collapsed && <span className="truncate">{item.label}</span>}
+                  </Link>
+                );
+              })}
+            </div>
+          </div>
+        ))}
       </nav>
 
       {/* Bottom */}

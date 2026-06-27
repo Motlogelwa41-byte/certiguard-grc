@@ -12,7 +12,7 @@ import { useToast } from "@/components/ui/use-toast";
 export default function RemediationDialog({ open, onOpenChange, control, onSuccess }) {
   const [step, setStep] = useState("form"); // "form" | "done"
   const [saving, setSaving] = useState(false);
-  const [createdTask, setCreatedTask] = useState(null);
+
   const [form, setForm] = useState({
     assignee_name: "",
     assignee_email: "",
@@ -26,7 +26,6 @@ export default function RemediationDialog({ open, onOpenChange, control, onSucce
   useEffect(() => {
     if (open) {
       setStep("form");
-      setCreatedTask(null);
       // Default due date: 14 days from now, retest 30 days
       const now = new Date();
       const due = new Date(now); due.setDate(due.getDate() + 14);
@@ -92,7 +91,6 @@ export default function RemediationDialog({ open, onOpenChange, control, onSucce
         } catch {} // Don't fail the whole flow if email fails
       }
 
-      setCreatedTask(task);
       setStep("done");
       toast({ title: "Remediation loop created", description: "Task assigned, retest scheduled, and email sent." });
       onSuccess?.();

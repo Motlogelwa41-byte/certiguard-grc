@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
 import {
-  Brain, Upload, Loader2, CheckCircle, XCircle, Plus,
-  FileText, Link2, Zap, Download, AlertTriangle
+  Brain, Upload, Loader2, CheckCircle, Plus,
+  FileText, Link2, Zap
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
@@ -288,7 +288,7 @@ ${documentText.substring(0, 10000)}`;
                   <div
                     key={ctrl._key}
                     className={`bg-card rounded-xl border transition-colors cursor-pointer ${
-                      selectedMappings.has(ctrl._key) ? "border-primary bg-primary/3" : "border-border"
+                      selectedMappings.has(ctrl._key) ? "border-primary bg-primary/5" : "border-border"
                     }`}
                     onClick={() => toggleSelect(ctrl._key)}
                   >
