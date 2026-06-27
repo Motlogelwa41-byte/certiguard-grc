@@ -1,0 +1,49 @@
+{
+  "name": "AuditChecklist",
+  "type": "object",
+  "properties": {
+    "title": {
+      "type": "string"
+    },
+    "description": {
+      "type": "string"
+    },
+    "framework_name": {
+      "type": "string"
+    },
+    "framework_id": {
+      "type": "string"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "draft",
+        "in_progress",
+        "completed"
+      ],
+      "default": "draft"
+    },
+    "assigned_to": {
+      "type": "string"
+    },
+    "due_date": {
+      "type": "string",
+      "format": "date"
+    },
+    "items": {
+      "type": "string",
+      "description": "JSON array of checklist items: [{id, text, checked, category, notes}]"
+    },
+    "total_items": {
+      "type": "number",
+      "default": 0
+    },
+    "checked_items": {
+      "type": "number",
+      "default": 0
+    }
+  },
+  "required": [
+    "title"
+  ]
+}

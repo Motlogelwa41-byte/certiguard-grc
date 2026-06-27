@@ -49,6 +49,7 @@ import BulkEvidenceUploader from '@/pages/BulkEvidenceUploader';
 import PostureDashboard from '@/pages/PostureDashboard';
 import EvidenceReminders from '@/pages/EvidenceReminders';
 import ScheduledReports from '@/pages/ScheduledReports';
+import AuditChecklist from '@/pages/AuditChecklist';
 
 const AuthenticatedApp = () => {
   const { isLoadingAuth, isLoadingPublicSettings, authError, navigateToLogin } = useAuth();
@@ -114,6 +115,7 @@ const AuthenticatedApp = () => {
           <Route path="/posture" element={<PostureDashboard />} />
           <Route path="/evidence-reminders" element={<EvidenceReminders />} />
           <Route path="/scheduled-reports" element={<ScheduledReports />} />
+          <Route path="/audit-checklists" element={<AuditChecklist />} />
         </Route>
       </Route>
       <Route path="*" element={<PageNotFound />} />
