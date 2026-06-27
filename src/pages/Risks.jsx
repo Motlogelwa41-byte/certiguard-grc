@@ -13,11 +13,14 @@ import PageHeader from "@/components/shared/PageHeader";
 import StatusBadge from "@/components/shared/StatusBadge";
 import EmptyState from "@/components/shared/EmptyState";
 import { useToast } from "@/components/ui/use-toast";
+import { logAuditTrail } from "@/lib/auditLogger";
+import { useAuth } from "@/lib/AuthContext";
 
 const riskCategories = ["operational","technical","compliance","financial","strategic","reputational","third_party"];
 const defaultForm = { risk_id: "", title: "", description: "", category: "operational", likelihood: 3, impact: 3, status: "open", treatment: "mitigate", owner_name: "", mitigation_plan: "", due_date: "", related_control_ids: [] };
 
 export default function Risks() {
+  const { user } = useAuth();
   const [items, setItems] = useState([]);
   const [controls, setControls] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -59,8 +62,14 @@ export default function Risks() {
   const handleSave = async () => {
     try {
       const data = { ...form, risk_score: form.likelihood * form.impact };
-      if (editId) await base44.entities.Risk.update(editId, data);
-      else await base44.entities.Risk.create(data);
+      if (editId) {
+        const before = items.find(i => i.id === editId);
+        await base44.entities.Risk.update(editId, data);
+        await logAuditTrail({ action: "update", entity_type: "Risk", entity_id: editId, entity_name: form.title, before, after: data, user, severity: "info" });
+      } else {
+        const created = await base44.entities.Risk.create(data);
+        await logAuditTrail({ action: "create", entity_type: "Risk", entity_id: created?.id, entity_name: form.title, after: data, user, severity: "info" });
+      }
       setOpen(false); setForm(defaultForm); setEditId(null); load();
       toast({ title: editId ? "Risk updated" : "Risk created" });
     } catch (e) { toast({ title: "Error", description: e.message, variant: "destructive" }); }
@@ -76,7 +85,12 @@ export default function Risks() {
     setForm({ ...form, related_control_ids: ids.includes(ctlId) ? ids.filter(id => id !== ctlId) : [...ids, ctlId] });
   };
 
-  const handleDelete = async (id) => { await base44.entities.Risk.delete(id); load(); toast({ title: "Risk deleted" }); };
+  const handleDelete = async (id) => {
+    const item = items.find(i => i.id === id);
+    await base44.entities.Risk.delete(id);
+    await logAuditTrail({ action: "delete", entity_type: "Risk", entity_id: id, entity_name: item?.title, before: item, user, severity: "warning" });
+    load(); toast({ title: "Risk deleted" });
+  };
 
   const filtered = items.filter((r) => {
     const matchSearch = !search || r.title?.toLowerCase().includes(search.toLowerCase());

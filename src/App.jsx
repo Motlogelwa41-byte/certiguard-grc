@@ -45,6 +45,7 @@ import { TenantProvider } from '@/lib/TenantContext';
 import VendorQuestionnaire from '@/pages/VendorQuestionnaire';
 import TaskReminders from '@/pages/TaskReminders';
 import RiskHeatmap from '@/pages/RiskHeatmap';
+import BulkEvidenceUploader from '@/pages/BulkEvidenceUploader';
 
 const AuthenticatedApp = () => {
   const { isLoadingAuth, isLoadingPublicSettings, authError, navigateToLogin } = useAuth();
@@ -106,6 +107,7 @@ const AuthenticatedApp = () => {
           <Route path="/notification-preferences" element={<NotificationPreferences />} />
           <Route path="/task-reminders" element={<TaskReminders />} />
           <Route path="/risk-heatmap" element={<RiskHeatmap />} />
+          <Route path="/bulk-evidence" element={<BulkEvidenceUploader />} />
         </Route>
       </Route>
       <Route path="*" element={<PageNotFound />} />

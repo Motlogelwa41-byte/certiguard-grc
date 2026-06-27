@@ -13,11 +13,14 @@ import PageHeader from "@/components/shared/PageHeader";
 import StatusBadge from "@/components/shared/StatusBadge";
 import EmptyState from "@/components/shared/EmptyState";
 import { useToast } from "@/components/ui/use-toast";
+import { logAuditTrail } from "@/lib/auditLogger";
+import { useAuth } from "@/lib/AuthContext";
 
 const categories = ["access_control","data_protection","incident_response","change_management","risk_management","security_operations","business_continuity","network_security","physical_security","compliance","human_resources","asset_management"];
 const defaultForm = { control_id: "", title: "", description: "", category: "access_control", status: "not_tested", severity: "medium", automation_status: "manual", owner_name: "", notes: "", framework_ids: [], framework_names: [] };
 
 export default function Controls() {
+  const { user } = useAuth();
   const [items, setItems] = useState([]);
   const [frameworks, setFrameworks] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -58,8 +61,14 @@ export default function Controls() {
 
   const handleSave = async () => {
     try {
-      if (editId) await base44.entities.Control.update(editId, form);
-      else await base44.entities.Control.create(form);
+      if (editId) {
+        const before = items.find(i => i.id === editId);
+        await base44.entities.Control.update(editId, form);
+        await logAuditTrail({ action: "update", entity_type: "Control", entity_id: editId, entity_name: form.title, before, after: form, user, severity: "info" });
+      } else {
+        const created = await base44.entities.Control.create(form);
+        await logAuditTrail({ action: "create", entity_type: "Control", entity_id: created?.id, entity_name: form.title, after: form, user, severity: "info" });
+      }
       setOpen(false); setForm(defaultForm); setEditId(null); load();
       toast({ title: editId ? "Control updated" : "Control created" });
     } catch (e) { toast({ title: "Error", description: e.message, variant: "destructive" }); }
@@ -80,7 +89,12 @@ export default function Controls() {
     }
   };
 
-  const handleDelete = async (id) => { await base44.entities.Control.delete(id); load(); toast({ title: "Control deleted" }); };
+  const handleDelete = async (id) => {
+    const item = items.find(i => i.id === id);
+    await base44.entities.Control.delete(id);
+    await logAuditTrail({ action: "delete", entity_type: "Control", entity_id: id, entity_name: item?.title, before: item, user, severity: "warning" });
+    load(); toast({ title: "Control deleted" });
+  };
 
   const filtered = items.filter((c) => {
     const matchSearch = !search || c.title?.toLowerCase().includes(search.toLowerCase()) || c.control_id?.toLowerCase().includes(search.toLowerCase());

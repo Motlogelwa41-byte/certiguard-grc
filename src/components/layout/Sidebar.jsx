@@ -29,7 +29,8 @@ import {
   Users,
   Copy,
   SlidersHorizontal,
-  Target
+  Target,
+  Upload
 } from "lucide-react";
 import { base44 } from "@/api/base44Client";
 
@@ -41,6 +42,7 @@ const navItems = [
   { label: "Risk Heatmap", path: "/risk-heatmap", icon: Target },
   { label: "Policies", path: "/policies", icon: FileText },
   { label: "Evidence", path: "/evidence", icon: Paperclip },
+  { label: "Bulk Evidence Upload", path: "/bulk-evidence", icon: Upload },
   { label: "Audits", path: "/audits", icon: ClipboardList },
   { label: "Vendors", path: "/vendors", icon: Building2 },
   { label: "Vendor Assessments", path: "/vendor-assessments", icon: ClipboardList },
