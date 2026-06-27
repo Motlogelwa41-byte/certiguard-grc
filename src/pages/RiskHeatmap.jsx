@@ -1,6 +1,8 @@
 import React, { useState, useEffect, useMemo } from "react";
 import { base44 } from "@/api/base44Client";
-import { AlertTriangle, TrendingUp, Shield, Target, Filter } from "lucide-react";
+import { AlertTriangle, TrendingUp, Shield, Target } from "lucide-react";
+import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, ReferenceLine } from "recharts";
+import { subMonths, format, startOfMonth, endOfMonth, parseISO, isWithinInterval } from "date-fns";
 import PageHeader from "@/components/shared/PageHeader";
 import StatusBadge from "@/components/shared/StatusBadge";
 import EmptyState from "@/components/shared/EmptyState";
@@ -63,6 +65,38 @@ export default function RiskHeatmap() {
 
   const categories = [...new Set(risks.map(r => r.category).filter(Boolean))];
 
+  // Build 6-month trend: for each month, compute avg risk score of risks that existed then
+  const trendData = useMemo(() => {
+    const months = Array.from({ length: 6 }, (_, i) => subMonths(new Date(), 5 - i));
+    return months.map(monthDate => {
+      const monthStart = startOfMonth(monthDate);
+      const monthEnd = endOfMonth(monthDate);
+      // Risks created on or before end of this month
+      const existedThen = risks.filter(r => {
+        if (!r.created_date) return false;
+        try { return parseISO(r.created_date) <= monthEnd; } catch { return false; }
+      });
+      // Of those, how many were "closed" by this month
+      const closedThen = existedThen.filter(r => {
+        if (r.status !== "closed" || !r.updated_date) return false;
+        try { return parseISO(r.updated_date) <= monthEnd; } catch { return false; }
+      });
+      const openThen = existedThen.filter(r => !closedThen.includes(r));
+      const avgScore = openThen.length
+        ? Math.round((openThen.reduce((s, r) => s + ((r.likelihood || 3) * (r.impact || 3)), 0) / openThen.length) * 10) / 10
+        : 0;
+      const criticalCount = openThen.filter(r => (r.likelihood || 3) * (r.impact || 3) >= 20).length;
+      const highCount = openThen.filter(r => { const s = (r.likelihood || 3) * (r.impact || 3); return s >= 12 && s < 20; }).length;
+      return {
+        month: format(monthDate, "MMM yy"),
+        avgScore,
+        openRisks: openThen.length,
+        critical: criticalCount,
+        high: highCount,
+      };
+    });
+  }, [risks]);
+
   if (loading) return (
     <div className="flex items-center justify-center h-64">
       <div className="w-8 h-8 border-4 border-primary/20 border-t-primary rounded-full animate-spin" />
@@ -115,6 +149,32 @@ export default function RiskHeatmap() {
             <p className="text-xs opacity-60 mt-0.5">{sub}</p>
           </div>
         ))}
+      </div>
+
+      {/* 6-month trend chart */}
+      <div className="bg-card rounded-xl border border-border p-6">
+        <div className="flex items-center gap-2 mb-1">
+          <TrendingUp className="w-4 h-4 text-primary" />
+          <h3 className="font-heading font-semibold text-foreground">Risk Profile Trend — Last 6 Months</h3>
+        </div>
+        <p className="text-xs text-muted-foreground mb-5">Average risk score and critical/high risk counts over time. A downward trend indicates an improving risk posture.</p>
+        <ResponsiveContainer width="100%" height={220}>
+          <LineChart data={trendData} margin={{ top: 4, right: 16, left: 0, bottom: 0 }}>
+            <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
+            <XAxis dataKey="month" tick={{ fontSize: 11, fill: "hsl(var(--muted-foreground))" }} axisLine={false} tickLine={false} />
+            <YAxis yAxisId="score" tick={{ fontSize: 11, fill: "hsl(var(--muted-foreground))" }} axisLine={false} tickLine={false} width={32} domain={[0, 25]} label={{ value: "Avg Score", angle: -90, position: "insideLeft", offset: 8, style: { fontSize: 10, fill: "hsl(var(--muted-foreground))" } }} />
+            <YAxis yAxisId="count" orientation="right" tick={{ fontSize: 11, fill: "hsl(var(--muted-foreground))" }} axisLine={false} tickLine={false} width={32} />
+            <Tooltip
+              contentStyle={{ background: "hsl(var(--card))", border: "1px solid hsl(var(--border))", borderRadius: 8, fontSize: 12 }}
+              labelStyle={{ fontWeight: 600, color: "hsl(var(--foreground))" }}
+            />
+            <Legend iconType="circle" wrapperStyle={{ fontSize: 11 }} />
+            <ReferenceLine yAxisId="score" y={12} stroke="#f97316" strokeDasharray="4 3" strokeOpacity={0.5} label={{ value: "High threshold", position: "insideTopRight", fontSize: 10, fill: "#f97316" }} />
+            <Line yAxisId="score" type="monotone" dataKey="avgScore" name="Avg Risk Score" stroke="#3b82f6" strokeWidth={2.5} dot={{ r: 4, fill: "#3b82f6" }} activeDot={{ r: 6 }} />
+            <Line yAxisId="count" type="monotone" dataKey="critical" name="Critical Risks" stroke="#ef4444" strokeWidth={2} dot={{ r: 3, fill: "#ef4444" }} strokeDasharray="5 3" />
+            <Line yAxisId="count" type="monotone" dataKey="high" name="High Risks" stroke="#f97316" strokeWidth={2} dot={{ r: 3, fill: "#f97316" }} strokeDasharray="5 3" />
+          </LineChart>
+        </ResponsiveContainer>
       </div>
 
       <div className="grid grid-cols-1 xl:grid-cols-3 gap-6">
