@@ -4,7 +4,7 @@ import { Link } from "react-router-dom";
 import {
   FileText, Download, RefreshCw, TrendingUp, TrendingDown,
   AlertTriangle, CheckCircle, Clock, Shield, Eye, Calendar,
-  ChevronRight, BarChart3, Target, Activity, FileDown
+  ChevronRight, BarChart3, Target, Activity, FileDown, Send
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -15,12 +15,14 @@ import { useTenant } from "@/lib/TenantContext";
 import { useRBAC } from "@/lib/useRBAC";
 import { useToast } from "@/components/ui/use-toast";
 import { generateManagementReport } from "@/lib/generateReport";
+import { sendReportToStakeholders } from "@/lib/reportEmailer";
 import moment from "moment";
 
 export default function ManagementReports() {
   const [reports, setReports] = useState([]);
   const [loading, setLoading] = useState(true);
   const [generating, setGenerating] = useState(false);
+  const [distributing, setDistributing] = useState({});
   const { tenant } = useTenant();
   const { can, role } = useRBAC();
   const { toast } = useToast();
@@ -45,6 +47,32 @@ export default function ManagementReports() {
       toast({ title: "Generation failed", description: "Could not generate the report. Try again.", variant: "destructive" });
     }
     setGenerating(false);
+  };
+
+  const distributeReport = async (report) => {
+    setDistributing(prev => ({ ...prev, [report.id]: true }));
+    try {
+      const schedules = await base44.entities.ReportSchedule.filter({ is_active: true });
+      if (!schedules || schedules.length === 0) {
+        toast({ title: "No active schedules", description: "Set up a distribution schedule in Scheduled Reports first.", variant: "destructive" });
+        setDistributing(prev => ({ ...prev, [report.id]: false }));
+        return;
+      }
+      let totalSent = 0;
+      for (const schedule of schedules) {
+        const { successCount } = await sendReportToStakeholders({ base44, schedule, reportData: report });
+        totalSent += successCount;
+        await base44.entities.ReportSchedule.update(schedule.id, {
+          last_sent_at: new Date().toISOString().slice(0, 10),
+          last_sent_status: "sent",
+          total_sent: (schedule.total_sent || 0) + successCount,
+        });
+      }
+      toast({ title: `Report distributed to ${totalSent} stakeholder${totalSent !== 1 ? "s" : ""}`, description: `Sent via ${schedules.length} active schedule${schedules.length !== 1 ? "s" : ""}.` });
+    } catch (e) {
+      toast({ title: "Distribution failed", description: e.message, variant: "destructive" });
+    }
+    setDistributing(prev => ({ ...prev, [report.id]: false }));
   };
 
   const exportReport = (report) => {
@@ -142,6 +170,11 @@ ${topRisks.length > 0 ? `<table><tr><th>Risk</th><th>Score</th><th>Status</th></
         subtitle="Monthly executive reports — activities, scores, risks, and recommendations"
         actions={
           <div className="flex gap-2">
+            <Button size="sm" variant="outline" asChild>
+              <Link to="/scheduled-reports">
+                <Calendar className="w-4 h-4 mr-1" /> Manage Schedules
+              </Link>
+            </Button>
             <Button size="sm" onClick={generateNow} disabled={generating}>
               <RefreshCw className={`w-4 h-4 mr-1 ${generating ? "animate-spin" : ""}`} />
               {generating ? "Generating..." : "Generate Now"}
@@ -178,9 +211,17 @@ ${topRisks.length > 0 ? `<table><tr><th>Risk</th><th>Score</th><th>Status</th></
                         </p>
                       </div>
                     </div>
-                    <Button size="sm" variant="outline" onClick={() => exportReport(report)}>
-                      <Download className="w-4 h-4 mr-1" /> Export
-                    </Button>
+                    <div className="flex items-center gap-2">
+                      <Button size="sm" variant="outline" onClick={() => exportReport(report)}>
+                        <Download className="w-4 h-4 mr-1" /> Export
+                      </Button>
+                      <Button size="sm" onClick={() => distributeReport(report)} disabled={distributing[report.id]}>
+                        {distributing[report.id]
+                          ? <RefreshCw className="w-4 h-4 mr-1 animate-spin" />
+                          : <Send className="w-4 h-4 mr-1" />}
+                        {distributing[report.id] ? "Sending..." : "Send to Stakeholders"}
+                      </Button>
+                    </div>
                   </div>
                 </CardHeader>
                 <CardContent>

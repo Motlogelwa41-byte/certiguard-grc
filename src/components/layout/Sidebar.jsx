@@ -30,7 +30,8 @@ import {
   Copy,
   SlidersHorizontal,
   Target,
-  Upload
+  Upload,
+  Send
 } from "lucide-react";
 import { base44 } from "@/api/base44Client";
 
@@ -60,6 +61,7 @@ const navItems = [
   { label: "Incidents", path: "/incidents", icon: ShieldAlert },
   { label: "Training", path: "/training", icon: GraduationCap },
   { label: "Mgmt Reports", path: "/management-reports", icon: BarChart3 },
+  { label: "Scheduled Reports", path: "/scheduled-reports", icon: Send },
   { label: "Calendar", path: "/calendar", icon: Calendar },
   { label: "Notifications", path: "/notifications", icon: Bell },
   { label: "Notif. Preferences", path: "/notification-preferences", icon: SlidersHorizontal },

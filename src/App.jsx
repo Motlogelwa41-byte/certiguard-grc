@@ -48,6 +48,7 @@ import RiskHeatmap from '@/pages/RiskHeatmap';
 import BulkEvidenceUploader from '@/pages/BulkEvidenceUploader';
 import PostureDashboard from '@/pages/PostureDashboard';
 import EvidenceReminders from '@/pages/EvidenceReminders';
+import ScheduledReports from '@/pages/ScheduledReports';
 
 const AuthenticatedApp = () => {
   const { isLoadingAuth, isLoadingPublicSettings, authError, navigateToLogin } = useAuth();
@@ -112,6 +113,7 @@ const AuthenticatedApp = () => {
           <Route path="/bulk-evidence" element={<BulkEvidenceUploader />} />
           <Route path="/posture" element={<PostureDashboard />} />
           <Route path="/evidence-reminders" element={<EvidenceReminders />} />
+          <Route path="/scheduled-reports" element={<ScheduledReports />} />
         </Route>
       </Route>
       <Route path="*" element={<PageNotFound />} />

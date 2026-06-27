@@ -1,0 +1,68 @@
+{
+  "name": "ReportSchedule",
+  "type": "object",
+  "properties": {
+    "name": {
+      "type": "string",
+      "description": "Schedule name, e.g. 'Monthly Board Report'"
+    },
+    "recipients": {
+      "type": "string",
+      "description": "Comma-separated list of stakeholder email addresses"
+    },
+    "frequency": {
+      "type": "string",
+      "enum": [
+        "manual",
+        "weekly",
+        "monthly"
+      ],
+      "default": "monthly"
+    },
+    "day_of_month": {
+      "type": "number",
+      "default": 1,
+      "description": "Day of month to send (1\u201328) for monthly schedules"
+    },
+    "include_sections": {
+      "type": "string",
+      "description": "JSON array of sections to include: compliance_score, risks, controls, tasks, frameworks, recommendations"
+    },
+    "subject_prefix": {
+      "type": "string",
+      "default": "Compliance Report"
+    },
+    "custom_message": {
+      "type": "string",
+      "description": "Optional message prepended to the email body"
+    },
+    "is_active": {
+      "type": "boolean",
+      "default": true
+    },
+    "last_sent_at": {
+      "type": "string",
+      "format": "date"
+    },
+    "last_sent_status": {
+      "type": "string",
+      "enum": [
+        "sent",
+        "failed",
+        "never"
+      ],
+      "default": "never"
+    },
+    "total_sent": {
+      "type": "number",
+      "default": 0
+    },
+    "created_by_name": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "name",
+    "recipients"
+  ]
+}
