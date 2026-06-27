@@ -32,7 +32,9 @@ import {
   Target,
   Upload,
   Send,
-  Globe
+  Globe,
+  Users2,
+  MapPin
 } from "lucide-react";
 import { base44 } from "@/api/base44Client";
 
@@ -71,6 +73,8 @@ const navItems = [
   { label: "Security", path: "/security", icon: ShieldCheck },
   { label: "Users", path: "/users", icon: Users },
   { label: "Tenants", path: "/tenant-admin", icon: Building2 },
+  { label: "SADC Frameworks", path: "/sadc-frameworks", icon: MapPin },
+  { label: "People Compliance", path: "/people", icon: Users2 },
   { label: "Trust Center", path: "/trust-center-settings", icon: Globe },
 ];
 
