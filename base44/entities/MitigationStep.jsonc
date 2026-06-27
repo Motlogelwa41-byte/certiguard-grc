@@ -1,0 +1,44 @@
+{
+  "name": "MitigationStep",
+  "type": "object",
+  "properties": {
+    "risk_id": {
+      "type": "string",
+      "description": "ID of the parent Risk entity"
+    },
+    "title": {
+      "type": "string",
+      "description": "Short description of the mitigation action"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "todo",
+        "in_progress",
+        "completed"
+      ],
+      "default": "todo"
+    },
+    "linked_control_id": {
+      "type": "string",
+      "description": "Optional: ID of the Control this step relates to"
+    },
+    "linked_control_name": {
+      "type": "string"
+    },
+    "due_date": {
+      "type": "string",
+      "format": "date"
+    },
+    "owner_name": {
+      "type": "string"
+    },
+    "notes": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "risk_id",
+    "title"
+  ]
+}
