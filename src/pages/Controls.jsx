@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
-import { FileCheck, Plus, Pencil, Trash2, Search, Download, Upload } from "lucide-react";
+import { FileCheck, Plus, Pencil, Trash2, Search, Download, Upload, Zap } from "lucide-react";
+import RemediationDialog from "@/components/controls/RemediationDialog";
 import { exportToCsv } from "@/lib/exportCsv";
 import BulkImportModal from "@/components/shared/BulkImportModal";
 import { Button } from "@/components/ui/button";
@@ -31,6 +32,7 @@ export default function Controls() {
   const [filterStatus, setFilterStatus] = useState("all");
   const [filterCategory, setFilterCategory] = useState("all");
   const [importOpen, setImportOpen] = useState(false);
+  const [remediationControl, setRemediationControl] = useState(null);
   const { toast } = useToast();
 
   const handleExport = () => exportToCsv(items, "controls", ["control_id", "title", "category", "status", "severity", "automation_status", "owner_name", "description"]);
@@ -172,6 +174,11 @@ export default function Controls() {
                     <td className="px-4 py-3 text-muted-foreground">{c.owner_name || "—"}</td>
                     <td className="px-4 py-3 text-right">
                       <div className="flex items-center justify-end gap-1">
+                        {c.status === "failing" && (
+                          <button onClick={() => setRemediationControl(c)} className="p-1.5 rounded hover:bg-amber-50 text-amber-600" title="Launch remediation loop">
+                            <Zap className="w-3.5 h-3.5" />
+                          </button>
+                        )}
                         <button onClick={() => handleEdit(c)} className="p-1.5 rounded hover:bg-muted"><Pencil className="w-3.5 h-3.5 text-muted-foreground" /></button>
                         <button onClick={() => handleDelete(c.id)} className="p-1.5 rounded hover:bg-muted"><Trash2 className="w-3.5 h-3.5 text-destructive" /></button>
                       </div>
@@ -185,6 +192,7 @@ export default function Controls() {
       )}
 
       <BulkImportModal open={importOpen} onOpenChange={setImportOpen} entityName="Control" columns={importColumns} sampleRows={importSampleRows} onSuccess={load} />
+      <RemediationDialog open={!!remediationControl} onOpenChange={v => { if (!v) setRemediationControl(null); }} control={remediationControl} onSuccess={load} />
 
       <Dialog open={open} onOpenChange={setOpen}>
         <DialogContent className="max-w-lg">

@@ -51,6 +51,7 @@ import EvidenceReminders from '@/pages/EvidenceReminders';
 import ScheduledReports from '@/pages/ScheduledReports';
 import AuditChecklist from '@/pages/AuditChecklist';
 import SADCFrameworks from '@/pages/SADCFrameworks';
+import AIControlMapper from '@/pages/AIControlMapper';
 import PeopleDashboard from '@/pages/PeopleDashboard';
 import TrustCenterSettings from '@/pages/TrustCenterSettings';
 import TrustCenterPublic from '@/pages/TrustCenterPublic';
@@ -123,6 +124,7 @@ const AuthenticatedApp = () => {
           <Route path="/audit-checklists" element={<AuditChecklist />} />
           <Route path="/trust-center-settings" element={<TrustCenterSettings />} />
           <Route path="/sadc-frameworks" element={<SADCFrameworks />} />
+          <Route path="/ai-control-mapper" element={<AIControlMapper />} />
           <Route path="/people" element={<PeopleDashboard />} />
         </Route>
       </Route>

@@ -34,7 +34,8 @@ import {
   Send,
   Globe,
   Users2,
-  MapPin
+  MapPin,
+  Zap
 } from "lucide-react";
 import { base44 } from "@/api/base44Client";
 
@@ -58,6 +59,7 @@ const navItems = [
   { label: "Task Reminders", path: "/task-reminders", icon: Bell },
   { label: "Gap Analysis", path: "/gap-analysis", icon: FileSearch },
   { label: "AI Auditor", path: "/ai-auditor", icon: Brain },
+  { label: "AI Control Mapper", path: "/ai-control-mapper", icon: Zap },
   { label: "Compliance Runs", path: "/compliance-runs", icon: Play },
   { label: "ROPA", path: "/ropa", icon: FileSpreadsheet },
   { label: "Reports", path: "/reports", icon: FileDown },
