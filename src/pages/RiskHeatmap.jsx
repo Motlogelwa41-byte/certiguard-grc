@@ -4,6 +4,7 @@ import { AlertTriangle, TrendingUp, Shield, Target, Filter } from "lucide-react"
 import PageHeader from "@/components/shared/PageHeader";
 import StatusBadge from "@/components/shared/StatusBadge";
 import EmptyState from "@/components/shared/EmptyState";
+import RiskDetailPanel from "@/components/risks/RiskDetailPanel";
 
 const ZONE_COLOR = (likelihood, impact) => {
   const score = likelihood * impact;
@@ -33,6 +34,7 @@ export default function RiskHeatmap() {
   const [loading, setLoading] = useState(true);
   const [selectedCell, setSelectedCell] = useState(null); // {likelihood, impact}
   const [selectedRisk, setSelectedRisk] = useState(null);
+  const [panelRisk, setPanelRisk] = useState(null);
   const [filterStatus, setFilterStatus] = useState("all");
   const [filterCategory, setFilterCategory] = useState("all");
   const [hoveredCell, setHoveredCell] = useState(null);
@@ -75,7 +77,7 @@ export default function RiskHeatmap() {
   );
 
   return (
-    <div className="space-y-6">
+    <><div className="space-y-6">
       <PageHeader
         title="Risk Heatmap"
         subtitle="Interactive plot of identified risks by likelihood and impact"
@@ -227,7 +229,7 @@ export default function RiskHeatmap() {
                 {cellRisks.length === 0 ? (
                   <p className="text-sm text-muted-foreground text-center py-8">No risks in this cell</p>
                 ) : cellRisks.map(r => (
-                  <div key={r.id} onClick={() => setSelectedRisk(selectedRisk?.id === r.id ? null : r)}
+                  <div key={r.id} onClick={() => setPanelRisk(r)}
                     className="p-4 cursor-pointer hover:bg-muted/20 transition-colors">
                     <div className="flex items-start justify-between gap-2">
                       <div>
@@ -244,15 +246,6 @@ export default function RiskHeatmap() {
                         {(r.category || "").replace(/_/g, " ")}
                       </span>
                     </div>
-                    {selectedRisk?.id === r.id && (
-                      <div className="mt-3 pt-3 border-t border-border space-y-1.5 text-xs text-muted-foreground">
-                        {r.description && <p>{r.description}</p>}
-                        {r.owner_name && <p>👤 Owner: <span className="text-foreground">{r.owner_name}</span></p>}
-                        {r.treatment && <p>🛡 Treatment: <span className="text-foreground capitalize">{r.treatment}</span></p>}
-                        {r.mitigation_plan && <p>📋 Plan: <span className="text-foreground">{r.mitigation_plan}</span></p>}
-                        {r.due_date && <p>📅 Due: <span className="text-foreground">{r.due_date}</span></p>}
-                      </div>
-                    )}
                   </div>
                 ))}
               </div>
@@ -338,7 +331,7 @@ export default function RiskHeatmap() {
               {[...filtered].sort((a, b) => (b.likelihood * b.impact) - (a.likelihood * a.impact)).map(r => {
                 const score = r.likelihood * r.impact;
                 return (
-                  <tr key={r.id} className="border-t border-border hover:bg-muted/20 cursor-pointer" onClick={() => setSelectedCell({ likelihood: r.likelihood, impact: r.impact })}>
+                  <tr key={r.id} className="border-t border-border hover:bg-muted/20 cursor-pointer" onClick={() => setPanelRisk(r)}>
                     <td className="px-4 py-2.5">
                       <span className={`inline-flex items-center justify-center w-8 h-8 rounded-lg text-xs font-bold ${SCORE_BG(score)}`}>{score}</span>
                     </td>
@@ -359,5 +352,7 @@ export default function RiskHeatmap() {
         </div>
       </div>
     </div>
+    <RiskDetailPanel risk={panelRisk} onClose={() => setPanelRisk(null)} />
+  </>
   );
 }
