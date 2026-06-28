@@ -18,7 +18,7 @@ import { useAuth } from "@/lib/AuthContext";
 import RiskCardDetail from "@/components/risks/RiskCardDetail";
 
 const riskCategories = ["operational","technical","compliance","financial","strategic","reputational","third_party"];
-const defaultForm = { risk_id: "", title: "", description: "", category: "operational", likelihood: 3, impact: 3, status: "open", treatment: "mitigate", owner_name: "", mitigation_plan: "", due_date: "", related_control_ids: [] };
+const defaultForm = { risk_id: "", title: "", description: "", category: "operational", likelihood: 3, impact: 3, status: "open", treatment: "mitigate", owner_name: "", mitigation_plan: "", due_date: "", related_control_ids: [], tolerance_justification: "" };
 
 export default function Risks() {
   const { user } = useAuth();
@@ -77,7 +77,7 @@ export default function Risks() {
   };
 
   const handleEdit = (item) => {
-    setForm({ risk_id: item.risk_id || "", title: item.title || "", description: item.description || "", category: item.category || "operational", likelihood: item.likelihood || 3, impact: item.impact || 3, status: item.status || "open", treatment: item.treatment || "mitigate", owner_name: item.owner_name || "", mitigation_plan: item.mitigation_plan || "", due_date: item.due_date || "", related_control_ids: item.related_control_ids || [] });
+    setForm({ risk_id: item.risk_id || "", title: item.title || "", description: item.description || "", category: item.category || "operational", likelihood: item.likelihood || 3, impact: item.impact || 3, status: item.status || "open", treatment: item.treatment || "mitigate", owner_name: item.owner_name || "", mitigation_plan: item.mitigation_plan || "", due_date: item.due_date || "", related_control_ids: item.related_control_ids || [], tolerance_justification: item.tolerance_justification || "" });
     setEditId(item.id); setOpen(true);
   };
 
@@ -225,6 +225,15 @@ export default function Risks() {
             <div><Label>Due Date</Label><Input type="date" value={form.due_date} onChange={(e) => setForm({ ...form, due_date: e.target.value })} /></div>
             <div><Label>Description</Label><Textarea value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })} rows={3} /></div>
             <div><Label>Mitigation Plan</Label><Textarea value={form.mitigation_plan} onChange={(e) => setForm({ ...form, mitigation_plan: e.target.value })} rows={3} /></div>
+            <div>
+              <Label>Tolerance Justification</Label>
+              <Textarea
+                value={form.tolerance_justification || ""}
+                onChange={(e) => setForm({ ...form, tolerance_justification: e.target.value })}
+                rows={2}
+                placeholder="Required if risk exceeds company tolerance — explain why it's accepted..."
+              />
+            </div>
             {controls.length > 0 && (
               <div>
                 <Label>Linked Controls (Mitigating)</Label>

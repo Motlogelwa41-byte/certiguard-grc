@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
-import { FileText, Plus, Pencil, Trash2, Search, Eye, CheckSquare, Download, Upload } from "lucide-react";
+import { FileText, Plus, Pencil, Trash2, Search, Eye, CheckSquare, Download, Upload, PenLine, History, Send, AlertCircle } from "lucide-react";
 import { exportToCsv } from "@/lib/exportCsv";
 import BulkImportModal from "@/components/shared/BulkImportModal";
 import { Link } from "react-router-dom";
@@ -15,9 +15,20 @@ import PageHeader from "@/components/shared/PageHeader";
 import StatusBadge from "@/components/shared/StatusBadge";
 import EmptyState from "@/components/shared/EmptyState";
 import { useToast } from "@/components/ui/use-toast";
+import PolicyApprovalDialog from "@/components/policies/PolicyApprovalDialog";
+import PolicyVersionHistory from "@/components/policies/PolicyVersionHistory";
 
 const policyCategories = ["information_security","data_privacy","acceptable_use","access_control","incident_response","business_continuity","change_management","vendor_management","human_resources","physical_security"];
 const defaultForm = { title: "", description: "", content: "", category: "information_security", status: "draft", version: "1.0", owner_name: "", acknowledgment_required: true, next_review_date: "" };
+
+const APPROVAL_STATUS_COLORS = {
+  draft: "text-slate-500",
+  in_review: "text-amber-600",
+  pending_approval: "text-blue-600",
+  approved: "text-emerald-600",
+  rejected: "text-red-600",
+  archived: "text-slate-400",
+};
 
 export default function Policies() {
   const [items, setItems] = useState([]);
@@ -29,6 +40,8 @@ export default function Policies() {
   const [editId, setEditId] = useState(null);
   const [search, setSearch] = useState("");
   const [importOpen, setImportOpen] = useState(false);
+  const [approvalPolicy, setApprovalPolicy] = useState(null);
+  const [historyPolicy, setHistoryPolicy] = useState(null);
   const { toast } = useToast();
 
   const handleExport = () => exportToCsv(items, "policies", ["title", "category", "status", "version", "owner_name", "next_review_date"]);
@@ -67,6 +80,15 @@ export default function Policies() {
 
   const handleDelete = async (id) => { await base44.entities.Policy.delete(id); load(); toast({ title: "Policy deleted" }); };
 
+  const getApprovalProgress = (policy) => {
+    try {
+      const steps = JSON.parse(policy.approval_workflow || "[]");
+      if (steps.length === 0) return null;
+      const approved = steps.filter(s => s.status === "approved").length;
+      return { approved, total: steps.length };
+    } catch { return null; }
+  };
+
   const filtered = items.filter((p) => !search || p.title?.toLowerCase().includes(search.toLowerCase()));
 
   if (loading) return <div className="flex items-center justify-center h-64"><div className="w-8 h-8 border-4 border-primary/20 border-t-primary rounded-full animate-spin" /></div>;
@@ -99,30 +121,61 @@ export default function Policies() {
         <EmptyState icon={FileText} title="No policies yet" description="Create policies to define your organization's compliance posture." actionLabel="Add Policy" onAction={() => setOpen(true)} />
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-          {filtered.map((p) => (
-            <div key={p.id} className="bg-card rounded-xl border border-border p-5 flex flex-col gap-3">
-              <div className="flex items-start justify-between">
-                <div>
-                  <h3 className="font-heading font-semibold text-foreground text-sm">{p.title}</h3>
-                  <p className="text-xs text-muted-foreground capitalize mt-0.5">{(p.category || "").replace(/_/g, " ")}</p>
+          {filtered.map((p) => {
+            const progress = getApprovalProgress(p);
+            const isRejected = p.status === "rejected";
+            return (
+              <div key={p.id} className={`bg-card rounded-xl border p-5 flex flex-col gap-3 ${isRejected ? "border-red-300 dark:border-red-800" : "border-border"}`}>
+                <div className="flex items-start justify-between">
+                  <div>
+                    <h3 className="font-heading font-semibold text-foreground text-sm">{p.title}</h3>
+                    <p className="text-xs text-muted-foreground capitalize mt-0.5">{(p.category || "").replace(/_/g, " ")}</p>
+                  </div>
+                  <StatusBadge status={p.status} />
                 </div>
-                <StatusBadge status={p.status} />
-              </div>
-              {p.description && <p className="text-xs text-muted-foreground line-clamp-2">{p.description}</p>}
-              <div className="grid grid-cols-2 gap-2 text-xs">
-                <div><span className="text-muted-foreground">Version: </span><span className="font-semibold">{p.version || "1.0"}</span></div>
-                <div><span className="text-muted-foreground">Owner: </span><span className="font-semibold">{p.owner_name || "—"}</span></div>
-              </div>
-              <div className="flex items-center justify-between text-xs pt-2 border-t border-border">
-                <span className="text-muted-foreground">{p.acknowledgment_required ? "Ack required" : "No ack needed"}</span>
-                <div className="flex items-center gap-1">
-                  <button onClick={() => { setViewPolicy(p); setViewOpen(true); }} className="p-1 rounded hover:bg-muted"><Eye className="w-3.5 h-3.5 text-muted-foreground" /></button>
-                  <button onClick={() => handleEdit(p)} className="p-1 rounded hover:bg-muted"><Pencil className="w-3.5 h-3.5 text-muted-foreground" /></button>
-                  <button onClick={() => handleDelete(p.id)} className="p-1 rounded hover:bg-muted text-destructive"><Trash2 className="w-3.5 h-3.5" /></button>
+
+                {isRejected && p.rejection_reason && (
+                  <div className="flex items-start gap-1.5 p-2 bg-red-50 dark:bg-red-900/20 rounded text-xs text-red-700">
+                    <AlertCircle className="w-3.5 h-3.5 shrink-0 mt-0.5" /> {p.rejection_reason}
+                  </div>
+                )}
+
+                {p.description && <p className="text-xs text-muted-foreground line-clamp-2">{p.description}</p>}
+
+                <div className="grid grid-cols-2 gap-2 text-xs">
+                  <div><span className="text-muted-foreground">Version: </span><span className="font-semibold">v{p.version || "1.0"}</span></div>
+                  <div><span className="text-muted-foreground">Owner: </span><span className="font-semibold">{p.owner_name || "—"}</span></div>
+                </div>
+
+                {/* Approval progress */}
+                {progress && (
+                  <div className="space-y-1">
+                    <div className="flex items-center justify-between text-xs">
+                      <span className="text-muted-foreground">Approval progress</span>
+                      <span className={`font-semibold ${APPROVAL_STATUS_COLORS[p.status] || ""}`}>{progress.approved}/{progress.total} signed</span>
+                    </div>
+                    <div className="h-1.5 bg-muted rounded-full overflow-hidden">
+                      <div
+                        className={`h-full rounded-full transition-all ${p.status === "rejected" ? "bg-red-500" : p.status === "approved" ? "bg-emerald-500" : "bg-blue-500"}`}
+                        style={{ width: `${Math.round((progress.approved / progress.total) * 100)}%` }}
+                      />
+                    </div>
+                  </div>
+                )}
+
+                <div className="flex items-center justify-between text-xs pt-2 border-t border-border">
+                  <span className="text-muted-foreground">{p.acknowledgment_required ? "Ack required" : "No ack needed"}</span>
+                  <div className="flex items-center gap-1">
+                    <button onClick={() => { setViewPolicy(p); setViewOpen(true); }} className="p-1 rounded hover:bg-muted" title="View"><Eye className="w-3.5 h-3.5 text-muted-foreground" /></button>
+                    <button onClick={() => { setHistoryPolicy(p); }} className="p-1 rounded hover:bg-muted" title="Version History"><History className="w-3.5 h-3.5 text-muted-foreground" /></button>
+                    <button onClick={() => { setApprovalPolicy(p); }} className="p-1 rounded hover:bg-muted" title="Approval Workflow"><PenLine className="w-3.5 h-3.5 text-blue-500" /></button>
+                    <button onClick={() => handleEdit(p)} className="p-1 rounded hover:bg-muted" title="Edit"><Pencil className="w-3.5 h-3.5 text-muted-foreground" /></button>
+                    <button onClick={() => handleDelete(p.id)} className="p-1 rounded hover:bg-muted text-destructive" title="Delete"><Trash2 className="w-3.5 h-3.5" /></button>
+                  </div>
                 </div>
               </div>
-            </div>
-          ))}
+            );
+          })}
         </div>
       )}
 
@@ -138,6 +191,7 @@ export default function Policies() {
                 <StatusBadge status={viewPolicy.status} />
                 <span className="text-xs text-muted-foreground">v{viewPolicy.version || "1.0"}</span>
                 <span className="text-xs text-muted-foreground capitalize">{(viewPolicy.category || "").replace(/_/g, " ")}</span>
+                {viewPolicy.approved_by && <span className="text-xs text-emerald-600">✓ Approved by {viewPolicy.approved_by}</span>}
               </div>
               {viewPolicy.description && <p className="text-sm text-muted-foreground">{viewPolicy.description}</p>}
               {viewPolicy.content && <div className="bg-muted/50 rounded-lg p-4 text-sm whitespace-pre-wrap max-h-96 overflow-y-auto">{viewPolicy.content}</div>}
@@ -165,7 +219,9 @@ export default function Policies() {
                   <SelectContent>
                     <SelectItem value="draft">Draft</SelectItem>
                     <SelectItem value="in_review">In Review</SelectItem>
+                    <SelectItem value="pending_approval">Pending Approval</SelectItem>
                     <SelectItem value="approved">Approved</SelectItem>
+                    <SelectItem value="rejected">Rejected</SelectItem>
                     <SelectItem value="archived">Archived</SelectItem>
                   </SelectContent>
                 </Select>
@@ -186,6 +242,26 @@ export default function Policies() {
           </div>
         </DialogContent>
       </Dialog>
+
+      {/* Approval Workflow Dialog */}
+      {approvalPolicy && (
+        <PolicyApprovalDialog
+          policy={approvalPolicy}
+          open={!!approvalPolicy}
+          onOpenChange={(v) => { if (!v) setApprovalPolicy(null); }}
+          onUpdated={() => { load(); setApprovalPolicy(null); }}
+        />
+      )}
+
+      {/* Version History Dialog */}
+      {historyPolicy && (
+        <PolicyVersionHistory
+          policy={historyPolicy}
+          open={!!historyPolicy}
+          onOpenChange={(v) => { if (!v) setHistoryPolicy(null); }}
+          onUpdated={() => { load(); setHistoryPolicy(null); }}
+        />
+      )}
     </div>
   );
 }

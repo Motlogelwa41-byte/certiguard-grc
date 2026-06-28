@@ -33,7 +33,9 @@
       "enum": [
         "draft",
         "in_review",
+        "pending_approval",
         "approved",
+        "rejected",
         "archived"
       ],
       "default": "draft"
@@ -72,6 +74,23 @@
     "acknowledgment_count": {
       "type": "number",
       "default": 0
+    },
+    "approval_workflow": {
+      "type": "string",
+      "description": "JSON array of approval steps: [{step, approver_name, approver_email, status, signed_at, signature, comments}]"
+    },
+    "version_history": {
+      "type": "string",
+      "description": "JSON array of past versions: [{version, content, changed_by, changed_at, change_notes}]"
+    },
+    "rejection_reason": {
+      "type": "string"
+    },
+    "submitted_for_review_at": {
+      "type": "string"
+    },
+    "submitted_by": {
+      "type": "string"
     }
   },
   "required": [

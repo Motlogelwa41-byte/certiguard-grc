@@ -97,6 +97,40 @@
     "residual_impact": {
       "type": "number",
       "default": 1
+    },
+    "appetite_band": {
+      "type": "string",
+      "enum": [
+        "within_appetite",
+        "tolerance_zone",
+        "above_appetite",
+        "unacceptable"
+      ],
+      "description": "Auto-classified band based on risk score vs company thresholds"
+    },
+    "exceeds_tolerance": {
+      "type": "boolean",
+      "default": false,
+      "description": "Flagged when risk score exceeds the company tolerance threshold"
+    },
+    "tolerance_justification": {
+      "type": "string",
+      "description": "Reason accepted if risk exceeds tolerance (required for accepted treatment)"
+    },
+    "appetite_override": {
+      "type": "boolean",
+      "default": false,
+      "description": "Manually override appetite classification"
+    },
+    "appetite_override_band": {
+      "type": "string",
+      "enum": [
+        "within_appetite",
+        "tolerance_zone",
+        "above_appetite",
+        "unacceptable"
+      ],
+      "description": "Manual override band if appetite_override is true"
     }
   },
   "required": [
