@@ -58,6 +58,8 @@ import TrustCenterPublic from '@/pages/TrustCenterPublic';
 import SecurityPosture from '@/pages/SecurityPosture';
 import AIHub from '@/pages/AIHub';
 import AuditFindings from '@/pages/AuditFindings';
+import IncidentCommand from '@/pages/IncidentCommand';
+import RiskAppetiteHeatmap from '@/pages/RiskAppetiteHeatmap';
 
 const AuthenticatedApp = () => {
   const { isLoadingAuth, isLoadingPublicSettings, authError, navigateToLogin } = useAuth();
@@ -132,6 +134,8 @@ const AuthenticatedApp = () => {
           <Route path="/security-posture" element={<SecurityPosture />} />
           <Route path="/ai-hub" element={<AIHub />} />
           <Route path="/audit-findings" element={<AuditFindings />} />
+          <Route path="/incident-command" element={<IncidentCommand />} />
+          <Route path="/risk-appetite-heatmap" element={<RiskAppetiteHeatmap />} />
         </Route>
       </Route>
       <Route path="*" element={<PageNotFound />} />

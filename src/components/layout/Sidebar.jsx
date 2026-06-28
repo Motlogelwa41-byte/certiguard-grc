@@ -69,6 +69,7 @@ const navSections = [
     items: [
       { label: "Risk Register", path: "/risks", icon: AlertTriangle },
       { label: "Risk Heatmap", path: "/risk-heatmap", icon: Target },
+      { label: "Appetite Heatmap", path: "/risk-appetite-heatmap", icon: Target },
     ]
   },
   {
@@ -97,6 +98,7 @@ const navSections = [
       { label: "Task Reminders", path: "/task-reminders", icon: Bell },
       { label: "Calendar", path: "/calendar", icon: Calendar },
       { label: "Incidents", path: "/incidents", icon: ShieldAlert },
+      { label: "Incident Command", path: "/incident-command", icon: AlertTriangle },
       { label: "Training", path: "/training", icon: GraduationCap },
     ]
   },
