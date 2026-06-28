@@ -2,19 +2,22 @@ import React, { useState, useEffect, useMemo } from "react";
 import { base44 } from "@/api/base44Client";
 import {
   Mail, RefreshCw, CheckCircle, AlertTriangle, Clock,
-  Send, Filter, Search, Bell, FileX, Eye
+  Send, Search, Bell, FileX, Eye, CalendarClock
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Badge } from "@/components/ui/badge";
 import PageHeader from "@/components/shared/PageHeader";
 import { useToast } from "@/components/ui/use-toast";
-import { formatDistanceToNow, isPast, parseISO, differenceInDays } from "date-fns";
+import { isPast, parseISO, differenceInDays, addDays } from "date-fns";
+
+// Days ahead threshold for "expiring soon" detection
+const EXPIRY_WARNING_DAYS = 30;
 
 const STATUS_CONFIG = {
-  pending_review: { label: "Pending Review", color: "bg-amber-100 text-amber-700", icon: Clock, urgent: false },
-  rejected:       { label: "Rejected",       color: "bg-red-100 text-red-700",    icon: FileX, urgent: true },
-  expired:        { label: "Expired",         color: "bg-red-100 text-red-700",    icon: AlertTriangle, urgent: true },
+  pending_review:  { label: "Pending Review",  color: "bg-amber-100 text-amber-700",  icon: Clock,         urgent: false },
+  rejected:        { label: "Rejected",         color: "bg-red-100 text-red-700",      icon: FileX,         urgent: true  },
+  expired:         { label: "Expired",          color: "bg-red-100 text-red-700",      icon: AlertTriangle, urgent: true  },
+  expiring_soon:   { label: "Expiring Soon",    color: "bg-orange-100 text-orange-700",icon: CalendarClock, urgent: true  },
 };
 
 export default function EvidenceReminders() {
@@ -30,10 +33,25 @@ export default function EvidenceReminders() {
   const load = async () => {
     setLoading(true);
     const all = await base44.entities.Evidence.list("-created_date", 500);
-    // Only show items that need attention
-    const actionable = all.filter(e =>
-      e.status === "pending_review" || e.status === "rejected" || e.status === "expired"
-    );
+    const today = new Date();
+    const warningDate = addDays(today, EXPIRY_WARNING_DAYS);
+
+    // Build actionable list: expired/rejected/pending + upcoming expiry on approved items
+    const actionable = all
+      .filter(e =>
+        e.status === "pending_review" ||
+        e.status === "rejected" ||
+        e.status === "expired" ||
+        (e.status === "approved" && e.expiry_date && parseISO(e.expiry_date) <= warningDate)
+      )
+      .map(e => {
+        // Tag approved-but-expiring items
+        if (e.status === "approved" && e.expiry_date && parseISO(e.expiry_date) <= warningDate) {
+          return { ...e, _displayStatus: "expiring_soon" };
+        }
+        return { ...e, _displayStatus: e.status };
+      });
+
     setEvidence(actionable);
     setLoading(false);
   };
@@ -46,13 +64,13 @@ export default function EvidenceReminders() {
         e.title?.toLowerCase().includes(search.toLowerCase()) ||
         e.reviewer_name?.toLowerCase().includes(search.toLowerCase()) ||
         e.control_title?.toLowerCase().includes(search.toLowerCase());
-      const matchStatus = filterStatus === "all" || e.status === filterStatus;
+      const matchStatus = filterStatus === "all" || e._displayStatus === filterStatus;
       return matchSearch && matchStatus;
     });
   }, [evidence, search, filterStatus]);
 
   const urgentCount = useMemo(() =>
-    evidence.filter(e => e.status === "expired" || e.status === "rejected").length,
+    evidence.filter(e => e.status === "expired" || e.status === "rejected" || e._displayStatus === "expiring_soon").length,
     [evidence]
   );
 
@@ -69,10 +87,12 @@ export default function EvidenceReminders() {
 
     setSending(prev => ({ ...prev, [item.id]: true }));
 
-    const statusLabel = STATUS_CONFIG[item.status]?.label || item.status;
-    const urgency = item.status === "expired" ? "URGENT: " : item.status === "rejected" ? "ACTION REQUIRED: " : "";
+    const displayStatus = item._displayStatus || item.status;
+    const statusLabel = STATUS_CONFIG[displayStatus]?.label || displayStatus;
+    const urgency = displayStatus === "expired" ? "URGENT: " : (displayStatus === "rejected" || displayStatus === "expiring_soon") ? "ACTION REQUIRED: " : "";
+    const daysLeft = item.expiry_date ? differenceInDays(parseISO(item.expiry_date), new Date()) : null;
     const expiryNote = item.expiry_date
-      ? `\n\nNote: This evidence ${isPast(parseISO(item.expiry_date)) ? "expired" : "expires"} on ${item.expiry_date}.`
+      ? `\n\nNote: This evidence ${isPast(parseISO(item.expiry_date)) ? "expired" : `expires in ${daysLeft} day${daysLeft !== 1 ? "s" : ""}`} on ${item.expiry_date}.`
       : "";
 
     await base44.integrations.Core.SendEmail({
@@ -88,10 +108,12 @@ This is an automated reminder regarding the following compliance evidence item t
 📌 Current Status: ${statusLabel}
 📅 Collected: ${item.collected_date || "Not recorded"}${expiryNote}
 
-${item.status === "pending_review"
+${displayStatus === "pending_review"
   ? "This evidence is awaiting your review. Please log in to ComplianceOS to review and approve or reject it."
-  : item.status === "rejected"
+  : displayStatus === "rejected"
   ? "This evidence was previously rejected. Please resubmit updated documentation as soon as possible."
+  : displayStatus === "expiring_soon"
+  ? `This evidence is expiring in ${daysLeft} day${daysLeft !== 1 ? "s" : ""}. Please renew it before it expires to maintain continuous compliance coverage.`
   : "This evidence has expired and needs to be renewed. Please collect and upload current documentation immediately."}
 
 ${item.notes ? `\nNotes: ${item.notes}` : ""}
@@ -153,32 +175,41 @@ ComplianceOS Automated Notification System
       />
 
       {/* Summary cards */}
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-        <div className="bg-card rounded-xl border border-border p-4 flex items-center gap-4">
-          <div className="w-10 h-10 rounded-lg bg-amber-100 flex items-center justify-center">
-            <Clock className="w-5 h-5 text-amber-600" />
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+        <div className="bg-card rounded-xl border border-border p-4 flex items-center gap-3">
+          <div className="w-9 h-9 rounded-lg bg-amber-100 flex items-center justify-center shrink-0">
+            <Clock className="w-4 h-4 text-amber-600" />
           </div>
           <div>
-            <p className="text-2xl font-bold text-foreground">{evidence.filter(e => e.status === "pending_review").length}</p>
-            <p className="text-sm text-muted-foreground">Pending Review</p>
+            <p className="text-2xl font-bold text-foreground">{evidence.filter(e => e._displayStatus === "pending_review").length}</p>
+            <p className="text-xs text-muted-foreground">Pending Review</p>
           </div>
         </div>
-        <div className="bg-card rounded-xl border border-border p-4 flex items-center gap-4">
-          <div className="w-10 h-10 rounded-lg bg-red-100 flex items-center justify-center">
-            <AlertTriangle className="w-5 h-5 text-red-600" />
+        <div className="bg-card rounded-xl border border-border p-4 flex items-center gap-3">
+          <div className="w-9 h-9 rounded-lg bg-orange-100 flex items-center justify-center shrink-0">
+            <CalendarClock className="w-4 h-4 text-orange-600" />
           </div>
           <div>
-            <p className="text-2xl font-bold text-foreground">{evidence.filter(e => e.status === "expired").length}</p>
-            <p className="text-sm text-muted-foreground">Expired</p>
+            <p className="text-2xl font-bold text-foreground">{evidence.filter(e => e._displayStatus === "expiring_soon").length}</p>
+            <p className="text-xs text-muted-foreground">Expiring Soon</p>
           </div>
         </div>
-        <div className="bg-card rounded-xl border border-border p-4 flex items-center gap-4">
-          <div className="w-10 h-10 rounded-lg bg-red-100 flex items-center justify-center">
-            <FileX className="w-5 h-5 text-red-600" />
+        <div className="bg-card rounded-xl border border-border p-4 flex items-center gap-3">
+          <div className="w-9 h-9 rounded-lg bg-red-100 flex items-center justify-center shrink-0">
+            <AlertTriangle className="w-4 h-4 text-red-600" />
           </div>
           <div>
-            <p className="text-2xl font-bold text-foreground">{evidence.filter(e => e.status === "rejected").length}</p>
-            <p className="text-sm text-muted-foreground">Rejected</p>
+            <p className="text-2xl font-bold text-foreground">{evidence.filter(e => e._displayStatus === "expired").length}</p>
+            <p className="text-xs text-muted-foreground">Expired</p>
+          </div>
+        </div>
+        <div className="bg-card rounded-xl border border-border p-4 flex items-center gap-3">
+          <div className="w-9 h-9 rounded-lg bg-red-100 flex items-center justify-center shrink-0">
+            <FileX className="w-4 h-4 text-red-600" />
+          </div>
+          <div>
+            <p className="text-2xl font-bold text-foreground">{evidence.filter(e => e._displayStatus === "rejected").length}</p>
+            <p className="text-xs text-muted-foreground">Rejected</p>
           </div>
         </div>
       </div>
@@ -204,7 +235,7 @@ ComplianceOS Automated Notification System
           />
         </div>
         <div className="flex items-center gap-2">
-          {["all", "pending_review", "expired", "rejected"].map(s => (
+          {["all", "pending_review", "expiring_soon", "expired", "rejected"].map(s => (
             <button
               key={s}
               onClick={() => setFilterStatus(s)}
@@ -242,11 +273,12 @@ ComplianceOS Automated Notification System
             </thead>
             <tbody>
               {filtered.map(item => {
-                const cfg = STATUS_CONFIG[item.status] || {};
+                const cfg = STATUS_CONFIG[item._displayStatus || item.status] || {};
                 const StatusIcon = cfg.icon || Clock;
                 const alreadySent = sentLog[item.id];
                 const hasEmail = item.reviewer_name?.includes("@");
                 const isExpired = item.expiry_date && isPast(parseISO(item.expiry_date));
+                const daysToExpiry = item.expiry_date ? differenceInDays(parseISO(item.expiry_date), new Date()) : null;
 
                 return (
                   <tr key={item.id} className={`border-b border-border last:border-0 hover:bg-muted/20 transition-colors ${cfg.urgent ? "bg-red-50/30" : ""}`}>
@@ -288,8 +320,8 @@ ComplianceOS Automated Notification System
                     </td>
                     <td className="px-4 py-3 hidden lg:table-cell text-sm">
                       {item.expiry_date ? (
-                        <span className={isExpired ? "text-red-600 font-medium" : "text-muted-foreground"}>
-                          {isExpired ? "⚠ " : ""}{item.expiry_date}
+                        <span className={isExpired ? "text-red-600 font-medium" : daysToExpiry <= EXPIRY_WARNING_DAYS ? "text-orange-600 font-medium" : "text-muted-foreground"}>
+                          {isExpired ? "⚠ Expired" : daysToExpiry !== null ? `${daysToExpiry}d left` : item.expiry_date}
                         </span>
                       ) : <span className="text-muted-foreground/50">—</span>}
                     </td>
@@ -326,7 +358,7 @@ ComplianceOS Automated Notification System
       )}
 
       <p className="text-xs text-muted-foreground">
-        💡 Tip: Add an email address to the <strong>Reviewer</strong> field of each evidence record to enable automated reminders.
+        💡 Tip: Add an email address to the <strong>Reviewer</strong> field of each evidence record to enable automated reminders. Evidence expiring within <strong>{EXPIRY_WARNING_DAYS} days</strong> is automatically flagged.
       </p>
     </div>
   );

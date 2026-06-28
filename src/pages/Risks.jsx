@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
-import { AlertTriangle, Plus, Pencil, Trash2, Search, Download, Upload } from "lucide-react";
+import { AlertTriangle, Plus, Search, Download, Upload } from "lucide-react";
 import { exportToCsv } from "@/lib/exportCsv";
 import BulkImportModal from "@/components/shared/BulkImportModal";
 import { Button } from "@/components/ui/button";
@@ -10,11 +10,11 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 import PageHeader from "@/components/shared/PageHeader";
-import StatusBadge from "@/components/shared/StatusBadge";
 import EmptyState from "@/components/shared/EmptyState";
 import { useToast } from "@/components/ui/use-toast";
 import { logAuditTrail } from "@/lib/auditLogger";
 import { useAuth } from "@/lib/AuthContext";
+import RiskCardDetail from "@/components/risks/RiskCardDetail";
 
 const riskCategories = ["operational","technical","compliance","financial","strategic","reputational","third_party"];
 const defaultForm = { risk_id: "", title: "", description: "", category: "operational", likelihood: 3, impact: 3, status: "open", treatment: "mitigate", owner_name: "", mitigation_plan: "", due_date: "", related_control_ids: [] };
@@ -98,13 +98,6 @@ export default function Risks() {
     return matchSearch && matchStatus;
   });
 
-  const getRiskColor = (score) => {
-    if (score >= 20) return "bg-red-500";
-    if (score >= 12) return "bg-orange-500";
-    if (score >= 6) return "bg-amber-500";
-    return "bg-emerald-500";
-  };
-
   if (loading) return <div className="flex items-center justify-center h-64"><div className="w-8 h-8 border-4 border-primary/20 border-t-primary rounded-full animate-spin" /></div>;
 
   return (
@@ -130,7 +123,7 @@ export default function Risks() {
                     const score = impact * likelihood;
                     const risksInCell = items.filter(r => r.likelihood === likelihood && r.impact === impact);
                     return (
-                      <div key={`${impact}-${likelihood}`} className={`aspect-square rounded-md flex items-center justify-center text-xs font-bold text-white relative ${getRiskColor(score)} ${risksInCell.length > 0 ? 'ring-2 ring-foreground/20' : 'opacity-60'}`}>
+                      <div key={`${impact}-${likelihood}`} className={`aspect-square rounded-md flex items-center justify-center text-xs font-bold text-white relative ${score >= 20 ? "bg-red-500" : score >= 12 ? "bg-orange-500" : score >= 6 ? "bg-amber-500" : "bg-emerald-500"} ${risksInCell.length > 0 ? 'ring-2 ring-foreground/20' : 'opacity-60'}`}>
                         {risksInCell.length > 0 && risksInCell.length}
                       </div>
                     );
@@ -167,44 +160,15 @@ export default function Risks() {
         <p className="text-center text-muted-foreground py-12">No risks match your filters.</p>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-          {filtered.map((r) => {
-            const score = (r.likelihood || 1) * (r.impact || 1);
-            return (
-              <div key={r.id} className="bg-card rounded-xl border border-border p-5 flex flex-col gap-3">
-                <div className="flex items-start justify-between">
-                  <div>
-                    <div className="flex items-center gap-2 mb-1">
-                      {r.risk_id && <span className="text-xs font-mono text-muted-foreground">{r.risk_id}</span>}
-                      <StatusBadge status={r.status} />
-                    </div>
-                    <h3 className="font-heading font-semibold text-foreground text-sm">{r.title}</h3>
-                  </div>
-                  <div className={`w-10 h-10 rounded-lg flex items-center justify-center text-white font-bold text-sm ${getRiskColor(score)}`}>
-                    {score}
-                  </div>
-                </div>
-                {r.description && <p className="text-xs text-muted-foreground line-clamp-2">{r.description}</p>}
-                <div className="grid grid-cols-2 gap-2 text-xs">
-                  <div><span className="text-muted-foreground">Likelihood: </span><span className="font-semibold">{r.likelihood}/5</span></div>
-                  <div><span className="text-muted-foreground">Impact: </span><span className="font-semibold">{r.impact}/5</span></div>
-                  <div><span className="text-muted-foreground">Treatment: </span><span className="font-semibold capitalize">{r.treatment}</span></div>
-                  <div><span className="text-muted-foreground">Category: </span><span className="font-semibold capitalize">{(r.category || "").replace(/_/g, " ")}</span></div>
-                </div>
-                {r.related_control_ids?.length > 0 && (
-                  <div className="text-xs text-muted-foreground">
-                    <span className="font-medium text-foreground">{r.related_control_ids.length} control{r.related_control_ids.length > 1 ? "s" : ""} linked</span>
-                  </div>
-                )}
-                <div className="flex items-center justify-between text-xs text-muted-foreground pt-2 border-t border-border">
-                  <span>{r.owner_name || "Unassigned"}</span>
-                  <div className="flex items-center gap-1">
-                    <button onClick={() => handleEdit(r)} className="p-1 rounded hover:bg-muted"><Pencil className="w-3.5 h-3.5" /></button>
-                    <button onClick={() => handleDelete(r.id)} className="p-1 rounded hover:bg-muted text-destructive"><Trash2 className="w-3.5 h-3.5" /></button>
-                  </div>
-                </div>
-              </div>
-            );
-          })}
+          {filtered.map((r) => (
+            <RiskCardDetail
+              key={r.id}
+              r={r}
+              allControls={controls}
+              onEdit={handleEdit}
+              onDelete={handleDelete}
+            />
+          ))}
         </div>
       )}
 
