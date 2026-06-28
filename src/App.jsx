@@ -59,6 +59,7 @@ import SecurityPosture from '@/pages/SecurityPosture';
 import AIHub from '@/pages/AIHub';
 import AuditFindings from '@/pages/AuditFindings';
 import IncidentCommand from '@/pages/IncidentCommand';
+import ManagementDashboard from '@/pages/ManagementDashboard';
 import RiskAppetiteHeatmap from '@/pages/RiskAppetiteHeatmap';
 
 const AuthenticatedApp = () => {
@@ -135,6 +136,7 @@ const AuthenticatedApp = () => {
           <Route path="/ai-hub" element={<AIHub />} />
           <Route path="/audit-findings" element={<AuditFindings />} />
           <Route path="/incident-command" element={<IncidentCommand />} />
+          <Route path="/management-dashboard" element={<ManagementDashboard />} />
           <Route path="/risk-appetite-heatmap" element={<RiskAppetiteHeatmap />} />
         </Route>
       </Route>

@@ -122,6 +122,7 @@ const navSections = [
   {
     label: "Reporting",
     items: [
+      { label: "Mgmt Dashboard", path: "/management-dashboard", icon: BarChart2 },
       { label: "Security Posture", path: "/security-posture", icon: Radar },
       { label: "Reports", path: "/reports", icon: FileDown },
       { label: "Mgmt Reports", path: "/management-reports", icon: BarChart2 },
