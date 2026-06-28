@@ -66,6 +66,10 @@
       "type": "string",
       "format": "date"
     },
+    "remediated_date": {
+      "type": "string",
+      "format": "date"
+    },
     "resolved_date": {
       "type": "string",
       "format": "date"
@@ -101,6 +105,27 @@
       "items": {
         "type": "string"
       }
+    },
+    "timeline_events": {
+      "type": "string",
+      "description": "JSON array of {timestamp, event, actor, severity_change, notes}"
+    },
+    "escalation_chain": {
+      "type": "string",
+      "description": "JSON array of {level, name, email, role, notified_at, acknowledged_at}"
+    },
+    "escalation_level": {
+      "type": "number",
+      "default": 0,
+      "description": "Current escalation level (0=none, 1=team lead, 2=manager, 3=executive)"
+    },
+    "mttr_hours": {
+      "type": "number",
+      "description": "Mean time to resolve in hours (auto-calculated)"
+    },
+    "mttc_hours": {
+      "type": "number",
+      "description": "Mean time to contain in hours (auto-calculated)"
     }
   },
   "required": [
