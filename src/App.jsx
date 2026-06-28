@@ -55,6 +55,7 @@ import AIControlMapper from '@/pages/AIControlMapper';
 import PeopleDashboard from '@/pages/PeopleDashboard';
 import TrustCenterSettings from '@/pages/TrustCenterSettings';
 import TrustCenterPublic from '@/pages/TrustCenterPublic';
+import SecurityPosture from '@/pages/SecurityPosture';
 
 const AuthenticatedApp = () => {
   const { isLoadingAuth, isLoadingPublicSettings, authError, navigateToLogin } = useAuth();
@@ -126,6 +127,7 @@ const AuthenticatedApp = () => {
           <Route path="/sadc-frameworks" element={<SADCFrameworks />} />
           <Route path="/ai-control-mapper" element={<AIControlMapper />} />
           <Route path="/people" element={<PeopleDashboard />} />
+          <Route path="/security-posture" element={<SecurityPosture />} />
         </Route>
       </Route>
       <Route path="*" element={<PageNotFound />} />

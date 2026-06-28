@@ -36,7 +36,7 @@ const CATEGORY_LABELS = {
   asset_management: "Asset Mgmt",
 };
 
-function KpiCard({ label, value, sub, trend, color = "blue", icon: Icon }) {
+function KpiCard({ label, value, sub, trend, color = "blue", icon: Icon = null }) {
   const colorMap = {
     blue: "bg-blue-50 text-blue-700 border-blue-100",
     green: "bg-emerald-50 text-emerald-700 border-emerald-100",
@@ -49,7 +49,7 @@ function KpiCard({ label, value, sub, trend, color = "blue", icon: Icon }) {
     <div className={`rounded-xl border p-4 ${cls}`}>
       <div className="flex items-center justify-between mb-2">
         <p className="text-xs font-semibold opacity-70">{label}</p>
-        {Icon && <Icon className="w-4 h-4 opacity-50" />}
+        {Icon && React.createElement(Icon, { className: "w-4 h-4 opacity-50" })}
       </div>
       <p className="text-3xl font-bold">{value}</p>
       {sub && <p className="text-xs opacity-60 mt-1">{sub}</p>}

@@ -118,6 +118,7 @@ const navSections = [
   {
     label: "Reporting",
     items: [
+      { label: "Security Posture", path: "/security-posture", icon: Radar },
       { label: "Reports", path: "/reports", icon: FileDown },
       { label: "Mgmt Reports", path: "/management-reports", icon: BarChart2 },
       { label: "Scheduled Reports", path: "/scheduled-reports", icon: Send },
