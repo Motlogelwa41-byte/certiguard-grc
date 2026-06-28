@@ -84,6 +84,7 @@ const navSections = [
   {
     label: "AI & Automation",
     items: [
+      { label: "AI Hub", path: "/ai-hub", icon: Radar },
       { label: "AI Auditor", path: "/ai-auditor", icon: Brain },
       { label: "AI Control Mapper", path: "/ai-control-mapper", icon: Zap },
       { label: "Compliance Runs", path: "/compliance-runs", icon: Play },

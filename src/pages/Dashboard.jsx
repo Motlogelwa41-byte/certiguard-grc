@@ -2,14 +2,17 @@ import React, { useState, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
 import { Link } from "react-router-dom";
 import {
-  Shield, FileCheck, AlertTriangle, CheckSquare, Building2,
-  FileText, TrendingUp, ArrowRight, ClipboardList
+  Shield, FileCheck, AlertTriangle, CheckSquare,
+  FileText, ArrowRight
 } from "lucide-react";
 import { PieChart, Pie, Cell, ResponsiveContainer, BarChart, Bar, XAxis, YAxis, Tooltip } from "recharts";
 import PageHeader from "@/components/shared/PageHeader";
 import StatCard from "@/components/shared/StatCard";
 import StatusBadge from "@/components/shared/StatusBadge";
 import VendorAssessmentWidget from "@/components/dashboard/VendorAssessmentWidget";
+import ComplianceScoreRing from "@/components/dashboard/ComplianceScoreRing";
+import ActivityFeed from "@/components/dashboard/ActivityFeed";
+import QuickActions from "@/components/dashboard/QuickActions";
 
 const COLORS = ["#3b82f6", "#10b981", "#f59e0b", "#ef4444", "#8b5cf6", "#6b7280"];
 
@@ -55,6 +58,15 @@ export default function Dashboard() {
   const overdueTasks = tasks.filter((t) => t.status === "overdue").length;
   const pendingTasks = tasks.filter((t) => t.status === "todo" || t.status === "in_progress").length;
 
+  // Compliance score: weighted average of passing controls + framework readiness
+  const controlScore = controls.length > 0 ? Math.round((passingControls / controls.length) * 100) : 0;
+  const frameworkScore = frameworks.length > 0
+    ? Math.round(frameworks.reduce((sum, f) => sum + (f.readiness_score || 0), 0) / frameworks.length)
+    : 0;
+  const complianceScore = frameworks.length > 0
+    ? Math.round(controlScore * 0.6 + frameworkScore * 0.4)
+    : controlScore;
+
   const controlStatusData = [
     { name: "Passing", value: controls.filter((c) => c.status === "passing").length },
     { name: "Failing", value: controls.filter((c) => c.status === "failing").length },
@@ -76,6 +88,16 @@ export default function Dashboard() {
         title="Compliance Dashboard"
         subtitle="Real-time overview of your organization's compliance posture"
       />
+
+      {/* Score + Quick Actions Row */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
+        <div className="bg-card rounded-xl border border-border p-6 flex items-center justify-center">
+          <ComplianceScoreRing score={complianceScore} size={140} />
+        </div>
+        <div className="lg:col-span-2">
+          <QuickActions />
+        </div>
+      </div>
 
       {/* Stats Row */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
@@ -166,8 +188,8 @@ export default function Dashboard() {
         )}
       </div>
 
-      {/* Recent Items Row */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      {/* Recent Items + Activity Row */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Recent Tasks */}
         <div className="bg-card rounded-xl border border-border p-6">
           <div className="flex items-center justify-between mb-4">
@@ -194,6 +216,7 @@ export default function Dashboard() {
         </div>
 
         <VendorAssessmentWidget assessments={assessments} />
+        <ActivityFeed />
       </div>
     </div>
   );
