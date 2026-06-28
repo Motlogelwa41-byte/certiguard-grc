@@ -88,6 +88,32 @@ export default function IncidentCommand() {
     return { severity: sev.charAt(0).toUpperCase() + sev.slice(1), avg, count: items.length };
   }).filter(d => d.count > 0), [metrics.withMTTR]);
 
+  // MTTR trend over time: monthly avg MTTR + MTTC per severity — last 6 months
+  const mttrTrendData = useMemo(() => {
+    return Array.from({ length: 6 }, (_, i) => {
+      const d = new Date(); d.setMonth(d.getMonth() - (5 - i));
+      const y = d.getFullYear(); const m = d.getMonth();
+      const monthLabel = d.toLocaleString("default", { month: "short", year: "2-digit" });
+      const monthClosed = metrics.withMTTR.filter(inc => {
+        const rd = new Date(inc.resolved_date || inc.remediated_date || inc.updated_date);
+        return rd.getFullYear() === y && rd.getMonth() === m;
+      });
+      const avg = (sevs) => {
+        const items = monthClosed.filter(sevs);
+        return items.length ? Math.round(items.reduce((s, i) => s + i.mttr, 0) / items.length * 10) / 10 : null;
+      };
+      const mttcItems = monthClosed.filter(i => i.mttc != null);
+      return {
+        month: monthLabel,
+        all: avg(() => true),
+        critical: avg(i => i.severity === "critical"),
+        high: avg(i => i.severity === "high"),
+        mttc: mttcItems.length ? Math.round(mttcItems.reduce((s, i) => s + i.mttc, 0) / mttcItems.length * 10) / 10 : null,
+        count: monthClosed.length,
+      };
+    });
+  }, [metrics.withMTTR]);
+
   // Incident trend: last 6 months
   const trendData = useMemo(() => {
     return Array.from({ length: 6 }, (_, i) => {
@@ -168,6 +194,46 @@ export default function IncidentCommand() {
         <MetricTile label="Avg MTTC" value={metrics.avgMTTC} unit="hrs" sub="Mean time to contain" color="text-blue-600" icon={Activity} />
         <MetricTile label="Total Incidents" value={incidents.length} sub={`${metrics.closed.length} resolved`} icon={ShieldAlert} />
         <MetricTile label="Escalated" value={metrics.escalated.length} sub="Awaiting resolution" color={metrics.escalated.length > 0 ? "text-orange-600" : "text-emerald-600"} icon={ArrowUp} />
+      </div>
+
+      {/* MTTR Trend over time */}
+      <div className="bg-card rounded-xl border border-border p-5">
+        <div className="flex items-start justify-between mb-1">
+          <div>
+            <h3 className="font-semibold text-foreground">Response Time Trend — MTTR &amp; MTTC</h3>
+            <p className="text-xs text-muted-foreground mt-0.5">Monthly average hours to resolve and contain, by severity · lower is better</p>
+          </div>
+          <div className="flex items-center gap-3 text-xs text-muted-foreground shrink-0">
+            <span className="flex items-center gap-1"><span className="w-3 h-0.5 bg-blue-500 inline-block" /> Avg MTTR</span>
+            <span className="flex items-center gap-1"><span className="w-3 h-0.5 bg-emerald-500 inline-block" /> Avg MTTC</span>
+            <span className="flex items-center gap-1"><span className="w-3 h-0.5 bg-red-400 inline-block border-dashed" style={{borderTop:"2px dashed #f87171",height:0}} /> Critical</span>
+          </div>
+        </div>
+        {metrics.withMTTR.length === 0 ? (
+          <div className="flex items-center justify-center h-40 text-muted-foreground text-sm">
+            No resolved incidents with date data yet — add detection &amp; resolution dates to incidents.
+          </div>
+        ) : (
+          <ResponsiveContainer width="100%" height={220}>
+            <LineChart data={mttrTrendData} margin={{ top: 8, right: 16, left: 0, bottom: 0 }}>
+              <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
+              <XAxis dataKey="month" tick={{ fontSize: 11, fill: "hsl(var(--muted-foreground))" }} axisLine={false} tickLine={false} />
+              <YAxis tick={{ fontSize: 11, fill: "hsl(var(--muted-foreground))" }} unit="h" axisLine={false} tickLine={false} width={36} />
+              <Tooltip content={<CustomTooltip />} formatter={(v, name) => v != null ? [`${v}h`, name] : ["—", name]} />
+              <Legend wrapperStyle={{ fontSize: 11 }} />
+              <Line type="monotone" dataKey="all" name="Avg MTTR" stroke="#3b82f6" strokeWidth={2.5} dot={{ r: 4, fill: "#3b82f6" }} activeDot={{ r: 6 }} connectNulls />
+              <Line type="monotone" dataKey="mttc" name="Avg MTTC" stroke="#10b981" strokeWidth={2.5} dot={{ r: 4, fill: "#10b981" }} strokeDasharray="6 3" connectNulls />
+              <Line type="monotone" dataKey="critical" name="Critical MTTR" stroke="#ef4444" strokeWidth={1.5} dot={{ r: 3, fill: "#ef4444" }} strokeDasharray="4 2" connectNulls />
+              <Line type="monotone" dataKey="high" name="High MTTR" stroke="#f97316" strokeWidth={1.5} dot={{ r: 3, fill: "#f97316" }} strokeDasharray="4 2" connectNulls />
+            </LineChart>
+          </ResponsiveContainer>
+        )}
+        {/* SLA reference guide */}
+        <div className="flex flex-wrap gap-4 mt-3 pt-3 border-t border-border text-xs text-muted-foreground">
+          {[{ sev: "Critical", target: "1h", color: "text-red-600" }, { sev: "High", target: "4h", color: "text-orange-600" }, { sev: "Medium", target: "24h", color: "text-amber-600" }, { sev: "Low", target: "72h", color: "text-emerald-600" }].map(s => (
+            <span key={s.sev}><span className={`font-semibold ${s.color}`}>{s.sev}</span> SLA target: <strong>{s.target}</strong></span>
+          ))}
+        </div>
       </div>
 
       {/* Trend + Status pie */}
