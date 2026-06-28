@@ -112,6 +112,7 @@ const navSections = [
     items: [
       { label: "ROPA", path: "/ropa", icon: FileSpreadsheet },
       { label: "Audits", path: "/audits", icon: Landmark },
+      { label: "Audit Findings", path: "/audit-findings", icon: AlertTriangle },
       { label: "Audit Trail", path: "/audit-trail", icon: History },
       { label: "People Compliance", path: "/people", icon: Users2 },
     ]

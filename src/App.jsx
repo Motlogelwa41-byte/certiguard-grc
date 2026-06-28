@@ -57,6 +57,7 @@ import TrustCenterSettings from '@/pages/TrustCenterSettings';
 import TrustCenterPublic from '@/pages/TrustCenterPublic';
 import SecurityPosture from '@/pages/SecurityPosture';
 import AIHub from '@/pages/AIHub';
+import AuditFindings from '@/pages/AuditFindings';
 
 const AuthenticatedApp = () => {
   const { isLoadingAuth, isLoadingPublicSettings, authError, navigateToLogin } = useAuth();
@@ -130,6 +131,7 @@ const AuthenticatedApp = () => {
           <Route path="/people" element={<PeopleDashboard />} />
           <Route path="/security-posture" element={<SecurityPosture />} />
           <Route path="/ai-hub" element={<AIHub />} />
+          <Route path="/audit-findings" element={<AuditFindings />} />
         </Route>
       </Route>
       <Route path="*" element={<PageNotFound />} />

@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
 import { AlertTriangle, Plus, Search, Download, Upload } from "lucide-react";
+import RiskAppetitePanel from "@/components/risks/RiskAppetitePanel";
 import { exportToCsv } from "@/lib/exportCsv";
 import BulkImportModal from "@/components/shared/BulkImportModal";
 import { Button } from "@/components/ui/button";
@@ -109,6 +110,9 @@ export default function Risks() {
           <Button size="sm" onClick={() => { setForm(defaultForm); setEditId(null); setOpen(true); }}><Plus className="w-4 h-4 mr-1" /> Add Risk</Button>
         </div>
       } />
+
+      {/* Risk Appetite Thresholds */}
+      {items.length > 0 && <RiskAppetitePanel risks={items} />}
 
       {/* Risk Heatmap */}
       {items.length > 0 && (
