@@ -89,6 +89,23 @@
       "type": "string",
       "format": "date"
     },
+    "linked_control_ids": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "Controls this vendor is responsible for or impacts"
+    },
+    "linked_control_names": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "compliance_notes": {
+      "type": "string",
+      "description": "Vendor-specific compliance obligations or gaps"
+    },
     "notes": {
       "type": "string"
     }
