@@ -62,6 +62,7 @@ import IncidentCommand from '@/pages/IncidentCommand';
 import ManagementDashboard from '@/pages/ManagementDashboard';
 import RiskAppetiteHeatmap from '@/pages/RiskAppetiteHeatmap';
 import RiskFrameworkCrossMap from '@/pages/RiskFrameworkCrossMap';
+import AIAssistant from '@/pages/AIAssistant';
 
 const AuthenticatedApp = () => {
   const { isLoadingAuth, isLoadingPublicSettings, authError, navigateToLogin } = useAuth();
@@ -140,6 +141,7 @@ const AuthenticatedApp = () => {
           <Route path="/management-dashboard" element={<ManagementDashboard />} />
           <Route path="/risk-appetite-heatmap" element={<RiskAppetiteHeatmap />} />
           <Route path="/risk-framework-crossmap" element={<RiskFrameworkCrossMap />} />
+          <Route path="/ai-assistant" element={<AIAssistant />} />
         </Route>
       </Route>
       <Route path="*" element={<PageNotFound />} />

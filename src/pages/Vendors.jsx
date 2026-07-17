@@ -11,6 +11,7 @@ import { Switch } from "@/components/ui/switch";
 import PageHeader from "@/components/shared/PageHeader";
 import StatusBadge from "@/components/shared/StatusBadge";
 import EmptyState from "@/components/shared/EmptyState";
+import BulkActionBar from "@/components/shared/BulkActionBar";
 import { useToast } from "@/components/ui/use-toast";
 
 const vendorCategories = ["cloud_infrastructure","saas","data_processor","consulting","managed_services","hardware","other"];
@@ -39,7 +40,38 @@ export default function Vendors() {
   const [filterRisk, setFilterRisk] = useState("all");
   const [filterStatus, setFilterStatus] = useState("all");
   const [expandedId, setExpandedId] = useState(null);
+  const [selected, setSelected] = useState(new Set());
+  const [bulkStatus, setBulkStatus] = useState("");
+  const [bulkRisk, setBulkRisk] = useState("");
   const { toast } = useToast();
+
+  const toggleSelect = (id) => {
+    const next = new Set(selected);
+    if (next.has(id)) next.delete(id); else next.add(id);
+    setSelected(next);
+  };
+  const applyBulkStatus = async () => {
+    if (!bulkStatus || selected.size === 0) return;
+    const updates = [...selected].map(id => ({ id, status: bulkStatus }));
+    await base44.entities.Vendor.bulkUpdate(updates);
+    setSelected(new Set()); setBulkStatus(""); load();
+    toast({ title: `${updates.length} vendors updated` });
+  };
+  const applyBulkRisk = async () => {
+    if (!bulkRisk || selected.size === 0) return;
+    const updates = [...selected].map(id => ({ id, risk_level: bulkRisk }));
+    await base44.entities.Vendor.bulkUpdate(updates);
+    setSelected(new Set()); setBulkRisk(""); load();
+    toast({ title: `${updates.length} vendors updated` });
+  };
+  const bulkDelete = async () => {
+    if (selected.size === 0) return;
+    if (!window.confirm(`Delete ${selected.size} selected vendors? This cannot be undone.`)) return;
+    const count = selected.size;
+    await base44.entities.Vendor.deleteMany({ id: { $in: [...selected] } });
+    setSelected(new Set()); load();
+    toast({ title: `${count} vendors deleted` });
+  };
 
   const load = () =>
     Promise.all([base44.entities.Vendor.list(), base44.entities.Control.list()])
@@ -157,6 +189,31 @@ export default function Vendors() {
         </Select>
       </div>
 
+      <BulkActionBar selectedCount={selected.size} onClear={() => setSelected(new Set())}>
+        <Select value={bulkStatus} onValueChange={setBulkStatus}>
+          <SelectTrigger className="w-[150px] h-8"><SelectValue placeholder="Set status" /></SelectTrigger>
+          <SelectContent>
+            <SelectItem value="approved">Approved</SelectItem>
+            <SelectItem value="pending_review">Pending Review</SelectItem>
+            <SelectItem value="under_review">Under Review</SelectItem>
+            <SelectItem value="rejected">Rejected</SelectItem>
+            <SelectItem value="inactive">Inactive</SelectItem>
+          </SelectContent>
+        </Select>
+        <Button size="sm" variant="secondary" onClick={applyBulkStatus} disabled={!bulkStatus}>Apply Status</Button>
+        <Select value={bulkRisk} onValueChange={setBulkRisk}>
+          <SelectTrigger className="w-[140px] h-8"><SelectValue placeholder="Set risk" /></SelectTrigger>
+          <SelectContent>
+            <SelectItem value="critical">Critical</SelectItem>
+            <SelectItem value="high">High</SelectItem>
+            <SelectItem value="medium">Medium</SelectItem>
+            <SelectItem value="low">Low</SelectItem>
+          </SelectContent>
+        </Select>
+        <Button size="sm" variant="secondary" onClick={applyBulkRisk} disabled={!bulkRisk}>Apply Risk</Button>
+        <Button size="sm" variant="destructive" onClick={bulkDelete}><Trash2 className="w-4 h-4 mr-1" />Delete</Button>
+      </BulkActionBar>
+
       {items.length === 0 ? (
         <EmptyState icon={Building2} title="No vendors yet" description="Add vendors to start managing third-party risk." actionLabel="Add Vendor" onAction={() => setOpen(true)} />
       ) : filtered.length === 0 ? (
@@ -167,9 +224,10 @@ export default function Vendors() {
             const isExpanded = expandedId === v.id;
             const linkedCtls = controls.filter(c => (v.linked_control_ids || []).includes(c.id));
             return (
-              <div key={v.id} className={`bg-card rounded-xl border border-border border-l-4 ${riskColors[v.risk_level] || "border-l-border"} overflow-hidden`}>
+              <div key={v.id} className={`bg-card rounded-xl border border-border border-l-4 ${riskColors[v.risk_level] || "border-l-border"} overflow-hidden ${selected.has(v.id) ? "ring-2 ring-primary" : ""}`}>
                 {/* Main row */}
                 <div className="p-5 flex items-start gap-4">
+                  <input type="checkbox" checked={selected.has(v.id)} onChange={() => toggleSelect(v.id)} className="w-4 h-4 mt-1 rounded shrink-0" aria-label={`Select ${v.name}`} />
                   <div className="flex-1 min-w-0">
                     <div className="flex flex-wrap items-center gap-2 mb-1">
                       <h3 className="font-heading font-semibold text-foreground">{v.name}</h3>

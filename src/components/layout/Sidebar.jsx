@@ -42,7 +42,8 @@ import {
   Landmark,
   BarChart2,
   Network,
-  GitCompare
+  GitCompare,
+  Sparkles
 } from "lucide-react";
 import { base44 } from "@/api/base44Client";
 
@@ -87,6 +88,7 @@ const navSections = [
   {
     label: "AI & Automation",
     items: [
+      { label: "AI Assistant", path: "/ai-assistant", icon: Sparkles },
       { label: "AI Hub", path: "/ai-hub", icon: Radar },
       { label: "AI Auditor", path: "/ai-auditor", icon: Brain },
       { label: "AI Control Mapper", path: "/ai-control-mapper", icon: Zap },

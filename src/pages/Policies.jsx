@@ -3,6 +3,7 @@ import { base44 } from "@/api/base44Client";
 import { FileText, Plus, Pencil, Trash2, Search, Eye, CheckSquare, Download, Upload, PenLine, History, Send, AlertCircle } from "lucide-react";
 import { exportToCsv } from "@/lib/exportCsv";
 import BulkImportModal from "@/components/shared/BulkImportModal";
+import BulkActionBar from "@/components/shared/BulkActionBar";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
@@ -64,6 +65,46 @@ export default function Policies() {
   const load = () => base44.entities.Policy.list().then((d) => { setItems(d); setLoading(false); });
   useEffect(() => { load(); }, []);
 
+  const [selected, setSelected] = useState(new Set());
+  const [bulkStatus, setBulkStatus] = useState("");
+  const [bulkOwner, setBulkOwner] = useState("");
+  const [bulkCategory, setBulkCategory] = useState("");
+
+  const toggleSelect = (id) => {
+    const next = new Set(selected);
+    if (next.has(id)) next.delete(id); else next.add(id);
+    setSelected(next);
+  };
+  const applyBulkStatus = async () => {
+    if (!bulkStatus || selected.size === 0) return;
+    const updates = [...selected].map(id => ({ id, status: bulkStatus }));
+    await base44.entities.Policy.bulkUpdate(updates);
+    setSelected(new Set()); setBulkStatus(""); load();
+    toast({ title: `${updates.length} policies updated` });
+  };
+  const applyBulkOwner = async () => {
+    if (!bulkOwner.trim() || selected.size === 0) return;
+    const updates = [...selected].map(id => ({ id, owner_name: bulkOwner.trim() }));
+    await base44.entities.Policy.bulkUpdate(updates);
+    setSelected(new Set()); setBulkOwner(""); load();
+    toast({ title: `${updates.length} policies reassigned` });
+  };
+  const applyBulkCategory = async () => {
+    if (!bulkCategory || selected.size === 0) return;
+    const updates = [...selected].map(id => ({ id, category: bulkCategory }));
+    await base44.entities.Policy.bulkUpdate(updates);
+    setSelected(new Set()); setBulkCategory(""); load();
+    toast({ title: `${updates.length} policies updated` });
+  };
+  const bulkDelete = async () => {
+    if (selected.size === 0) return;
+    if (!window.confirm(`Delete ${selected.size} selected policies? This cannot be undone.`)) return;
+    const count = selected.size;
+    await base44.entities.Policy.deleteMany({ id: { $in: [...selected] } });
+    setSelected(new Set()); load();
+    toast({ title: `${count} policies deleted` });
+  };
+
   const handleSave = async () => {
     try {
       if (editId) await base44.entities.Policy.update(editId, form);
@@ -117,6 +158,28 @@ export default function Policies() {
         </div>
       </div>
 
+      <BulkActionBar selectedCount={selected.size} onClear={() => setSelected(new Set())}>
+        <Select value={bulkStatus} onValueChange={setBulkStatus}>
+          <SelectTrigger className="w-[150px] h-8"><SelectValue placeholder="Set status" /></SelectTrigger>
+          <SelectContent>
+            <SelectItem value="draft">Draft</SelectItem>
+            <SelectItem value="in_review">In Review</SelectItem>
+            <SelectItem value="pending_approval">Pending Approval</SelectItem>
+            <SelectItem value="approved">Approved</SelectItem>
+            <SelectItem value="archived">Archived</SelectItem>
+          </SelectContent>
+        </Select>
+        <Button size="sm" variant="secondary" onClick={applyBulkStatus} disabled={!bulkStatus}>Apply Status</Button>
+        <Select value={bulkCategory} onValueChange={setBulkCategory}>
+          <SelectTrigger className="w-[160px] h-8"><SelectValue placeholder="Set category" /></SelectTrigger>
+          <SelectContent>{policyCategories.map((c) => <SelectItem key={c} value={c}>{c.replace(/_/g, " ").replace(/\b\w/g, l => l.toUpperCase())}</SelectItem>)}</SelectContent>
+        </Select>
+        <Button size="sm" variant="secondary" onClick={applyBulkCategory} disabled={!bulkCategory}>Apply Category</Button>
+        <Input value={bulkOwner} onChange={(e) => setBulkOwner(e.target.value)} placeholder="Assign owner" className="w-[160px] h-8" />
+        <Button size="sm" variant="secondary" onClick={applyBulkOwner} disabled={!bulkOwner.trim()}>Assign Owner</Button>
+        <Button size="sm" variant="destructive" onClick={bulkDelete}><Trash2 className="w-4 h-4 mr-1" />Delete</Button>
+      </BulkActionBar>
+
       {items.length === 0 ? (
         <EmptyState icon={FileText} title="No policies yet" description="Create policies to define your organization's compliance posture." actionLabel="Add Policy" onAction={() => setOpen(true)} />
       ) : (
@@ -125,11 +188,14 @@ export default function Policies() {
             const progress = getApprovalProgress(p);
             const isRejected = p.status === "rejected";
             return (
-              <div key={p.id} className={`bg-card rounded-xl border p-5 flex flex-col gap-3 ${isRejected ? "border-red-300 dark:border-red-800" : "border-border"}`}>
+              <div key={p.id} className={`bg-card rounded-xl border p-5 flex flex-col gap-3 ${selected.has(p.id) ? "ring-2 ring-primary " : ""}${isRejected ? "border-red-300 dark:border-red-800" : "border-border"}`}>
                 <div className="flex items-start justify-between">
-                  <div>
-                    <h3 className="font-heading font-semibold text-foreground text-sm">{p.title}</h3>
-                    <p className="text-xs text-muted-foreground capitalize mt-0.5">{(p.category || "").replace(/_/g, " ")}</p>
+                  <div className="flex items-start gap-2">
+                    <input type="checkbox" checked={selected.has(p.id)} onChange={() => toggleSelect(p.id)} className="w-4 h-4 mt-0.5 rounded shrink-0" aria-label={`Select ${p.title}`} />
+                    <div>
+                      <h3 className="font-heading font-semibold text-foreground text-sm">{p.title}</h3>
+                      <p className="text-xs text-muted-foreground capitalize mt-0.5">{(p.category || "").replace(/_/g, " ")}</p>
+                    </div>
                   </div>
                   <StatusBadge status={p.status} />
                 </div>
