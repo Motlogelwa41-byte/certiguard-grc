@@ -1,155 +1,15 @@
 import React, { useState } from "react";
 import { Link, useLocation } from "react-router-dom";
-import {
-  LayoutDashboard,
-  Shield,
-  FileCheck,
-  AlertTriangle,
-  FileText,
-  Paperclip,
-  ClipboardList,
-  Building2,
-  CheckSquare,
-  ChevronLeft,
-  ChevronRight,
-  LogOut,
-  ShieldCheck,
-  FileSearch,
-  Brain,
-  Play,
-  FileSpreadsheet,
-  FileDown,
-  BarChart3,
-  History,
-  ShieldAlert,
-  GraduationCap,
-  Calendar,
-  Bell,
-  Users,
-  Copy,
-  SlidersHorizontal,
-  Target,
-  Upload,
-  Send,
-  Globe,
-  Users2,
-  MapPin,
-  Zap,
-  ListChecks,
-  BellRing,
-  PieChart,
-  Radar,
-  Landmark,
-  BarChart2,
-  Network,
-  GitCompare,
-  Sparkles
-} from "lucide-react";
+import { ChevronLeft, ChevronRight, LogOut, ShieldCheck } from "lucide-react";
 import { base44 } from "@/api/base44Client";
-
-const navSections = [
-  {
-    label: "Overview",
-    items: [
-      { label: "Dashboard", path: "/", icon: LayoutDashboard },
-      { label: "Posture Dashboard", path: "/posture", icon: BarChart3 },
-    ]
-  },
-  {
-    label: "Compliance",
-    items: [
-      { label: "Frameworks", path: "/frameworks", icon: Shield },
-      { label: "Controls", path: "/controls", icon: FileCheck },
-      { label: "Gap Analysis", path: "/gap-analysis", icon: FileSearch },
-      { label: "Framework Map", path: "/framework-map", icon: Network },
-      { label: "SADC Frameworks", path: "/sadc-frameworks", icon: MapPin },
-      { label: "Audit Checklists", path: "/audit-checklists", icon: ListChecks },
-    ]
-  },
-  {
-    label: "Risk",
-    items: [
-      { label: "Risk Register", path: "/risks", icon: AlertTriangle },
-      { label: "Risk Heatmap", path: "/risk-heatmap", icon: Target },
-      { label: "Appetite Heatmap", path: "/risk-appetite-heatmap", icon: Target },
-      { label: "Framework Cross-Map", path: "/risk-framework-crossmap", icon: GitCompare },
-    ]
-  },
-  {
-    label: "Policies & Evidence",
-    items: [
-      { label: "Policies", path: "/policies", icon: FileText },
-      { label: "Policy Templates", path: "/policy-templates", icon: Copy },
-      { label: "Evidence", path: "/evidence", icon: Paperclip },
-      { label: "Bulk Evidence", path: "/bulk-evidence", icon: Upload },
-      { label: "Evidence Reminders", path: "/evidence-reminders", icon: BellRing },
-    ]
-  },
-  {
-    label: "AI & Automation",
-    items: [
-      { label: "AI Assistant", path: "/ai-assistant", icon: Sparkles },
-      { label: "AI Hub", path: "/ai-hub", icon: Radar },
-      { label: "AI Auditor", path: "/ai-auditor", icon: Brain },
-      { label: "AI Control Mapper", path: "/ai-control-mapper", icon: Zap },
-      { label: "Compliance Runs", path: "/compliance-runs", icon: Play },
-    ]
-  },
-  {
-    label: "Operations",
-    items: [
-      { label: "Tasks", path: "/tasks", icon: CheckSquare },
-      { label: "Task Reminders", path: "/task-reminders", icon: Bell },
-      { label: "Calendar", path: "/calendar", icon: Calendar },
-      { label: "Incidents", path: "/incidents", icon: ShieldAlert },
-      { label: "Incident Command", path: "/incident-command", icon: AlertTriangle },
-      { label: "Training", path: "/training", icon: GraduationCap },
-    ]
-  },
-  {
-    label: "Vendors & Third Parties",
-    items: [
-      { label: "Vendors", path: "/vendors", icon: Building2 },
-      { label: "Vendor Assessments", path: "/vendor-assessments", icon: ClipboardList },
-    ]
-  },
-  {
-    label: "Privacy & Governance",
-    items: [
-      { label: "ROPA", path: "/ropa", icon: FileSpreadsheet },
-      { label: "Audits", path: "/audits", icon: Landmark },
-      { label: "Audit Findings", path: "/audit-findings", icon: AlertTriangle },
-      { label: "Audit Trail", path: "/audit-trail", icon: History },
-      { label: "People Compliance", path: "/people", icon: Users2 },
-    ]
-  },
-  {
-    label: "Reporting",
-    items: [
-      { label: "Mgmt Dashboard", path: "/management-dashboard", icon: BarChart2 },
-      { label: "Security Posture", path: "/security-posture", icon: Radar },
-      { label: "Reports", path: "/reports", icon: FileDown },
-      { label: "Mgmt Reports", path: "/management-reports", icon: BarChart2 },
-      { label: "Scheduled Reports", path: "/scheduled-reports", icon: Send },
-    ]
-  },
-  {
-    label: "Settings",
-    items: [
-      { label: "Trust Center", path: "/trust-center-settings", icon: Globe },
-      { label: "Security", path: "/security", icon: ShieldCheck },
-      { label: "Users", path: "/users", icon: Users },
-      { label: "Tenants", path: "/tenant-admin", icon: PieChart },
-      { label: "Policy Acknowledgments", path: "/policy-acknowledgments", icon: FileCheck },
-      { label: "Notifications", path: "/notifications", icon: Bell },
-      { label: "Notif. Preferences", path: "/notification-preferences", icon: SlidersHorizontal },
-    ]
-  },
-];
+import { filterNavSections } from "@/lib/navConfig";
+import { useRBAC } from "@/lib/useRBAC";
 
 export default function Sidebar() {
   const [collapsed, setCollapsed] = useState(false);
   const location = useLocation();
+  const { role } = useRBAC();
+  const sections = filterNavSections(role || "user");
 
   const isActive = (path) => {
     if (path === "/") return location.pathname === "/";
@@ -176,7 +36,7 @@ export default function Sidebar() {
 
       {/* Nav */}
       <nav className="flex-1 py-3 px-2 overflow-y-auto">
-        {navSections.map((section) => (
+        {sections.map((section) => (
           <div key={section.label} className="mb-3">
             {!collapsed && (
               <p className="text-[10px] font-bold uppercase tracking-widest text-sidebar-foreground/30 px-2.5 mb-1">

@@ -3,6 +3,7 @@ import { Outlet } from "react-router-dom";
 import Sidebar from "./Sidebar";
 import GlobalSearch from "@/components/shared/GlobalSearch";
 import SubscriptionGate from "@/components/shared/SubscriptionGate";
+import RoleGuard from "@/components/shared/RoleGuard";
 import { Search } from "lucide-react";
 
 export default function AppLayout() {
@@ -36,7 +37,9 @@ export default function AppLayout() {
         </div>
         <div className="p-6 lg:p-8 max-w-[1400px] mx-auto">
           <SubscriptionGate>
-            <Outlet />
+            <RoleGuard>
+              <Outlet />
+            </RoleGuard>
           </SubscriptionGate>
         </div>
       </main>
