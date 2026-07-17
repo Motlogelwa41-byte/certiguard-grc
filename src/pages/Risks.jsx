@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
-import { AlertTriangle, Plus, Search, Download, Upload } from "lucide-react";
+import { AlertTriangle, Plus, Search, Download, Upload, Trash2 } from "lucide-react";
 import RiskAppetitePanel from "@/components/risks/RiskAppetitePanel";
 import { exportToCsv } from "@/lib/exportCsv";
 import BulkImportModal from "@/components/shared/BulkImportModal";
@@ -16,6 +16,7 @@ import { useToast } from "@/components/ui/use-toast";
 import { logAuditTrail } from "@/lib/auditLogger";
 import { useAuth } from "@/lib/AuthContext";
 import RiskCardDetail from "@/components/risks/RiskCardDetail";
+import BulkActionBar from "@/components/shared/BulkActionBar";
 
 const riskCategories = ["operational","technical","compliance","financial","strategic","reputational","third_party"];
 const defaultForm = { risk_id: "", title: "", description: "", category: "operational", likelihood: 3, impact: 3, status: "open", treatment: "mitigate", owner_name: "", mitigation_plan: "", due_date: "", related_control_ids: [], tolerance_justification: "" };
@@ -31,6 +32,9 @@ export default function Risks() {
   const [search, setSearch] = useState("");
   const [filterStatus, setFilterStatus] = useState("all");
   const [importOpen, setImportOpen] = useState(false);
+  const [selected, setSelected] = useState(new Set());
+  const [bulkStatus, setBulkStatus] = useState("");
+  const [bulkOwner, setBulkOwner] = useState("");
   const { toast } = useToast();
 
   const handleExport = () => exportToCsv(items, "risks", ["risk_id", "title", "category", "status", "likelihood", "impact", "risk_score", "treatment", "owner_name"]);
@@ -99,6 +103,37 @@ export default function Risks() {
     return matchSearch && matchStatus;
   });
 
+  const toggleSelect = (id) => {
+    const next = new Set(selected);
+    if (next.has(id)) next.delete(id); else next.add(id);
+    setSelected(next);
+  };
+  const applyBulkStatus = async () => {
+    if (!bulkStatus || selected.size === 0) return;
+    const updates = [...selected].map(id => ({ id, status: bulkStatus }));
+    await base44.entities.Risk.bulkUpdate(updates);
+    await logAuditTrail({ action: "update", entity_type: "Risk", entity_name: `${selected.size} risks`, after: { status: bulkStatus }, user, severity: "info" });
+    setSelected(new Set()); setBulkStatus(""); load();
+    toast({ title: `${updates.length} risks updated` });
+  };
+  const applyBulkOwner = async () => {
+    if (!bulkOwner.trim() || selected.size === 0) return;
+    const updates = [...selected].map(id => ({ id, owner_name: bulkOwner.trim() }));
+    await base44.entities.Risk.bulkUpdate(updates);
+    await logAuditTrail({ action: "update", entity_type: "Risk", entity_name: `${selected.size} risks`, after: { owner_name: bulkOwner.trim() }, user, severity: "info" });
+    setSelected(new Set()); setBulkOwner(""); load();
+    toast({ title: `${updates.length} risks reassigned` });
+  };
+  const bulkDelete = async () => {
+    if (selected.size === 0) return;
+    if (!window.confirm(`Delete ${selected.size} selected risks? This cannot be undone.`)) return;
+    await base44.entities.Risk.deleteMany({ id: { $in: [...selected] } });
+    await logAuditTrail({ action: "delete", entity_type: "Risk", entity_name: `${selected.size} risks`, user, severity: "warning" });
+    const count = selected.size;
+    setSelected(new Set()); load();
+    toast({ title: `${count} risks deleted` });
+  };
+
   if (loading) return <div className="flex items-center justify-center h-64"><div className="w-8 h-8 border-4 border-primary/20 border-t-primary rounded-full animate-spin" /></div>;
 
   return (
@@ -158,6 +193,23 @@ export default function Risks() {
         </Select>
       </div>
 
+      <BulkActionBar selectedCount={selected.size} onClear={() => setSelected(new Set())}>
+        <Select value={bulkStatus} onValueChange={setBulkStatus}>
+          <SelectTrigger className="w-[140px] h-8"><SelectValue placeholder="Set status" /></SelectTrigger>
+          <SelectContent>
+            <SelectItem value="open">Open</SelectItem>
+            <SelectItem value="mitigating">Mitigating</SelectItem>
+            <SelectItem value="accepted">Accepted</SelectItem>
+            <SelectItem value="transferred">Transferred</SelectItem>
+            <SelectItem value="closed">Closed</SelectItem>
+          </SelectContent>
+        </Select>
+        <Button size="sm" variant="secondary" onClick={applyBulkStatus} disabled={!bulkStatus}>Apply Status</Button>
+        <Input value={bulkOwner} onChange={(e) => setBulkOwner(e.target.value)} placeholder="Assign owner" className="w-[160px] h-8" />
+        <Button size="sm" variant="secondary" onClick={applyBulkOwner} disabled={!bulkOwner.trim()}>Assign Owner</Button>
+        <Button size="sm" variant="destructive" onClick={bulkDelete}><Trash2 className="w-4 h-4 mr-1" />Delete</Button>
+      </BulkActionBar>
+
       {items.length === 0 ? (
         <EmptyState icon={AlertTriangle} title="No risks identified" description="Add risks to your register to start tracking." actionLabel="Add Risk" onAction={() => setOpen(true)} />
       ) : filtered.length === 0 ? (
@@ -165,13 +217,17 @@ export default function Risks() {
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
           {filtered.map((r) => (
-            <RiskCardDetail
-              key={r.id}
-              r={r}
-              allControls={controls}
-              onEdit={handleEdit}
-              onDelete={handleDelete}
-            />
+            <div key={r.id} className={`relative rounded-xl ${selected.has(r.id) ? "ring-2 ring-primary" : ""}`}>
+              <div className="absolute top-2 right-2 z-10">
+                <input type="checkbox" checked={selected.has(r.id)} onChange={() => toggleSelect(r.id)} className="w-4 h-4 rounded" aria-label={`Select ${r.title}`} />
+              </div>
+              <RiskCardDetail
+                r={r}
+                allControls={controls}
+                onEdit={handleEdit}
+                onDelete={handleDelete}
+              />
+            </div>
           ))}
         </div>
       )}

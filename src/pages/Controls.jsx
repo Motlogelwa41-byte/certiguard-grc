@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
 import { FileCheck, Plus, Pencil, Trash2, Search, Download, Upload, Zap } from "lucide-react";
 import RemediationDialog from "@/components/controls/RemediationDialog";
+import BulkActionBar from "@/components/shared/BulkActionBar";
 import { exportToCsv } from "@/lib/exportCsv";
 import BulkImportModal from "@/components/shared/BulkImportModal";
 import { Button } from "@/components/ui/button";
@@ -33,6 +34,9 @@ export default function Controls() {
   const [filterCategory, setFilterCategory] = useState("all");
   const [importOpen, setImportOpen] = useState(false);
   const [remediationControl, setRemediationControl] = useState(null);
+  const [selected, setSelected] = useState(new Set());
+  const [bulkStatus, setBulkStatus] = useState("");
+  const [bulkOwner, setBulkOwner] = useState("");
   const { toast } = useToast();
 
   const handleExport = () => exportToCsv(items, "controls", ["control_id", "title", "category", "status", "severity", "automation_status", "owner_name", "description"]);
@@ -105,6 +109,45 @@ export default function Controls() {
     return matchSearch && matchStatus && matchCategory;
   });
 
+  const filteredIds = filtered.map(c => c.id);
+  const allFilteredSelected = filteredIds.length > 0 && filteredIds.every(id => selected.has(id));
+  const toggleSelect = (id) => {
+    const next = new Set(selected);
+    if (next.has(id)) next.delete(id); else next.add(id);
+    setSelected(next);
+  };
+  const toggleSelectAll = () => {
+    const next = new Set(selected);
+    if (allFilteredSelected) filteredIds.forEach(id => next.delete(id));
+    else filteredIds.forEach(id => next.add(id));
+    setSelected(next);
+  };
+  const applyBulkStatus = async () => {
+    if (!bulkStatus || selected.size === 0) return;
+    const updates = [...selected].map(id => ({ id, status: bulkStatus }));
+    await base44.entities.Control.bulkUpdate(updates);
+    await logAuditTrail({ action: "update", entity_type: "Control", entity_name: `${selected.size} controls`, after: { status: bulkStatus }, user, severity: "info" });
+    setSelected(new Set()); setBulkStatus(""); load();
+    toast({ title: `${updates.length} controls updated` });
+  };
+  const applyBulkOwner = async () => {
+    if (!bulkOwner.trim() || selected.size === 0) return;
+    const updates = [...selected].map(id => ({ id, owner_name: bulkOwner.trim() }));
+    await base44.entities.Control.bulkUpdate(updates);
+    await logAuditTrail({ action: "update", entity_type: "Control", entity_name: `${selected.size} controls`, after: { owner_name: bulkOwner.trim() }, user, severity: "info" });
+    setSelected(new Set()); setBulkOwner(""); load();
+    toast({ title: `${updates.length} controls reassigned` });
+  };
+  const bulkDelete = async () => {
+    if (selected.size === 0) return;
+    if (!window.confirm(`Delete ${selected.size} selected controls? This cannot be undone.`)) return;
+    await base44.entities.Control.deleteMany({ id: { $in: [...selected] } });
+    await logAuditTrail({ action: "delete", entity_type: "Control", entity_name: `${selected.size} controls`, user, severity: "warning" });
+    const count = selected.size;
+    setSelected(new Set()); load();
+    toast({ title: `${count} controls deleted` });
+  };
+
   if (loading) return <div className="flex items-center justify-center h-64"><div className="w-8 h-8 border-4 border-primary/20 border-t-primary rounded-full animate-spin" /></div>;
 
   return (
@@ -142,6 +185,22 @@ export default function Controls() {
         </Select>
       </div>
 
+      <BulkActionBar selectedCount={selected.size} onClear={() => setSelected(new Set())}>
+        <Select value={bulkStatus} onValueChange={setBulkStatus}>
+          <SelectTrigger className="w-[140px] h-8"><SelectValue placeholder="Set status" /></SelectTrigger>
+          <SelectContent>
+            <SelectItem value="passing">Passing</SelectItem>
+            <SelectItem value="failing">Failing</SelectItem>
+            <SelectItem value="not_tested">Not Tested</SelectItem>
+            <SelectItem value="not_applicable">N/A</SelectItem>
+          </SelectContent>
+        </Select>
+        <Button size="sm" variant="secondary" onClick={applyBulkStatus} disabled={!bulkStatus}>Apply Status</Button>
+        <Input value={bulkOwner} onChange={(e) => setBulkOwner(e.target.value)} placeholder="Assign owner" className="w-[160px] h-8" />
+        <Button size="sm" variant="secondary" onClick={applyBulkOwner} disabled={!bulkOwner.trim()}>Assign Owner</Button>
+        <Button size="sm" variant="destructive" onClick={bulkDelete}><Trash2 className="w-4 h-4 mr-1" />Delete</Button>
+      </BulkActionBar>
+
       {items.length === 0 ? (
         <EmptyState icon={FileCheck} title="No controls yet" description="Add controls to track your compliance posture." actionLabel="Add Control" onAction={() => setOpen(true)} />
       ) : filtered.length === 0 ? (
@@ -152,6 +211,7 @@ export default function Controls() {
             <table className="w-full text-sm">
               <thead>
                 <tr className="border-b border-border bg-muted/50">
+                  <th className="px-4 py-3 w-10"><input type="checkbox" checked={allFilteredSelected} onChange={toggleSelectAll} aria-label="Select all" /></th>
                   <th className="text-left px-4 py-3 font-semibold text-muted-foreground">ID</th>
                   <th className="text-left px-4 py-3 font-semibold text-muted-foreground">Title</th>
                   <th className="text-left px-4 py-3 font-semibold text-muted-foreground">Category</th>
@@ -164,7 +224,8 @@ export default function Controls() {
               </thead>
               <tbody>
                 {filtered.map((c) => (
-                  <tr key={c.id} className="border-b border-border last:border-0 hover:bg-muted/30 transition-colors">
+                  <tr key={c.id} className={`border-b border-border last:border-0 hover:bg-muted/30 transition-colors ${selected.has(c.id) ? "bg-primary/5" : ""}`}>
+                    <td className="px-4 py-3"><input type="checkbox" checked={selected.has(c.id)} onChange={() => toggleSelect(c.id)} aria-label={`Select ${c.control_id}`} /></td>
                     <td className="px-4 py-3 font-mono text-xs text-muted-foreground">{c.control_id}</td>
                     <td className="px-4 py-3 font-medium text-foreground max-w-xs truncate">{c.title}</td>
                     <td className="px-4 py-3 text-muted-foreground capitalize">{(c.category || "").replace(/_/g, " ")}</td>
