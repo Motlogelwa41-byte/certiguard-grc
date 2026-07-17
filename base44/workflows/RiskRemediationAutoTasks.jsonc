@@ -1,0 +1,42 @@
+{
+  "name": "Risk Remediation Auto-Tasks",
+  "definition": {
+    "document": {
+      "dsl": "1.0.0",
+      "name": "risk_remediation_auto_tasks",
+      "version": "1.0",
+      "namespace": "base44"
+    },
+    "do": [
+      {
+        "create_remediation_task": {
+          "call": "invoke_backend_function",
+          "with": {
+            "function_name": "generateRiskRemediationTasks",
+            "args": {
+              "risk_id": "${ .trigger.entity_id }",
+              "risk": "${ .trigger.data }"
+            }
+          },
+          "then": "end",
+          "x-base44": {
+            "title": "Create remediation task",
+            "description": "Auto-generate remediation follow-up for high-score risks"
+          }
+        }
+      }
+    ]
+  },
+  "description": "When a risk's inherent score (likelihood x impact) exceeds the tolerance threshold (12), auto-generate a remediation follow-up task linked to that risk.",
+  "trigger": {
+    "condition": "${ (.trigger.data.likelihood * .trigger.data.impact) > 12 }",
+    "config": {
+      "trigger_type": "entity",
+      "entity_name": "Risk",
+      "events": [
+        "create",
+        "update"
+      ]
+    }
+  }
+}
