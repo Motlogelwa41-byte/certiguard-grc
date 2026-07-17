@@ -2,6 +2,10 @@
   "name": "TaskReminder",
   "type": "object",
   "properties": {
+    "tenant_id": {
+      "type": "string",
+      "description": "Tenant isolation key"
+    },
     "task_id": {
       "type": "string"
     },
@@ -43,10 +47,22 @@
   ],
   "rls": {
     "create": null,
-    "read": null,
+    "read": {
+      "$or": [
+        {
+          "data.tenant_id": "{{user.data.tenant_id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
     "update": {
       "$or": [
         {
+          "data.tenant_id": "{{user.data.tenant_id}}",
           "created_by_id": "{{user.id}}"
         },
         {
@@ -59,6 +75,7 @@
     "delete": {
       "$or": [
         {
+          "data.tenant_id": "{{user.data.tenant_id}}",
           "created_by_id": "{{user.id}}"
         },
         {
