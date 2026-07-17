@@ -41,7 +41,8 @@ import {
   Radar,
   Landmark,
   BarChart2,
-  Network
+  Network,
+  GitCompare
 } from "lucide-react";
 import { base44 } from "@/api/base44Client";
 
@@ -70,6 +71,7 @@ const navSections = [
       { label: "Risk Register", path: "/risks", icon: AlertTriangle },
       { label: "Risk Heatmap", path: "/risk-heatmap", icon: Target },
       { label: "Appetite Heatmap", path: "/risk-appetite-heatmap", icon: Target },
+      { label: "Framework Cross-Map", path: "/risk-framework-crossmap", icon: GitCompare },
     ]
   },
   {
