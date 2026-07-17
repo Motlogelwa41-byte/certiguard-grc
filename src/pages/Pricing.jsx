@@ -2,6 +2,7 @@ import React, { useState, useEffect, useMemo } from "react";
 import { Link } from "react-router-dom";
 import { Check, X, Shield, Zap, Building2, ArrowRight, Star } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { startCheckout } from "@/lib/billing";
 
 const plans = [
   {
@@ -116,6 +117,7 @@ const plans = [
 
 export default function Pricing() {
   const [billingCycle, setBillingCycle] = useState("annual");
+  const [checkout, setCheckout] = useState(null);
 
   return (
     <div className="min-h-screen bg-background">
@@ -211,15 +213,16 @@ export default function Pricing() {
                 className="w-full"
                 variant={plan.tier === "professional" ? "default" : "outline"}
                 size="lg"
-                onClick={() => {
-                  if (plan.tier === "enterprise") {
-                    window.location.href = "mailto:sales@complianceos.com";
-                  } else {
-                    window.location.href = "/register";
-                  }
+                disabled={checkout === plan.tier}
+                onClick={async () => {
+                  if (plan.tier === "trial") { window.location.href = "/register"; return; }
+                  if (plan.tier === "enterprise") { window.location.href = "mailto:sales@complianceos.com"; return; }
+                  setCheckout(plan.tier);
+                  try { await startCheckout(plan.tier, billingCycle); }
+                  finally { setCheckout(null); }
                 }}
               >
-                {plan.tier === "trial" ? "Start Free Trial" : plan.tier === "enterprise" ? "Contact Sales" : "Get Started"}
+                {checkout === plan.tier ? "Redirecting…" : plan.tier === "trial" ? "Start Free Trial" : plan.tier === "enterprise" ? "Contact Sales" : "Get Started"}
                 <ArrowRight className="w-4 h-4 ml-1" />
               </Button>
             </div>

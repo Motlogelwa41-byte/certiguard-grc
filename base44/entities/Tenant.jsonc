@@ -81,6 +81,22 @@
     "is_active": {
       "type": "boolean",
       "default": true
+    },
+    "stripe_customer_id": {
+      "type": "string",
+      "description": "Stripe customer object ID linked to this tenant"
+    },
+    "stripe_subscription_id": {
+      "type": "string",
+      "description": "Stripe subscription ID for the active plan"
+    },
+    "billing_cycle": {
+      "type": "string",
+      "enum": [
+        "monthly",
+        "annual"
+      ],
+      "description": "Current billing cycle"
     }
   },
   "required": [

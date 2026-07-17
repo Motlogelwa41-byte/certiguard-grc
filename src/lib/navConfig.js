@@ -4,7 +4,7 @@ import {
   ShieldCheck, FileSearch, Brain, Play, FileSpreadsheet, FileDown, BarChart3,
   History, ShieldAlert, GraduationCap, Calendar, Bell, Users, Copy, SlidersHorizontal,
   Target, Upload, Send, Globe, Users2, MapPin, Zap, ListChecks, BellRing,
-  PieChart, Radar, Landmark, BarChart2, Network, GitCompare, Sparkles
+  PieChart, Radar, Landmark, BarChart2, Network, GitCompare, Sparkles, CreditCard
 } from "lucide-react";
 
 // Roles: admin, compliance_officer, risk_manager, auditor, user
@@ -102,6 +102,7 @@ export const navSections = [
       { label: "Security", path: "/security", icon: ShieldCheck, roles: ["admin"] },
       { label: "Users", path: "/users", icon: Users, roles: ["admin"] },
       { label: "Tenants", path: "/tenant-admin", icon: PieChart, roles: ["admin"] },
+      { label: "Billing", path: "/billing", icon: CreditCard, roles: ["admin"] },
       { label: "Policy Acknowledgments", path: "/policy-acknowledgments", icon: FileCheck, roles: ["admin", "compliance_officer"] },
       { label: "Notifications", path: "/notifications", icon: Bell, roles: ["admin", "compliance_officer", "risk_manager", "auditor", "user"] },
       { label: "Notif. Preferences", path: "/notification-preferences", icon: SlidersHorizontal, roles: ["admin", "compliance_officer", "risk_manager"] },
