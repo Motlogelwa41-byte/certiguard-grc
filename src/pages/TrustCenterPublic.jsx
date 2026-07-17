@@ -3,7 +3,7 @@ import { base44 } from "@/api/base44Client";
 import {
   Shield, CheckCircle, Lock, Eye, Server, Globe, Mail, Award,
   AlertTriangle, Activity, Zap, FileCheck, Users, Clock,
-  ChevronDown, ChevronUp, ExternalLink, Star, TrendingUp
+  ChevronDown, ChevronUp, ExternalLink, Star, TrendingUp, Sparkles
 } from "lucide-react";
 
 function parse(val) {
@@ -179,6 +179,33 @@ export default function TrustCenterPublic() {
       </div>
 
       <div className="max-w-6xl mx-auto px-6 py-14 space-y-16">
+
+        {/* About CertiGuard — condensed origin story */}
+        <section className="rounded-2xl p-8" style={{ background: `linear-gradient(135deg, ${accent}10 0%, ${accent}03 100%)`, border: `1px solid ${accent}20` }}>
+          <div className="flex items-center gap-3 mb-3">
+            <div className="w-10 h-10 rounded-xl flex items-center justify-center" style={{ background: `${accent}15` }}>
+              <Shield className="w-5 h-5" style={{ color: accent }} />
+            </div>
+            <div>
+              <h2 className="text-xl font-extrabold text-slate-900">Built on African Soil, Engineered for Global Trust</h2>
+              <p className="text-xs text-slate-500">A product of Ethical Edge GRC Consulting (Pty) Ltd — Gaborone, Botswana</p>
+            </div>
+          </div>
+          <p className="text-slate-600 text-sm leading-relaxed max-w-3xl">
+            CertiGuard GRC is an AI-native, Cognitive GRC platform engineered to turn compliance from a heavy
+            corporate burden into an empowering asset. By combining continuous compliance automation with
+            predictive risk analytics, climate resilience, and our proprietary Immutable Governance Ledger
+            (IGGL), we ensure your organization is not just ready for today's audit, but resilient against
+            tomorrow's challenges — backed by a fully certified, deeply professional GRC consultancy.
+          </p>
+          <div className="flex flex-wrap gap-2 mt-4">
+            {[["AI Cognitive Engine", Sparkles], ["Continuous Monitoring", Activity], ["IGGL Trust Ledger", Lock]].map(([label, Icon]) => (
+              <span key={label} className="inline-flex items-center gap-1.5 text-xs font-medium px-3 py-1.5 rounded-full bg-white border border-slate-200 text-slate-700">
+                <Icon className="w-3.5 h-3.5" style={{ color: accent }} />{label}
+              </span>
+            ))}
+          </div>
+        </section>
 
         {/* SADC Compliance showcase — unique differentiator */}
         {sadcFrameworks.length > 0 && (

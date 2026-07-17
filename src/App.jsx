@@ -65,6 +65,7 @@ import RiskAppetiteHeatmap from '@/pages/RiskAppetiteHeatmap';
 import RiskFrameworkCrossMap from '@/pages/RiskFrameworkCrossMap';
 import AIAssistant from '@/pages/AIAssistant';
 import Billing from '@/pages/Billing';
+import About from '@/pages/About';
 
 const AuthenticatedApp = () => {
   const { isLoadingAuth, isLoadingPublicSettings, authError, navigateToLogin } = useAuth();
@@ -146,6 +147,7 @@ const AuthenticatedApp = () => {
           <Route path="/risk-framework-crossmap" element={<RiskFrameworkCrossMap />} />
           <Route path="/ai-assistant" element={<AIAssistant />} />
           <Route path="/billing" element={<Billing />} />
+          <Route path="/about" element={<About />} />
         </Route>
       </Route>
       <Route path="*" element={<PageNotFound />} />
