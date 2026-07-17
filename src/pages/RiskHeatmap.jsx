@@ -1,12 +1,15 @@
-import React, { useState, useEffect, useMemo } from "react";
+import React, { useState, useEffect, useMemo, useRef } from "react";
 import { base44 } from "@/api/base44Client";
-import { AlertTriangle, TrendingUp, Shield, Target } from "lucide-react";
+import { AlertTriangle, TrendingUp, Shield, Target, Download } from "lucide-react";
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, ReferenceLine } from "recharts";
 import { subMonths, format, startOfMonth, endOfMonth, parseISO, isWithinInterval } from "date-fns";
 import PageHeader from "@/components/shared/PageHeader";
 import StatusBadge from "@/components/shared/StatusBadge";
 import EmptyState from "@/components/shared/EmptyState";
 import RiskDetailPanel from "@/components/risks/RiskDetailPanel";
+import { Button } from "@/components/ui/button";
+import { useToast } from "@/components/ui/use-toast";
+import { exportElementToPDF } from "@/lib/boardReportExport";
 
 const ZONE_COLOR = (likelihood, impact) => {
   const score = likelihood * impact;
@@ -40,6 +43,26 @@ export default function RiskHeatmap() {
   const [filterStatus, setFilterStatus] = useState("all");
   const [filterCategory, setFilterCategory] = useState("all");
   const [hoveredCell, setHoveredCell] = useState(null);
+  const exportRef = useRef(null);
+  const [exporting, setExporting] = useState(false);
+  const { toast } = useToast();
+
+  const handleExportPDF = async () => {
+    if (!exportRef.current) return;
+    setExporting(true);
+    try {
+      await exportElementToPDF(exportRef.current, {
+        filename: `risk-heatmap-${new Date().toISOString().slice(0, 10)}.pdf`,
+        title: "Risk Heatmap Report",
+        subtitle: "Likelihood × Impact matrix and trend analysis",
+      });
+      toast({ title: "PDF exported" });
+    } catch (e) {
+      toast({ title: "Export failed", description: e.message, variant: "destructive" });
+    } finally {
+      setExporting(false);
+    }
+  };
 
   useEffect(() => {
     base44.entities.Risk.list().then((r) => { setRisks(r); setLoading(false); });
@@ -111,7 +134,7 @@ export default function RiskHeatmap() {
   );
 
   return (
-    <><div className="space-y-6">
+    <>
       <PageHeader
         title="Risk Heatmap"
         subtitle="Interactive plot of identified risks by likelihood and impact"
@@ -131,9 +154,13 @@ export default function RiskHeatmap() {
               <option value="all">All Categories</option>
               {categories.map(c => <option key={c} value={c}>{c.replace(/_/g, " ").replace(/\b\w/g, l => l.toUpperCase())}</option>)}
             </select>
+            <Button variant="outline" size="sm" onClick={handleExportPDF} disabled={exporting}>
+              <Download className="w-4 h-4 mr-1" />{exporting ? "Exporting…" : "Export PDF"}
+            </Button>
           </div>
         }
       />
+      <div className="space-y-6" ref={exportRef}>
 
       {/* Summary cards */}
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">

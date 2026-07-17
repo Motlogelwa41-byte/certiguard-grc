@@ -1,11 +1,14 @@
-import React, { useState, useEffect, useMemo } from "react";
+import React, { useState, useEffect, useMemo, useRef } from "react";
 import { base44 } from "@/api/base44Client";
 import {
   LineChart, Line, BarChart, Bar, PieChart, Pie, Cell,
   XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, AreaChart, Area
 } from "recharts";
-import { ShieldCheck, TrendingUp, TrendingDown, AlertTriangle, CheckCircle2, XCircle, Clock, Target } from "lucide-react";
+import { ShieldCheck, TrendingUp, TrendingDown, AlertTriangle, CheckCircle2, XCircle, Clock, Target, Download } from "lucide-react";
 import PageHeader from "@/components/shared/PageHeader";
+import { Button } from "@/components/ui/button";
+import { useToast } from "@/components/ui/use-toast";
+import { exportElementToPDF } from "@/lib/boardReportExport";
 
 const SEVERITY_COLORS = { critical: "#ef4444", high: "#f97316", medium: "#f59e0b", low: "#10b981" };
 const STATUS_COLORS = { passing: "#10b981", failing: "#ef4444", not_tested: "#6b7280", not_applicable: "#94a3b8" };
@@ -49,6 +52,26 @@ export default function ManagementDashboard() {
   const [frameworks, setFrameworks] = useState([]);
   const [incidents, setIncidents] = useState([]);
   const [loading, setLoading] = useState(true);
+  const exportRef = useRef(null);
+  const [exporting, setExporting] = useState(false);
+  const { toast } = useToast();
+
+  const handleExportPDF = async () => {
+    if (!exportRef.current) return;
+    setExporting(true);
+    try {
+      await exportElementToPDF(exportRef.current, {
+        filename: `management-dashboard-${new Date().toISOString().slice(0, 10)}.pdf`,
+        title: "Management Security Dashboard",
+        subtitle: "Risk posture · Control health · Compliance readiness",
+      });
+      toast({ title: "PDF exported" });
+    } catch (e) {
+      toast({ title: "Export failed", description: e.message, variant: "destructive" });
+    } finally {
+      setExporting(false);
+    }
+  };
 
   useEffect(() => {
     Promise.all([
@@ -167,11 +190,17 @@ export default function ManagementDashboard() {
   );
 
   return (
-    <div className="space-y-6">
+    <>
       <PageHeader
         title="Management Security Dashboard"
         subtitle="Executive-level overview of risk posture, control health, and compliance readiness"
+        actions={
+          <Button variant="outline" size="sm" onClick={handleExportPDF} disabled={exporting}>
+            <Download className="w-4 h-4 mr-1" />{exporting ? "Exporting…" : "Export PDF"}
+          </Button>
+        }
       />
+      <div className="space-y-6" ref={exportRef}>
 
       {/* Hero banner */}
       <div className="bg-gradient-to-r from-slate-900 via-blue-950 to-slate-900 rounded-2xl p-6 text-white">
@@ -360,5 +389,6 @@ export default function ManagementDashboard() {
         </ResponsiveContainer>
       </div>
     </div>
+    </>
   );
 }
