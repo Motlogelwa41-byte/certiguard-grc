@@ -3,7 +3,6 @@ import { appParams } from '@/lib/app-params';
 
 const { appId, token, functionsVersion, appBaseUrl } = appParams;
 
-//Create a client with authentication required
 export const base44 = createClient({
   appId,
   token,
@@ -14,31 +13,119 @@ export const base44 = createClient({
 });
 
 // --- Multi-tenant isolation: auto-stamp tenant_id on creates ---
-// The current tenant id is injected by TenantProvider after auth resolves.
 let _tenantId = null;
 export function setTenantContext(tid) { _tenantId = tid || null; }
 export function getTenantId() { return _tenantId; }
 
 // Entities that carry tenant-scoped data and must be stamped on create.
 const TENANT_SCOPED_ENTITIES = new Set([
-  'Control', 'Risk', 'Policy', 'Vendor', 'ComplianceTask',
-  'Framework', 'Incident', 'Evidence'
+  'Control', 'Risk', 'Policy', 'Vendor', 'ComplianceTask', 'Framework', 'Incident', 'Evidence',
+  'Audit', 'VendorAssessment', 'ComplianceRun', 'GapAnalysis', 'TaskReminder', 'AuditFinding',
+  'AuditChecklist', 'MitigationStep', 'Training', 'ComplianceEvent', 'ROPA', 'TrustCenter',
+  'ReportSchedule', 'SecurityAlert', 'ManagementReport', 'Subscription'
 ]);
+
+// AuditTrail is created server-side via the logAudit function; skip client logging for it.
+const SKIP_AUDIT = new Set(['AuditTrail']);
+
+const nameKeys = ['title', 'name', 'control_id', 'risk_id', 'incident_id', 'finding_id', 'vendor_name', 'processing_activity', 'company_name'];
+const nameOf = (d) => {
+  if (!d || typeof d !== 'object') return '';
+  for (const k of nameKeys) { if (d[k]) return String(d[k]); }
+  return '';
+};
+
+function safeChanges(data) {
+  if (!data || typeof data !== 'object') return data;
+  const out = {};
+  for (const k of Object.keys(data)) {
+    if (k === 'tenant_id') continue;
+    const v = data[k];
+    if (v && typeof v === 'object' && !(v instanceof File) && !Array.isArray(v)) out[k] = JSON.stringify(v);
+    else out[k] = v;
+  }
+  return out;
+}
+
+function logAudit(payload) {
+  // Fire-and-forget; never block or break the user action
+  base44.functions.invoke('logAudit', payload).catch(() => {});
+}
 
 const _origEntities = base44.entities;
 base44.entities = new Proxy(_origEntities, {
   get(target, entityName) {
     const entity = target[entityName];
-    if (!entity || !TENANT_SCOPED_ENTITIES.has(entityName)) return entity;
+    if (!entity) return entity;
+    const stamp = TENANT_SCOPED_ENTITIES.has(entityName);
+    const audit = !SKIP_AUDIT.has(entityName);
+    if (!stamp && !audit) return entity;
+
     return new Proxy(entity, {
       get(e, key) {
         const fn = e[key];
         if (typeof fn !== 'function') return fn;
+
         if (key === 'create') {
-          return (data) => fn.call(e, { tenant_id: _tenantId, ...data });
+          return async (data) => {
+            const payload = stamp ? { tenant_id: _tenantId, ...data } : data;
+            const result = await fn.call(e, payload);
+            if (audit) {
+              logAudit({
+                action: 'create', entity_type: entityName,
+                entity_id: result?.id || '', entity_name: nameOf(data),
+                changes: JSON.stringify(safeChanges(data)), severity: 'info'
+              });
+            }
+            return result;
+          };
         }
         if (key === 'bulkCreate') {
-          return (arr) => fn.call(e, (arr || []).map((d) => ({ tenant_id: _tenantId, ...d })));
+          return async (arr) => {
+            const payload = stamp ? (arr || []).map((d) => ({ tenant_id: _tenantId, ...d })) : arr;
+            const result = await fn.call(e, payload);
+            if (audit) {
+              logAudit({ action: 'create', entity_type: entityName, entity_id: '', entity_name: `Bulk create ${(arr || []).length} ${entityName}`, changes: JSON.stringify({ count: (arr || []).length }), severity: 'info' });
+            }
+            return result;
+          };
+        }
+        if (key === 'update') {
+          return async (id, data) => {
+            const result = await fn.call(e, id, data);
+            if (audit) {
+              logAudit({ action: 'update', entity_type: entityName, entity_id: id, entity_name: nameOf(data), changes: JSON.stringify(safeChanges(data)), severity: 'info' });
+            }
+            return result;
+          };
+        }
+        if (key === 'bulkUpdate') {
+          return async (arr) => {
+            const result = await fn.call(e, arr);
+            if (audit) logAudit({ action: 'update', entity_type: entityName, entity_id: '', entity_name: `Bulk update ${(arr || []).length} ${entityName}`, changes: JSON.stringify({ count: (arr || []).length }), severity: 'info' });
+            return result;
+          };
+        }
+        if (key === 'updateMany') {
+          return async (query, update) => {
+            const result = await fn.call(e, query, update);
+            if (audit) logAudit({ action: 'update', entity_type: entityName, entity_id: '', entity_name: `Bulk updateMany ${entityName}`, changes: JSON.stringify({ query, update: safeChanges(update) }), severity: 'info' });
+            return result;
+          };
+        }
+        if (key === 'delete') {
+          return async (id) => {
+            const result = await fn.call(e, id);
+            if (audit) logAudit({ action: 'delete', entity_type: entityName, entity_id: id, entity_name: '', changes: null, severity: 'warning' });
+            return result;
+          };
+        }
+        if (key === 'deleteMany') {
+          return async (query) => {
+            const result = await fn.call(e, query);
+            if (audit) logAudit({ action: 'delete', entity_type: entityName, entity_id: '', entity_name: `Bulk deleteMany ${entityName}`, changes: JSON.stringify({ query }), severity: 'warning' });
+            return result;
+          };
         }
         return fn.bind(e);
       }
