@@ -4,6 +4,7 @@ import { ChevronLeft, ChevronRight, LogOut, ShieldCheck } from "lucide-react";
 import { base44 } from "@/api/base44Client";
 import { filterNavSections } from "@/lib/navConfig";
 import { useRBAC } from "@/lib/useRBAC";
+import { logLogout } from "@/lib/authAudit";
 
 export default function Sidebar() {
   const [collapsed, setCollapsed] = useState(false);
@@ -82,7 +83,7 @@ export default function Sidebar() {
           {!collapsed && <span>Collapse</span>}
         </button>
         <button
-          onClick={() => base44.auth.logout("/")}
+          onClick={async () => { await logLogout(); base44.auth.logout("/"); }}
           className="flex items-center gap-2.5 px-2.5 py-2 rounded-md text-sm font-medium text-sidebar-foreground/70 hover:text-sidebar-foreground hover:bg-sidebar-accent/50 w-full transition-colors"
         >
           <LogOut className="w-[18px] h-[18px] shrink-0" />

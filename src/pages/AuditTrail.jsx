@@ -7,6 +7,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import PageHeader from "@/components/shared/PageHeader";
 import EmptyState from "@/components/shared/EmptyState";
 import { exportEvidencePack } from "@/lib/exportEvidencePack";
+import { exportAuditTrailPdf } from "@/lib/exportAuditTrailPdf";
 import moment from "moment";
 
 const ENTITY_FILTERS = [
@@ -60,6 +61,18 @@ export default function AuditTrailPage() {
     }
   };
 
+  const [exportingTrail, setExportingTrail] = useState(false);
+  const handleExportTrail = async () => {
+    setExportingTrail(true);
+    try {
+      await exportAuditTrailPdf({ auditLogs: logs });
+    } catch (e) {
+      // best-effort export
+    } finally {
+      setExportingTrail(false);
+    }
+  };
+
   useEffect(() => {
     base44.entities.AuditTrail.list("-created_date", 500).then((d) => { setLogs(d); setLoading(false); });
   }, []);
@@ -83,9 +96,14 @@ export default function AuditTrailPage() {
         title="Audit Trail"
         subtitle="Complete activity log — every change to risks, controls, and tasks with timestamp and user"
         actions={
-          <Button size="sm" onClick={handleExport} disabled={exporting}>
-            <FileDown className="w-4 h-4 mr-1" /> {exporting ? "Generating…" : "Export Evidence Pack"}
-          </Button>
+          <div className="flex items-center gap-2">
+            <Button size="sm" variant="outline" onClick={handleExportTrail} disabled={exportingTrail}>
+              <FileDown className="w-4 h-4 mr-1" /> {exportingTrail ? "Generating…" : "Audit Trail PDF"}
+            </Button>
+            <Button size="sm" onClick={handleExport} disabled={exporting}>
+              <FileDown className="w-4 h-4 mr-1" /> {exporting ? "Generating…" : "Evidence Pack"}
+            </Button>
+          </div>
         }
       />
 
