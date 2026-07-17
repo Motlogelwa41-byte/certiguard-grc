@@ -1,10 +1,12 @@
 import React, { useState, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
-import { History, Search, ChevronDown, ChevronRight } from "lucide-react";
+import { History, Search, ChevronDown, ChevronRight, FileDown } from "lucide-react";
 import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import PageHeader from "@/components/shared/PageHeader";
 import EmptyState from "@/components/shared/EmptyState";
+import { exportEvidencePack } from "@/lib/exportEvidencePack";
 import moment from "moment";
 
 const ENTITY_FILTERS = [
@@ -45,6 +47,18 @@ export default function AuditTrailPage() {
   const [actionFilter, setActionFilter] = useState("all");
   const [entityFilter, setEntityFilter] = useState("all");
   const [expanded, setExpanded] = useState(null);
+  const [exporting, setExporting] = useState(false);
+
+  const handleExport = async () => {
+    setExporting(true);
+    try {
+      await exportEvidencePack({ auditLogs: logs });
+    } catch (e) {
+      // best-effort export
+    } finally {
+      setExporting(false);
+    }
+  };
 
   useEffect(() => {
     base44.entities.AuditTrail.list("-created_date", 500).then((d) => { setLogs(d); setLoading(false); });
@@ -65,7 +79,15 @@ export default function AuditTrailPage() {
 
   return (
     <div>
-      <PageHeader title="Audit Trail" subtitle="Complete activity log — every change to risks, controls, and tasks with timestamp and user" />
+      <PageHeader
+        title="Audit Trail"
+        subtitle="Complete activity log — every change to risks, controls, and tasks with timestamp and user"
+        actions={
+          <Button size="sm" onClick={handleExport} disabled={exporting}>
+            <FileDown className="w-4 h-4 mr-1" /> {exporting ? "Generating…" : "Export Evidence Pack"}
+          </Button>
+        }
+      />
 
       <div className="flex flex-wrap items-center gap-3 mb-6">
         <div className="relative flex-1 min-w-[200px] max-w-sm">
