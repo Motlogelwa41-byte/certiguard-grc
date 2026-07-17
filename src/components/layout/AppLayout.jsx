@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { Outlet } from "react-router-dom";
 import Sidebar from "./Sidebar";
 import GlobalSearch from "@/components/shared/GlobalSearch";
+import SubscriptionGate from "@/components/shared/SubscriptionGate";
 import { Search } from "lucide-react";
 
 export default function AppLayout() {
@@ -34,7 +35,9 @@ export default function AppLayout() {
           </button>
         </div>
         <div className="p-6 lg:p-8 max-w-[1400px] mx-auto">
-          <Outlet />
+          <SubscriptionGate>
+            <Outlet />
+          </SubscriptionGate>
         </div>
       </main>
       <GlobalSearch open={searchOpen} onOpenChange={setSearchOpen} />

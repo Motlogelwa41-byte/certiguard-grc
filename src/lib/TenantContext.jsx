@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useState, useEffect, useCallback } from "react";
-import { base44 } from "@/api/base44Client";
+import { base44, setTenantContext } from "@/api/base44Client";
 
 const TenantContext = createContext(null);
 
@@ -33,11 +33,23 @@ export function TenantProvider({ children }) {
       const me = await base44.auth.me().catch(() => null);
       if (!me) { setLoading(false); return; }
 
-      // Find tenant where this user is admin or member
-      const tenants = await base44.entities.Tenant.filter({ is_active: true });
-      // For now, match by the user email as admin
-      const userTenant = tenants.find(t => t.admin_email === me.email) || tenants[0];
-      
+      // Stamp tenant context from the user profile so creates are isolated
+      setTenantContext(me.tenant_id);
+
+      // Resolve the tenant record (admin can read it; non-admins rely on user.tenant_id only)
+      const tenants = await base44.entities.Tenant.filter({ is_active: true }).catch(() => []);
+      const userTenant = tenants.find((t) => t.admin_email === me.email) || tenants[0];
+
+      // Self-heal: assign this user to the tenant if their profile is missing tenant_id
+      if (userTenant && !me.tenant_id) {
+        try {
+          await base44.auth.updateMe({ tenant_id: userTenant.id });
+          setTenantContext(userTenant.id);
+        } catch (e) {
+          // non-admins may not be able to updateMe; ignore — tenant_id may already be set
+        }
+      }
+
       if (userTenant) {
         const tier = userTenant.subscription_tier || "trial";
         setTenant({
@@ -70,8 +82,31 @@ export function TenantProvider({ children }) {
     return true;
   };
 
+  // Plan-limit checks for enforcement on create/invite actions
+  const canAddUser = (currentCount) => {
+    if (!tenant) return true;
+    const cap = tenant.limits?.maxUsers ?? tenant.max_users ?? 3;
+    return currentCount < cap;
+  };
+
+  const canAddFramework = (currentCount) => {
+    if (!tenant) return true;
+    const cap = tenant.limits?.maxFrameworks ?? tenant.max_frameworks ?? 2;
+    return currentCount < cap;
+  };
+
+  const isTrialExpired = () => {
+    if (!tenant) return false;
+    const status = tenant.subscription_status;
+    if (status === "expired" || status === "cancelled") return true;
+    if (status === "trial" && tenant.trial_ends_at) {
+      return new Date(tenant.trial_ends_at) < new Date();
+    }
+    return false;
+  };
+
   return (
-    <TenantContext.Provider value={{ tenant, loading, hasFeature, isWithinLimit, refreshTenant: loadTenant }}>
+    <TenantContext.Provider value={{ tenant, loading, hasFeature, isWithinLimit, canAddUser, canAddFramework, isTrialExpired, refreshTenant: loadTenant }}>
       {children}
     </TenantContext.Provider>
   );

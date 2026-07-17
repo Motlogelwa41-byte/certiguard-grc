@@ -12,6 +12,10 @@
         "risk_manager"
       ],
       "default": "user"
+    },
+    "tenant_id": {
+      "type": "string",
+      "description": "The tenant this user belongs to"
     }
   },
   "required": [

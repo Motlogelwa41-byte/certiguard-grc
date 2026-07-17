@@ -11,6 +11,7 @@ import PageHeader from "@/components/shared/PageHeader";
 import StatusBadge from "@/components/shared/StatusBadge";
 import EmptyState from "@/components/shared/EmptyState";
 import { useToast } from "@/components/ui/use-toast";
+import { useTenant } from "@/lib/TenantContext";
 
 const defaultForm = { name: "", version: "", description: "", status: "not_started", readiness_score: 0, total_controls: 0, passing_controls: 0 };
 
@@ -21,6 +22,9 @@ export default function Frameworks() {
   const [form, setForm] = useState(defaultForm);
   const [editId, setEditId] = useState(null);
   const { toast } = useToast();
+  const { canAddFramework, tenant } = useTenant();
+  const fwLimit = tenant?.limits?.maxFrameworks ?? tenant?.max_frameworks ?? null;
+  const atLimit = !canAddFramework(items.length);
 
   const load = () => base44.entities.Framework.list().then((d) => { setItems(d); setLoading(false); });
   useEffect(() => { load(); }, []);
@@ -30,6 +34,10 @@ export default function Frameworks() {
       if (editId) {
         await base44.entities.Framework.update(editId, form);
       } else {
+        if (!canAddFramework(items.length)) {
+          toast({ title: "Framework limit reached", description: "Upgrade your plan to add more frameworks.", variant: "destructive" });
+          return;
+        }
         await base44.entities.Framework.create(form);
       }
       setOpen(false);
@@ -58,7 +66,12 @@ export default function Frameworks() {
 
   return (
     <div>
-      <PageHeader title="Frameworks" subtitle="Manage compliance frameworks and track readiness" actions={<Button size="sm" onClick={() => { setForm(defaultForm); setEditId(null); setOpen(true); }}><Plus className="w-4 h-4 mr-1" /> Add Framework</Button>} />
+      <PageHeader title="Frameworks" subtitle="Manage compliance frameworks and track readiness" actions={
+        <div className="flex items-center gap-3">
+          {fwLimit && <span className="text-xs text-muted-foreground">{items.length} / {fwLimit} frameworks</span>}
+          <Button size="sm" disabled={atLimit} title={atLimit ? "Framework limit reached — upgrade to add more" : ""} onClick={() => { setForm(defaultForm); setEditId(null); setOpen(true); }}><Plus className="w-4 h-4 mr-1" /> Add Framework</Button>
+        </div>
+      } />
       {items.length === 0 ? (
         <EmptyState icon={Shield} title="No frameworks yet" description="Add your first compliance framework to start tracking." actionLabel="Add Framework" onAction={() => setOpen(true)} />
       ) : (

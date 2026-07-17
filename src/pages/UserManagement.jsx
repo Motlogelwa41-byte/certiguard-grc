@@ -9,6 +9,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import PageHeader from "@/components/shared/PageHeader";
 import EmptyState from "@/components/shared/EmptyState";
 import { useToast } from "@/components/ui/use-toast";
+import { useTenant } from "@/lib/TenantContext";
 
 const roleColors = {
   admin: "bg-purple-100 text-purple-700",
@@ -37,6 +38,9 @@ export default function UserManagement() {
   const [search, setSearch] = useState("");
   const [filterRole, setFilterRole] = useState("all");
   const { toast } = useToast();
+  const { canAddUser, tenant } = useTenant();
+  const userLimit = tenant?.limits?.maxUsers ?? tenant?.max_users ?? null;
+  const atLimit = !canAddUser(users.length);
 
   const load = async () => {
     const [allUsers, me] = await Promise.all([
@@ -52,6 +56,10 @@ export default function UserManagement() {
 
   const handleInvite = async () => {
     if (!inviteEmail) return;
+    if (!canAddUser(users.length)) {
+      toast({ title: "User limit reached", description: "Upgrade your plan to invite more users.", variant: "destructive" });
+      return;
+    }
     setInviting(true);
     try {
       await base44.users.inviteUser(inviteEmail, inviteRole);
@@ -95,9 +103,14 @@ export default function UserManagement() {
         title="User Management"
         subtitle="Invite team members, manage roles and access"
         actions={
-          <Button size="sm" onClick={() => setInviteOpen(true)}>
-            <UserPlus className="w-4 h-4 mr-1" /> Invite User
-          </Button>
+          <div className="flex items-center gap-3">
+            {userLimit && (
+              <span className="text-xs text-muted-foreground">{users.length} / {userLimit} users</span>
+            )}
+            <Button size="sm" onClick={() => setInviteOpen(true)} disabled={atLimit} title={atLimit ? "User limit reached — upgrade to add more" : ""}>
+              <UserPlus className="w-4 h-4 mr-1" /> Invite User
+            </Button>
+          </div>
         }
       />
 
