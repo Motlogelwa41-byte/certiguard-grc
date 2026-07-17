@@ -4,7 +4,7 @@ import {
   ShieldCheck, FileSearch, Brain, Play, FileSpreadsheet, FileDown, BarChart3,
   History, ShieldAlert, GraduationCap, Calendar, Bell, Users, Copy, SlidersHorizontal,
   Target, Upload, Send, Globe, Users2, MapPin, Zap, ListChecks, BellRing,
-  PieChart, Radar, Landmark, BarChart2, Network, GitCompare, Sparkles, CreditCard
+  PieChart, Radar, Landmark, BarChart2, Network, GitCompare, Sparkles, CreditCard, Gauge
 } from "lucide-react";
 
 // Roles: admin, compliance_officer, risk_manager, auditor, user
@@ -73,6 +73,7 @@ export const navSections = [
     items: [
       { label: "Vendors", path: "/vendors", icon: Building2, roles: ["admin", "compliance_officer", "risk_manager", "auditor"] },
       { label: "Vendor Assessments", path: "/vendor-assessments", icon: ClipboardList, roles: ["admin", "compliance_officer", "risk_manager", "auditor"] },
+      { label: "Vendor Scorecard", path: "/vendor-scorecard", icon: Gauge, roles: ["admin", "compliance_officer", "risk_manager", "auditor"] },
     ]
   },
   {

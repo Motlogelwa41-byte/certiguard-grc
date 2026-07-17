@@ -33,6 +33,7 @@ import ManagementReports from '@/pages/ManagementReports';
 import UserManagement from '@/pages/UserManagement';
 import PolicyAcknowledgments from '@/pages/PolicyAcknowledgments';
 import VendorAssessments from '@/pages/VendorAssessments';
+import VendorScorecard from '@/pages/VendorScorecard';
 import FrameworkControlMap from '@/pages/FrameworkControlMap';
 import ComplianceCalendar from '@/pages/ComplianceCalendar';
 import PolicyTemplates from '@/pages/PolicyTemplates';
@@ -121,6 +122,7 @@ const AuthenticatedApp = () => {
           <Route path="/users" element={<UserManagement />} />
           <Route path="/policy-acknowledgments" element={<PolicyAcknowledgments />} />
           <Route path="/vendor-assessments" element={<VendorAssessments />} />
+          <Route path="/vendor-scorecard" element={<VendorScorecard />} />
           <Route path="/framework-map" element={<FrameworkControlMap />} />
           <Route path="/policy-templates" element={<PolicyTemplates />} />
           <Route path="/notification-preferences" element={<NotificationPreferences />} />

@@ -1,0 +1,45 @@
+{
+  "name": "Monthly Management Report",
+  "definition": {
+    "document": {
+      "dsl": "1.0.0",
+      "name": "monthly_management_report",
+      "version": "1.0",
+      "namespace": "base44"
+    },
+    "do": [
+      {
+        "send_report": {
+          "call": "invoke_backend_function",
+          "with": {
+            "function_name": "sendScheduledManagementReport",
+            "args": {}
+          },
+          "then": "end",
+          "x-base44": {
+            "title": "Send management report",
+            "description": "Email audit trail + compliance summary to due schedules"
+          }
+        }
+      }
+    ]
+  },
+  "description": "Daily check that emails the latest audit trail and compliance summary to management teams on their configured monthly (or weekly) schedule day",
+  "trigger": {
+    "condition": null,
+    "config": {
+      "trigger_type": "scheduled",
+      "events": [],
+      "schedule_mode": "recurring",
+      "cron_expression": "0 9 * * *",
+      "one_time_date": null,
+      "timezone": "Africa/Johannesburg",
+      "interval_value": null,
+      "interval_unit": null,
+      "interval_anchor": null,
+      "ends_type": "never",
+      "ends_on_date": null,
+      "ends_after_count": null
+    }
+  }
+}

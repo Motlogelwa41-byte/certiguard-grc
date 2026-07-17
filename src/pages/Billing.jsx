@@ -151,6 +151,16 @@ export default function Billing() {
         </div>
         <Link to="/pricing"><Button variant="outline">View pricing <ExternalLink className="w-4 h-4 ml-1" /></Button></Link>
       </div>
+
+      {/* Accepted payment methods */}
+      <div className="mt-4 flex flex-wrap items-center gap-2 text-xs text-muted-foreground">
+        <CreditCard className="w-4 h-4" />
+        <span className="font-medium text-foreground">Accepted payment methods:</span>
+        {["Visa", "Mastercard", "American Express", "Debit cards", "Credit cards"].map((m) => (
+          <span key={m} className="px-2 py-1 rounded-md bg-card border border-border font-medium">{m}</span>
+        ))}
+        <span>— processed securely by Stripe.</span>
+      </div>
     </div>
   );
 }
