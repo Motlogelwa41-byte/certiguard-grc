@@ -11,6 +11,7 @@ import PageHeader from "@/components/shared/PageHeader";
 import StatusBadge from "@/components/shared/StatusBadge";
 import EmptyState from "@/components/shared/EmptyState";
 import { useToast } from "@/components/ui/use-toast";
+import Can from "@/components/shared/Can";
 
 const defaultForm = { title: "", description: "", framework_name: "", type: "internal", status: "planned", auditor_name: "", auditor_firm: "", start_date: "", end_date: "", findings_count: 0, critical_findings: 0, result: "pending", notes: "" };
 
@@ -48,7 +49,7 @@ export default function Audits() {
 
   return (
     <div>
-      <PageHeader title="Audits" subtitle="Track and manage internal and external audits" actions={<Button size="sm" onClick={() => { setForm(defaultForm); setEditId(null); setOpen(true); }}><Plus className="w-4 h-4 mr-1" /> Add Audit</Button>} />
+      <PageHeader title="Audits" subtitle="Track and manage internal and external audits" actions={<Can permission="audits:write"><Button size="sm" onClick={() => { setForm(defaultForm); setEditId(null); setOpen(true); }}><Plus className="w-4 h-4 mr-1" /> Add Audit</Button></Can>} />
 
       <div className="flex items-center gap-3 mb-6">
         <div className="relative flex-1 max-w-sm">
@@ -84,8 +85,8 @@ export default function Audits() {
                 <div className="text-xs text-muted-foreground">{a.start_date || "?"} → {a.end_date || "?"}</div>
               )}
               <div className="flex items-center justify-end gap-1 pt-2 border-t border-border">
-                <button onClick={() => handleEdit(a)} className="p-1 rounded hover:bg-muted"><Pencil className="w-3.5 h-3.5 text-muted-foreground" /></button>
-                <button onClick={() => handleDelete(a.id)} className="p-1 rounded hover:bg-muted text-destructive"><Trash2 className="w-3.5 h-3.5" /></button>
+                <Can permission="audits:write"><button onClick={() => handleEdit(a)} className="p-1 rounded hover:bg-muted"><Pencil className="w-3.5 h-3.5 text-muted-foreground" /></button></Can>
+                <Can permission="audits:delete"><button onClick={() => handleDelete(a.id)} className="p-1 rounded hover:bg-muted text-destructive"><Trash2 className="w-3.5 h-3.5" /></button></Can>
               </div>
             </div>
           ))}

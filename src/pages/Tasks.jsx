@@ -11,6 +11,7 @@ import PageHeader from "@/components/shared/PageHeader";
 import StatusBadge from "@/components/shared/StatusBadge";
 import EmptyState from "@/components/shared/EmptyState";
 import { useToast } from "@/components/ui/use-toast";
+import Can from "@/components/shared/Can";
 
 const taskTypes = ["control_implementation","evidence_collection","policy_review","risk_assessment","audit_preparation","remediation","training","vendor_review","other"];
 const defaultForm = { title: "", description: "", type: "other", status: "todo", priority: "medium", assignee_name: "", assignee_email: "", due_date: "", notes: "" };
@@ -103,7 +104,7 @@ export default function Tasks() {
 
   return (
     <div>
-      <PageHeader title="Compliance Tasks" subtitle="Track and manage compliance activities" actions={<Button size="sm" onClick={() => { setForm(defaultForm); setEditId(null); setOpen(true); }}><Plus className="w-4 h-4 mr-1" /> Add Task</Button>} />
+      <PageHeader title="Compliance Tasks" subtitle="Track and manage compliance activities" actions={<Can permission="tasks:write"><Button size="sm" onClick={() => { setForm(defaultForm); setEditId(null); setOpen(true); }}><Plus className="w-4 h-4 mr-1" /> Add Task</Button></Can>} />
 
       <div className="flex flex-wrap items-center gap-3 mb-6">
         <div className="relative flex-1 min-w-[200px] max-w-sm">
@@ -150,8 +151,8 @@ export default function Tasks() {
                       <div className="flex items-center justify-between pt-1">
                         <span className="text-xs text-muted-foreground">{t.assignee_name || "Unassigned"}</span>
                         <div className="flex items-center gap-0.5">
-                          <button onClick={() => handleEdit(t)} className="p-1 rounded hover:bg-muted"><Pencil className="w-3 h-3 text-muted-foreground" /></button>
-                          <button onClick={() => handleDelete(t.id)} className="p-1 rounded hover:bg-muted"><Trash2 className="w-3 h-3 text-destructive" /></button>
+                          <Can permission="tasks:write"><button onClick={() => handleEdit(t)} className="p-1 rounded hover:bg-muted"><Pencil className="w-3 h-3 text-muted-foreground" /></button></Can>
+                          <Can permission="tasks:write"><button onClick={() => handleDelete(t.id)} className="p-1 rounded hover:bg-muted"><Trash2 className="w-3 h-3 text-destructive" /></button></Can>
                         </div>
                       </div>
                     </div>

@@ -13,6 +13,7 @@ import StatusBadge from "@/components/shared/StatusBadge";
 import EmptyState from "@/components/shared/EmptyState";
 import BulkActionBar from "@/components/shared/BulkActionBar";
 import { useToast } from "@/components/ui/use-toast";
+import Can from "@/components/shared/Can";
 
 const vendorCategories = ["cloud_infrastructure","saas","data_processor","consulting","managed_services","hardware","other"];
 const defaultForm = {
@@ -137,9 +138,11 @@ export default function Vendors() {
         title="Vendor Risk Management"
         subtitle="Track third-party compliance status and link vendors to specific controls"
         actions={
-          <Button size="sm" onClick={() => { setForm(defaultForm); setEditId(null); setOpen(true); }}>
-            <Plus className="w-4 h-4 mr-1" /> Add Vendor
-          </Button>
+          <Can permission="vendors:write">
+            <Button size="sm" onClick={() => { setForm(defaultForm); setEditId(null); setOpen(true); }}>
+              <Plus className="w-4 h-4 mr-1" /> Add Vendor
+            </Button>
+          </Can>
         }
       />
 
@@ -200,7 +203,7 @@ export default function Vendors() {
             <SelectItem value="inactive">Inactive</SelectItem>
           </SelectContent>
         </Select>
-        <Button size="sm" variant="secondary" onClick={applyBulkStatus} disabled={!bulkStatus}>Apply Status</Button>
+        <Can permission="vendors:write"><Button size="sm" variant="secondary" onClick={applyBulkStatus} disabled={!bulkStatus}>Apply Status</Button></Can>
         <Select value={bulkRisk} onValueChange={setBulkRisk}>
           <SelectTrigger className="w-[140px] h-8"><SelectValue placeholder="Set risk" /></SelectTrigger>
           <SelectContent>
@@ -210,8 +213,8 @@ export default function Vendors() {
             <SelectItem value="low">Low</SelectItem>
           </SelectContent>
         </Select>
-        <Button size="sm" variant="secondary" onClick={applyBulkRisk} disabled={!bulkRisk}>Apply Risk</Button>
-        <Button size="sm" variant="destructive" onClick={bulkDelete}><Trash2 className="w-4 h-4 mr-1" />Delete</Button>
+        <Can permission="vendors:write"><Button size="sm" variant="secondary" onClick={applyBulkRisk} disabled={!bulkRisk}>Apply Risk</Button></Can>
+        <Can permission="vendors:delete"><Button size="sm" variant="destructive" onClick={bulkDelete}><Trash2 className="w-4 h-4 mr-1" />Delete</Button></Can>
       </BulkActionBar>
 
       {items.length === 0 ? (
@@ -253,8 +256,8 @@ export default function Vendors() {
                         <ExternalLink className="w-3.5 h-3.5 text-muted-foreground" />
                       </a>
                     )}
-                    <button onClick={() => handleEdit(v)} className="p-1.5 rounded hover:bg-muted"><Pencil className="w-3.5 h-3.5 text-muted-foreground" /></button>
-                    <button onClick={() => handleDelete(v.id)} className="p-1.5 rounded hover:bg-muted"><Trash2 className="w-3.5 h-3.5 text-destructive" /></button>
+                    <Can permission="vendors:write"><button onClick={() => handleEdit(v)} className="p-1.5 rounded hover:bg-muted"><Pencil className="w-3.5 h-3.5 text-muted-foreground" /></button></Can>
+                    <Can permission="vendors:delete"><button onClick={() => handleDelete(v.id)} className="p-1.5 rounded hover:bg-muted"><Trash2 className="w-3.5 h-3.5 text-destructive" /></button></Can>
                     <button onClick={() => setExpandedId(isExpanded ? null : v.id)} className="p-1.5 rounded hover:bg-muted ml-1">
                       {isExpanded ? <ChevronUp className="w-4 h-4 text-muted-foreground" /> : <ChevronDown className="w-4 h-4 text-muted-foreground" />}
                     </button>

@@ -16,6 +16,8 @@ import { useToast } from "@/components/ui/use-toast";
 import IncidentTimeline from "@/components/incidents/IncidentTimeline";
 import EscalationChain from "@/components/incidents/EscalationChain";
 import MTTRAnalytics from "@/components/incidents/MTTRAnalytics";
+import Can from "@/components/shared/Can";
+import { useRBAC } from "@/lib/useRBAC";
 
 const defaultForm = {
   incident_id: "", title: "", description: "", type: "security_breach", severity: "medium",
@@ -57,8 +59,8 @@ function IncidentCard({ incident, onEdit, onDelete, onUpdated }) {
             <p className="text-xs text-muted-foreground mt-0.5">{incident.type?.replace(/_/g, " ").replace(/\b\w/g, c => c.toUpperCase())}</p>
           </div>
           <div className="flex items-center gap-1 shrink-0">
-            <button onClick={() => onEdit(incident)} className="p-1.5 rounded hover:bg-muted"><Pencil className="w-3.5 h-3.5 text-muted-foreground" /></button>
-            <button onClick={() => onDelete(incident.id)} className="p-1.5 rounded hover:bg-muted"><Trash2 className="w-3.5 h-3.5 text-destructive" /></button>
+            {onEdit && <button onClick={() => onEdit(incident)} className="p-1.5 rounded hover:bg-muted"><Pencil className="w-3.5 h-3.5 text-muted-foreground" /></button>}
+            {onDelete && <button onClick={() => onDelete(incident.id)} className="p-1.5 rounded hover:bg-muted"><Trash2 className="w-3.5 h-3.5 text-destructive" /></button>}
           </div>
         </div>
 
@@ -118,6 +120,7 @@ export default function Incidents() {
   const [severityFilter, setSeverityFilter] = useState("all");
   const [statusFilter, setStatusFilter] = useState("all");
   const { toast } = useToast();
+  const { can } = useRBAC();
 
   const load = () => base44.entities.Incident.list("-created_date").then(d => { setItems(d); setLoading(false); });
   useEffect(() => { load(); }, []);
@@ -172,9 +175,11 @@ export default function Incidents() {
         title="Incident Management"
         subtitle="Track, investigate, and resolve security incidents with full timeline and escalation"
         actions={
-          <Button size="sm" onClick={() => { setForm(defaultForm); setEditId(null); setOpen(true); }}>
-            <Plus className="w-4 h-4 mr-1" /> Report Incident
-          </Button>
+          <Can permission="incidents:write">
+            <Button size="sm" onClick={() => { setForm(defaultForm); setEditId(null); setOpen(true); }}>
+              <Plus className="w-4 h-4 mr-1" /> Report Incident
+            </Button>
+          </Can>
         }
       />
 
@@ -221,7 +226,7 @@ export default function Incidents() {
       ) : (
         <div className="grid grid-cols-1 xl:grid-cols-2 gap-4">
           {filtered.map(inc => (
-            <IncidentCard key={inc.id} incident={inc} onEdit={handleEdit} onDelete={handleDelete} onUpdated={load} />
+            <IncidentCard key={inc.id} incident={inc} onEdit={can("incidents:write") ? handleEdit : null} onDelete={can("incidents:write") ? handleDelete : null} onUpdated={load} />
           ))}
         </div>
       )}
