@@ -68,6 +68,7 @@ import AIAssistant from '@/pages/AIAssistant';
 import Billing from '@/pages/Billing';
 import About from '@/pages/About';
 import RegulatoryChanges from '@/pages/RegulatoryChanges';
+import DPIA from '@/pages/DPIA';
 
 const AuthenticatedApp = () => {
   const { isLoadingAuth, isLoadingPublicSettings, authError, navigateToLogin } = useAuth();
@@ -152,6 +153,7 @@ const AuthenticatedApp = () => {
           <Route path="/billing" element={<Billing />} />
           <Route path="/about" element={<About />} />
           <Route path="/regulatory-changes" element={<RegulatoryChanges />} />
+          <Route path="/dpia" element={<DPIA />} />
         </Route>
       </Route>
       <Route path="*" element={<PageNotFound />} />

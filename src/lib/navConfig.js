@@ -82,6 +82,7 @@ export const navSections = [
     label: "Privacy & Governance",
     items: [
       { label: "ROPA", path: "/ropa", icon: FileSpreadsheet, roles: ["admin", "compliance_officer", "auditor"] },
+      { label: "DPIA", path: "/dpia", icon: ShieldAlert, roles: ["admin", "compliance_officer", "auditor"] },
       { label: "Audits", path: "/audits", icon: Landmark, roles: ["admin", "compliance_officer", "auditor"] },
       { label: "Audit Findings", path: "/audit-findings", icon: AlertTriangle, roles: ["admin", "compliance_officer", "risk_manager", "auditor"] },
       { label: "Audit Trail", path: "/audit-trail", icon: History, roles: ["admin", "compliance_officer", "auditor"] },

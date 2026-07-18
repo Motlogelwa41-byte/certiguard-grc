@@ -1,0 +1,181 @@
+{
+  "name": "DPIA",
+  "type": "object",
+  "properties": {
+    "tenant_id": {
+      "type": "string",
+      "description": "Tenant isolation key"
+    },
+    "assessment_id": {
+      "type": "string",
+      "description": "Unique identifier e.g. DPIA-2024-001"
+    },
+    "title": {
+      "type": "string"
+    },
+    "linked_ropa_id": {
+      "type": "string",
+      "description": "ID of the linked ROPA processing activity record"
+    },
+    "processing_activity": {
+      "type": "string",
+      "description": "Processing activity under assessment (denormalized from ROPA)"
+    },
+    "description": {
+      "type": "string",
+      "description": "Description of the processing operation and context"
+    },
+    "data_subjects": {
+      "type": "string",
+      "description": "Categories of data subjects affected"
+    },
+    "data_categories": {
+      "type": "string",
+      "description": "Categories of personal data involved"
+    },
+    "purpose": {
+      "type": "string",
+      "description": "Purpose of the processing"
+    },
+    "necessity_proportionality": {
+      "type": "string",
+      "description": "Assessment of whether processing is necessary and proportionate"
+    },
+    "risk_level": {
+      "type": "string",
+      "enum": [
+        "high",
+        "medium",
+        "low",
+        "none"
+      ],
+      "default": "medium",
+      "description": "Inherent risk level before mitigation"
+    },
+    "residual_risk_level": {
+      "type": "string",
+      "enum": [
+        "high",
+        "medium",
+        "low",
+        "none"
+      ],
+      "default": "medium",
+      "description": "Residual risk after mitigation measures"
+    },
+    "identified_risks": {
+      "type": "string",
+      "description": "JSON array of risks: [{risk, likelihood, impact, score, mitigation}]"
+    },
+    "mitigations": {
+      "type": "string",
+      "description": "Measures to address the risks identified"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "required",
+        "in_progress",
+        "completed",
+        "not_required",
+        "review_due"
+      ],
+      "default": "required"
+    },
+    "dpia_type": {
+      "type": "string",
+      "enum": [
+        "initial",
+        "review",
+        "renewal",
+        "screening"
+      ],
+      "default": "initial"
+    },
+    "controller_name": {
+      "type": "string"
+    },
+    "dpo_name": {
+      "type": "string",
+      "description": "Data Protection Officer overseeing the assessment"
+    },
+    "consultation_required": {
+      "type": "boolean",
+      "default": false,
+      "description": "Whether prior consultation with the regulator is required (high residual risk)"
+    },
+    "regulator_consulted": {
+      "type": "boolean",
+      "default": false
+    },
+    "consultation_date": {
+      "type": "string",
+      "format": "date"
+    },
+    "decision_outcome": {
+      "type": "string",
+      "description": "Final decision: proceed, proceed with conditions, do not proceed"
+    },
+    "review_date": {
+      "type": "string",
+      "format": "date",
+      "description": "Next scheduled review date"
+    },
+    "completed_date": {
+      "type": "string",
+      "format": "date"
+    },
+    "assessor_name": {
+      "type": "string"
+    },
+    "notes": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "title"
+  ],
+  "rls": {
+    "create": {
+      "data.tenant_id": "{{user.data.tenant_id}}"
+    },
+    "read": {
+      "$or": [
+        {
+          "data.tenant_id": "{{user.data.tenant_id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "update": {
+      "$or": [
+        {
+          "data.tenant_id": "{{user.data.tenant_id}}",
+          "created_by_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "delete": {
+      "$or": [
+        {
+          "data.tenant_id": "{{user.data.tenant_id}}",
+          "created_by_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    }
+  }
+}
