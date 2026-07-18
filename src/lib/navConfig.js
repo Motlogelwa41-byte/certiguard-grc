@@ -4,7 +4,7 @@ import {
   ShieldCheck, FileSearch, Brain, Play, FileSpreadsheet, FileDown, BarChart3,
   History, ShieldAlert, GraduationCap, Calendar, Bell, Users, Copy, SlidersHorizontal,
   Target, Upload, Send, Globe, Users2, MapPin, Zap, ListChecks, BellRing,
-  PieChart, Radar, Landmark, BarChart2, Network, GitCompare, Sparkles, CreditCard, Gauge, Info, ScrollText, Activity, Factory, Plug
+  PieChart, Radar, Landmark, BarChart2, Network, GitCompare, Sparkles, CreditCard, Gauge, Info, ScrollText, Activity, Factory, Plug, UserCheck
 } from "lucide-react";
 
 // Roles: admin, compliance_officer, risk_manager, auditor, user
@@ -74,6 +74,7 @@ export const navSections = [
       { label: "Calendar", path: "/calendar", icon: Calendar, roles: ["admin", "compliance_officer", "risk_manager", "auditor", "user"] },
       { label: "Incidents", path: "/incidents", icon: ShieldAlert, roles: ["admin", "compliance_officer", "risk_manager", "auditor", "user"] },
       { label: "Incident Command", path: "/incident-command", icon: AlertTriangle, roles: ["admin", "compliance_officer", "risk_manager"] },
+      { label: "Access Recertification", path: "/access-recertification", icon: UserCheck, roles: ["admin"] },
       { label: "Training", path: "/training", icon: GraduationCap, roles: ["admin", "compliance_officer", "risk_manager", "auditor", "user"] },
     ]
   },

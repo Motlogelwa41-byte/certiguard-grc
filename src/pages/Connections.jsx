@@ -8,6 +8,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useToast } from "@/components/ui/use-toast";
+import { Switch } from "@/components/ui/switch";
 import { CATALOG, CATEGORIES, catalogEntry } from "@/lib/connectionsCatalog";
 import StatusBadge from "@/components/shared/StatusBadge";
 import { Plus, RefreshCw, Settings2, Trash2, CheckCircle2, AlertCircle, Link2, Zap } from "lucide-react";
@@ -128,6 +129,14 @@ export default function Connections() {
     toast({ title: "Connection removed" });
   };
 
+  const toggleAuto = async (conn, enabled) => {
+    try {
+      await base44.entities.Connection.update(conn.id, { auto_collect: enabled });
+      load();
+      toast({ title: enabled ? "Auto-sync enabled" : "Auto-sync paused" });
+    } catch (e) { toast({ title: "Error", description: e.message, variant: "destructive" }); }
+  };
+
   const runNow = async (conn) => {
     setRunning(conn.id);
     try {
@@ -211,6 +220,10 @@ export default function Connections() {
                   <div className="flex justify-between"><span className="text-muted-foreground">Last sync</span><span className="text-foreground">{conn.last_sync_at ? new Date(conn.last_sync_at).toLocaleString() : "—"}</span></div>
                   <div className="flex justify-between items-center"><span className="text-muted-foreground">Health</span><span className={`flex items-center gap-1 font-medium ${healthColor(conn.health)}`}>{conn.health || "unknown"}</span></div>
                   {conn.last_error && <p className="text-rose-500 text-[11px] mt-1">{conn.last_error}</p>}
+                  <div className="flex items-center justify-between pt-1.5 border-t border-border mt-1.5">
+                    <span className="text-muted-foreground">Automated sync</span>
+                    <Switch checked={conn.auto_collect !== false} onCheckedChange={(v) => toggleAuto(conn, v)} />
+                  </div>
                 </div>
               )}
 
