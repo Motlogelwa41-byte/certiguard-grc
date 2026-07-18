@@ -4,7 +4,7 @@ import {
   ShieldCheck, FileSearch, Brain, Play, FileSpreadsheet, FileDown, BarChart3,
   History, ShieldAlert, GraduationCap, Calendar, Bell, Users, Copy, SlidersHorizontal,
   Target, Upload, Send, Globe, Users2, MapPin, Zap, ListChecks, BellRing,
-  PieChart, Radar, Landmark, BarChart2, Network, GitCompare, Sparkles, CreditCard, Gauge, Info, ScrollText, Activity
+  PieChart, Radar, Landmark, BarChart2, Network, GitCompare, Sparkles, CreditCard, Gauge, Info, ScrollText, Activity, Factory
 } from "lucide-react";
 
 // Roles: admin, compliance_officer, risk_manager, auditor, user
@@ -95,6 +95,7 @@ export const navSections = [
     items: [
       { label: "Mgmt Dashboard", path: "/management-dashboard", icon: BarChart2, roles: ["admin", "compliance_officer", "risk_manager", "auditor"] },
       { label: "SADC Exec Dashboard", path: "/sadc-executive-dashboard", icon: Globe, roles: ["admin", "compliance_officer", "risk_manager", "auditor"] },
+      { label: "Industry Dashboard", path: "/industry-dashboard", icon: Factory, roles: ["admin", "compliance_officer", "risk_manager", "auditor"] },
       { label: "Security Posture", path: "/security-posture", icon: Radar, roles: ["admin", "compliance_officer", "risk_manager", "auditor"] },
       { label: "Reports", path: "/reports", icon: FileDown, roles: ["admin", "compliance_officer", "risk_manager", "auditor"] },
       { label: "Mgmt Reports", path: "/management-reports", icon: BarChart2, roles: ["admin", "compliance_officer", "risk_manager", "auditor"] },
