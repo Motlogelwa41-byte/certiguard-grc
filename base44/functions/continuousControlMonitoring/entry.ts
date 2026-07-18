@@ -13,10 +13,17 @@ Deno.serve(async (req) => {
     const sr = base44.asServiceRole;
 
     let triggeredBy = "scheduled";
+    let authUser = null;
     try {
       const user = await base44.auth.me();
-      if (user) triggeredBy = user.full_name || user.email || "manual";
+      if (user) { authUser = user; triggeredBy = user.full_name || user.email || "manual"; }
     } catch (_) { /* scheduled run — no user */ }
+
+    // Least privilege: only admins or compliance officers may trigger this tenant-wide
+    // operation manually. Scheduled (no-auth) runs are allowed.
+    if (authUser && !["admin", "compliance_officer"].includes(authUser.role)) {
+      return Response.json({ error: "Insufficient permissions — only admins or compliance officers may trigger this operation." }, { status: 403 });
+    }
 
     const controls = await sr.entities.Control.list("-created_date", 500);
 
