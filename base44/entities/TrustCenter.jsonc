@@ -80,7 +80,9 @@
     "company_name"
   ],
   "rls": {
-    "create": null,
+    "create": {
+      "data.tenant_id": "{{user.data.tenant_id}}"
+    },
     "read": {
       "$or": [
         {
