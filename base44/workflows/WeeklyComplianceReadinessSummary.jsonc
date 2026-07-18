@@ -1,0 +1,45 @@
+{
+  "name": "Weekly Compliance Readiness Summary",
+  "description": "Every Monday at 9am (Africa/Johannesburg), compute compliance readiness metrics and post a summary to the #compliance Slack channel.",
+  "trigger": {
+    "condition": null,
+    "config": {
+      "trigger_type": "scheduled",
+      "events": [],
+      "schedule_mode": "recurring",
+      "cron_expression": "0 9 * * 1",
+      "one_time_date": null,
+      "timezone": "Africa/Johannesburg",
+      "interval_value": null,
+      "interval_unit": null,
+      "interval_anchor": null,
+      "ends_type": "never",
+      "ends_on_date": null,
+      "ends_after_count": null
+    }
+  },
+  "definition": {
+    "document": {
+      "dsl": "1.0.0",
+      "name": "weekly_compliance_readiness_summary",
+      "version": "1.0",
+      "namespace": "base44"
+    },
+    "do": [
+      {
+        "post_summary": {
+          "call": "invoke_backend_function",
+          "with": {
+            "function_name": "weeklyComplianceReadinessSummary",
+            "args": {}
+          },
+          "then": "end",
+          "x-base44": {
+            "title": "Post weekly readiness summary to Slack",
+            "description": "Compute metrics and notify #compliance"
+          }
+        }
+      }
+    ]
+  }
+}
