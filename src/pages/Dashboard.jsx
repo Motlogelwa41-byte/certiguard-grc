@@ -14,7 +14,7 @@ import ComplianceScoreRing from "@/components/dashboard/ComplianceScoreRing";
 import ActivityFeed from "@/components/dashboard/ActivityFeed";
 import QuickActions from "@/components/dashboard/QuickActions";
 
-const COLORS = ["#0B1E3F", "#0EA5A4", "#F59E0B", "#EF4444", "#7C3AED", "#64748B"];
+const COLORS = ["#1E293B", "#10B981", "#F59E0B", "#EF4444", "#7C3AED", "#64748B"];
 
 export default function Dashboard() {
   const [frameworks, setFrameworks] = useState([]);
@@ -87,19 +87,19 @@ export default function Dashboard() {
   return (
     <div>
       {/* RegTech hero */}
-      <div className="mb-8 relative overflow-hidden rounded-2xl border border-white/10 bg-gradient-to-br from-[hsl(222_71%_12%)] via-[hsl(220_71%_15%)] to-[hsl(218_80%_8%)] p-6 sm:p-8">
-        <div className="absolute -top-20 -right-16 w-72 h-72 rounded-full bg-[hsl(180_84%_45%)]/20 blur-3xl pointer-events-none" />
-        <div className="absolute -bottom-24 -left-12 w-64 h-64 rounded-full bg-[hsl(199_89%_48%)]/10 blur-3xl pointer-events-none" />
+      <div className="mb-8 relative overflow-hidden rounded-2xl border border-white/10 bg-gradient-to-br from-[hsl(222_47%_11%)] via-[hsl(217_33%_15%)] to-[hsl(215_28%_9%)] p-6 sm:p-8">
+        <div className="absolute -top-20 -right-16 w-72 h-72 rounded-full bg-[hsl(160_84%_37%)]/20 blur-3xl pointer-events-none" />
+        <div className="absolute -bottom-24 -left-12 w-64 h-64 rounded-full bg-[hsl(160_84%_45%)]/10 blur-3xl pointer-events-none" />
         <div className="relative flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6">
           <div className="flex-1">
-            <span className="inline-flex items-center gap-1.5 text-[11px] font-semibold uppercase tracking-wider text-[hsl(180_84%_65%)] bg-[hsl(180_84%_45%)]/10 border border-[hsl(180_84%_45%)]/25 rounded-full px-3 py-1">
+            <span className="inline-flex items-center gap-1.5 text-[11px] font-semibold uppercase tracking-wider text-[hsl(160_84%_60%)] bg-[hsl(160_84%_37%)]/10 border border-[hsl(160_84%_37%)]/25 rounded-full px-3 py-1">
               <Shield className="w-3.5 h-3.5" /> RegTech GRC Platform
             </span>
             <h1 className="mt-3 text-2xl sm:text-3xl font-heading font-bold text-white tracking-tight">Compliance Dashboard</h1>
             <p className="mt-1.5 text-sm text-slate-300 max-w-xl">Real-time overview of your organization's compliance posture across SADC and global frameworks.</p>
             <div className="mt-4 flex items-center gap-2">
               <span className="text-[11px] font-medium text-slate-400">Posture:</span>
-              <span className={`text-xs font-semibold px-2.5 py-1 rounded-full border ${complianceScore >= 80 ? "text-[hsl(180_84%_60%)] bg-[hsl(180_84%_45%)]/15 border-[hsl(180_84%_45%)]/30" : complianceScore >= 60 ? "text-amber-300 bg-amber-500/15 border-amber-400/30" : "text-rose-300 bg-rose-500/15 border-rose-400/30"}`}>{verdict}</span>
+              <span className={`text-xs font-semibold px-2.5 py-1 rounded-full border ${complianceScore >= 80 ? "text-[hsl(160_84%_55%)] bg-[hsl(160_84%_37%)]/15 border-[hsl(160_84%_37%)]/30" : complianceScore >= 60 ? "text-amber-300 bg-amber-500/15 border-amber-400/30" : "text-rose-300 bg-rose-500/15 border-rose-400/30"}`}>{verdict}</span>
             </div>
           </div>
           <div className="shrink-0 rounded-2xl bg-white/5 border border-white/10 p-4 backdrop-blur">
@@ -161,7 +161,7 @@ export default function Dashboard() {
                 <XAxis type="number" hide />
                 <YAxis type="category" dataKey="name" width={100} tick={{ fontSize: 12 }} />
                 <Tooltip />
-                <Bar dataKey="value" fill="#0B1E3F" radius={[0, 4, 4, 0]} barSize={20} />
+                <Bar dataKey="value" fill="#1E293B" radius={[0, 4, 4, 0]} barSize={20} />
               </BarChart>
             </ResponsiveContainer>
           ) : (
@@ -188,7 +188,7 @@ export default function Dashboard() {
                   <div className="flex-1 h-2 bg-muted rounded-full overflow-hidden">
                     <div
                       className="h-full rounded-full transition-all duration-500"
-                      style={{ width: `${pct}%`, backgroundColor: pct >= 80 ? "#0EA5A4" : pct >= 50 ? "#f59e0b" : "#ef4444" }}
+                      style={{ width: `${pct}%`, backgroundColor: pct >= 80 ? "#10B981" : pct >= 50 ? "#f59e0b" : "#ef4444" }}
                     />
                   </div>
                   <span className="text-sm font-semibold text-foreground w-12 text-right">{pct}%</span>

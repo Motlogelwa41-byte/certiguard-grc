@@ -1,0 +1,47 @@
+{
+  "definition": {
+    "document": {
+      "dsl": "1.0.0",
+      "name": "quarterly_access_recertification",
+      "version": "1.0",
+      "namespace": "base44"
+    },
+    "do": [
+      {
+        "launch_campaign": {
+          "call": "invoke_backend_function",
+          "with": {
+            "function_name": "runAccessRecertificationCampaign",
+            "args": {
+              "action": "auto_create"
+            }
+          },
+          "then": "end",
+          "x-base44": {
+            "title": "Launch recertification campaign",
+            "description": "Quarterly auto-create + generate review items"
+          }
+        }
+      }
+    ]
+  },
+  "description": "Auto-launches a quarterly access recertification campaign, generating a review item for every user so admins can certify, modify, or revoke permissions under least-privilege.",
+  "name": "Quarterly Access Recertification",
+  "trigger": {
+    "condition": null,
+    "config": {
+      "trigger_type": "scheduled",
+      "events": [],
+      "schedule_mode": "recurring",
+      "cron_expression": "0 9 1 */3 *",
+      "one_time_date": null,
+      "timezone": "Africa/Johannesburg",
+      "interval_value": null,
+      "interval_unit": null,
+      "interval_anchor": null,
+      "ends_type": "never",
+      "ends_on_date": null,
+      "ends_after_count": null
+    }
+  }
+}

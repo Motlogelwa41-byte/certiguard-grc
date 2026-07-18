@@ -14,6 +14,37 @@ Deno.serve(async (req) => {
     const sr = base44.asServiceRole;
     const body = await req.json().catch(() => ({}));
     const action = body.action;
+
+    // Auto-create + populate a quarterly recertification campaign (called by scheduled workflow).
+    if (action === 'auto_create') {
+      const now = new Date();
+      const year = now.getFullYear();
+      const month = now.getMonth();
+      const q = Math.floor(month / 3) + 1;
+      const period = `Q${q} ${year}`;
+      const start = new Date(year, month, 1).toISOString().slice(0, 10);
+      const deadline = new Date(year, month + 1, 28).toISOString().slice(0, 10);
+      const created = await sr.entities.AccessReviewCampaign.create({
+        name: `${period} Access Recertification`,
+        description: 'Auto-launched quarterly access review enforcing least-privilege compliance.',
+        period, scope: 'all_users', status: 'draft',
+        start_date: start, end_date: deadline, deadline,
+        reviewer_name: user.full_name || '',
+        notes: 'Auto-created by scheduled workflow.',
+      });
+      const users = await sr.entities.User.list('-created_date', 500);
+      const toCreate = (users || []).map((u) => ({
+        campaign_id: created.id, campaign_name: created.name,
+        user_id: u.id, user_name: u.full_name || u.email, user_email: u.email,
+        role: u.role || 'user',
+        access_summary: `Platform role: ${u.role || 'user'}. Review assigned permissions, integrations, and tenant access for least-privilege.`,
+        reviewer_name: user.full_name || '', decision: 'pending', status: 'open',
+      }));
+      if (toCreate.length) await sr.entities.AccessReviewItem.bulkCreate(toCreate);
+      await sr.entities.AccessReviewCampaign.update(created.id, { total_items: toCreate.length, status: 'in_review' });
+      return Response.json({ ok: true, campaign_id: created.id, items: toCreate.length });
+    }
+
     const campaignId = body.campaign_id;
     if (!campaignId) return Response.json({ error: 'campaign_id required' }, { status: 400 });
 

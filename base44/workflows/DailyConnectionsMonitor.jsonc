@@ -1,0 +1,45 @@
+{
+  "definition": {
+    "document": {
+      "dsl": "1.0.0",
+      "name": "daily_connections_monitor",
+      "version": "1.0",
+      "namespace": "base44"
+    },
+    "do": [
+      {
+        "run_monitor": {
+          "call": "invoke_backend_function",
+          "with": {
+            "function_name": "runConnectionMonitor",
+            "args": {}
+          },
+          "then": "end",
+          "x-base44": {
+            "title": "Run connection monitor",
+            "description": "Collect evidence for all auto-sync connections"
+          }
+        }
+      }
+    ]
+  },
+  "description": "Runs automated evidence collection across every connected integration with auto-sync enabled, refreshing snapshots and control evidence once a day.",
+  "name": "Daily Connections Monitor",
+  "trigger": {
+    "condition": null,
+    "config": {
+      "trigger_type": "scheduled",
+      "events": [],
+      "schedule_mode": "recurring",
+      "cron_expression": "0 2 * * *",
+      "one_time_date": null,
+      "timezone": "Africa/Johannesburg",
+      "interval_value": null,
+      "interval_unit": null,
+      "interval_anchor": null,
+      "ends_type": "never",
+      "ends_on_date": null,
+      "ends_after_count": null
+    }
+  }
+}
