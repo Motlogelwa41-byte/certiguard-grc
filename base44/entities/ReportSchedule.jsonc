@@ -26,7 +26,7 @@
     "day_of_month": {
       "type": "number",
       "default": 1,
-      "description": "Day of month to send (1\u201328) for monthly schedules"
+      "description": "Day of month to send (1-28) for monthly schedules"
     },
     "include_sections": {
       "type": "string",
@@ -70,7 +70,9 @@
     "recipients"
   ],
   "rls": {
-    "create": null,
+    "create": {
+      "data.tenant_id": "{{user.data.tenant_id}}"
+    },
     "read": {
       "$or": [
         {
