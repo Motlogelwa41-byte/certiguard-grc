@@ -23,7 +23,7 @@ Deno.serve(async (req) => {
 
     // Avoid duplicate remediation tasks for the same risk
     const existing = await base44.asServiceRole.entities.ComplianceTask
-      .filter({ type: 'remediation' }, '-created_date', 500)
+      .filter({ type: 'remediation', tenant_id: tenantId }, '-created_date', 500)
       .catch(() => []);
     const tag = `risk_ref:${riskId}`;
     const duplicate = (existing || []).some((t) => (t.notes || '').includes(tag) || (t.title || '') === `Remediate: ${title}`);
