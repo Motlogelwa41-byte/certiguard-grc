@@ -1,0 +1,45 @@
+{
+  "name": "Automated Evidence Collection",
+  "trigger": {
+    "condition": null,
+    "config": {
+      "trigger_type": "scheduled",
+      "events": [],
+      "schedule_mode": "recurring",
+      "cron_expression": "30 6 * * 1",
+      "one_time_date": null,
+      "timezone": "Africa/Johannesburg",
+      "interval_value": null,
+      "interval_unit": null,
+      "interval_anchor": null,
+      "ends_type": "never",
+      "ends_on_date": null,
+      "ends_after_count": null
+    }
+  },
+  "description": "Weekly automated pull and save of each control's required evidence documents",
+  "definition": {
+    "document": {
+      "dsl": "1.0.0",
+      "name": "automated_evidence_collection",
+      "version": "1.0",
+      "namespace": "base44"
+    },
+    "do": [
+      {
+        "collect_evidence": {
+          "call": "invoke_backend_function",
+          "with": {
+            "function_name": "automatedEvidenceCollection",
+            "args": {}
+          },
+          "then": "end",
+          "x-base44": {
+            "title": "Collect required control evidence",
+            "description": "Auto-pull & save evidence documents per control"
+          }
+        }
+      }
+    ]
+  }
+}
