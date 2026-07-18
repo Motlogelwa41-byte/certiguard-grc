@@ -72,6 +72,7 @@ import DPIA from '@/pages/DPIA';
 import ContinuousMonitoring from '@/pages/ContinuousMonitoring';
 import IndustryDashboard from '@/pages/IndustryDashboard';
 import FinancialServicesDashboard from '@/pages/FinancialServicesDashboard';
+import Connections from '@/pages/Connections';
 
 const AuthenticatedApp = () => {
   const { isLoadingAuth, isLoadingPublicSettings, authError, navigateToLogin } = useAuth();
@@ -160,6 +161,7 @@ const AuthenticatedApp = () => {
           <Route path="/control-monitoring" element={<ContinuousMonitoring />} />
           <Route path="/industry-dashboard" element={<IndustryDashboard />} />
           <Route path="/financial-dashboard" element={<FinancialServicesDashboard />} />
+          <Route path="/connections" element={<Connections />} />
         </Route>
       </Route>
       <Route path="*" element={<PageNotFound />} />
