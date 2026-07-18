@@ -61,6 +61,7 @@ import AIHub from '@/pages/AIHub';
 import AuditFindings from '@/pages/AuditFindings';
 import IncidentCommand from '@/pages/IncidentCommand';
 import ManagementDashboard from '@/pages/ManagementDashboard';
+import SADCExecutiveDashboard from '@/pages/SADCExecutiveDashboard';
 import RiskAppetiteHeatmap from '@/pages/RiskAppetiteHeatmap';
 import RiskFrameworkCrossMap from '@/pages/RiskFrameworkCrossMap';
 import AIAssistant from '@/pages/AIAssistant';
@@ -143,6 +144,7 @@ const AuthenticatedApp = () => {
           <Route path="/audit-findings" element={<AuditFindings />} />
           <Route path="/incident-command" element={<IncidentCommand />} />
           <Route path="/management-dashboard" element={<ManagementDashboard />} />
+          <Route path="/sadc-executive-dashboard" element={<SADCExecutiveDashboard />} />
           <Route path="/risk-appetite-heatmap" element={<RiskAppetiteHeatmap />} />
           <Route path="/risk-framework-crossmap" element={<RiskFrameworkCrossMap />} />
           <Route path="/ai-assistant" element={<AIAssistant />} />
