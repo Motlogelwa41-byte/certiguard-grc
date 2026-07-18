@@ -69,6 +69,7 @@ import Billing from '@/pages/Billing';
 import About from '@/pages/About';
 import RegulatoryChanges from '@/pages/RegulatoryChanges';
 import DPIA from '@/pages/DPIA';
+import ContinuousMonitoring from '@/pages/ContinuousMonitoring';
 
 const AuthenticatedApp = () => {
   const { isLoadingAuth, isLoadingPublicSettings, authError, navigateToLogin } = useAuth();
@@ -154,6 +155,7 @@ const AuthenticatedApp = () => {
           <Route path="/about" element={<About />} />
           <Route path="/regulatory-changes" element={<RegulatoryChanges />} />
           <Route path="/dpia" element={<DPIA />} />
+          <Route path="/control-monitoring" element={<ContinuousMonitoring />} />
         </Route>
       </Route>
       <Route path="*" element={<PageNotFound />} />

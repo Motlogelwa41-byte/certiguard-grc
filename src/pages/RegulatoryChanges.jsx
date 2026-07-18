@@ -15,7 +15,7 @@ import {
 import { useToast } from "@/components/ui/use-toast";
 import {
   Plus, Search, ScrollText, AlertTriangle, Clock, MapPin, Building2,
-  TrendingUp, CheckCircle2, ExternalLink, Calendar, Filter, ChevronRight, Eye, Pencil, Trash2, Loader2,
+  TrendingUp, CheckCircle2, ExternalLink, Calendar, Filter, ChevronRight, Eye, Pencil, Trash2, Loader2, Sparkles,
 } from "lucide-react";
 
 const STATUS_FLOW = ["identified", "assessing", "in_progress", "implemented", "monitoring"];
@@ -93,6 +93,7 @@ export default function RegulatoryChanges() {
   const [editing, setEditing] = useState(null);
   const [form, setForm] = useState(emptyForm);
   const [saving, setSaving] = useState(false);
+  const [genLoading, setGenLoading] = useState(null);
   const { toast } = useToast();
 
   const load = () => {
@@ -176,6 +177,24 @@ export default function RegulatoryChanges() {
       load();
     } catch (e) {
       toast({ title: "Update failed", description: e.message, variant: "destructive" });
+    }
+  };
+
+  const generateTasks = async (c) => {
+    setGenLoading(c.id);
+    try {
+      const res = await base44.functions.invoke("generateRegulatoryChangeTasks", { regulatory_change_id: c.id });
+      const data = res.data || {};
+      if (data.error) throw new Error(data.error);
+      toast({
+        title: `${data.created || 0} compliance task(s) generated`,
+        description: (data.tasks || []).map((t) => "• " + t.title).join("\n") || undefined,
+      });
+      load();
+    } catch (e) {
+      toast({ title: "Task generation failed", description: e.message, variant: "destructive" });
+    } finally {
+      setGenLoading(null);
     }
   };
 
@@ -363,6 +382,9 @@ export default function RegulatoryChanges() {
                         Advance <ChevronRight className="w-3 h-3" />
                       </Button>
                     )}
+                    <Button size="sm" variant="secondary" onClick={() => generateTasks(c)} disabled={genLoading === c.id} className="whitespace-nowrap">
+                      {genLoading === c.id ? <Loader2 className="w-3 h-3 mr-1 animate-spin" /> : <Sparkles className="w-3 h-3 mr-1" />} Tasks
+                    </Button>
                     <div className="flex gap-1">
                       <Button size="icon" variant="ghost" onClick={() => { setEditing(c); setDetailOpen(true); }}><Eye className="w-4 h-4" /></Button>
                       <Button size="icon" variant="ghost" onClick={() => openEdit(c)}><Pencil className="w-4 h-4" /></Button>
