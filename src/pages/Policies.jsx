@@ -18,6 +18,7 @@ import EmptyState from "@/components/shared/EmptyState";
 import { useToast } from "@/components/ui/use-toast";
 import PolicyApprovalDialog from "@/components/policies/PolicyApprovalDialog";
 import PolicyVersionHistory from "@/components/policies/PolicyVersionHistory";
+import Can from "@/components/shared/Can";
 
 const policyCategories = ["information_security","data_privacy","acceptable_use","access_control","incident_response","business_continuity","change_management","vendor_management","human_resources","physical_security"];
 const defaultForm = { title: "", description: "", content: "", category: "information_security", status: "draft", version: "1.0", owner_name: "", acknowledgment_required: true, next_review_date: "" };
@@ -144,9 +145,9 @@ export default function Policies() {
             <Link to="/policy-acknowledgments">
               <Button variant="outline" size="sm"><CheckSquare className="w-4 h-4 mr-1" /> Acknowledgments</Button>
             </Link>
-            <Button variant="outline" size="sm" onClick={handleExport}><Download className="w-4 h-4 mr-1" /> Export</Button>
-            <Button variant="outline" size="sm" onClick={() => setImportOpen(true)}><Upload className="w-4 h-4 mr-1" /> Import</Button>
-            <Button size="sm" onClick={() => { setForm(defaultForm); setEditId(null); setOpen(true); }}><Plus className="w-4 h-4 mr-1" /> Add Policy</Button>
+            <Can permission="reports:export"><Button variant="outline" size="sm" onClick={handleExport}><Download className="w-4 h-4 mr-1" /> Export</Button></Can>
+            <Can permission="policies:write"><Button variant="outline" size="sm" onClick={() => setImportOpen(true)}><Upload className="w-4 h-4 mr-1" /> Import</Button></Can>
+            <Can permission="policies:write"><Button size="sm" onClick={() => { setForm(defaultForm); setEditId(null); setOpen(true); }}><Plus className="w-4 h-4 mr-1" /> Add Policy</Button></Can>
           </div>
         }
       />
@@ -177,7 +178,7 @@ export default function Policies() {
         <Button size="sm" variant="secondary" onClick={applyBulkCategory} disabled={!bulkCategory}>Apply Category</Button>
         <Input value={bulkOwner} onChange={(e) => setBulkOwner(e.target.value)} placeholder="Assign owner" className="w-[160px] h-8" />
         <Button size="sm" variant="secondary" onClick={applyBulkOwner} disabled={!bulkOwner.trim()}>Assign Owner</Button>
-        <Button size="sm" variant="destructive" onClick={bulkDelete}><Trash2 className="w-4 h-4 mr-1" />Delete</Button>
+        <Can permission="policies:delete"><Button size="sm" variant="destructive" onClick={bulkDelete}><Trash2 className="w-4 h-4 mr-1" />Delete</Button></Can>
       </BulkActionBar>
 
       {items.length === 0 ? (
@@ -234,9 +235,9 @@ export default function Policies() {
                   <div className="flex items-center gap-1">
                     <button onClick={() => { setViewPolicy(p); setViewOpen(true); }} className="p-1 rounded hover:bg-muted" title="View"><Eye className="w-3.5 h-3.5 text-muted-foreground" /></button>
                     <button onClick={() => { setHistoryPolicy(p); }} className="p-1 rounded hover:bg-muted" title="Version History"><History className="w-3.5 h-3.5 text-muted-foreground" /></button>
-                    <button onClick={() => { setApprovalPolicy(p); }} className="p-1 rounded hover:bg-muted" title="Approval Workflow"><PenLine className="w-3.5 h-3.5 text-blue-500" /></button>
-                    <button onClick={() => handleEdit(p)} className="p-1 rounded hover:bg-muted" title="Edit"><Pencil className="w-3.5 h-3.5 text-muted-foreground" /></button>
-                    <button onClick={() => handleDelete(p.id)} className="p-1 rounded hover:bg-muted text-destructive" title="Delete"><Trash2 className="w-3.5 h-3.5" /></button>
+                    <Can permission="policies:approve"><button onClick={() => { setApprovalPolicy(p); }} className="p-1 rounded hover:bg-muted" title="Approval Workflow"><PenLine className="w-3.5 h-3.5 text-blue-500" /></button></Can>
+                    <Can permission="policies:write"><button onClick={() => handleEdit(p)} className="p-1 rounded hover:bg-muted" title="Edit"><Pencil className="w-3.5 h-3.5 text-muted-foreground" /></button></Can>
+                    <Can permission="policies:delete"><button onClick={() => handleDelete(p.id)} className="p-1 rounded hover:bg-muted text-destructive" title="Delete"><Trash2 className="w-3.5 h-3.5" /></button></Can>
                   </div>
                 </div>
               </div>

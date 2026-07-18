@@ -99,8 +99,8 @@ export default function RiskCardDetail({ r, allControls, onEdit, onDelete }) {
       <div className="flex items-center justify-between text-xs text-muted-foreground pt-2 border-t border-border">
         <span>{r.owner_name || "Unassigned"}</span>
         <div className="flex items-center gap-1">
-          <button onClick={() => onEdit(r)} className="p-1 rounded hover:bg-muted"><Pencil className="w-3.5 h-3.5" /></button>
-          <button onClick={() => onDelete(r.id)} className="p-1 rounded hover:bg-muted text-destructive"><Trash2 className="w-3.5 h-3.5" /></button>
+          {onEdit && <button onClick={() => onEdit(r)} className="p-1 rounded hover:bg-muted"><Pencil className="w-3.5 h-3.5" /></button>}
+          {onDelete && <button onClick={() => onDelete(r.id)} className="p-1 rounded hover:bg-muted text-destructive"><Trash2 className="w-3.5 h-3.5" /></button>}
         </div>
       </div>
     </div>

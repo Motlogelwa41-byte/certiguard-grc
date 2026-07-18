@@ -17,12 +17,15 @@ import { logAuditTrail } from "@/lib/auditLogger";
 import { useAuth } from "@/lib/AuthContext";
 import RiskCardDetail from "@/components/risks/RiskCardDetail";
 import BulkActionBar from "@/components/shared/BulkActionBar";
+import Can from "@/components/shared/Can";
+import { useRBAC } from "@/lib/useRBAC";
 
 const riskCategories = ["operational","technical","compliance","financial","strategic","reputational","third_party"];
 const defaultForm = { risk_id: "", title: "", description: "", category: "operational", likelihood: 3, impact: 3, status: "open", treatment: "mitigate", owner_name: "", mitigation_plan: "", due_date: "", related_control_ids: [], tolerance_justification: "" };
 
 export default function Risks() {
   const { user } = useAuth();
+  const { can } = useRBAC();
   const [items, setItems] = useState([]);
   const [controls, setControls] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -140,9 +143,9 @@ export default function Risks() {
     <div>
       <PageHeader title="Risk Register" subtitle="Identify, assess, and manage organizational risks" actions={
         <div className="flex items-center gap-2">
-          <Button variant="outline" size="sm" onClick={handleExport}><Download className="w-4 h-4 mr-1" /> Export</Button>
-          <Button variant="outline" size="sm" onClick={() => setImportOpen(true)}><Upload className="w-4 h-4 mr-1" /> Import</Button>
-          <Button size="sm" onClick={() => { setForm(defaultForm); setEditId(null); setOpen(true); }}><Plus className="w-4 h-4 mr-1" /> Add Risk</Button>
+          <Can permission="reports:export"><Button variant="outline" size="sm" onClick={handleExport}><Download className="w-4 h-4 mr-1" /> Export</Button></Can>
+          <Can permission="risks:write"><Button variant="outline" size="sm" onClick={() => setImportOpen(true)}><Upload className="w-4 h-4 mr-1" /> Import</Button></Can>
+          <Can permission="risks:write"><Button size="sm" onClick={() => { setForm(defaultForm); setEditId(null); setOpen(true); }}><Plus className="w-4 h-4 mr-1" /> Add Risk</Button></Can>
         </div>
       } />
 
@@ -207,7 +210,7 @@ export default function Risks() {
         <Button size="sm" variant="secondary" onClick={applyBulkStatus} disabled={!bulkStatus}>Apply Status</Button>
         <Input value={bulkOwner} onChange={(e) => setBulkOwner(e.target.value)} placeholder="Assign owner" className="w-[160px] h-8" />
         <Button size="sm" variant="secondary" onClick={applyBulkOwner} disabled={!bulkOwner.trim()}>Assign Owner</Button>
-        <Button size="sm" variant="destructive" onClick={bulkDelete}><Trash2 className="w-4 h-4 mr-1" />Delete</Button>
+        <Can permission="risks:delete"><Button size="sm" variant="destructive" onClick={bulkDelete}><Trash2 className="w-4 h-4 mr-1" />Delete</Button></Can>
       </BulkActionBar>
 
       {items.length === 0 ? (
@@ -224,8 +227,8 @@ export default function Risks() {
               <RiskCardDetail
                 r={r}
                 allControls={controls}
-                onEdit={handleEdit}
-                onDelete={handleDelete}
+                onEdit={can("risks:write") ? handleEdit : null}
+                onDelete={can("risks:delete") ? handleDelete : null}
               />
             </div>
           ))}
