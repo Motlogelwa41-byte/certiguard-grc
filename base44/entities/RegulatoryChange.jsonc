@@ -1,0 +1,189 @@
+{
+  "name": "RegulatoryChange",
+  "type": "object",
+  "properties": {
+    "tenant_id": {
+      "type": "string",
+      "description": "Tenant isolation key"
+    },
+    "change_id": {
+      "type": "string",
+      "description": "Unique identifier e.g. RC-2024-001"
+    },
+    "title": {
+      "type": "string"
+    },
+    "regulator": {
+      "type": "string",
+      "description": "Issuing authority e.g. Information Regulator, SARB, ICASA, ENISA"
+    },
+    "region": {
+      "type": "string",
+      "enum": [
+        "south_africa",
+        "sadc",
+        "african_union",
+        "european_union",
+        "united_kingdom",
+        "united_states",
+        "global",
+        "other"
+      ],
+      "default": "sadc"
+    },
+    "regulation_name": {
+      "type": "string",
+      "description": "Name of the regulation being changed"
+    },
+    "change_type": {
+      "type": "string",
+      "enum": [
+        "new_regulation",
+        "amendment",
+        "repeal",
+        "guidance",
+        "consultation",
+        "enforcement"
+      ],
+      "default": "amendment"
+    },
+    "change_summary": {
+      "type": "string",
+      "description": "Plain-language summary of what is changing"
+    },
+    "priority": {
+      "type": "string",
+      "enum": [
+        "critical",
+        "high",
+        "medium",
+        "low"
+      ],
+      "default": "medium"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "identified",
+        "assessing",
+        "in_progress",
+        "implemented",
+        "monitoring",
+        "no_action"
+      ],
+      "default": "identified"
+    },
+    "impact_level": {
+      "type": "string",
+      "enum": [
+        "high",
+        "medium",
+        "low",
+        "none"
+      ],
+      "default": "medium"
+    },
+    "impact_summary": {
+      "type": "string",
+      "description": "Assessment of how the change affects the organization"
+    },
+    "affected_areas": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "Areas impacted: policies, controls, vendors, data_processing, contracts, training, systems"
+    },
+    "affected_framework_ids": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "effective_date": {
+      "type": "string",
+      "format": "date"
+    },
+    "compliance_deadline": {
+      "type": "string",
+      "format": "date"
+    },
+    "source_url": {
+      "type": "string"
+    },
+    "owner_name": {
+      "type": "string"
+    },
+    "owner_id": {
+      "type": "string"
+    },
+    "assigned_to": {
+      "type": "string"
+    },
+    "action_plan": {
+      "type": "string",
+      "description": "Steps to achieve compliance with the change"
+    },
+    "risk_if_not_addressed": {
+      "type": "string"
+    },
+    "identified_date": {
+      "type": "string",
+      "format": "date"
+    },
+    "last_reviewed": {
+      "type": "string",
+      "format": "date"
+    },
+    "notes": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "title",
+    "regulator"
+  ],
+  "rls": {
+    "create": {
+      "data.tenant_id": "{{user.data.tenant_id}}"
+    },
+    "read": {
+      "$or": [
+        {
+          "data.tenant_id": "{{user.data.tenant_id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "update": {
+      "$or": [
+        {
+          "data.tenant_id": "{{user.data.tenant_id}}",
+          "created_by_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "delete": {
+      "$or": [
+        {
+          "data.tenant_id": "{{user.data.tenant_id}}",
+          "created_by_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    }
+  }
+}
