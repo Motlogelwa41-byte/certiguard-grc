@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
-import { Paperclip, Plus, Pencil, Trash2, Search, Upload, ExternalLink, Link2 } from "lucide-react";
+import { Paperclip, Plus, Pencil, Trash2, Search, Upload, ExternalLink, Link2, Layers } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import BulkUploadPanel from "@/components/evidence/BulkUploadPanel";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -24,6 +25,7 @@ export default function EvidenceManager() {
   const [editId, setEditId] = useState(null);
   const [search, setSearch] = useState("");
   const [uploading, setUploading] = useState(false);
+  const [bulkOpen, setBulkOpen] = useState(false);
   const { toast } = useToast();
 
   const load = async () => {
@@ -69,7 +71,12 @@ export default function EvidenceManager() {
 
   return (
     <div>
-      <PageHeader title="Evidence" subtitle="Collect and manage audit evidence" actions={<Button size="sm" onClick={() => { setForm(defaultForm); setEditId(null); setOpen(true); }}><Plus className="w-4 h-4 mr-1" /> Add Evidence</Button>} />
+      <PageHeader title="Evidence" subtitle="Collect and manage audit evidence" actions={
+        <div className="flex items-center gap-2">
+          <Button size="sm" variant="outline" onClick={() => setBulkOpen(true)}><Layers className="w-4 h-4 mr-1" /> Bulk Upload</Button>
+          <Button size="sm" onClick={() => { setForm(defaultForm); setEditId(null); setOpen(true); }}><Plus className="w-4 h-4 mr-1" /> Add Evidence</Button>
+        </div>
+      } />
 
       <div className="flex items-center gap-3 mb-6">
         <div className="relative flex-1 max-w-sm">
@@ -185,6 +192,14 @@ export default function EvidenceManager() {
             <div><Label>Notes</Label><Textarea value={form.notes} onChange={(e) => setForm({ ...form, notes: e.target.value })} rows={2} /></div>
             <Button className="w-full" onClick={handleSave} disabled={!form.title}>{editId ? "Update" : "Add"}</Button>
           </div>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={bulkOpen} onOpenChange={setBulkOpen}>
+        <DialogContent className="max-w-3xl">
+          <DialogHeader><DialogTitle>Bulk Upload Evidence</DialogTitle></DialogHeader>
+          <p className="text-sm text-muted-foreground -mt-2">Drag and drop multiple files, map each to a control, then upload all at once.</p>
+          <BulkUploadPanel controls={controls} onComplete={load} />
         </DialogContent>
       </Dialog>
     </div>
