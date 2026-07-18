@@ -2,27 +2,11 @@ import { createClientFromRequest } from 'npm:@base44/sdk@0.8.38';
 
 // Posts an alert to the #compliance Slack channel as the CertiGuard bot.
 // Invoked by workflows (Vendor high-risk status change, new ComplianceTask).
-const DEFAULT_CHANNEL = 'compliance';
+// The slackbot connector grants only chat scopes (no channels:read), so the
+// channel ID must be hardcoded — we cannot resolve the channel name at runtime.
+const COMPLIANCE_CHANNEL_ID = 'C0BJB8240RF';
 const BOT_USERNAME = 'CertiGuard';
 const BOT_ICON_EMOJI = ':shield:';
-
-// Resolve a human channel name (e.g. "compliance") to its Slack channel ID,
-// paginating conversations.list fully.
-async function resolveChannelId(accessToken, name) {
-  const clean = String(name || '').replace(/^#/, '');
-  let cursor = '';
-  for (let i = 0; i < 20; i++) {
-    const url = `https://slack.com/api/conversations.list?types=public_channel,private_channel&limit=200${cursor ? `&cursor=${cursor}` : ''}`;
-    const res = await fetch(url, { headers: { Authorization: `Bearer ${accessToken}` } });
-    const data = await res.json();
-    if (!data.ok) return null;
-    const found = (data.channels || []).find((c) => c.name === clean);
-    if (found) return found.id;
-    if (!data.response_metadata?.next_cursor) break;
-    cursor = data.response_metadata.next_cursor;
-  }
-  return null;
-}
 
 Deno.serve(async (req) => {
   try {
@@ -34,9 +18,7 @@ Deno.serve(async (req) => {
 
     const body = await req.json().catch(() => ({}));
     const text = body.text || 'CertiGuard GRC alert';
-    const channelName = body.channel || DEFAULT_CHANNEL;
-
-    const channelId = (await resolveChannelId(accessToken, channelName)) || channelName.replace(/^#/, '');
+    const channelId = body.channel || COMPLIANCE_CHANNEL_ID;
 
     const postRes = await fetch('https://slack.com/api/chat.postMessage', {
       method: 'POST',
