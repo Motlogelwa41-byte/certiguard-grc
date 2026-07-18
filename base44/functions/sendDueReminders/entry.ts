@@ -20,18 +20,21 @@ Deno.serve(async (req) => {
     });
 
     // Group tasks by assignee email
+    // Group by tenant_id + email so reminders never mix tenants for the same address
     const byEmail = {};
     for (const t of due) {
       const email = (t.assignee_email || "").trim().toLowerCase();
       if (!email) continue;
-      (byEmail[email] = byEmail[email] || []).push(t);
+      const key = `${t.tenant_id || ""}|${email}`;
+      (byEmail[key] = byEmail[key] || []).push(t);
     }
 
     let sent = 0;
     let failed = 0;
     const reminders = [];
 
-    for (const [email, list] of Object.entries(byEmail)) {
+    for (const [key, list] of Object.entries(byEmail)) {
+      const [tenantId, email] = key.split("|");
       const rows = list.map((t) =>
         `<tr>
           <td style="padding:8px 10px;border-bottom:1px solid #eef2f7;font-size:13px">${escapeHtml(t.title || "")}</td>
@@ -80,6 +83,7 @@ Deno.serve(async (req) => {
           task_title: t.title,
           assignee_name: t.assignee_name,
           assignee_email: email,
+          tenant_id: t.tenant_id,
           due_date: t.due_date,
           days_before: 7,
           sent_at: new Date().toISOString(),

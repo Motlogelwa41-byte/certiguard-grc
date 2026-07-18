@@ -1,0 +1,40 @@
+{
+  "name": "Vendor High-Risk Status Alert",
+  "description": "Posts a Slack alert to #compliance whenever a high- or critical-risk vendor's status changes.",
+  "trigger": {
+    "config": {
+      "trigger_type": "entity",
+      "entity_name": "Vendor",
+      "events": [
+        "update"
+      ]
+    },
+    "condition": "${ .trigger.changed_fields | index(\"status\") != null and (.trigger.data.risk_level == \"critical\" or .trigger.data.risk_level == \"high\") }"
+  },
+  "definition": {
+    "document": {
+      "dsl": "1.0.0",
+      "name": "vendor_high_risk_status_alert",
+      "version": "1.0",
+      "namespace": "base44"
+    },
+    "do": [
+      {
+        "send_alert": {
+          "call": "invoke_backend_function",
+          "with": {
+            "function_name": "sendSlackAlert",
+            "args": {
+              "text": ":warning: High-risk vendor status changed: *${ .trigger.data.name }* is now *${ .trigger.data.status }* (risk level: ${ .trigger.data.risk_level }). Review in CertiGuard."
+            }
+          },
+          "then": "end",
+          "x-base44": {
+            "title": "Post Slack alert",
+            "description": "Alert #compliance channel"
+          }
+        }
+      }
+    ]
+  }
+}

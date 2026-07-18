@@ -1,0 +1,40 @@
+{
+  "name": "New Compliance Task Alert",
+  "description": "Posts a Slack alert to #compliance whenever a new compliance task is assigned to someone.",
+  "trigger": {
+    "config": {
+      "trigger_type": "entity",
+      "entity_name": "ComplianceTask",
+      "events": [
+        "create"
+      ]
+    },
+    "condition": "${ .trigger.data.assignee_name != null and .trigger.data.assignee_name != \"\" }"
+  },
+  "definition": {
+    "document": {
+      "dsl": "1.0.0",
+      "name": "new_compliance_task_alert",
+      "version": "1.0",
+      "namespace": "base44"
+    },
+    "do": [
+      {
+        "send_alert": {
+          "call": "invoke_backend_function",
+          "with": {
+            "function_name": "sendSlackAlert",
+            "args": {
+              "text": ":clipboard: New compliance task assigned: *${ .trigger.data.title }* (priority: ${ .trigger.data.priority }, due: ${ .trigger.data.due_date }) \u2192 assignee: ${ .trigger.data.assignee_name }"
+            }
+          },
+          "then": "end",
+          "x-base44": {
+            "title": "Post Slack alert",
+            "description": "Alert #compliance channel"
+          }
+        }
+      }
+    ]
+  }
+}
