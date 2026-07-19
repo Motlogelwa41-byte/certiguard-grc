@@ -75,6 +75,9 @@ import FinancialServicesDashboard from '@/pages/FinancialServicesDashboard';
 import Connections from '@/pages/Connections';
 import AccessRecertification from '@/pages/AccessRecertification';
 import OnboardingWizard from '@/pages/OnboardingWizard';
+import SSOSettings from '@/pages/SSOSettings';
+import Vulnerabilities from '@/pages/Vulnerabilities';
+import ControlLibraries from '@/pages/ControlLibraries';
 
 const AuthenticatedApp = () => {
   const { isLoadingAuth, isLoadingPublicSettings, authError, navigateToLogin } = useAuth();
@@ -166,6 +169,9 @@ const AuthenticatedApp = () => {
           <Route path="/connections" element={<Connections />} />
           <Route path="/access-recertification" element={<AccessRecertification />} />
           <Route path="/onboarding" element={<OnboardingWizard />} />
+          <Route path="/sso" element={<SSOSettings />} />
+          <Route path="/vulnerabilities" element={<Vulnerabilities />} />
+          <Route path="/control-libraries" element={<ControlLibraries />} />
         </Route>
       </Route>
       <Route path="*" element={<PageNotFound />} />

@@ -52,28 +52,49 @@ Deno.serve(async (req) => {
     if (!campaign) return Response.json({ error: 'Campaign not found' }, { status: 404 });
 
     if (action === 'generate') {
-      const users = await sr.entities.User.list('-created_date', 500);
+      const [users, dirUsers] = await Promise.all([
+        sr.entities.User.list('-created_date', 500),
+        sr.entities.DirectoryUser.list('-last_synced_at', 1000),
+      ]);
       const existing = await sr.entities.AccessReviewItem.filter({ campaign_id: campaignId }, '-updated_date', 1000);
-      const existingIds = new Set((existing || []).map((i) => i.user_id).filter(Boolean));
-      const scoped = (users || []).filter((u) => campaign.scope === 'admins_only' ? u.role === 'admin' : true);
-      const toCreate = scoped
-        .filter((u) => !existingIds.has(u.id))
-        .map((u) => ({
-          campaign_id: campaignId,
-          campaign_name: campaign.name,
-          user_id: u.id,
-          user_name: u.full_name || u.email,
-          user_email: u.email,
-          role: u.role || 'user',
-          access_summary: `Platform role: ${u.role || 'user'}. Review assigned permissions, integrations, and tenant access for least-privilege.`,
-          reviewer_name: campaign.reviewer_name || user.full_name || '',
-          decision: 'pending',
-          status: 'open',
-        }));
+      const existingKeys = new Set((existing || []).map((i) => `${i.user_id || ''}|${(i.access_summary || '').slice(0, 20)}`));
+      const toCreate = [];
+      // Platform app users
+      (users || [])
+        .filter((u) => campaign.scope === 'admins_only' ? u.role === 'admin' : true)
+        .forEach((u) => {
+          const key = `${u.id}|platform`;
+          if (existingKeys.has(key)) return;
+          toCreate.push({
+            campaign_id: campaignId, campaign_name: campaign.name,
+            user_id: u.id, user_name: u.full_name || u.email, user_email: u.email,
+            role: u.role || 'user',
+            access_summary: `Platform role: ${u.role || 'user'}. Review assigned app permissions and tenant access for least-privilege.`,
+            reviewer_name: campaign.reviewer_name || user.full_name || '', decision: 'pending', status: 'open',
+          });
+          existingKeys.add(key);
+        });
+      // IdP-grounded directory users (real access state from synced providers)
+      (dirUsers || [])
+        .filter((d) => campaign.scope === 'admins_only' ? (d.roles || []).some((r) => /admin|owner/i.test(r)) : true)
+        .forEach((d) => {
+          const key = `${d.id}|idp`;
+          if (existingKeys.has(key)) return;
+          const groups = (d.groups || []).join(', ') || 'none';
+          const roles = (d.roles || []).join(', ') || 'none';
+          toCreate.push({
+            campaign_id: campaignId, campaign_name: campaign.name,
+            user_id: d.user_id || d.external_id, user_name: d.full_name || d.email, user_email: d.email,
+            role: roles,
+            access_summary: `IdP: ${d.idp_name || 'directory'} · Status: ${d.status} · Groups: ${groups} · Roles: ${roles}. Verify least-privilege and revoke stale access.`,
+            reviewer_name: campaign.reviewer_name || user.full_name || '', decision: 'pending', status: 'open',
+          });
+          existingKeys.add(key);
+        });
       if (toCreate.length) await sr.entities.AccessReviewItem.bulkCreate(toCreate);
       const total = (existing?.length || 0) + toCreate.length;
       await sr.entities.AccessReviewCampaign.update(campaignId, { total_items: total, status: 'in_review' });
-      return Response.json({ ok: true, generated: toCreate.length, total });
+      return Response.json({ ok: true, generated: toCreate.length, total, idp_users: (dirUsers || []).length });
     }
 
     if (action === 'finalize') {

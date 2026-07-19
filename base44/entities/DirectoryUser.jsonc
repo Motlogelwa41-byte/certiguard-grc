@@ -1,0 +1,120 @@
+{
+  "name": "DirectoryUser",
+  "type": "object",
+  "properties": {
+    "tenant_id": {
+      "type": "string",
+      "description": "Tenant isolation key"
+    },
+    "idp_id": {
+      "type": "string"
+    },
+    "idp_name": {
+      "type": "string"
+    },
+    "external_id": {
+      "type": "string",
+      "description": "Unique id from the IdP/SCIM directory"
+    },
+    "email": {
+      "type": "string"
+    },
+    "full_name": {
+      "type": "string"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "active",
+        "suspended",
+        "deprovisioned"
+      ],
+      "default": "active"
+    },
+    "groups": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "roles": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "department": {
+      "type": "string"
+    },
+    "title": {
+      "type": "string"
+    },
+    "provisioning_status": {
+      "type": "string",
+      "enum": [
+        "synced",
+        "invited",
+        "pending",
+        "error"
+      ],
+      "default": "synced"
+    },
+    "user_id": {
+      "type": "string",
+      "description": "Linked Base44 user id once provisioned"
+    },
+    "last_synced_at": {
+      "type": "string"
+    },
+    "mfa_enabled": {
+      "type": "boolean",
+      "default": false
+    }
+  },
+  "required": [
+    "external_id"
+  ],
+  "rls": {
+    "create": {
+      "data.tenant_id": "{{user.data.tenant_id}}"
+    },
+    "read": {
+      "$or": [
+        {
+          "data.tenant_id": "{{user.data.tenant_id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "update": {
+      "$or": [
+        {
+          "data.tenant_id": "{{user.data.tenant_id}}",
+          "created_by_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "delete": {
+      "$or": [
+        {
+          "data.tenant_id": "{{user.data.tenant_id}}",
+          "created_by_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    }
+  }
+}
