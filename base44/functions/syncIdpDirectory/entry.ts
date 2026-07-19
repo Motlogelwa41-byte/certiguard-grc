@@ -65,7 +65,19 @@ Deno.serve(async (req) => {
       if (existing && existing.length) {
         await base44.entities.DirectoryUser.update(existing[0].id, payload);
       } else {
-        await base44.entities.DirectoryUser.create(payload);
+        let pstatus = 'synced';
+        let userId = '';
+        if (idp.provision_new_users && email) {
+          try {
+            const inv = await base44.users.inviteUser(email, 'user');
+            userId = (inv && inv.id) || '';
+            pstatus = 'invited';
+          } catch (e) {
+            console.warn('provision invite failed', email, e?.message);
+            pstatus = 'error';
+          }
+        }
+        await base44.entities.DirectoryUser.create({ ...payload, provisioning_status: pstatus, user_id: userId });
       }
       synced++;
     }

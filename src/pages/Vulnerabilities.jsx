@@ -29,12 +29,16 @@ export default function Vulnerabilities() {
   const [importText, setImportText] = useState("");
   const [importing, setImporting] = useState(false);
   const [sel, setSel] = useState([]);
+  const [controls, setControls] = useState([]);
   const { toast } = useToast();
 
   const load = async () => {
     setLoading(true);
-    const f = await base44.entities.SecurityFinding.list("-created_date", 500);
-    // compute sla breach
+    const [f, ctls] = await Promise.all([
+      base44.entities.SecurityFinding.list("-created_date", 500),
+      base44.entities.Control.list("-updated_date", 500),
+    ]);
+    setControls(ctls || []);
     const now = new Date();
     const enriched = (f || []).map((x) => ({ ...x, sla_breached: x.status === "open" && x.due_date && new Date(x.due_date) < now }));
     setFindings(enriched);
@@ -58,7 +62,9 @@ export default function Vulnerabilities() {
 
   const saveTriage = async () => {
     try {
-      const updates = { status: triage.status, owner_name: triage.owner_name, due_date: triage.due_date, notes: triage.notes, linked_control_ids: (triage.linked_control_ids || "").split(",").map((x) => x.trim()).filter(Boolean), remediated_date: triage.status === "remediated" ? new Date().toISOString().slice(0, 10) : triage.remediated_date };
+      const linkedIds = Array.isArray(triage.linked_control_ids) ? triage.linked_control_ids : [];
+      const linkedNames = linkedIds.map((id) => { const c = controls.find((x) => x.id === id); return c ? c.title : ""; }).filter(Boolean);
+      const updates = { status: triage.status, owner_name: triage.owner_name, due_date: triage.due_date, notes: triage.notes, linked_control_ids: linkedIds, linked_control_names: linkedNames, remediated_date: triage.status === "remediated" ? new Date().toISOString().slice(0, 10) : triage.remediated_date };
       await base44.entities.SecurityFinding.update(triage.id, updates);
       toast({ title: "Finding updated" });
       setTriage(null); load();
@@ -168,7 +174,21 @@ export default function Vulnerabilities() {
                 <div><Label>Owner</Label><Input value={triage.owner_name || ""} onChange={(e) => setTriage({ ...triage, owner_name: e.target.value })} /></div>
               </div>
               <div><Label>Due date</Label><Input type="date" value={triage.due_date || ""} onChange={(e) => setTriage({ ...triage, due_date: e.target.value })} /></div>
-              <div><Label>Linked control IDs (comma-separated)</Label><Input value={(triage.linked_control_ids || []).join(", ")} onChange={(e) => setTriage({ ...triage, linked_control_ids: e.target.value })} /></div>
+              <div>
+                <Label>Linked compliance controls ({(triage.linked_control_ids || []).length})</Label>
+                <div className="border border-border rounded-lg max-h-40 overflow-y-auto p-2 space-y-1">
+                  {controls.length === 0 && <p className="text-xs text-muted-foreground p-1">No controls available.</p>}
+                  {controls.map((c) => {
+                    const on = (triage.linked_control_ids || []).includes(c.id);
+                    return (
+                      <label key={c.id} className="flex items-center gap-2 text-xs py-0.5 px-1 rounded hover:bg-muted cursor-pointer">
+                        <input type="checkbox" checked={on} onChange={() => setTriage((t) => ({ ...t, linked_control_ids: on ? (t.linked_control_ids || []).filter((x) => x !== c.id) : [...(t.linked_control_ids || []), c.id] }))} className="rounded" />
+                        <span className="text-foreground truncate">{c.control_id ? `[${c.control_id}] ` : ""}{c.title}</span>
+                      </label>
+                    );
+                  })}
+                </div>
+              </div>
               <div><Label>Notes</Label><Textarea rows={3} value={triage.notes || ""} onChange={(e) => setTriage({ ...triage, notes: e.target.value })} /></div>
               <Button className="w-full" onClick={saveTriage}>Save</Button>
             </div>
