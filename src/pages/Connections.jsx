@@ -9,9 +9,10 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useToast } from "@/components/ui/use-toast";
 import { Switch } from "@/components/ui/switch";
+import { Link } from "react-router-dom";
 import { CATALOG, CATEGORIES, catalogEntry } from "@/lib/connectionsCatalog";
 import StatusBadge from "@/components/shared/StatusBadge";
-import { Plus, RefreshCw, Settings2, Trash2, CheckCircle2, AlertCircle, Link2, Zap } from "lucide-react";
+import { Plus, RefreshCw, Settings2, Trash2, CheckCircle2, AlertCircle, Link2, Zap, Wand2 } from "lucide-react";
 
 const FREQ = [
   { value: "hourly", label: "Hourly" },
@@ -165,7 +166,7 @@ export default function Connections() {
       <PageHeader
         title="Connections"
         subtitle="Connect source systems to automatically collect evidence and monitor controls"
-        actions={<Button size="sm" variant="outline" onClick={load}><RefreshCw className="w-4 h-4 mr-1" /> Refresh</Button>}
+        actions={<div className="flex items-center gap-2"><Link to="/onboarding"><Button size="sm"><Wand2 className="w-4 h-4 mr-1" /> Setup Wizard</Button></Link><Button size="sm" variant="outline" onClick={load}><RefreshCw className="w-4 h-4 mr-1" /> Refresh</Button></div>}
       />
 
       {/* Stats */}

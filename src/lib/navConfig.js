@@ -4,7 +4,7 @@ import {
   ShieldCheck, FileSearch, Brain, Play, FileSpreadsheet, FileDown, BarChart3,
   History, ShieldAlert, GraduationCap, Calendar, Bell, Users, Copy, SlidersHorizontal,
   Target, Upload, Send, Globe, Users2, MapPin, Zap, ListChecks, BellRing,
-  PieChart, Radar, Landmark, BarChart2, Network, GitCompare, Sparkles, CreditCard, Gauge, Info, ScrollText, Activity, Factory, Plug, UserCheck
+  PieChart, Radar, Landmark, BarChart2, Network, GitCompare, Sparkles, CreditCard, Gauge, Info, ScrollText, Activity, Factory, Plug, UserCheck, Wand2
 } from "lucide-react";
 
 // Roles: admin, compliance_officer, risk_manager, auditor, user
@@ -21,6 +21,7 @@ export const navSections = [
   {
     label: "Integrations",
     items: [
+      { label: "Setup Wizard", path: "/onboarding", icon: Wand2, roles: ["admin", "compliance_officer", "risk_manager"] },
       { label: "Connections", path: "/connections", icon: Plug, roles: ["admin", "compliance_officer", "risk_manager", "auditor"] },
     ]
   },
