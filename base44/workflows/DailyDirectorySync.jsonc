@@ -1,0 +1,44 @@
+{
+  "trigger": {
+    "condition": null,
+    "config": {
+      "trigger_type": "scheduled",
+      "events": [],
+      "schedule_mode": "recurring",
+      "cron_expression": "0 2 * * *",
+      "one_time_date": null,
+      "timezone": "Africa/Johannesburg",
+      "interval_value": null,
+      "interval_unit": null,
+      "interval_anchor": null,
+      "ends_type": "never",
+      "ends_on_date": null,
+      "ends_after_count": null
+    }
+  },
+  "name": "Daily Directory Sync",
+  "definition": {
+    "document": {
+      "dsl": "1.0.0",
+      "name": "daily_directory_sync",
+      "version": "1.0",
+      "namespace": "base44"
+    },
+    "do": [
+      {
+        "sync_directories": {
+          "call": "invoke_backend_function",
+          "with": {
+            "function_name": "syncAllDirectories"
+          },
+          "then": "end",
+          "x-base44": {
+            "title": "Sync all IdP directories",
+            "description": "Daily directory refresh"
+          }
+        }
+      }
+    ]
+  },
+  "description": "Refreshes employee directories from all active identity providers daily so access stays current without manual entry."
+}

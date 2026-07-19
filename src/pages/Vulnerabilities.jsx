@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
+import { PieChart, Pie, Cell, BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer } from "recharts";
 import PageHeader from "@/components/shared/PageHeader";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -9,7 +10,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useToast } from "@/components/ui/use-toast";
 import StatusBadge from "@/components/shared/StatusBadge";
-import { Plus, RefreshCw, Trash2, Bug, Upload, Download, ShieldAlert, CheckCircle2, AlertTriangle } from "lucide-react";
+import { Plus, RefreshCw, Trash2, Bug, Upload, Download, ShieldAlert, CheckCircle2, AlertTriangle, Loader2, Cloud } from "lucide-react";
 
 const SOURCES = ["security_hub", "guardduty", "nessus", "qualys", "crowdstrike", "defender", "rapid7", "tenable", "snipe", "other"];
 const SEVERITIES = ["critical", "high", "medium", "low", "info"];
@@ -28,6 +29,7 @@ export default function Vulnerabilities() {
   const [importOpen, setImportOpen] = useState(false);
   const [importText, setImportText] = useState("");
   const [importing, setImporting] = useState(false);
+  const [hubSyncing, setHubSyncing] = useState(false);
   const [sel, setSel] = useState([]);
   const [controls, setControls] = useState([]);
   const { toast } = useToast();
@@ -59,6 +61,9 @@ export default function Vulnerabilities() {
     open: findings.filter((f) => f.status === "open").length,
     breached: findings.filter((f) => f.sla_breached).length,
   };
+  const SEV_COLORS = { critical: "#e11d48", high: "#f97316", medium: "#f59e0b", low: "#0ea5e9", info: "#94a3b8" };
+  const severityData = SEVERITIES.map((s) => ({ key: s, name: s, value: findings.filter((f) => f.severity === s).length }));
+  const statusData = STATUSES.map((s) => ({ name: s.replace(/_/g, " "), value: findings.filter((f) => f.status === s).length }));
 
   const saveTriage = async () => {
     try {
@@ -93,6 +98,17 @@ export default function Vulnerabilities() {
 
   const remove = async (f) => { await base44.entities.SecurityFinding.delete(f.id); load(); toast({ title: "Finding deleted" }); };
 
+  const syncHub = async () => {
+    setHubSyncing(true);
+    try {
+      const res = await base44.functions.invoke("syncAwsSecurityHub", {});
+      const data = res?.data || res;
+      if (data?.ok) { toast({ title: "Security Hub synced", description: `${data.count} findings pulled from AWS Security Hub.` }); load(); }
+      else toast({ title: "Sync failed", description: data?.error, variant: "destructive" });
+    } catch (e) { toast({ title: "Sync failed", description: e.message, variant: "destructive" }); }
+    setHubSyncing(false);
+  };
+
   const exportCsv = () => {
     const rows = [["finding_id", "source", "title", "severity", "status", "asset", "cve", "due_date", "owner", "sla_hours"]];
     filtered.forEach((f) => rows.push([f.finding_id, f.source, `"${(f.title || "").replace(/"/g, '""')}"`, f.severity, f.status, f.asset, f.cve, f.due_date, f.owner_name, f.sla_hours]));
@@ -106,13 +122,45 @@ export default function Vulnerabilities() {
   return (
     <div>
       <PageHeader title="Security Findings" subtitle="Ingest and triage CSPM, vulnerability scanner, and EDR findings with SLA tracking"
-        actions={<div className="flex gap-2"><Button size="sm" variant="outline" onClick={() => setImportOpen(true)}><Upload className="w-4 h-4 mr-1" /> Import</Button><Button size="sm" variant="outline" onClick={exportCsv}><Download className="w-4 h-4 mr-1" /> Export</Button></div>} />
+        actions={<div className="flex gap-2"><Button size="sm" variant="outline" onClick={syncHub} disabled={hubSyncing}>{hubSyncing ? <Loader2 className="w-4 h-4 mr-1 animate-spin" /> : <Cloud className="w-4 h-4 mr-1" />} Security Hub</Button><Button size="sm" variant="outline" onClick={() => setImportOpen(true)}><Upload className="w-4 h-4 mr-1" /> Import</Button><Button size="sm" variant="outline" onClick={exportCsv}><Download className="w-4 h-4 mr-1" /> Export</Button></div>} />
 
       <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-6">
         <StatTile label="Critical open" value={counts.critical} icon={ShieldAlert} color="text-rose-500" />
         <StatTile label="High open" value={counts.high} icon={AlertTriangle} color="text-orange-500" />
         <StatTile label="Total open" value={counts.open} icon={Bug} color="text-amber-500" />
         <StatTile label="SLA breached" value={counts.breached} icon={AlertTriangle} color="text-rose-500" />
+      </div>
+
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 mb-6">
+        <div className="bg-card rounded-2xl border border-border p-5">
+          <h3 className="text-sm font-heading font-semibold mb-3">Findings by severity</h3>
+          <div className="h-56">
+            <ResponsiveContainer width="100%" height="100%">
+              <PieChart>
+                <Pie data={severityData} dataKey="value" nameKey="name" cx="50%" cy="50%" innerRadius={50} outerRadius={80} paddingAngle={2}>
+                  {severityData.map((d) => <Cell key={d.key} fill={SEV_COLORS[d.key]} />)}
+                </Pie>
+                <Tooltip />
+              </PieChart>
+            </ResponsiveContainer>
+          </div>
+          <div className="flex flex-wrap gap-3 justify-center mt-2">
+            {severityData.map((d) => <span key={d.key} className="text-[11px] flex items-center gap-1.5 capitalize"><span className="w-2.5 h-2.5 rounded-full" style={{ background: SEV_COLORS[d.key] }} />{d.name} ({d.value})</span>)}
+          </div>
+        </div>
+        <div className="bg-card rounded-2xl border border-border p-5">
+          <h3 className="text-sm font-heading font-semibold mb-3">Findings by status</h3>
+          <div className="h-56">
+            <ResponsiveContainer width="100%" height="100%">
+              <BarChart data={statusData}>
+                <XAxis dataKey="name" tick={{ fontSize: 11 }} stroke="hsl(var(--muted-foreground))" />
+                <YAxis allowDecimals={false} tick={{ fontSize: 11 }} stroke="hsl(var(--muted-foreground))" />
+                <Tooltip />
+                <Bar dataKey="value" radius={[4, 4, 0, 0]} fill="hsl(var(--primary))" />
+              </BarChart>
+            </ResponsiveContainer>
+          </div>
+        </div>
       </div>
 
       <div className="flex flex-wrap items-center gap-2 mb-4">
