@@ -32,6 +32,7 @@ export default function Vulnerabilities() {
   const [hubSyncing, setHubSyncing] = useState(false);
   const [sel, setSel] = useState([]);
   const [controls, setControls] = useState([]);
+  const [now, setNow] = useState(Date.now());
   const { toast } = useToast();
 
   const load = async () => {
@@ -47,6 +48,18 @@ export default function Vulnerabilities() {
     setLoading(false);
   };
   useEffect(() => { load(); }, []);
+  useEffect(() => { const t = setInterval(() => setNow(Date.now()), 60000); return () => clearInterval(t); }, []);
+
+  const slaRemaining = (f) => {
+    if (!f.due_date || f.status === "remediated" || f.status === "false_positive") return null;
+    const ms = new Date(f.due_date).getTime() - now;
+    if (ms <= 0) return { text: "SLA breached", color: "text-rose-500" };
+    const h = Math.floor(ms / 3600000);
+    const d = Math.floor(h / 24);
+    const text = d >= 1 ? `${d}d ${h % 24}h left` : `${h}h left`;
+    const color = h <= 24 ? "text-orange-500" : d <= 3 ? "text-amber-500" : "text-emerald-500";
+    return { text, color };
+  };
 
   const filtered = findings.filter((f) =>
     (fSource === "all" || f.source === fSource) &&
@@ -194,12 +207,24 @@ export default function Vulnerabilities() {
                 {filtered.map((f) => (
                   <tr key={f.id} className={`hover:bg-muted/30 ${f.sla_breached ? "bg-rose-50/40 dark:bg-rose-900/10" : ""}`}>
                     <td className="p-3"><input type="checkbox" checked={sel.includes(f.id)} onChange={(e) => setSel((s) => e.target.checked ? [...s, f.id] : s.filter((x) => x !== f.id))} className="rounded" /></td>
-                    <td className="p-3"><p className="font-medium text-foreground">{f.title}</p><p className="text-xs text-muted-foreground">{f.finding_id}{f.cve ? ` · ${f.cve}` : ""}</p></td>
+                    <td className="p-3">
+                      <p className="font-medium text-foreground">{f.title}</p>
+                      <p className="text-xs text-muted-foreground">{f.finding_id}{f.cve ? ` · ${f.cve}` : ""}</p>
+                      {(f.linked_control_names && f.linked_control_names.length > 0) && (
+                        <div className="flex flex-wrap gap-1 mt-1">
+                          {f.linked_control_names.slice(0, 2).map((n, i) => <span key={i} className="text-[10px] px-1.5 py-0.5 rounded bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-300">{n}</span>)}
+                          {f.linked_control_names.length > 2 && <span className="text-[10px] text-muted-foreground">+{f.linked_control_names.length - 2}</span>}
+                        </div>
+                      )}
+                    </td>
                     <td className="p-3 text-muted-foreground capitalize">{f.source.replace(/_/g, " ")}</td>
                     <td className={`p-3 font-medium capitalize ${sevColor(f.severity)}`}>{f.severity}</td>
                     <td className="p-3"><StatusBadge status={f.status} /></td>
                     <td className="p-3 text-muted-foreground text-xs">{f.asset || "—"}</td>
-                    <td className="p-3 text-xs"><span className={f.sla_breached ? "text-rose-500 font-medium" : "text-muted-foreground"}>{f.due_date || "—"}</span>{f.sla_breached && <span className="block text-[10px] text-rose-500">SLA breached</span>}</td>
+                    <td className="p-3 text-xs">
+                      <span className={f.sla_breached ? "text-rose-500 font-medium" : "text-muted-foreground"}>{f.due_date || "—"}</span>
+                      {(() => { const r = slaRemaining(f); return r ? <span className={`block text-[10px] font-medium ${r.color}`}>{r.text}</span> : null; })()}
+                    </td>
                     <td className="p-3 text-muted-foreground text-xs">{f.owner_name || "—"}</td>
                     <td className="p-3"><div className="flex gap-1"><Button size="sm" variant="ghost" onClick={() => setTriage(f)}>Triage</Button><button onClick={() => remove(f)} className="p-1.5 rounded hover:bg-muted"><Trash2 className="w-3.5 h-3.5 text-destructive" /></button></div></td>
                   </tr>

@@ -73,6 +73,30 @@ Deno.serve(async (req) => {
     const items = data.Findings || [];
     const existing = await base44.entities.SecurityFinding.list('-created_date', 500);
     const existingIds = new Set((existing || []).map((f) => f.finding_id).filter(Boolean));
+    const controls = await base44.entities.Control.list('-updated_date', 500);
+    const byCat = {};
+    (controls || []).forEach((c) => { (byCat[c.category] = byCat[c.category] || []).push(c); });
+    const KW_CAT = [
+      ['access_control', ['iam', 'mfa', 'password', 'access', 'root', 'credential', 'principal', 'permission', 'role']],
+      ['data_protection', ['encryption', 'encrypt', 'kms', 's3', 'rds', 'ebs', 'snapshot', 'backup', 'tls', 'certificate', 'secret']],
+      ['network_security', ['security group', 'vpc', 'subnet', 'port', 'firewall', 'nat', 'load balancer', 'ssh', 'elb']],
+      ['change_management', ['config', 'cloudtrail', 'change', 'versioning', 'logging']],
+      ['security_operations', ['guardduty', 'security hub', 'cloudwatch', 'alarm', 'alert', 'intrusion', 'detect']],
+      ['asset_management', ['inventory', 'tag', 'asset']],
+      ['incident_response', ['incident', 'breach', 'forensic']],
+      ['compliance', ['cis', 'compliance', 'benchmark', 'standard', 'regulatory']],
+    ];
+    const linkControls = (haystack) => {
+      const cats = new Set();
+      for (const [cat, kws] of KW_CAT) { if (kws.some((k) => haystack.includes(k))) cats.add(cat); }
+      let picked = [];
+      for (const cat of cats) { for (const c of (byCat[cat] || [])) { if (picked.length < 3 && !picked.includes(c)) picked.push(c); } }
+      if (picked.length === 0 && (controls || []).length) {
+        const tokens = haystack.split(/[^a-z0-9]+/).filter((t) => t.length > 4);
+        for (const c of controls) { const t = (c.title || '').toLowerCase(); if (tokens.some((tk) => t.includes(tk)) && picked.length < 3) picked.push(c); }
+      }
+      return { ids: picked.map((c) => c.id), names: picked.map((c) => c.title).filter(Boolean) };
+    };
     const now = new Date();
     const records = [];
     for (const f of items) {
@@ -82,6 +106,9 @@ Deno.serve(async (req) => {
       const sla = SLA[sev] ?? 720;
       const due = new Date(now.getTime() + sla * 3600 * 1000).toISOString().slice(0, 10);
       const res0 = (f.Resources && f.Resources[0]) || {};
+      const types = (f.Types || []).join(' ');
+      const haystack = [f.Title, f.Description, types, f.GeneratorId].filter(Boolean).join(' ').toLowerCase();
+      const linked = linkControls(haystack);
       records.push({
         finding_id: fid || `SF-${now.getFullYear()}-${records.length}`,
         source: 'security_hub', title: f.Title || f.Description || 'AWS Security Hub finding',
@@ -93,7 +120,7 @@ Deno.serve(async (req) => {
         first_seen: f.FirstObservedAt || f.CreatedAt || now.toISOString(),
         last_seen: f.LastObservedAt || f.UpdatedAt || now.toISOString(),
         due_date: due, sla_hours: sla, sla_breached: false,
-        owner_name: '', linked_control_ids: [], linked_control_names: [],
+        owner_name: '', linked_control_ids: linked.ids, linked_control_names: linked.names,
         evidence_url: '', notes: '', connection_id: conn.id
       });
     }
