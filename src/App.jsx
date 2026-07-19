@@ -78,6 +78,7 @@ import OnboardingWizard from '@/pages/OnboardingWizard';
 import SSOSettings from '@/pages/SSOSettings';
 import Vulnerabilities from '@/pages/Vulnerabilities';
 import ControlLibraries from '@/pages/ControlLibraries';
+import BoardReport from '@/pages/BoardReport';
 
 const AuthenticatedApp = () => {
   const { isLoadingAuth, isLoadingPublicSettings, authError, navigateToLogin } = useAuth();
@@ -172,6 +173,7 @@ const AuthenticatedApp = () => {
           <Route path="/sso" element={<SSOSettings />} />
           <Route path="/vulnerabilities" element={<Vulnerabilities />} />
           <Route path="/control-libraries" element={<ControlLibraries />} />
+          <Route path="/board-report" element={<BoardReport />} />
         </Route>
       </Route>
       <Route path="*" element={<PageNotFound />} />
