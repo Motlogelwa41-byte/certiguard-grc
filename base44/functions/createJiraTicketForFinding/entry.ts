@@ -1,0 +1,108 @@
+import { createClientFromRequest } from 'npm:@base44/sdk@0.8.38';
+
+Deno.serve(async (req) => {
+  try {
+    const base44 = createClientFromRequest(req);
+    const body = await req.json().catch(() => ({}));
+    const f = body.finding || {};
+    const title = f.title || "Untitled security finding";
+    const severity = f.severity || "medium";
+
+    const { accessToken } = await base44.asServiceRole.connectors.getConnection("jira");
+    if (!accessToken) return Response.json({ error: "Jira not connected" }, { status: 400 });
+
+    // Resolve the user's accessible Jira site + cloudId
+    const resResp = await fetch("https://api.atlassian.com/oauth/token/accessible-resources", {
+      headers: { Authorization: `Bearer ${accessToken}` },
+    });
+    const resources = await resResp.json();
+    if (!Array.isArray(resources) || resources.length === 0) {
+      return Response.json({ error: "No accessible Jira sites for this account" }, { status: 400 });
+    }
+    const site = resources[0];
+    const cloudId = site.id;
+    const siteUrl = site.url;
+
+    // Project key: Connection (service=jira) config.project_key > JIRA_PROJECT_KEY env > "SEC"
+    let projectKey = Deno.env.get("JIRA_PROJECT_KEY");
+    try {
+      const conns = await base44.asServiceRole.entities.Connection.filter({ service: "jira" });
+      if (conns && conns.length > 0 && conns[0].config) {
+        const cfg = JSON.parse(conns[0].config);
+        if (cfg.project_key) projectKey = cfg.project_key;
+      }
+    } catch (_e) { /* ignore */ }
+    if (!projectKey) projectKey = "SEC";
+
+    const lines = [
+      "A new high-priority security finding was detected by CertiGuard GRC.",
+      "",
+      `Severity: ${severity}`,
+      f.asset ? `Asset: ${f.asset}` : null,
+      f.resource_id ? `Resource: ${f.resource_id}` : null,
+      f.cve ? `CVE: ${f.cve}` : null,
+      f.source ? `Source: ${f.source}` : null,
+      f.detected_date ? `Detected: ${f.detected_date}` : null,
+      f.due_date ? `Remediation due: ${f.due_date}` : null,
+      f.linked_control_names && f.linked_control_names.length
+        ? `Linked controls: ${f.linked_control_names.join(", ")}`
+        : null,
+      "",
+      f.description || "(no description provided)",
+    ].filter((l) => l !== null);
+    const descText = lines.join("\n");
+
+    const baseFields = {
+      project: { key: projectKey },
+      summary: `[${severity.toUpperCase()}] ${title}`,
+      description: {
+        type: "doc",
+        version: 1,
+        content: [{ type: "paragraph", content: [{ type: "text", text: descText }] }],
+      },
+      issuetype: { name: "Bug" },
+    };
+
+    const create = async (fields) => {
+      return await fetch(`https://api.atlassian.com/ex/jira/${cloudId}/rest/api/3/issue`, {
+        method: "POST",
+        headers: { Authorization: `Bearer ${accessToken}`, "Content-Type": "application/json" },
+        body: JSON.stringify({ fields }),
+      });
+    };
+
+    // First attempt with labels; some projects disallow custom labels — retry without them.
+    let resp = await create({ ...baseFields, labels: ["security-finding", `sev-${severity}`] });
+    let data = await resp.json();
+    if (!resp.ok) {
+      resp = await create(baseFields);
+      data = await resp.json();
+    }
+    if (!resp.ok) {
+      console.error("Jira issue creation failed:", JSON.stringify(data));
+      return Response.json(
+        { error: (data.errorMessages && data.errorMessages.join("; ")) || "Jira issue creation failed", details: data },
+        { status: 502 }
+      );
+    }
+
+    const key = data.key;
+    const link = `${siteUrl}/browse/${key}`;
+
+    // Stamp the ticket reference back onto the finding
+    if (f.id) {
+      try {
+        const note = `Jira ticket: ${key} — ${link}`;
+        const curNotes = f.notes ? `${f.notes}\n` : "";
+        await base44.asServiceRole.entities.SecurityFinding.update(f.id, { notes: `${curNotes}${note}` });
+      } catch (e) {
+        console.error("Failed to update finding with Jira key:", e.message);
+      }
+    }
+
+    return Response.json({ ok: true, jira_key: key, jira_url: link });
+  } catch (error) {
+    console.error("createJiraTicketForFinding error:", error);
+    return Response.json({ error: error.message }, { status: 500 });
+  }
+});

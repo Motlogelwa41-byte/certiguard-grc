@@ -1,0 +1,40 @@
+{
+  "name": "Jira Ticket for High-Priority Finding",
+  "description": "When a new critical or high security finding is created, automatically open a tracked Jira ticket for the engineering team.",
+  "trigger": {
+    "config": {
+      "trigger_type": "entity",
+      "entity_name": "SecurityFinding",
+      "events": [
+        "create"
+      ]
+    },
+    "condition": "${ (.trigger.data.severity == \"critical\" or .trigger.data.severity == \"high\") and .trigger.data.status == \"open\" }"
+  },
+  "definition": {
+    "document": {
+      "dsl": "1.0.0",
+      "name": "jira_ticket_for_high_priority_finding",
+      "version": "1.0",
+      "namespace": "base44"
+    },
+    "do": [
+      {
+        "create_ticket": {
+          "call": "invoke_backend_function",
+          "with": {
+            "function_name": "createJiraTicketForFinding",
+            "args": {
+              "finding": "${ .trigger.data }"
+            }
+          },
+          "then": "end",
+          "x-base44": {
+            "title": "Create Jira ticket",
+            "description": "Open a tracked ticket for the finding"
+          }
+        }
+      }
+    ]
+  }
+}
