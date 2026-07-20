@@ -15,8 +15,13 @@ const ENTITY_FILTERS = [
   { value: "Risk", label: "Risks" },
   { value: "Control", label: "Controls" },
   { value: "ComplianceTask", label: "Tasks" },
+  { value: "Policy", label: "Policies" },
+  { value: "Vendor", label: "Vendors" },
+  { value: "User", label: "Users" },
   { value: "other", label: "Other" },
 ];
+
+const PRIMARY_ENTITY_TYPES = ["Risk", "Control", "ComplianceTask", "Policy", "Vendor", "User"];
 
 const actionColors = {
   create: "bg-emerald-100 text-emerald-700",
@@ -82,7 +87,7 @@ export default function AuditTrailPage() {
     if (actionFilter !== "all" && l.action !== actionFilter) return false;
     if (entityFilter !== "all") {
       if (entityFilter === "other") {
-        if (["Risk", "Control", "ComplianceTask"].includes(l.entity_type)) return false;
+        if (PRIMARY_ENTITY_TYPES.includes(l.entity_type)) return false;
       } else if (l.entity_type !== entityFilter) return false;
     }
     return true;
