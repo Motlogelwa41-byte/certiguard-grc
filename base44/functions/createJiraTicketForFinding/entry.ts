@@ -59,20 +59,37 @@ Deno.serve(async (req) => {
     };
 
     const authHeader = "Basic " + btoa(`${email}:${token}`);
+    const endpoint = `${baseUrl}/rest/api/3/issue`;
     const create = async (fields) => {
-      return await fetch(`${baseUrl}/rest/api/3/issue`, {
+      return await fetch(endpoint, {
         method: "POST",
-        headers: { Authorization: authHeader, "Content-Type": "application/json" },
+        headers: { Authorization: authHeader, "Content-Type": "application/json", Accept: "application/json" },
         body: JSON.stringify({ fields }),
       });
     };
 
+    const parseJsonSafe = async (resp) => {
+      const text = await resp.text();
+      try { return JSON.parse(text); } catch (_e) {
+        console.error("Non-JSON response from", endpoint, "status", resp.status, "body:", text.slice(0, 300));
+        return null;
+      }
+    };
+
+    console.log("Jira endpoint:", endpoint, "| email:", email, "| project:", projectKey);
+
     // First attempt with labels; some projects disallow custom labels — retry without them.
     let resp = await create({ ...baseFields, labels: ["security-finding", `sev-${severity}`] });
-    let data = await resp.json();
-    if (!resp.ok) {
+    let data = await parseJsonSafe(resp);
+    if (!resp.ok || !data) {
       resp = await create(baseFields);
-      data = await resp.json();
+      data = await parseJsonSafe(resp);
+    }
+    if (!data) {
+      return Response.json(
+        { error: "Jira returned a non-JSON (likely HTML login) response", status: resp.status, endpoint, body_snippet: "see logs" },
+        { status: 502 }
+      );
     }
     if (!resp.ok) {
       console.error("Jira issue creation failed:", JSON.stringify(data));
