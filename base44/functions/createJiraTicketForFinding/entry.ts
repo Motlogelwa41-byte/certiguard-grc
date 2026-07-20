@@ -8,20 +8,15 @@ Deno.serve(async (req) => {
     const title = f.title || "Untitled security finding";
     const severity = f.severity || "medium";
 
-    const { accessToken } = await base44.asServiceRole.connectors.getConnection("jira");
-    if (!accessToken) return Response.json({ error: "Jira not connected" }, { status: 400 });
-
-    // Resolve the user's accessible Jira site + cloudId
-    const resResp = await fetch("https://api.atlassian.com/oauth/token/accessible-resources", {
-      headers: { Authorization: `Bearer ${accessToken}` },
-    });
-    const resources = await resResp.json();
-    if (!Array.isArray(resources) || resources.length === 0) {
-      return Response.json({ error: "No accessible Jira sites for this account" }, { status: 400 });
+    const email = Deno.env.get("JIRA_USER_EMAIL");
+    const token = Deno.env.get("JIRA_API_TOKEN");
+    const baseUrl = (Deno.env.get("JIRA_BASE_URL") || "").replace(/\/$/, "");
+    if (!email || !token || !baseUrl) {
+      return Response.json(
+        { error: "Jira not configured — set JIRA_USER_EMAIL, JIRA_API_TOKEN, and JIRA_BASE_URL secrets" },
+        { status: 400 }
+      );
     }
-    const site = resources[0];
-    const cloudId = site.id;
-    const siteUrl = site.url;
 
     // Project key: Connection (service=jira) config.project_key > JIRA_PROJECT_KEY env > "SEC"
     let projectKey = Deno.env.get("JIRA_PROJECT_KEY");
@@ -63,10 +58,11 @@ Deno.serve(async (req) => {
       issuetype: { name: "Bug" },
     };
 
+    const authHeader = "Basic " + btoa(`${email}:${token}`);
     const create = async (fields) => {
-      return await fetch(`https://api.atlassian.com/ex/jira/${cloudId}/rest/api/3/issue`, {
+      return await fetch(`${baseUrl}/rest/api/3/issue`, {
         method: "POST",
-        headers: { Authorization: `Bearer ${accessToken}`, "Content-Type": "application/json" },
+        headers: { Authorization: authHeader, "Content-Type": "application/json" },
         body: JSON.stringify({ fields }),
       });
     };
@@ -87,7 +83,7 @@ Deno.serve(async (req) => {
     }
 
     const key = data.key;
-    const link = `${siteUrl}/browse/${key}`;
+    const link = `${baseUrl}/browse/${key}`;
 
     // Stamp the ticket reference back onto the finding
     if (f.id) {
