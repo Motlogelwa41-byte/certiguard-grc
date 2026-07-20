@@ -1,4 +1,5 @@
 import { createClientFromRequest } from "npm:@base44/sdk@0.8.38";
+import { sendGmail } from "../../shared/gmailSender.ts";
 
 Deno.serve(async (req) => {
   try {
@@ -70,7 +71,7 @@ Deno.serve(async (req) => {
 
       let delivered = false;
       try {
-        await base44.asServiceRole.integrations.Core.SendEmail({ to: email, subject, body });
+        await sendGmail(base44, email, subject, body);
         delivered = true;
         sent++;
       } catch (e) {
