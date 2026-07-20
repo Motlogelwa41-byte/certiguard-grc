@@ -267,8 +267,18 @@ export default function Risks() {
               </div>
             </div>
             <div className="grid grid-cols-3 gap-3">
-              <div><Label>Likelihood (1-5)</Label><Input type="number" min="1" max="5" value={form.likelihood} onChange={(e) => setForm({ ...form, likelihood: parseInt(e.target.value) || 1 })} /></div>
-              <div><Label>Impact (1-5)</Label><Input type="number" min="1" max="5" value={form.impact} onChange={(e) => setForm({ ...form, impact: parseInt(e.target.value) || 1 })} /></div>
+              <div><Label>Likelihood (1-5)</Label>
+                <Select value={String(form.likelihood)} onValueChange={(v) => setForm({ ...form, likelihood: parseInt(v) })}>
+                  <SelectTrigger><SelectValue placeholder="1-5" /></SelectTrigger>
+                  <SelectContent>{[1,2,3,4,5].map((n) => <SelectItem key={n} value={String(n)}>{n}</SelectItem>)}</SelectContent>
+                </Select>
+              </div>
+              <div><Label>Impact (1-5)</Label>
+                <Select value={String(form.impact)} onValueChange={(v) => setForm({ ...form, impact: parseInt(v) })}>
+                  <SelectTrigger><SelectValue placeholder="1-5" /></SelectTrigger>
+                  <SelectContent>{[1,2,3,4,5].map((n) => <SelectItem key={n} value={String(n)}>{n}</SelectItem>)}</SelectContent>
+                </Select>
+              </div>
               <div><Label>Treatment</Label>
                 <Select value={form.treatment} onValueChange={(v) => setForm({ ...form, treatment: v })}>
                   <SelectTrigger><SelectValue /></SelectTrigger>
