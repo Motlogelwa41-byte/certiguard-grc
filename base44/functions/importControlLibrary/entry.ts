@@ -6,6 +6,7 @@ Deno.serve(async (req) => {
     const user = await base44.auth.me();
     if (!user) return Response.json({ error: 'Unauthorized' }, { status: 401 });
     if (user.role !== 'admin' && user.role !== 'compliance_officer') return Response.json({ error: 'Forbidden' }, { status: 403 });
+    const tenantId = user?.data?.tenant_id || user?.tenant_id || '';
     const body = await req.json();
     const { library_key, library_name, library_version, controls } = body || {};
     if (!library_name || !Array.isArray(controls) || !controls.length) {
@@ -17,6 +18,7 @@ Deno.serve(async (req) => {
     let framework = existingFws && existingFws[0];
     if (!framework) {
       framework = await base44.entities.Framework.create({
+        tenant_id: tenantId,
         name: library_name,
         version: library_version || '1.0',
         description: `Imported from ${library_key} authoritative control library`,
@@ -32,6 +34,7 @@ Deno.serve(async (req) => {
     const toCreate = controls
       .filter((c) => c.control_id && !existingIds.has(c.control_id))
       .map((c) => ({
+        tenant_id: tenantId,
         control_id: c.control_id,
         title: c.title,
         description: c.description || '',
