@@ -69,13 +69,17 @@ export default function Controls() {
 
   const handleSave = async () => {
     try {
+      const payload = { ...form };
+      if (!payload.control_id) {
+        payload.control_id = `CTRL-${Date.now().toString().slice(-6)}`;
+      }
       if (editId) {
         const before = items.find(i => i.id === editId);
-        await base44.entities.Control.update(editId, form);
-        await logAuditTrail({ action: "update", entity_type: "Control", entity_id: editId, entity_name: form.title, before, after: form, user, severity: "info" });
+        await base44.entities.Control.update(editId, payload);
+        await logAuditTrail({ action: "update", entity_type: "Control", entity_id: editId, entity_name: payload.title, before, after: payload, user, severity: "info" });
       } else {
-        const created = await base44.entities.Control.create(form);
-        await logAuditTrail({ action: "create", entity_type: "Control", entity_id: created?.id, entity_name: form.title, after: form, user, severity: "info" });
+        const created = await base44.entities.Control.create(payload);
+        await logAuditTrail({ action: "create", entity_type: "Control", entity_id: created?.id, entity_name: payload.title, after: payload, user, severity: "info" });
       }
       setOpen(false); setForm(defaultForm); setEditId(null); load();
       toast({ title: editId ? "Control updated" : "Control created" });
@@ -325,7 +329,7 @@ export default function Controls() {
                 </div>
               </div>
             )}
-            <Button className="w-full" onClick={handleSave} disabled={!form.title || !form.control_id}>{editId ? "Update" : "Create"}</Button>
+            <Button className="w-full" onClick={handleSave} disabled={!form.title}>{editId ? "Update" : "Create"}</Button>
           </div>
         </DialogContent>
       </Dialog>
