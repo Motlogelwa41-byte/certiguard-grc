@@ -15,6 +15,7 @@ import AppLayout from '@/components/layout/AppLayout';
 import Dashboard from '@/pages/Dashboard';
 import Frameworks from '@/pages/Frameworks';
 import Controls from '@/pages/Controls';
+import ControlDetail from '@/pages/ControlDetail';
 import Risks from '@/pages/Risks';
 import Policies from '@/pages/Policies';
 import EvidenceManager from '@/pages/EvidenceManager';
@@ -114,6 +115,7 @@ const AuthenticatedApp = () => {
           <Route path="/" element={<Dashboard />} />
           <Route path="/frameworks" element={<Frameworks />} />
           <Route path="/controls" element={<Controls />} />
+          <Route path="/controls/:id" element={<ControlDetail />} />
           <Route path="/risks" element={<Risks />} />
           <Route path="/policies" element={<Policies />} />
           <Route path="/evidence" element={<EvidenceManager />} />

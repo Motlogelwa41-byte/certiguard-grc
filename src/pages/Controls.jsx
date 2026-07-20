@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import { Link } from "react-router-dom";
 import { base44 } from "@/api/base44Client";
 import { FileCheck, Plus, Pencil, Trash2, Search, Download, Upload, Zap } from "lucide-react";
 import RemediationDialog from "@/components/controls/RemediationDialog";
@@ -227,8 +228,8 @@ export default function Controls() {
                 {filtered.map((c) => (
                   <tr key={c.id} className={`border-b border-border last:border-0 hover:bg-muted/30 transition-colors ${selected.has(c.id) ? "bg-primary/5" : ""}`}>
                     <td className="px-4 py-3"><input type="checkbox" checked={selected.has(c.id)} onChange={() => toggleSelect(c.id)} aria-label={`Select ${c.control_id}`} /></td>
-                    <td className="px-4 py-3 font-mono text-xs text-muted-foreground">{c.control_id}</td>
-                    <td className="px-4 py-3 font-medium text-foreground max-w-xs truncate">{c.title}</td>
+                    <td className="px-4 py-3 font-mono text-xs"><Link to={`/controls/${c.id}`} className="text-primary hover:underline">{c.control_id}</Link></td>
+                    <td className="px-4 py-3 font-medium text-foreground max-w-xs truncate"><Link to={`/controls/${c.id}`} className="hover:text-primary hover:underline">{c.title}</Link></td>
                     <td className="px-4 py-3 text-muted-foreground capitalize">{(c.category || "").replace(/_/g, " ")}</td>
                     <td className="px-4 py-3"><StatusBadge status={c.status} /></td>
                     <td className="px-4 py-3"><StatusBadge status={c.severity} /></td>
