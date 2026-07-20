@@ -17,6 +17,7 @@ export default function BoardReport() {
   const [loading, setLoading] = useState(true);
   const [exporting, setExporting] = useState(false);
   const [emailing, setEmailing] = useState(false);
+  const [sendingNow, setSendingNow] = useState(false);
   const printRef = useRef(null);
   const { tenant } = useTenant();
   const { can } = useRBAC();
@@ -66,6 +67,23 @@ export default function BoardReport() {
     setExporting(false);
   };
 
+  // Trigger the weekly board-report function on demand (generates the server-side
+  // PDF and emails all active schedule recipients — same path as the Monday run).
+  const sendNow = async () => {
+    setSendingNow(true);
+    try {
+      const res = await base44.functions.invoke("sendWeeklyBoardReport", {});
+      const d = res?.data || res;
+      if (d?.ok) {
+        const n = d.sent ?? 0;
+        toast({ title: n > 0 ? `Board report sent to ${n} recipient${n !== 1 ? "s" : ""}` : "Report generated", description: d.pdfUrl ? "PDF ready — download link emailed." : "No recipients found on active schedules." });
+      } else {
+        toast({ title: "Send failed", description: d?.error || "Unknown error", variant: "destructive" });
+      }
+    } catch (e) { toast({ title: "Send failed", description: e.message, variant: "destructive" }); }
+    setSendingNow(false);
+  };
+
   const emailExecs = async () => {
     setEmailing(true);
     try {
@@ -92,6 +110,7 @@ export default function BoardReport() {
         actions={<div className="flex gap-2 flex-wrap">
           <Button size="sm" variant="outline" asChild><Link to="/scheduled-reports"><Calendar className="w-4 h-4 mr-1" /> Schedules</Link></Button>
           <Button size="sm" variant="outline" onClick={emailExecs} disabled={emailing}>{emailing ? <RefreshCw className="w-4 h-4 mr-1 animate-spin" /> : <Send className="w-4 h-4 mr-1" />} Email Executives</Button>
+          <Button size="sm" variant="secondary" onClick={sendNow} disabled={sendingNow}>{sendingNow ? <RefreshCw className="w-4 h-4 mr-1 animate-spin" /> : <Send className="w-4 h-4 mr-1" />} Send Now (PDF)</Button>
           <Button size="sm" onClick={exportPDF} disabled={exporting}>{exporting ? <RefreshCw className="w-4 h-4 mr-1 animate-spin" /> : <FileDown className="w-4 h-4 mr-1" />} Export Board PDF</Button>
         </div>} />
 
