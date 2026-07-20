@@ -3,7 +3,7 @@ import { base44 } from "@/api/base44Client";
 import { Link } from "react-router-dom";
 import {
   Shield, FileCheck, AlertTriangle, CheckSquare,
-  FileText, ArrowRight
+  FileText, ArrowRight, FileDown, CalendarClock
 } from "lucide-react";
 import { PieChart, Pie, Cell, ResponsiveContainer, BarChart, Bar, XAxis, YAxis, Tooltip } from "recharts";
 import PageHeader from "@/components/shared/PageHeader";
@@ -13,6 +13,7 @@ import VendorAssessmentWidget from "@/components/dashboard/VendorAssessmentWidge
 import ComplianceScoreRing from "@/components/dashboard/ComplianceScoreRing";
 import ActivityFeed from "@/components/dashboard/ActivityFeed";
 import QuickActions from "@/components/dashboard/QuickActions";
+import ComplianceHeatmap from "@/components/dashboard/ComplianceHeatmap";
 
 const COLORS = ["#1E293B", "#10B981", "#F59E0B", "#EF4444", "#7C3AED", "#64748B"];
 
@@ -101,6 +102,14 @@ export default function Dashboard() {
               <span className="text-[11px] font-medium text-slate-400">Posture:</span>
               <span className={`text-xs font-semibold px-2.5 py-1 rounded-full border ${complianceScore >= 80 ? "text-[hsl(160_84%_55%)] bg-[hsl(160_84%_37%)]/15 border-[hsl(160_84%_37%)]/30" : complianceScore >= 60 ? "text-amber-300 bg-amber-500/15 border-amber-400/30" : "text-rose-300 bg-rose-500/15 border-rose-400/30"}`}>{verdict}</span>
             </div>
+            <div className="mt-4 flex flex-wrap items-center gap-2">
+              <Link to="/board-report" className="inline-flex items-center gap-1.5 text-xs font-medium text-white bg-white/10 hover:bg-white/20 border border-white/15 rounded-lg px-3 py-1.5 transition-colors">
+                <FileDown className="w-3.5 h-3.5" /> Generate PDF Report
+              </Link>
+              <Link to="/scheduled-reports" className="inline-flex items-center gap-1.5 text-xs font-medium text-white bg-white/10 hover:bg-white/20 border border-white/15 rounded-lg px-3 py-1.5 transition-colors">
+                <CalendarClock className="w-3.5 h-3.5" /> Schedule Weekly Email
+              </Link>
+            </div>
           </div>
           <div className="shrink-0 rounded-2xl bg-white/5 border border-white/10 p-4 backdrop-blur">
             <ComplianceScoreRing score={complianceScore} size={140} />
@@ -168,6 +177,11 @@ export default function Dashboard() {
             <p className="text-sm text-muted-foreground py-8 text-center">No risks added yet</p>
           )}
         </div>
+      </div>
+
+      {/* Interactive Compliance Risk Heatmap */}
+      <div className="mb-8">
+        <ComplianceHeatmap risks={risks} controls={controls} />
       </div>
 
       {/* Framework Readiness */}
