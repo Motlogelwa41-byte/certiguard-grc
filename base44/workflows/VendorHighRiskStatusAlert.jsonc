@@ -1,6 +1,6 @@
 {
-  "name": "Vendor High-Risk Status Alert",
-  "description": "Posts a Slack alert to #compliance whenever a high- or critical-risk vendor's status changes.",
+  "name": "Vendor Critical Risk Alert",
+  "description": "Posts a Slack alert to the compliance channel immediately whenever a vendor's risk level is escalated to critical.",
   "trigger": {
     "config": {
       "trigger_type": "entity",
@@ -9,13 +9,13 @@
         "update"
       ]
     },
-    "condition": "${ .trigger.changed_fields | index(\"status\") != null and (.trigger.data.risk_level == \"critical\" or .trigger.data.risk_level == \"high\") }"
+    "condition": "${ .trigger.changed_fields | index(\"risk_level\") != null and .trigger.data.risk_level == \"critical\" }"
   },
   "definition": {
     "document": {
       "dsl": "1.0.0",
-      "name": "vendor_high_risk_status_alert",
-      "version": "1.0",
+      "name": "vendor_critical_risk_alert",
+      "version": "1.1",
       "namespace": "base44"
     },
     "do": [
@@ -25,7 +25,7 @@
           "with": {
             "function_name": "sendSlackAlert",
             "args": {
-              "text": ":warning: High-risk vendor status changed: *${ .trigger.data.name }* is now *${ .trigger.data.status }* (risk level: ${ .trigger.data.risk_level }). Review in CertiGuard."
+              "text": ":rotating_light: Vendor risk escalated to CRITICAL: *${ .trigger.data.name }* is now marked critical risk. Status: ${ .trigger.data.status }. Review in CertiGuard."
             }
           },
           "then": "end",
