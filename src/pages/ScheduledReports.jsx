@@ -33,15 +33,8 @@ export default function ScheduledReports() {
   const [editId, setEditId] = useState(null);
   const [sending, setSending] = useState({});
   const [saving, setSaving] = useState(false);
-  const { toast, dismiss } = useToast();
+  const { toast } = useToast();
   const { user } = useAuth();
-
-  // Auto-dismiss action toasts quickly so they clear right after the action completes
-  const flash = (opts, ms = 2500) => {
-    const t = toast(opts);
-    setTimeout(() => dismiss(t.id), ms);
-    return t;
-  };
 
   const load = async () => {
     const data = await base44.entities.ReportSchedule.list("-created_date", 100);
@@ -75,7 +68,7 @@ export default function ScheduledReports() {
       else await base44.entities.ReportSchedule.create(payload);
       setOpen(false);
       await load();
-      flash({ title: editId ? "Schedule updated" : "Schedule created" });
+      toast({ title: editId ? "Schedule updated" : "Schedule created" });
     } catch (e) {
       toast({ title: "Error saving schedule", description: e.message, variant: "destructive" });
     }
@@ -85,7 +78,7 @@ export default function ScheduledReports() {
   const handleDelete = async (id) => {
     await base44.entities.ReportSchedule.delete(id);
     await load();
-    flash({ title: "Schedule deleted" });
+    toast({ title: "Schedule deleted" });
   };
 
   const toggleActive = async (s) => {
@@ -103,7 +96,7 @@ export default function ScheduledReports() {
         total_sent: (schedule.total_sent || 0) + successCount,
       });
       await load();
-      flash({
+      toast({
         title: `Report sent to ${successCount} recipient${successCount !== 1 ? "s" : ""}`,
         description: failCount > 0 ? `${failCount} failed to deliver.` : "All deliveries successful.",
       });
