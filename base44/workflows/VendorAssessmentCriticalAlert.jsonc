@@ -1,0 +1,45 @@
+{
+  "name": "Vendor Assessment Critical Finding Alert",
+  "description": "The instant a vendor assessment is scored critical, alerts Slack, escalates the vendor's risk level to critical, and creates a remediation task.",
+  "trigger": {
+    "config": {
+      "trigger_type": "entity",
+      "entity_name": "VendorAssessment",
+      "events": [
+        "update"
+      ]
+    },
+    "condition": "${ .trigger.changed_fields | index(\"risk_level\") != null and .trigger.data.risk_level == \"critical\" }"
+  },
+  "definition": {
+    "document": {
+      "dsl": "1.0.0",
+      "name": "vendor_assessment_critical_alert",
+      "version": "1.0",
+      "namespace": "base44"
+    },
+    "do": [
+      {
+        "escalate": {
+          "call": "invoke_backend_function",
+          "with": {
+            "function_name": "escalateCriticalVendorAssessment",
+            "args": {
+              "assessment_id": "${ .trigger.entity_id }",
+              "vendor_id": "${ .trigger.data.vendor_id }",
+              "vendor_name": "${ .trigger.data.vendor_name }",
+              "assessment_title": "${ .trigger.data.title }",
+              "risk_score": "${ .trigger.data.risk_score }",
+              "risk_level": "${ .trigger.data.risk_level }"
+            }
+          },
+          "then": "end",
+          "x-base44": {
+            "title": "Capture critical assessment",
+            "description": "Slack alert + vendor escalation + remediation task"
+          }
+        }
+      }
+    ]
+  }
+}
