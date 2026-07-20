@@ -43,6 +43,7 @@ export default function RiskHeatmap() {
   const [filterStatus, setFilterStatus] = useState("all");
   const [filterCategory, setFilterCategory] = useState("all");
   const [hoveredCell, setHoveredCell] = useState(null);
+  const [controls, setControls] = useState([]);
   const exportRef = useRef(null);
   const [exporting, setExporting] = useState(false);
   const { toast } = useToast();
@@ -66,6 +67,7 @@ export default function RiskHeatmap() {
 
   useEffect(() => {
     base44.entities.Risk.list().then((r) => { setRisks(r); setLoading(false); });
+    base44.entities.Control.list().then(setControls).catch(() => {});
   }, []);
 
   const filtered = useMemo(() =>
@@ -87,6 +89,51 @@ export default function RiskHeatmap() {
   const low      = filtered.filter(r => (r.likelihood * r.impact) < 6).length;
 
   const categories = [...new Set(risks.map(r => r.category).filter(Boolean))];
+
+  // Department / owner attention: group risks by owner_name (proxy for department)
+  const departmentAttention = useMemo(() => {
+    const map = new Map();
+    filtered.forEach(r => {
+      const key = r.owner_name?.trim() || "Unassigned";
+      if (!map.has(key)) map.set(key, { owner: key, total: 0, criticalHigh: 0, scoreSum: 0, open: 0 });
+      const entry = map.get(key);
+      entry.total += 1;
+      const score = (r.likelihood || 0) * (r.impact || 0);
+      entry.scoreSum += score;
+      if (score >= 12) entry.criticalHigh += 1;
+      if (r.status === "open" || r.status === "mitigating") entry.open += 1;
+    });
+    return [...map.values()]
+      .map(d => ({ ...d, avg: d.total ? Math.round((d.scoreSum / d.total) * 10) / 10 : 0 }))
+      .sort((a, b) => b.criticalHigh - a.criticalHigh || b.scoreSum - a.scoreSum);
+  }, [filtered]);
+
+  // Control attention: group risks by linked control, resolve control titles
+  const controlTitleById = useMemo(() => {
+    const m = new Map();
+    controls.forEach(c => m.set(c.id, c.title || c.control_id || "Untitled control"));
+    return m;
+  }, [controls]);
+
+  const controlAttention = useMemo(() => {
+    const map = new Map();
+    filtered.forEach(r => {
+      const ids = Array.isArray(r.related_control_ids) ? r.related_control_ids : [];
+      if (ids.length === 0) return;
+      ids.forEach(id => {
+        if (!map.has(id)) map.set(id, { id, title: controlTitleById.get(id) || id, total: 0, criticalHigh: 0, scoreSum: 0, open: 0 });
+        const entry = map.get(id);
+        entry.total += 1;
+        const score = (r.likelihood || 0) * (r.impact || 0);
+        entry.scoreSum += score;
+        if (score >= 12) entry.criticalHigh += 1;
+        if (r.status === "open" || r.status === "mitigating") entry.open += 1;
+      });
+    });
+    return [...map.values()]
+      .map(c => ({ ...c, avg: c.total ? Math.round((c.scoreSum / c.total) * 10) / 10 : 0 }))
+      .sort((a, b) => b.criticalHigh - a.criticalHigh || b.scoreSum - a.scoreSum);
+  }, [filtered, controlTitleById]);
 
   // Build 6-month trend: for each month, compute avg risk score of risks that existed then
   const trendData = useMemo(() => {
@@ -390,6 +437,75 @@ export default function RiskHeatmap() {
                 );
               })}
             </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Attention required: departments & controls at a glance */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <div className="bg-card rounded-xl border border-border overflow-hidden">
+          <div className="px-5 py-4 border-b border-border flex items-center gap-2">
+            <AlertTriangle className="w-4 h-4 text-red-500" />
+            <h3 className="font-heading font-semibold text-foreground">Departments / Owners Needing Attention</h3>
+            <span className="ml-auto text-xs text-muted-foreground">{departmentAttention.length} groups</span>
+          </div>
+          <div className="divide-y divide-border max-h-80 overflow-y-auto">
+            {departmentAttention.length === 0 ? (
+              <p className="text-sm text-muted-foreground text-center py-8">No risks to group</p>
+            ) : departmentAttention.map(d => {
+              const severity = d.criticalHigh > 0 ? "bg-red-500" : d.open > 0 ? "bg-amber-500" : "bg-emerald-500";
+              return (
+                <div key={d.owner} className="px-4 py-3 flex items-center gap-3">
+                  <span className={`w-2.5 h-2.5 rounded-full shrink-0 ${severity}`} />
+                  <div className="flex-1 min-w-0">
+                    <p className="text-sm font-medium text-foreground truncate">{d.owner}</p>
+                    <p className="text-xs text-muted-foreground">{d.total} risks · {d.open} open · avg {d.avg}</p>
+                  </div>
+                  <div className="flex items-center gap-3 shrink-0">
+                    <div className="text-right">
+                      <p className="text-sm font-bold text-red-400">{d.criticalHigh}</p>
+                      <p className="text-[10px] text-muted-foreground">critical/high</p>
+                    </div>
+                    <div className="w-20 h-2 bg-muted rounded-full overflow-hidden">
+                      <div className="h-full rounded-full bg-gradient-to-r from-amber-500 to-red-500" style={{ width: `${Math.min(100, (d.criticalHigh / Math.max(1, d.total)) * 100)}%` }} />
+                    </div>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+
+        <div className="bg-card rounded-xl border border-border overflow-hidden">
+          <div className="px-5 py-4 border-b border-border flex items-center gap-2">
+            <Shield className="w-4 h-4 text-orange-500" />
+            <h3 className="font-heading font-semibold text-foreground">Controls Needing Attention</h3>
+            <span className="ml-auto text-xs text-muted-foreground">{controlAttention.length} controls</span>
+          </div>
+          <div className="divide-y divide-border max-h-80 overflow-y-auto">
+            {controlAttention.length === 0 ? (
+              <p className="text-sm text-muted-foreground text-center py-8">No risks linked to controls yet. Link risks to controls in the Risk Register.</p>
+            ) : controlAttention.slice(0, 12).map(c => {
+              const severity = c.criticalHigh > 0 ? "bg-red-500" : c.open > 0 ? "bg-amber-500" : "bg-emerald-500";
+              return (
+                <div key={c.id} className="px-4 py-3 flex items-center gap-3">
+                  <span className={`w-2.5 h-2.5 rounded-full shrink-0 ${severity}`} />
+                  <div className="flex-1 min-w-0">
+                    <p className="text-sm font-medium text-foreground truncate">{c.title}</p>
+                    <p className="text-xs text-muted-foreground">{c.total} linked risks · {c.open} open · avg {c.avg}</p>
+                  </div>
+                  <div className="flex items-center gap-3 shrink-0">
+                    <div className="text-right">
+                      <p className="text-sm font-bold text-red-400">{c.criticalHigh}</p>
+                      <p className="text-[10px] text-muted-foreground">critical/high</p>
+                    </div>
+                    <div className="w-20 h-2 bg-muted rounded-full overflow-hidden">
+                      <div className="h-full rounded-full bg-gradient-to-r from-amber-500 to-red-500" style={{ width: `${Math.min(100, (c.criticalHigh / Math.max(1, c.total)) * 100)}%` }} />
+                    </div>
+                  </div>
+                </div>
+              );
+            })}
           </div>
         </div>
       </div>
