@@ -80,6 +80,7 @@ import SSOSettings from '@/pages/SSOSettings';
 import Vulnerabilities from '@/pages/Vulnerabilities';
 import ControlLibraries from '@/pages/ControlLibraries';
 import BoardReport from '@/pages/BoardReport';
+import ExecutiveRiskSummary from '@/pages/ExecutiveRiskSummary';
 
 const AuthenticatedApp = () => {
   const { isLoadingAuth, isLoadingPublicSettings, authError, navigateToLogin } = useAuth();
@@ -176,6 +177,7 @@ const AuthenticatedApp = () => {
           <Route path="/vulnerabilities" element={<Vulnerabilities />} />
           <Route path="/control-libraries" element={<ControlLibraries />} />
           <Route path="/board-report" element={<BoardReport />} />
+          <Route path="/executive-risk-summary" element={<ExecutiveRiskSummary />} />
         </Route>
       </Route>
       <Route path="*" element={<PageNotFound />} />

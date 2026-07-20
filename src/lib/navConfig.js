@@ -4,7 +4,7 @@ import {
   ShieldCheck, FileSearch, Brain, Play, FileSpreadsheet, FileDown, BarChart3,
   History, ShieldAlert, GraduationCap, Calendar, Bell, Users, Copy, SlidersHorizontal,
   Target, Upload, Send, Globe, Users2, MapPin, Zap, ListChecks, BellRing,
-  PieChart, Radar, Landmark, BarChart2, Network, GitCompare, Sparkles, CreditCard, Gauge, Info, ScrollText, Activity, Factory, Plug, UserCheck, Wand2, KeyRound, Bug, Library, Presentation
+  PieChart, Radar, Landmark, BarChart2, Network, GitCompare, Sparkles, CreditCard, Gauge, Info, ScrollText, Activity, Factory, Plug, UserCheck, Wand2, KeyRound, Bug, Library, Presentation, TrendingDown
 } from "lucide-react";
 
 // Roles: admin, compliance_officer, risk_manager, auditor, user
@@ -45,6 +45,7 @@ export const navSections = [
       { label: "Risk Register", path: "/risks", icon: AlertTriangle, roles: ["admin", "compliance_officer", "risk_manager", "auditor"] },
       { label: "Risk Heatmap", path: "/risk-heatmap", icon: Target, roles: ["admin", "compliance_officer", "risk_manager", "auditor"] },
       { label: "Appetite Heatmap", path: "/risk-appetite-heatmap", icon: Target, roles: ["admin", "compliance_officer", "risk_manager"] },
+      { label: "Exec Risk Summary", path: "/executive-risk-summary", icon: TrendingDown, roles: ["admin", "compliance_officer", "risk_manager", "auditor"] },
       { label: "Framework Cross-Map", path: "/risk-framework-crossmap", icon: GitCompare, roles: ["admin", "compliance_officer", "risk_manager", "auditor"] },
     ]
   },

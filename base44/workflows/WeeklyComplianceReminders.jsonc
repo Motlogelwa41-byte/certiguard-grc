@@ -1,0 +1,45 @@
+{
+  "name": "Weekly Compliance Reminders",
+  "definition": {
+    "document": {
+      "dsl": "1.0.0",
+      "name": "weekly_compliance_reminders",
+      "version": "1.0",
+      "namespace": "base44"
+    },
+    "do": [
+      {
+        "send_reminders": {
+          "call": "invoke_backend_function",
+          "with": {
+            "function_name": "sendWeeklyComplianceReminders",
+            "args": {}
+          },
+          "then": "end",
+          "x-base44": {
+            "title": "Send weekly compliance reminders",
+            "description": "Weekly digest of outstanding tasks & training"
+          }
+        }
+      }
+    ]
+  },
+  "description": "Sends each employee a weekly Monday digest of their outstanding compliance tasks and incomplete training requirements, with deep links to their assigned items.",
+  "trigger": {
+    "condition": null,
+    "config": {
+      "trigger_type": "scheduled",
+      "events": [],
+      "schedule_mode": "recurring",
+      "cron_expression": "0 8 * * 1",
+      "one_time_date": null,
+      "timezone": "Africa/Johannesburg",
+      "interval_value": null,
+      "interval_unit": null,
+      "interval_anchor": null,
+      "ends_type": "never",
+      "ends_on_date": null,
+      "ends_after_count": null
+    }
+  }
+}
