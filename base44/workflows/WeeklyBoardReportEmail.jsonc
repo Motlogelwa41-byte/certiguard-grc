@@ -1,0 +1,45 @@
+{
+  "name": "Weekly Board Report Email",
+  "description": "Every Monday at 8:00 AM, generates a board-ready compliance report PDF and emails it to the management team (recipients of all active report schedules) so they can review compliance status without logging in.",
+  "trigger": {
+    "condition": null,
+    "config": {
+      "trigger_type": "scheduled",
+      "events": [],
+      "schedule_mode": "recurring",
+      "cron_expression": "0 8 * * 1",
+      "one_time_date": null,
+      "timezone": "Africa/Johannesburg",
+      "interval_value": null,
+      "interval_unit": null,
+      "interval_anchor": null,
+      "ends_type": "never",
+      "ends_on_date": null,
+      "ends_after_count": null
+    }
+  },
+  "definition": {
+    "document": {
+      "dsl": "1.0.0",
+      "name": "weekly_board_report_email",
+      "version": "1.0",
+      "namespace": "base44"
+    },
+    "do": [
+      {
+        "send_board_report": {
+          "call": "invoke_backend_function",
+          "with": {
+            "function_name": "sendWeeklyBoardReport",
+            "args": {}
+          },
+          "then": "end",
+          "x-base44": {
+            "title": "Send weekly board report",
+            "description": "Generate PDF + email management team"
+          }
+        }
+      }
+    ]
+  }
+}

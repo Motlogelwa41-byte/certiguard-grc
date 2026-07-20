@@ -14,6 +14,7 @@ import ComplianceScoreRing from "@/components/dashboard/ComplianceScoreRing";
 import ActivityFeed from "@/components/dashboard/ActivityFeed";
 import QuickActions from "@/components/dashboard/QuickActions";
 import ComplianceHeatmap from "@/components/dashboard/ComplianceHeatmap";
+import FrameworkReadinessInsights from "@/components/dashboard/FrameworkReadinessInsights";
 
 const COLORS = ["#1E293B", "#10B981", "#F59E0B", "#EF4444", "#7C3AED", "#64748B"];
 
@@ -178,6 +179,9 @@ export default function Dashboard() {
           )}
         </div>
       </div>
+
+      {/* Readiness Insights — framework readiness + top missing controls */}
+      <FrameworkReadinessInsights frameworks={frameworks} controls={controls} />
 
       {/* Interactive Compliance Risk Heatmap */}
       <div className="mb-8">
