@@ -35,6 +35,9 @@ export default function UserManagement() {
   const [inviteEmail, setInviteEmail] = useState("");
   const [inviteRole, setInviteRole] = useState("user");
   const [inviting, setInviting] = useState(false);
+  const [bulkOpen, setBulkOpen] = useState(false);
+  const [bulkText, setBulkText] = useState("");
+  const [bulkSending, setBulkSending] = useState(false);
   const [search, setSearch] = useState("");
   const [filterRole, setFilterRole] = useState("all");
   const { toast } = useToast();
@@ -74,6 +77,22 @@ export default function UserManagement() {
     setInviting(false);
   };
 
+  const handleBulkInvite = async () => {
+    const emails = bulkText.split(/[\s,;]+/).map((e) => e.trim()).filter(Boolean);
+    if (emails.length === 0) return;
+    setBulkSending(true);
+    let ok = 0, fail = 0;
+    for (const email of emails) {
+      try { await base44.users.inviteUser(email, "user"); ok++; }
+      catch { fail++; }
+    }
+    setBulkSending(false);
+    setBulkOpen(false);
+    setBulkText("");
+    toast({ title: `Invited ${ok} user${ok !== 1 ? "s" : ""}`, description: fail > 0 ? `${fail} failed (already invited or limit reached)` : "All invitations sent." });
+    load();
+  };
+
   const handleChangeRole = async (userId, newRole) => {
     try {
       await base44.entities.User.update(userId, { role: newRole });
@@ -107,6 +126,9 @@ export default function UserManagement() {
             {userLimit && (
               <span className="text-xs text-muted-foreground">{users.length} / {userLimit} users</span>
             )}
+            <Button size="sm" variant="outline" onClick={() => setBulkOpen(true)} disabled={atLimit} title={atLimit ? "User limit reached — upgrade to add more" : ""}>
+              <Mail className="w-4 h-4 mr-1" /> Bulk Invite
+            </Button>
             <Button size="sm" onClick={() => setInviteOpen(true)} disabled={atLimit} title={atLimit ? "User limit reached — upgrade to add more" : ""}>
               <UserPlus className="w-4 h-4 mr-1" /> Invite User
             </Button>
@@ -222,6 +244,28 @@ export default function UserManagement() {
           </div>
         </div>
       )}
+
+      {/* Bulk Invite Dialog */}
+      <Dialog open={bulkOpen} onOpenChange={setBulkOpen}>
+        <DialogContent className="max-w-md">
+          <DialogHeader><DialogTitle>Bulk Invite Team Members</DialogTitle></DialogHeader>
+          <div className="space-y-4">
+            <div>
+              <Label>Email Addresses</Label>
+              <textarea
+                className="w-full rounded-md border border-input bg-transparent px-3 py-2 text-sm shadow-sm focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring min-h-[140px]"
+                placeholder={"Paste emails, separated by commas or new lines:\nalice@company.com\nbob@company.com"}
+                value={bulkText}
+                onChange={(e) => setBulkText(e.target.value)}
+              />
+              <p className="text-xs text-muted-foreground mt-1">Recipients are invited as basic users. They must accept the invite to receive platform emails.</p>
+            </div>
+            <Button className="w-full" onClick={handleBulkInvite} disabled={!bulkText.trim() || bulkSending}>
+              {bulkSending ? "Sending invitations..." : `Send ${bulkText.split(/[\s,;]+/).filter(Boolean).length} Invitations`}
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
 
       {/* Invite Dialog */}
       <Dialog open={inviteOpen} onOpenChange={setInviteOpen}>
