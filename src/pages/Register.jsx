@@ -12,6 +12,8 @@ import AuthBrandPanel from "@/components/auth/AuthBrandPanel";
 import GoogleIcon from "@/components/GoogleIcon";
 import { toast } from "@/components/ui/use-toast";
 import { logLogin } from "@/lib/authAudit";
+import PasswordStrengthMeter from "@/components/auth/PasswordStrengthMeter";
+import { meetsPasswordPolicy } from "@/lib/passwordPolicy";
 
 function MobileBrandHeader() {
   return (
@@ -41,6 +43,10 @@ export default function Register() {
     setError("");
     if (password !== confirmPassword) {
       setError("Passwords do not match");
+      return;
+    }
+    if (!meetsPasswordPolicy(password)) {
+      setError("Password must be 12+ characters with uppercase, lowercase, a number, and a symbol.");
       return;
     }
     setLoading(true);
@@ -241,6 +247,7 @@ export default function Register() {
                     required
                   />
                 </div>
+                <PasswordStrengthMeter password={password} />
               </div>
               <div className="space-y-2">
                 <Label htmlFor="confirm">Confirm password</Label>

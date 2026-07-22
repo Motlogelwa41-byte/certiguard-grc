@@ -5,9 +5,12 @@ import GlobalSearch from "@/components/shared/GlobalSearch";
 import SubscriptionGate from "@/components/shared/SubscriptionGate";
 import RoleGuard from "@/components/shared/RoleGuard";
 import { Search } from "lucide-react";
+import useIdleTimeout from "@/hooks/useIdleTimeout";
+import SecurityPolicyBanner from "@/components/shared/SecurityPolicyBanner";
 
 export default function AppLayout() {
   const [searchOpen, setSearchOpen] = useState(false);
+  useIdleTimeout();
 
   useEffect(() => {
     const handler = (e) => {
@@ -25,6 +28,7 @@ export default function AppLayout() {
       <Sidebar />
       <main className="ml-16 lg:ml-60 transition-all duration-300">
         {/* Top bar with global search */}
+        <SecurityPolicyBanner />
         <div className="sticky top-0 z-40 bg-background/80 backdrop-blur border-b border-border px-6 lg:px-8 h-14 flex items-center justify-between">
           <button
             onClick={() => setSearchOpen(true)}
