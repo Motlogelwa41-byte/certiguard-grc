@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { Pencil, Trash2, ChevronDown, ChevronUp, ShieldAlert } from "lucide-react";
+import { Pencil, Trash2, ChevronDown, ChevronUp, ShieldAlert, FileSignature, ShieldCheck } from "lucide-react";
 import StatusBadge from "@/components/shared/StatusBadge";
 import ResidualRiskCalculator from "@/components/risks/ResidualRiskCalculator";
 
@@ -28,7 +28,7 @@ const getRiskColor = (score) => {
   return "bg-emerald-500";
 };
 
-export default function RiskCardDetail({ r, allControls, onEdit, onDelete }) {
+export default function RiskCardDetail({ r, allControls, onEdit, onDelete, onAccept }) {
   const [expanded, setExpanded] = useState(false);
   const score = (r.likelihood || 1) * (r.impact || 1);
   const linkedControls = allControls.filter(c => (r.related_control_ids || []).includes(c.id));
@@ -68,6 +68,17 @@ export default function RiskCardDetail({ r, allControls, onEdit, onDelete }) {
         </div>
       )}
 
+      {r.status === "accepted" && r.accepted_by_name && (
+        <div className="flex items-start gap-1.5 p-2 bg-emerald-50 dark:bg-emerald-900/20 rounded text-xs text-emerald-700 dark:text-emerald-400">
+          <ShieldCheck className="w-3.5 h-3.5 shrink-0 mt-0.5" />
+          <span>
+            <strong>Formally accepted</strong> by {r.accepted_by_name} on {r.accepted_at}
+            {r.acceptance_expires_at ? ` · expires ${r.acceptance_expires_at}` : ""}
+            {r.acceptance_signature ? ` · signed “${r.acceptance_signature}”` : ""}
+          </span>
+        </div>
+      )}
+
       {r.description && <p className="text-xs text-muted-foreground line-clamp-2">{r.description}</p>}
 
       <div className="grid grid-cols-2 gap-2 text-xs">
@@ -99,6 +110,11 @@ export default function RiskCardDetail({ r, allControls, onEdit, onDelete }) {
       <div className="flex items-center justify-between text-xs text-muted-foreground pt-2 border-t border-border">
         <span>{r.owner_name || "Unassigned"}</span>
         <div className="flex items-center gap-1">
+          {onAccept && r.status !== "accepted" && (
+            <button onClick={() => onAccept(r)} className="p-1 rounded hover:bg-muted text-primary" title="Formally accept risk">
+              <FileSignature className="w-3.5 h-3.5" />
+            </button>
+          )}
           {onEdit && <button onClick={() => onEdit(r)} className="p-1 rounded hover:bg-muted"><Pencil className="w-3.5 h-3.5" /></button>}
           {onDelete && <button onClick={() => onDelete(r.id)} className="p-1 rounded hover:bg-muted text-destructive"><Trash2 className="w-3.5 h-3.5" /></button>}
         </div>

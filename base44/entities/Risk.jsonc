@@ -135,6 +135,28 @@
         "unacceptable"
       ],
       "description": "Manual override band if appetite_override is true"
+    },
+    "accepted_by_name": {
+      "type": "string",
+      "description": "Name of the approver who formally accepted this risk"
+    },
+    "accepted_by_id": {
+      "type": "string",
+      "description": "User ID of the formal risk acceptor"
+    },
+    "accepted_at": {
+      "type": "string",
+      "format": "date",
+      "description": "Date the risk was formally accepted"
+    },
+    "acceptance_expires_at": {
+      "type": "string",
+      "format": "date",
+      "description": "Date the formal acceptance expires and must be re-signed"
+    },
+    "acceptance_signature": {
+      "type": "string",
+      "description": "Typed full-name signature confirming formal sign-off authority"
     }
   },
   "required": [

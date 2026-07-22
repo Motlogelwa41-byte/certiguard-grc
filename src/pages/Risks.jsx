@@ -16,6 +16,7 @@ import { useToast } from "@/components/ui/use-toast";
 import { logAuditTrail } from "@/lib/auditLogger";
 import { useAuth } from "@/lib/AuthContext";
 import RiskCardDetail from "@/components/risks/RiskCardDetail";
+import RiskAcceptanceDialog from "@/components/risks/RiskAcceptanceDialog";
 import BulkActionBar from "@/components/shared/BulkActionBar";
 import Can from "@/components/shared/Can";
 import { useRBAC } from "@/lib/useRBAC";
@@ -38,6 +39,7 @@ export default function Risks() {
   const [selected, setSelected] = useState(new Set());
   const [bulkStatus, setBulkStatus] = useState("");
   const [bulkOwner, setBulkOwner] = useState("");
+  const [acceptRisk, setAcceptRisk] = useState(null);
   const { toast } = useToast();
 
   const handleExport = () => exportToCsv(items, "risks", ["risk_id", "title", "category", "status", "likelihood", "impact", "risk_score", "treatment", "owner_name"]);
@@ -229,6 +231,7 @@ export default function Risks() {
                 allControls={controls}
                 onEdit={can("risks:write") ? handleEdit : null}
                 onDelete={can("risks:delete") ? handleDelete : null}
+                onAccept={can("risks:write") ? (r) => setAcceptRisk(r) : null}
               />
             </div>
           ))}
@@ -236,6 +239,8 @@ export default function Risks() {
       )}
 
       <BulkImportModal open={importOpen} onOpenChange={setImportOpen} entityName="Risk" columns={importColumns} sampleRows={importSampleRows} onSuccess={load} />
+
+      <RiskAcceptanceDialog risk={acceptRisk} open={!!acceptRisk} onOpenChange={(o) => !o && setAcceptRisk(null)} onAccepted={load} />
 
       <Dialog open={open} onOpenChange={setOpen}>
         <DialogContent className="max-w-lg">
