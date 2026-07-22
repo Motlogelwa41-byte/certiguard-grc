@@ -1,0 +1,85 @@
+{
+  "name": "AuditorScope",
+  "type": "object",
+  "properties": {
+    "tenant_id": {
+      "type": "string",
+      "description": "Tenant isolation key"
+    },
+    "auditor_id": {
+      "type": "string",
+      "description": "User id of the external auditor"
+    },
+    "auditor_name": {
+      "type": "string"
+    },
+    "auditor_email": {
+      "type": "string"
+    },
+    "framework_ids": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "Frameworks the auditor is scoped to. Empty = all tenant frameworks."
+    },
+    "framework_names": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "scope_notes": {
+      "type": "string",
+      "description": "Engagement scope, boundaries, special instructions"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "active",
+        "revoked"
+      ],
+      "default": "active"
+    },
+    "expires_at": {
+      "type": "string",
+      "format": "date",
+      "description": "Scope expiry date"
+    },
+    "assigned_by_name": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "auditor_id"
+  ],
+  "rls": {
+    "create": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "read": {
+      "$or": [
+        {
+          "data.tenant_id": "{{user.data.tenant_id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "update": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "delete": {
+      "user_condition": {
+        "role": "admin"
+      }
+    }
+  }
+}

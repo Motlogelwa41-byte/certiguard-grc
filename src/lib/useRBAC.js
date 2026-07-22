@@ -2,7 +2,7 @@ import { useCallback, useMemo } from "react";
 import { useAuth } from "@/lib/AuthContext";
 
 // Role hierarchy (higher index = more privileges)
-const ROLE_HIERARCHY = ["user", "viewer", "auditor", "hr", "department_head", "risk_manager", "compliance_officer", "admin"];
+const ROLE_HIERARCHY = ["user", "viewer", "auditor", "external_auditor", "hr", "department_head", "risk_manager", "compliance_officer", "admin"];
 
 // Permissions required for each operation
 const PERMISSIONS = {
@@ -15,7 +15,7 @@ const PERMISSIONS = {
   "controls:read": ["user", "viewer", "auditor", "hr", "department_head", "risk_manager", "compliance_officer", "admin"],
   "controls:write": ["compliance_officer", "admin"],
   "controls:delete": ["admin"],
-  "controls:approve": ["auditor", "admin"],
+  "controls:approve": ["auditor", "external_auditor", "admin"],
 
   "risks:read": ["user", "viewer", "auditor", "hr", "department_head", "risk_manager", "compliance_officer", "admin"],
   "risks:write": ["risk_manager", "compliance_officer", "admin"],
@@ -28,14 +28,14 @@ const PERMISSIONS = {
   "policies:approve": ["compliance_officer", "admin"],
 
   "evidence:read": ["user", "viewer", "auditor", "hr", "department_head", "risk_manager", "compliance_officer", "admin"],
-  "evidence:write": ["auditor", "compliance_officer", "admin"],
+  "evidence:write": ["auditor", "external_auditor", "compliance_officer", "admin"],
   "evidence:delete": ["compliance_officer", "admin"],
-  "evidence:approve": ["auditor", "compliance_officer", "admin"],
+  "evidence:approve": ["auditor", "external_auditor", "compliance_officer", "admin"],
 
   "audits:read": ["user", "viewer", "auditor", "hr", "department_head", "risk_manager", "compliance_officer", "admin"],
-  "audits:write": ["auditor", "compliance_officer", "admin"],
+  "audits:write": ["auditor", "external_auditor", "compliance_officer", "admin"],
   "audits:delete": ["admin"],
-  "audits:approve": ["auditor", "admin"],
+  "audits:approve": ["auditor", "external_auditor", "admin"],
 
   "vendors:read": ["user", "viewer", "auditor", "hr", "department_head", "risk_manager", "compliance_officer", "admin"],
   "vendors:write": ["risk_manager", "compliance_officer", "admin"],
@@ -50,7 +50,7 @@ const PERMISSIONS = {
   "admin:settings": ["admin"],
 
   "reports:view": ["user", "viewer", "auditor", "hr", "department_head", "risk_manager", "compliance_officer", "admin"],
-  "reports:export": ["auditor", "risk_manager", "compliance_officer", "admin"],
+  "reports:export": ["auditor", "external_auditor", "risk_manager", "compliance_officer", "admin"],
 
   "audit_trail:view": ["auditor", "compliance_officer", "admin"],
 
