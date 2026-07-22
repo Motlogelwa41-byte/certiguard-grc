@@ -99,7 +99,8 @@ export const navSections = [
       { label: "DPIA", path: "/dpia", icon: ShieldAlert, roles: ["admin", "compliance_officer", "auditor"] },
       { label: "Audits", path: "/audits", icon: Landmark, roles: ["admin", "compliance_officer", "auditor"] },
       { label: "Audit Findings", path: "/audit-findings", icon: AlertTriangle, roles: ["admin", "compliance_officer", "risk_manager", "auditor"] },
-      { label: "Activity Log", path: "/audit-trail", icon: History, roles: ["admin", "compliance_officer", "auditor"] },
+      { label: "Audit Trail", path: "/audit-trail", icon: History, roles: ["admin", "compliance_officer", "auditor"] },
+      { label: "Activity Log", path: "/activity-log", icon: Activity, roles: ["admin", "compliance_officer", "risk_manager", "auditor"] },
       { label: "People Compliance", path: "/people", icon: Users2, roles: ["admin", "compliance_officer", "auditor"] },
     ]
   },

@@ -28,6 +28,9 @@ const TENANT_SCOPED_ENTITIES = new Set([
 // AuditTrail is created server-side via the logAudit function; skip client logging for it.
 const SKIP_AUDIT = new Set(['AuditTrail']);
 
+// Entities whose updates/deletes capture a before → after diff for the user-facing activity log.
+const DIFF_ENTITIES = new Set(['Risk', 'Policy', 'Control']);
+
 const nameKeys = ['title', 'name', 'control_id', 'risk_id', 'incident_id', 'finding_id', 'vendor_name', 'processing_activity', 'company_name'];
 const nameOf = (d) => {
   if (!d || typeof d !== 'object') return '';
@@ -92,10 +95,26 @@ base44.entities = new Proxy(_origEntities, {
         }
         if (key === 'update') {
           return async (id, data) => {
-            const result = await fn.call(e, id, data);
-            if (audit) {
-              logAudit({ action: 'update', entity_type: entityName, entity_id: id, entity_name: nameOf(data), changes: JSON.stringify(safeChanges(data)), severity: 'info' });
+            let auditPayload = null;
+            if (audit && DIFF_ENTITIES.has(entityName)) {
+              try {
+                const old = await e.get(id);
+                const safeNew = safeChanges(data);
+                const diff = {};
+                for (const k of Object.keys(safeNew)) {
+                  const ov = old && k in old ? (old[k] && typeof old[k] === 'object' && !Array.isArray(old[k]) ? JSON.stringify(old[k]) : old[k]) : '';
+                  const nv = safeNew[k];
+                  if (JSON.stringify(ov) !== JSON.stringify(nv)) diff[k] = { from: ov ?? '', to: nv ?? '' };
+                }
+                auditPayload = { action: 'update', entity_type: entityName, entity_id: id, entity_name: nameOf(old) || nameOf(data), changes: JSON.stringify(diff), severity: 'info' };
+              } catch (err) {
+                auditPayload = { action: 'update', entity_type: entityName, entity_id: id, entity_name: nameOf(data), changes: JSON.stringify(safeChanges(data)), severity: 'info' };
+              }
+            } else if (audit) {
+              auditPayload = { action: 'update', entity_type: entityName, entity_id: id, entity_name: nameOf(data), changes: JSON.stringify(safeChanges(data)), severity: 'info' };
             }
+            const result = await fn.call(e, id, data);
+            if (auditPayload) logAudit(auditPayload);
             return result;
           };
         }
@@ -115,8 +134,19 @@ base44.entities = new Proxy(_origEntities, {
         }
         if (key === 'delete') {
           return async (id) => {
+            let auditPayload = null;
+            if (audit && DIFF_ENTITIES.has(entityName)) {
+              try {
+                const old = await e.get(id);
+                auditPayload = { action: 'delete', entity_type: entityName, entity_id: id, entity_name: nameOf(old), changes: null, severity: 'warning' };
+              } catch (err) {
+                auditPayload = { action: 'delete', entity_type: entityName, entity_id: id, entity_name: '', changes: null, severity: 'warning' };
+              }
+            } else if (audit) {
+              auditPayload = { action: 'delete', entity_type: entityName, entity_id: id, entity_name: '', changes: null, severity: 'warning' };
+            }
             const result = await fn.call(e, id);
-            if (audit) logAudit({ action: 'delete', entity_type: entityName, entity_id: id, entity_name: '', changes: null, severity: 'warning' });
+            if (auditPayload) logAudit(auditPayload);
             return result;
           };
         }

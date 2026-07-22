@@ -1,0 +1,40 @@
+{
+  "name": "Slack Critical Audit Finding",
+  "description": "Posts an instant Slack alert to the #compliance channel whenever a critical-severity audit finding is logged, so the team can respond immediately.",
+  "trigger": {
+    "condition": "${ .trigger.data.severity == \"critical\" }",
+    "config": {
+      "trigger_type": "entity",
+      "entity_name": "AuditFinding",
+      "events": [
+        "create"
+      ]
+    }
+  },
+  "definition": {
+    "document": {
+      "dsl": "1.0.0",
+      "name": "slack_critical_audit_finding",
+      "version": "1.0",
+      "namespace": "base44"
+    },
+    "do": [
+      {
+        "post_alert": {
+          "call": "invoke_backend_function",
+          "with": {
+            "function_name": "sendSlackAlert",
+            "args": {
+              "text": "\ud83d\udea8 *Critical Audit Finding Logged*\n${ .trigger.data.title // \"Untitled\" }\nSeverity: ${ .trigger.data.severity } \u2022 Status: ${ .trigger.data.status }"
+            }
+          },
+          "then": "end",
+          "x-base44": {
+            "title": "Post Slack alert",
+            "description": "Critical finding \u2192 #compliance"
+          }
+        }
+      }
+    ]
+  }
+}

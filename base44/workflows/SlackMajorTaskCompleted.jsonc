@@ -1,0 +1,40 @@
+{
+  "name": "Slack Major Task Completed",
+  "description": "Posts an instant Slack alert to the #compliance channel whenever a critical or high priority compliance task is marked completed, so the team knows major milestones are done.",
+  "trigger": {
+    "condition": "${ .trigger.data.status == \"completed\" and .trigger.old_data.status != \"completed\" and (.trigger.data.priority == \"critical\" or .trigger.data.priority == \"high\") }",
+    "config": {
+      "trigger_type": "entity",
+      "entity_name": "ComplianceTask",
+      "events": [
+        "update"
+      ]
+    }
+  },
+  "definition": {
+    "document": {
+      "dsl": "1.0.0",
+      "name": "slack_major_task_completed",
+      "version": "1.0",
+      "namespace": "base44"
+    },
+    "do": [
+      {
+        "post_alert": {
+          "call": "invoke_backend_function",
+          "with": {
+            "function_name": "sendSlackAlert",
+            "args": {
+              "text": "\u2705 *Major Task Completed*\n${ .trigger.data.title // \"Untitled\" }\nPriority: ${ .trigger.data.priority } \u2022 Assignee: ${ .trigger.data.assignee_name // \"Unassigned\" }"
+            }
+          },
+          "then": "end",
+          "x-base44": {
+            "title": "Post Slack alert",
+            "description": "Major task done \u2192 #compliance"
+          }
+        }
+      }
+    ]
+  }
+}

@@ -84,6 +84,7 @@ import ExecutiveRiskSummary from '@/pages/ExecutiveRiskSummary';
 import CalendarSync from '@/pages/CalendarSync';
 import GuidedOnboarding from '@/pages/GuidedOnboarding';
 import AuditReadinessReport from '@/pages/AuditReadinessReport';
+import ActivityLog from '@/pages/ActivityLog';
 
 const AuthenticatedApp = () => {
   const { isLoadingAuth, isLoadingPublicSettings, authError, navigateToLogin } = useAuth();
@@ -184,6 +185,7 @@ const AuthenticatedApp = () => {
           <Route path="/calendar-sync" element={<CalendarSync />} />
           <Route path="/guided-onboarding" element={<GuidedOnboarding />} />
           <Route path="/audit-readiness-report" element={<AuditReadinessReport />} />
+          <Route path="/activity-log" element={<ActivityLog />} />
         </Route>
       </Route>
       <Route path="*" element={<PageNotFound />} />
