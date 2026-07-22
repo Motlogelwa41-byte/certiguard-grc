@@ -76,6 +76,10 @@ import AuditorPortal from '@/pages/AuditorPortal';
 import AuditorScopeAdmin from '@/pages/AuditorScopeAdmin';
 import Certifications from '@/pages/Certifications';
 import CertificationDetail from '@/pages/CertificationDetail';
+import SecurityQuestionnaires from '@/pages/SecurityQuestionnaires';
+import QuestionnaireDetail from '@/pages/QuestionnaireDetail';
+import PenTests from '@/pages/PenTests';
+import PenTestDetail from '@/pages/PenTestDetail';
 import IndustryDashboard from '@/pages/IndustryDashboard';
 import FinancialServicesDashboard from '@/pages/FinancialServicesDashboard';
 import Connections from '@/pages/Connections';
@@ -185,6 +189,10 @@ const AuthenticatedApp = () => {
           <Route path="/auditor-scope" element={<AuditorScopeAdmin />} />
           <Route path="/certifications" element={<Certifications />} />
           <Route path="/certifications/:id" element={<CertificationDetail />} />
+          <Route path="/questionnaires" element={<SecurityQuestionnaires />} />
+          <Route path="/questionnaires/:id" element={<QuestionnaireDetail />} />
+          <Route path="/pen-tests" element={<PenTests />} />
+          <Route path="/pen-tests/:id" element={<PenTestDetail />} />
           <Route path="/industry-dashboard" element={<IndustryDashboard />} />
           <Route path="/financial-dashboard" element={<FinancialServicesDashboard />} />
           <Route path="/connections" element={<Connections />} />

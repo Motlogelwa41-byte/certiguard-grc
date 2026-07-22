@@ -1,0 +1,143 @@
+{
+  "name": "SecurityQuestionnaire",
+  "type": "object",
+  "properties": {
+    "tenant_id": {
+      "type": "string",
+      "description": "Tenant isolation key"
+    },
+    "questionnaire_id": {
+      "type": "string",
+      "description": "Unique identifier e.g. Q-001"
+    },
+    "title": {
+      "type": "string"
+    },
+    "client_name": {
+      "type": "string",
+      "description": "Requesting party (customer/prospect)"
+    },
+    "client_email": {
+      "type": "string"
+    },
+    "request_type": {
+      "type": "string",
+      "enum": [
+        "security_review",
+        "due_diligence",
+        "rfp",
+        "vendor_assessment",
+        "regulatory",
+        "other"
+      ],
+      "default": "security_review"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "received",
+        "drafting",
+        "in_review",
+        "submitted",
+        "closed"
+      ],
+      "default": "received"
+    },
+    "due_date": {
+      "type": "string",
+      "format": "date"
+    },
+    "received_date": {
+      "type": "string",
+      "format": "date"
+    },
+    "submitted_date": {
+      "type": "string",
+      "format": "date"
+    },
+    "framework_ids": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "linked_control_ids": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "item_count": {
+      "type": "number",
+      "default": 0
+    },
+    "answered_count": {
+      "type": "number",
+      "default": 0
+    },
+    "drafted_count": {
+      "type": "number",
+      "default": 0
+    },
+    "owner_name": {
+      "type": "string"
+    },
+    "owner_id": {
+      "type": "string"
+    },
+    "notes": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "title",
+    "client_name"
+  ],
+  "rls": {
+    "create": {
+      "data.tenant_id": "{{user.data.tenant_id}}"
+    },
+    "read": {
+      "$or": [
+        {
+          "data.tenant_id": "{{user.data.tenant_id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "update": {
+      "$or": [
+        {
+          "data.tenant_id": "{{user.data.tenant_id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        },
+        {
+          "user_condition": {
+            "role": "compliance_officer"
+          }
+        }
+      ]
+    },
+    "delete": {
+      "$or": [
+        {
+          "data.tenant_id": "{{user.data.tenant_id}}",
+          "created_by_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    }
+  }
+}

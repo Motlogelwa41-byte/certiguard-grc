@@ -4,7 +4,7 @@ import {
   ShieldCheck, FileSearch, Brain, Play, FileSpreadsheet, FileDown, BarChart3, LineChart,
   History, ShieldAlert, GraduationCap, Calendar, Bell, Users, Copy, SlidersHorizontal,
   Target, Upload, Send, Globe, Users2, MapPin, Zap, ListChecks, BellRing,
-  PieChart,   Radar, Landmark, BarChart2, Network, GitCompare, Sparkles, CreditCard, Gauge, Info, ScrollText, Activity, Factory, Plug, UserCheck, Wand2, KeyRound, Bug, Library, Presentation, TrendingDown, CalendarCheck, Rocket, ClipboardCheck, FlaskRound, Award
+  PieChart,   Radar, Landmark, BarChart2, Network, GitCompare, Sparkles, CreditCard, Gauge, Info, ScrollText, Activity, Factory, Plug, UserCheck, Wand2, KeyRound, Bug, Library, Presentation, TrendingDown, CalendarCheck, Rocket, ClipboardCheck, FlaskRound, Award, FileQuestion, FlaskConical
 } from "lucide-react";
 
 // Roles: admin, compliance_officer, risk_manager, auditor, user
@@ -43,6 +43,8 @@ export const navSections = [
       { label: "Auditor Portal", path: "/auditor-portal", icon: ShieldCheck, roles: ["admin", "compliance_officer", "external_auditor", "auditor"] },
       { label: "Auditor Scope", path: "/auditor-scope", icon: UserCheck, roles: ["admin", "compliance_officer"] },
       { label: "Certifications", path: "/certifications", icon: Award, roles: ["admin", "compliance_officer", "auditor", "external_auditor"] },
+      { label: "Questionnaires", path: "/questionnaires", icon: FileQuestion, roles: ["admin", "compliance_officer"] },
+      { label: "Penetration Tests", path: "/pen-tests", icon: FlaskConical, roles: ["admin", "compliance_officer", "auditor", "external_auditor"] },
     ]
   },
   {
