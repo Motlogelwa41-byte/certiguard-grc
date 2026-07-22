@@ -16,6 +16,7 @@ export const navSections = [
       { label: "Dashboard", path: "/", icon: LayoutDashboard, roles: ["admin", "compliance_officer", "risk_manager", "auditor", "user"] },
       { label: "About CertiGuard", path: "/about", icon: Info, roles: ["admin", "compliance_officer", "risk_manager", "auditor", "user"] },
       { label: "Posture Dashboard", path: "/posture", icon: BarChart3, roles: ["admin", "compliance_officer", "risk_manager", "auditor"] },
+      { label: "GRC Education", path: "/grc-education", icon: Gauge, roles: ["admin", "compliance_officer", "risk_manager", "auditor", "user"] },
     ]
   },
   {
