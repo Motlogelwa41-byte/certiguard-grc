@@ -12,9 +12,9 @@ const IMPACT_LABELS = ["", "Negligible", "Minor", "Moderate", "Major", "Catastro
 const DEFAULT_THRESHOLDS = { appetite: 6, tolerance: 12 };
 
 function getCellZone(score, appetite, tolerance) {
-  if (score > tolerance) return { label: "Unacceptable", bg: "rgba(220,38,38,0.18)", border: "#ef4444", text: "#dc2626" };
-  if (score > appetite) return { label: "Tolerance Zone", bg: "rgba(245,158,11,0.18)", border: "#f59e0b", text: "#d97706" };
-  return { label: "Within Appetite", bg: "rgba(16,185,129,0.15)", border: "#10b981", text: "#059669" };
+  if (score > tolerance) return { label: "Unacceptable", bg: "linear-gradient(135deg, rgba(220,38,38,0.32), rgba(190,18,60,0.38))", border: "#ef4444", text: "#fca5a5", glow: "0 8px 20px -6px rgba(239,68,68,0.55)", ring: "#ef4444", accent: "#ef4444" };
+  if (score > appetite) return { label: "Tolerance Zone", bg: "linear-gradient(135deg, rgba(245,158,11,0.30), rgba(217,119,6,0.34))", border: "#f59e0b", text: "#fcd34d", glow: "0 6px 16px -6px rgba(245,158,11,0.5)", ring: "#f59e0b", accent: "#f59e0b" };
+  return { label: "Within Appetite", bg: "linear-gradient(135deg, rgba(16,185,129,0.26), rgba(13,148,136,0.30))", border: "#10b981", text: "#6ee7b7", glow: "0 6px 16px -6px rgba(16,185,129,0.45)", ring: "#10b981", accent: "#10b981" };
 }
 
 function getCellScore(l, i) { return l * i; }
@@ -149,18 +149,23 @@ export default function RiskAppetiteHeatmap() {
 
       <div className="grid grid-cols-1 xl:grid-cols-3 gap-6">
         {/* Heatmap */}
-        <div className="xl:col-span-2 bg-card rounded-xl border border-border p-6">
-          <div className="flex items-center gap-2 mb-1">
-            <h3 className="font-semibold text-foreground">Risk Matrix — Appetite Overlay</h3>
-            <span className="text-xs text-muted-foreground">({view === "both" ? "Inherent ● Residual ◆" : view === "residual" ? "Residual positions" : "Inherent positions"})</span>
+        <div className="xl:col-span-2 bg-card rounded-2xl border border-border p-6 shadow-sm">
+          <div className="flex items-center justify-between mb-1">
+            <div className="flex items-center gap-2">
+              <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-emerald-500/20 to-teal-500/20 flex items-center justify-center">
+                <Target className="w-4 h-4 text-emerald-400" />
+              </div>
+              <h3 className="font-heading font-semibold text-foreground">Risk Matrix — Appetite Overlay</h3>
+            </div>
+            <span className="text-xs text-muted-foreground">{view === "both" ? "Inherent ● Residual ◆" : view === "residual" ? "Residual positions" : "Inherent positions"}</span>
           </div>
           <p className="text-xs text-muted-foreground mb-4">Cell colors show appetite zone. Numbers = risk count. Click a cell to drill down.</p>
 
           {/* Legend zones */}
           <div className="flex items-center gap-4 mb-4 flex-wrap">
-            <div className="flex items-center gap-1.5 text-xs"><span className="w-3 h-3 rounded-sm" style={{ background: "rgba(16,185,129,0.3)", border: "1px solid #10b981" }} />Within Appetite (≤{thresholds.appetite})</div>
-            <div className="flex items-center gap-1.5 text-xs"><span className="w-3 h-3 rounded-sm" style={{ background: "rgba(245,158,11,0.3)", border: "1px solid #f59e0b" }} />Tolerance Zone ({thresholds.appetite + 1}–{thresholds.tolerance})</div>
-            <div className="flex items-center gap-1.5 text-xs"><span className="w-3 h-3 rounded-sm" style={{ background: "rgba(220,38,38,0.3)", border: "1px solid #ef4444" }} />Unacceptable (&gt;{thresholds.tolerance})</div>
+            <div className="flex items-center gap-1.5 text-xs"><span className="w-3.5 h-3.5 rounded-md" style={{ background: "linear-gradient(135deg,#10b981,#0d9488)", boxShadow: "0 2px 6px -2px #10b98180" }} />Within Appetite (≤{thresholds.appetite})</div>
+            <div className="flex items-center gap-1.5 text-xs"><span className="w-3.5 h-3.5 rounded-md" style={{ background: "linear-gradient(135deg,#f59e0b,#d97706)", boxShadow: "0 2px 6px -2px #f59e0b80" }} />Tolerance Zone ({thresholds.appetite + 1}–{thresholds.tolerance})</div>
+            <div className="flex items-center gap-1.5 text-xs"><span className="w-3.5 h-3.5 rounded-md" style={{ background: "linear-gradient(135deg,#ef4444,#be123c)", boxShadow: "0 2px 6px -2px #ef444480" }} />Unacceptable (&gt;{thresholds.tolerance})</div>
           </div>
 
           <div className="flex gap-2">
@@ -170,41 +175,48 @@ export default function RiskAppetiteHeatmap() {
             <div className="flex-1">
               {[5, 4, 3, 2, 1].map(impact => (
                 <div key={impact} className="flex items-stretch gap-1 mb-1">
-                  <div className="w-20 shrink-0 flex items-center justify-end pr-2">
-                    <span className="text-[10px] text-muted-foreground text-right leading-tight">{impact}. {IMPACT_LABELS[impact]}</span>
-                  </div>
-                  {[1, 2, 3, 4, 5].map(likelihood => {
-                    const score = getCellScore(likelihood, impact);
-                    const zone = getCellZone(score, thresholds.appetite, thresholds.tolerance);
-                    const inherentRisks = getRisksInCell(likelihood, impact, "inherent");
-                    const residualRisks = getRisksInCell(likelihood, impact, "residual");
-                    const showCount = view === "inherent" ? inherentRisks.length : view === "residual" ? residualRisks.length : inherentRisks.length + residualRisks.length;
-                    const isSelected = selectedCell?.l === likelihood && selectedCell?.i === impact;
+                <div className="w-20 shrink-0 flex items-center justify-end pr-2">
+                  <span className="text-[10px] text-muted-foreground text-right leading-tight">{impact}. {IMPACT_LABELS[impact]}</span>
+                </div>
+                {[1, 2, 3, 4, 5].map(likelihood => {
+                  const score = getCellScore(likelihood, impact);
+                  const zone = getCellZone(score, thresholds.appetite, thresholds.tolerance);
+                  const inherentRisks = getRisksInCell(likelihood, impact, "inherent");
+                  const residualRisks = getRisksInCell(likelihood, impact, "residual");
+                  const showCount = view === "inherent" ? inherentRisks.length : view === "residual" ? residualRisks.length : inherentRisks.length + residualRisks.length;
+                  const isSelected = selectedCell?.l === likelihood && selectedCell?.i === impact;
 
-                    return (
-                      <div
-                        key={likelihood}
-                        onClick={() => setSelectedCell(isSelected ? null : { l: likelihood, i: impact })}
-                        className={`flex-1 min-h-[62px] rounded-lg border-2 flex flex-col items-center justify-center cursor-pointer transition-all duration-150 relative ${isSelected ? "ring-2 ring-primary ring-offset-1 scale-105 shadow-lg" : "hover:brightness-110"}`}
-                        style={{ background: zone.bg, borderColor: zone.border }}
-                      >
-                        <span className="text-[10px] font-mono text-muted-foreground/50 absolute top-1 right-1.5">{score}</span>
-                        {showCount > 0 ? (
-                          <>
-                            <span className="text-base font-bold" style={{ color: zone.text }}>{showCount}</span>
-                            {view === "both" && (
-                              <div className="flex items-center gap-1 mt-0.5">
-                                {inherentRisks.length > 0 && <span className="text-[9px] px-1 rounded bg-slate-200/60 text-slate-600">I:{inherentRisks.length}</span>}
-                                {residualRisks.length > 0 && <span className="text-[9px] px-1 rounded bg-blue-200/60 text-blue-700">R:{residualRisks.length}</span>}
-                              </div>
-                            )}
-                          </>
-                        ) : (
-                          <span className="text-[10px] text-muted-foreground/30">{score}</span>
-                        )}
-                      </div>
-                    );
-                  })}
+                  return (
+                    <div
+                      key={likelihood}
+                      onClick={() => setSelectedCell(isSelected ? null : { l: likelihood, i: impact })}
+                      className={`relative flex-1 min-h-[68px] rounded-xl border flex flex-col items-center justify-center cursor-pointer transition-all duration-200 ease-out hover:-translate-y-0.5 ${isSelected ? "scale-[1.06] z-10" : ""}`}
+                      style={{
+                        background: zone.bg,
+                        borderColor: zone.border,
+                        boxShadow: isSelected
+                          ? `0 0 0 2px ${zone.ring}, 0 8px 22px -4px ${zone.accent}66`
+                          : showCount > 0
+                          ? zone.glow
+                          : "none",
+                      }}
+                    >
+                      <span className="absolute inset-x-1 top-1 h-1/3 rounded-t-xl bg-gradient-to-b from-white/15 to-transparent pointer-events-none" />
+                      <span className="absolute top-1 right-1.5 text-[10px] font-mono text-muted-foreground/50">{score}</span>
+                      {showCount > 0 ? (
+                        <>
+                          <span className="relative text-lg font-bold text-white drop-shadow-sm">{showCount}</span>
+                          {view === "both" && (
+                            <div className="relative flex items-center gap-1 mt-1.5">
+                              {inherentRisks.length > 0 && <span className="text-[9px] px-1 rounded bg-white/25 text-white font-semibold">I:{inherentRisks.length}</span>}
+                              {residualRisks.length > 0 && <span className="text-[9px] px-1 rounded bg-blue-500/40 text-white font-semibold">R:{residualRisks.length}</span>}
+                            </div>
+                          )}
+                        </>
+                      ) : null}
+                    </div>
+                  );
+                })}
                 </div>
               ))}
               <div className="flex gap-1 mt-1">
