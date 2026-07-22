@@ -58,7 +58,7 @@
     },
     "reviewer_name": {
       "type": "string",
-      "description": "Compliance manager who approved or rejected the evidence"
+      "description": "Compliance manager or auditor who approved or rejected the evidence"
     },
     "reviewed_at": {
       "type": "string",
@@ -67,7 +67,7 @@
     },
     "review_notes": {
       "type": "string",
-      "description": "Compliance manager's notes recorded during the formal approval or rejection"
+      "description": "Notes recorded during the formal approval or rejection"
     },
     "notes": {
       "type": "string"
@@ -105,6 +105,11 @@
         {
           "user_condition": {
             "role": "compliance_officer"
+          }
+        },
+        {
+          "user_condition": {
+            "role": "external_auditor"
           }
         }
       ]
