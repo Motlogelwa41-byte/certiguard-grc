@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
-import { Link } from "react-router-dom";
+import { Link, Navigate } from "react-router-dom";
 import {
   Shield, FileCheck, AlertTriangle, CheckSquare,
   FileText, ArrowRight, FileDown, CalendarClock, Rocket, ClipboardCheck
@@ -39,7 +39,7 @@ export default function Dashboard() {
   const role = user?.role || "user";
 
   useEffect(() => {
-    if (["risk_manager", "auditor", "viewer", "user", "hr", "department_head"].includes(role)) return;
+    if (["risk_manager", "auditor", "viewer", "user", "hr", "department_head", "external_auditor"].includes(role)) return;
     Promise.all([
       base44.entities.Framework.list(),
       base44.entities.Control.list(),
@@ -58,6 +58,7 @@ export default function Dashboard() {
     });
   }, [role]);
 
+  if (role === "external_auditor") return <Navigate to="/auditor-portal" replace />;
   if (role === "risk_manager") return <RiskManagerDashboard />;
   if (role === "auditor") return <AuditorDashboard />;
   if (role === "hr") return <HRDashboard />;

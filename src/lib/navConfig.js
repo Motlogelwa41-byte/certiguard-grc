@@ -40,6 +40,8 @@ export const navSections = [
       { label: "Audit Checklists", path: "/audit-checklists", icon: ListChecks, roles: ["admin", "compliance_officer", "auditor"] },
       { label: "Control Monitoring", path: "/control-monitoring", icon: Activity, roles: ["admin", "compliance_officer", "auditor"] },
       { label: "Control Tests", path: "/control-tests", icon: FlaskRound, roles: ["admin", "compliance_officer", "auditor"] },
+      { label: "Auditor Portal", path: "/auditor-portal", icon: ShieldCheck, roles: ["admin", "compliance_officer", "external_auditor", "auditor"] },
+      { label: "Auditor Scope", path: "/auditor-scope", icon: UserCheck, roles: ["admin", "compliance_officer"] },
     ]
   },
   {
