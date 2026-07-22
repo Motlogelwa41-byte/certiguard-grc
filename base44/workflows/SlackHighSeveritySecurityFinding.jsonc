@@ -1,0 +1,40 @@
+{
+  "name": "Slack High-Severity Security Finding",
+  "description": "Posts an instant Slack alert to the #compliance channel whenever a high- or critical-severity security finding is created, so the security team can respond immediately.",
+  "trigger": {
+    "condition": "${ .trigger.data.severity == \"high\" or .trigger.data.severity == \"critical\" }",
+    "config": {
+      "trigger_type": "entity",
+      "entity_name": "SecurityFinding",
+      "events": [
+        "create"
+      ]
+    }
+  },
+  "definition": {
+    "document": {
+      "dsl": "1.0.0",
+      "name": "slack_high_severity_security_finding",
+      "version": "1.0",
+      "namespace": "base44"
+    },
+    "do": [
+      {
+        "post_alert": {
+          "call": "invoke_backend_function",
+          "with": {
+            "function_name": "sendSlackAlert",
+            "args": {
+              "text": "\ud83d\udee1\ufe0f *High-Severity Security Finding Detected*\n*${ .trigger.data.title // \"Untitled finding\" }*\nSeverity: ${ .trigger.data.severity // \"unknown\" } \u2022 Status: ${ .trigger.data.status // \"open\" }\nSource: ${ .trigger.data.source // \"unknown\" } \u2022 Asset: ${ .trigger.data.asset // \"N/A\" }\nDetected: ${ .trigger.data.detected_date // \"just now\" }\nReview in CertiGuard \u2192 Security Findings."
+            }
+          },
+          "then": "end",
+          "x-base44": {
+            "title": "Post Slack alert",
+            "description": "High/critical finding \u2192 #compliance"
+          }
+        }
+      }
+    ]
+  }
+}

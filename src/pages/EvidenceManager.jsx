@@ -1,6 +1,10 @@
 import React, { useState, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
-import { Paperclip, Plus, Pencil, Trash2, Search, Upload, ExternalLink, Link2, Layers } from "lucide-react";
+import { useAuth } from "@/lib/AuthContext";
+import {
+  Paperclip, Plus, Pencil, Trash2, Search, Upload, ExternalLink, Link2, Layers,
+  CheckSquare, Clock, XCircle, CheckCircle2, ClipboardCheck
+} from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import BulkUploadPanel from "@/components/evidence/BulkUploadPanel";
@@ -13,10 +17,18 @@ import StatusBadge from "@/components/shared/StatusBadge";
 import EmptyState from "@/components/shared/EmptyState";
 import { useToast } from "@/components/ui/use-toast";
 
-const evidenceTypes = ["screenshot","document","report","log","certificate","configuration","other"];
+const evidenceTypes = ["screenshot", "document", "report", "log", "certificate", "configuration", "other"];
+const statusFilters = [
+  { value: "all", label: "All evidence" },
+  { value: "pending_review", label: "Pending review" },
+  { value: "approved", label: "Approved" },
+  { value: "rejected", label: "Rejected" },
+  { value: "expired", label: "Expired" },
+];
 const defaultForm = { title: "", description: "", type: "document", status: "pending_review", control_id: "", control_title: "", collected_date: "", expiry_date: "", reviewer_name: "", notes: "", file_url: "", file_name: "" };
 
 export default function EvidenceManager() {
+  const { user } = useAuth();
   const [items, setItems] = useState([]);
   const [controls, setControls] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -24,8 +36,14 @@ export default function EvidenceManager() {
   const [form, setForm] = useState(defaultForm);
   const [editId, setEditId] = useState(null);
   const [search, setSearch] = useState("");
+  const [statusFilter, setStatusFilter] = useState("all");
   const [uploading, setUploading] = useState(false);
   const [bulkOpen, setBulkOpen] = useState(false);
+  const [reviewOpen, setReviewOpen] = useState(false);
+  const [reviewItem, setReviewItem] = useState(null);
+  const [reviewDecision, setReviewDecision] = useState("approved");
+  const [reviewNotes, setReviewNotes] = useState("");
+  const [submitting, setSubmitting] = useState(false);
   const { toast } = useToast();
 
   const load = async () => {
@@ -52,9 +70,9 @@ export default function EvidenceManager() {
   const handleSave = async () => {
     try {
       if (editId) await base44.entities.Evidence.update(editId, form);
-      else await base44.entities.Evidence.create(form);
+      else await base44.entities.Evidence.create({ ...form, status: "pending_review" });
       setOpen(false); setForm(defaultForm); setEditId(null); load();
-      toast({ title: editId ? "Evidence updated" : "Evidence added" });
+      toast({ title: editId ? "Evidence updated" : "Evidence added", description: editId ? undefined : "Sent to compliance manager for review." });
     } catch (e) { toast({ title: "Error", description: e.message, variant: "destructive" }); }
   };
 
@@ -65,28 +83,91 @@ export default function EvidenceManager() {
 
   const handleDelete = async (id) => { await base44.entities.Evidence.delete(id); load(); toast({ title: "Evidence deleted" }); };
 
-  const filtered = items.filter((e) => !search || e.title?.toLowerCase().includes(search.toLowerCase()));
+  const openReview = (item) => {
+    setReviewItem(item);
+    setReviewDecision("approved");
+    setReviewNotes(item.review_notes || "");
+    setReviewOpen(true);
+  };
+
+  const submitReview = async () => {
+    if (reviewDecision === "rejected" && !reviewNotes.trim()) {
+      toast({ title: "Notes required", description: "A rejection reason is required.", variant: "destructive" });
+      return;
+    }
+    setSubmitting(true);
+    try {
+      const today = new Date().toISOString().slice(0, 10);
+      const reviewerName = user?.full_name || user?.email || "Compliance Manager";
+      await base44.entities.Evidence.update(reviewItem.id, {
+        status: reviewDecision,
+        reviewer_name: reviewerName,
+        reviewed_at: today,
+        review_notes: reviewNotes.trim(),
+      });
+      toast({ title: reviewDecision === "approved" ? "Evidence approved" : "Evidence rejected", description: "Review decision recorded." });
+      setReviewOpen(false); setReviewItem(null); setReviewNotes(""); load();
+    } catch (e) {
+      toast({ title: "Review failed", description: e.message, variant: "destructive" });
+    }
+    setSubmitting(false);
+  };
+
+  const filtered = items.filter((e) => {
+    if (statusFilter !== "all" && e.status !== statusFilter) return false;
+    if (search && !e.title?.toLowerCase().includes(search.toLowerCase())) return false;
+    return true;
+  });
+
+  const pendingCount = items.filter((e) => e.status === "pending_review").length;
+  const approvedCount = items.filter((e) => e.status === "approved").length;
 
   if (loading) return <div className="flex items-center justify-center h-64"><div className="w-8 h-8 border-4 border-primary/20 border-t-primary rounded-full animate-spin" /></div>;
 
   return (
     <div>
-      <PageHeader title="Evidence" subtitle="Collect and manage audit evidence" actions={
+      <PageHeader title="Evidence" subtitle="Collect, review, and approve audit evidence" actions={
         <div className="flex items-center gap-2">
           <Button size="sm" variant="outline" onClick={() => setBulkOpen(true)}><Layers className="w-4 h-4 mr-1" /> Bulk Upload</Button>
           <Button size="sm" onClick={() => { setForm(defaultForm); setEditId(null); setOpen(true); }}><Plus className="w-4 h-4 mr-1" /> Add Evidence</Button>
         </div>
       } />
 
-      <div className="flex items-center gap-3 mb-6">
+      {/* Review queue summary */}
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-6">
+        <div className="bg-card rounded-xl border border-border p-4">
+          <div className="flex items-center gap-2 text-muted-foreground text-xs mb-1"><ClipboardCheck className="w-3.5 h-3.5" /> Pending review</div>
+          <div className="text-2xl font-heading font-bold text-amber-600">{pendingCount}</div>
+        </div>
+        <div className="bg-card rounded-xl border border-border p-4">
+          <div className="flex items-center gap-2 text-muted-foreground text-xs mb-1"><CheckCircle2 className="w-3.5 h-3.5" /> Approved</div>
+          <div className="text-2xl font-heading font-bold text-emerald-600">{approvedCount}</div>
+        </div>
+        <div className="bg-card rounded-xl border border-border p-4">
+          <div className="flex items-center gap-2 text-muted-foreground text-xs mb-1"><Paperclip className="w-3.5 h-3.5" /> Total items</div>
+          <div className="text-2xl font-heading font-bold text-foreground">{items.length}</div>
+        </div>
+        <div className="bg-card rounded-xl border border-border p-4">
+          <div className="flex items-center gap-2 text-muted-foreground text-xs mb-1"><Clock className="w-3.5 h-3.5" /> Approval workflow</div>
+          <div className="text-sm font-semibold text-foreground leading-tight mt-1">New uploads require manager sign-off</div>
+        </div>
+      </div>
+
+      <div className="flex flex-col sm:flex-row sm:items-center gap-3 mb-6">
         <div className="relative flex-1 max-w-sm">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
           <Input placeholder="Search evidence..." value={search} onChange={(e) => setSearch(e.target.value)} className="pl-9" />
         </div>
+        <Select value={statusFilter} onValueChange={setStatusFilter}>
+          <SelectTrigger className="w-full sm:w-52"><SelectValue /></SelectTrigger>
+          <SelectContent>
+            {statusFilters.map((s) => <SelectItem key={s.value} value={s.value}>{s.label}</SelectItem>)}
+          </SelectContent>
+        </Select>
       </div>
 
       {items.length === 0 ? (
-        <EmptyState icon={Paperclip} title="No evidence collected" description="Start collecting evidence for your controls." actionLabel="Add Evidence" onAction={() => setOpen(true)} />
+        <EmptyState icon={Paperclip} title="No evidence collected" description="Upload evidence for your controls — it enters review automatically." actionLabel="Add Evidence" onAction={() => setOpen(true)} />
       ) : (
         <div className="bg-card rounded-xl border border-border overflow-hidden">
           <div className="overflow-x-auto">
@@ -97,6 +178,7 @@ export default function EvidenceManager() {
                   <th className="text-left px-4 py-3 font-semibold text-muted-foreground">Type</th>
                   <th className="text-left px-4 py-3 font-semibold text-muted-foreground">Control</th>
                   <th className="text-left px-4 py-3 font-semibold text-muted-foreground">Status</th>
+                  <th className="text-left px-4 py-3 font-semibold text-muted-foreground">Reviewer</th>
                   <th className="text-left px-4 py-3 font-semibold text-muted-foreground">File</th>
                   <th className="text-right px-4 py-3"></th>
                 </tr>
@@ -104,7 +186,10 @@ export default function EvidenceManager() {
               <tbody>
                 {filtered.map((e) => (
                   <tr key={e.id} className="border-b border-border last:border-0 hover:bg-muted/30 transition-colors">
-                    <td className="px-4 py-3 font-medium text-foreground">{e.title}</td>
+                    <td className="px-4 py-3 font-medium text-foreground">
+                      {e.title}
+                      {e.review_notes && <div className="text-xs text-muted-foreground mt-0.5 line-clamp-1">“{e.review_notes}”</div>}
+                    </td>
                     <td className="px-4 py-3 text-muted-foreground capitalize">{(e.type || "").replace(/_/g, " ")}</td>
                     <td className="px-4 py-3 text-muted-foreground">
                       {e.control_title ? (
@@ -112,9 +197,20 @@ export default function EvidenceManager() {
                       ) : "—"}
                     </td>
                     <td className="px-4 py-3"><StatusBadge status={e.status} /></td>
+                    <td className="px-4 py-3 text-muted-foreground text-xs">
+                      {e.reviewer_name ? (
+                        <div>
+                          <div className="text-foreground/80">{e.reviewer_name}</div>
+                          {e.reviewed_at && <div>{e.reviewed_at}</div>}
+                        </div>
+                      ) : "—"}
+                    </td>
                     <td className="px-4 py-3">{e.file_url ? <a href={e.file_url} target="_blank" rel="noopener noreferrer" className="text-primary hover:underline flex items-center gap-1 text-xs"><ExternalLink className="w-3 h-3" />{e.file_name || "View"}</a> : <span className="text-muted-foreground text-xs">—</span>}</td>
                     <td className="px-4 py-3 text-right">
                       <div className="flex items-center justify-end gap-1">
+                        {e.status === "pending_review" && (
+                          <button onClick={() => openReview(e)} title="Review" className="p-1.5 rounded hover:bg-muted text-primary"><CheckSquare className="w-3.5 h-3.5" /></button>
+                        )}
                         <button onClick={() => handleEdit(e)} className="p-1.5 rounded hover:bg-muted"><Pencil className="w-3.5 h-3.5 text-muted-foreground" /></button>
                         <button onClick={() => handleDelete(e.id)} className="p-1.5 rounded hover:bg-muted"><Trash2 className="w-3.5 h-3.5 text-destructive" /></button>
                       </div>
@@ -127,6 +223,7 @@ export default function EvidenceManager() {
         </div>
       )}
 
+      {/* Add / edit dialog */}
       <Dialog open={open} onOpenChange={setOpen}>
         <DialogContent className="max-w-lg">
           <DialogHeader><DialogTitle>{editId ? "Edit Evidence" : "Add Evidence"}</DialogTitle></DialogHeader>
@@ -169,7 +266,6 @@ export default function EvidenceManager() {
               <div><Label>Collected Date</Label><Input type="date" value={form.collected_date} onChange={(e) => setForm({ ...form, collected_date: e.target.value })} /></div>
               <div><Label>Expiry Date</Label><Input type="date" value={form.expiry_date} onChange={(e) => setForm({ ...form, expiry_date: e.target.value })} /></div>
             </div>
-            <div><Label>Reviewer</Label><Input value={form.reviewer_name} onChange={(e) => setForm({ ...form, reviewer_name: e.target.value })} /></div>
             <div>
               <Label>File</Label>
               <div className="mt-1">
@@ -187,6 +283,7 @@ export default function EvidenceManager() {
                   </label>
                 )}
               </div>
+              <p className="text-xs text-muted-foreground mt-2">New uploads default to <span className="font-medium">Pending Review</span> and require compliance manager approval before being finalized.</p>
             </div>
             <div><Label>Description</Label><Textarea value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })} rows={2} /></div>
             <div><Label>Notes</Label><Textarea value={form.notes} onChange={(e) => setForm({ ...form, notes: e.target.value })} rows={2} /></div>
@@ -195,10 +292,62 @@ export default function EvidenceManager() {
         </DialogContent>
       </Dialog>
 
+      {/* Review / approval dialog */}
+      <Dialog open={reviewOpen} onOpenChange={setReviewOpen}>
+        <DialogContent className="max-w-md">
+          <DialogHeader><DialogTitle className="flex items-center gap-2"><ClipboardCheck className="w-5 h-5 text-primary" /> Formal Evidence Review</DialogTitle></DialogHeader>
+          {reviewItem && (
+            <div className="space-y-4">
+              <div className="rounded-lg bg-muted/40 border border-border p-3">
+                <div className="font-medium text-foreground text-sm">{reviewItem.title}</div>
+                {reviewItem.control_title && <div className="text-xs text-muted-foreground mt-0.5">Control: {reviewItem.control_title}</div>}
+                {reviewItem.file_url && (
+                  <a href={reviewItem.file_url} target="_blank" rel="noopener noreferrer" className="text-xs text-primary hover:underline flex items-center gap-1 mt-1">
+                    <ExternalLink className="w-3 h-3" /> {reviewItem.file_name || "View file"}
+                  </a>
+                )}
+              </div>
+              <div>
+                <Label>Decision</Label>
+                <div className="grid grid-cols-2 gap-2 mt-1">
+                  <button
+                    onClick={() => setReviewDecision("approved")}
+                    className={`flex items-center justify-center gap-2 rounded-lg border px-3 py-2 text-sm font-medium transition-colors ${reviewDecision === "approved" ? "border-emerald-500 bg-emerald-500/10 text-emerald-600" : "border-border text-muted-foreground hover:bg-muted"}`}
+                  >
+                    <CheckCircle2 className="w-4 h-4" /> Approve
+                  </button>
+                  <button
+                    onClick={() => setReviewDecision("rejected")}
+                    className={`flex items-center justify-center gap-2 rounded-lg border px-3 py-2 text-sm font-medium transition-colors ${reviewDecision === "rejected" ? "border-red-500 bg-red-500/10 text-red-600" : "border-border text-muted-foreground hover:bg-muted"}`}
+                  >
+                    <XCircle className="w-4 h-4" /> Reject
+                  </button>
+                </div>
+              </div>
+              <div>
+                <Label>{reviewDecision === "rejected" ? "Rejection reason *" : "Review notes"}</Label>
+                <Textarea
+                  value={reviewNotes}
+                  onChange={(e) => setReviewNotes(e.target.value)}
+                  rows={3}
+                  placeholder={reviewDecision === "rejected" ? "Explain why this evidence is rejected..." : "Optional notes for the submitter..."}
+                />
+              </div>
+              <div className="flex justify-end gap-2">
+                <Button variant="outline" size="sm" onClick={() => setReviewOpen(false)}>Cancel</Button>
+                <Button size="sm" onClick={submitReview} disabled={submitting} className={reviewDecision === "rejected" ? "bg-destructive text-destructive-foreground hover:bg-destructive/90" : ""}>
+                  {submitting ? "Saving..." : reviewDecision === "approved" ? "Approve evidence" : "Reject evidence"}
+                </Button>
+              </div>
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
+
       <Dialog open={bulkOpen} onOpenChange={setBulkOpen}>
         <DialogContent className="max-w-3xl">
           <DialogHeader><DialogTitle>Bulk Upload Evidence</DialogTitle></DialogHeader>
-          <p className="text-sm text-muted-foreground -mt-2">Drag and drop multiple files, map each to a control, then upload all at once.</p>
+          <p className="text-sm text-muted-foreground -mt-2">Drag and drop multiple files, map each to a control, then upload all at once. All uploads enter pending review.</p>
           <BulkUploadPanel controls={controls} onComplete={load} />
         </DialogContent>
       </Dialog>

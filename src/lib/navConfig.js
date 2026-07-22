@@ -1,7 +1,7 @@
 import {
   LayoutDashboard, Shield, FileCheck, AlertTriangle, FileText, Paperclip,
   ClipboardList, Building2, CheckSquare, ChevronLeft, ChevronRight, LogOut,
-  ShieldCheck, FileSearch, Brain, Play, FileSpreadsheet, FileDown, BarChart3,
+  ShieldCheck, FileSearch, Brain, Play, FileSpreadsheet, FileDown, BarChart3, LineChart,
   History, ShieldAlert, GraduationCap, Calendar, Bell, Users, Copy, SlidersHorizontal,
   Target, Upload, Send, Globe, Users2, MapPin, Zap, ListChecks, BellRing,
   PieChart, Radar, Landmark, BarChart2, Network, GitCompare, Sparkles, CreditCard, Gauge, Info, ScrollText, Activity, Factory, Plug, UserCheck, Wand2, KeyRound, Bug, Library, Presentation, TrendingDown, CalendarCheck, Rocket, ClipboardCheck
@@ -108,6 +108,7 @@ export const navSections = [
   {
     label: "Reporting",
     items: [
+      { label: "Exec Risk Report", path: "/executive-risk-report", icon: LineChart, roles: ["admin", "compliance_officer", "risk_manager", "auditor"] },
       { label: "Board Report", path: "/board-report", icon: Presentation, roles: ["admin", "compliance_officer", "risk_manager", "auditor"] },
       { label: "Audit Readiness Report", path: "/audit-readiness-report", icon: ClipboardCheck, roles: ["admin", "compliance_officer", "risk_manager", "auditor"] },
       { label: "Mgmt Dashboard", path: "/management-dashboard", icon: BarChart2, roles: ["admin", "compliance_officer", "risk_manager", "auditor"] },
