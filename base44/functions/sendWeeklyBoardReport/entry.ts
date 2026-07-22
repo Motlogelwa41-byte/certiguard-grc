@@ -58,10 +58,30 @@ Deno.serve(async (req) => {
     if (openIncidents > 0) recs.push(`Resolve ${openIncidents} open security incidents.`);
     if (recs.length === 0) recs.push('All indicators within acceptable ranges — maintain current posture and monitoring cadence.');
 
+    // Risk trends — new risks opened per week (last 6) + current status breakdown
+    const riskByStatus = { open: 0, mitigating: 0, accepted: 0, closed: 0 };
+    (risks || []).forEach((r) => { riskByStatus[r.status] = (riskByStatus[r.status] || 0) + 1; });
+    const nowMs = now.getTime();
+    const weekMs = 7 * 24 * 60 * 60 * 1000;
+    const riskTrends = [];
+    for (let i = 5; i >= 0; i--) {
+      const wEnd = nowMs - i * weekMs;
+      const wStart = wEnd - weekMs;
+      const opened = (risks || []).filter((r) => {
+        const d = new Date(r.created_date).getTime();
+        return d >= wStart && d < wEnd;
+      }).length;
+      riskTrends.push({ week: new Date(wEnd).toISOString().slice(0, 10), opened });
+    }
+    const avgRiskScore = (risks || []).length > 0
+      ? Math.round(((risks || []).reduce((s, r) => s + (r.risk_score || 0), 0) / (risks || []).length) * 10) / 10
+      : 0;
+
     const report = {
       complianceScore, passing, total, fwScores, topRisks, sevCounts,
       openFindings: openFindings.length, overdueTasks, openIncidents,
       openRisks: openRisks.length, completedTasks, totalTasks: tasks.length, recs,
+      riskByStatus, riskTrends, avgRiskScore,
     };
 
     // ── Build the board PDF (server-side, text/tables — no DOM) ─────────────
@@ -98,7 +118,7 @@ Deno.serve(async (req) => {
         framework_readiness_scores: JSON.stringify(fwScores),
         top_risks: JSON.stringify(topRisks.map((r) => ({ title: r.title, score: r.risk_score, status: r.status }))),
         improvement_recommendations: recs.map((r) => `- ${r}`).join('\n'),
-        executive_summary: `Weekly board snapshot for ${dateStr}: compliance score ${complianceScore}%, ${passing}/${total} controls passing, ${openRisks.length} open risks, ${openFindings.length} open findings, ${overdueTasks} overdue tasks.`,
+        executive_summary: `Weekly board snapshot for ${dateStr}: compliance score ${complianceScore}%, ${passing}/${total} controls passing, ${openRisks.length} open risks, ${openFindings.length} open findings, ${overdueTasks} overdue tasks. Risk trends (6wk): ${riskTrends.map((w) => w.opened).join('/')} new per week; avg risk score ${avgRiskScore}.`,
         generated_by: 'Weekly Board Report Workflow',
         generated_at: now.toISOString(),
       });
@@ -231,6 +251,38 @@ function buildBoardPdf({ report, dateStr, tenantName }) {
   }
   y += 6;
 
+  // Risk trends (last 6 weeks)
+  y = pdfSectionTitle(doc, 'Risk Trends (last 6 weeks)', margin, pageW, y);
+  if (report.riskTrends.length === 0) {
+    doc.setFont('helvetica', 'normal'); doc.setFontSize(9); doc.setTextColor(148, 163, 184);
+    doc.text('No risk history.', margin, y); y += 14;
+  } else {
+    report.riskTrends.forEach((w) => {
+      ensureSpace(14);
+      doc.setFont('helvetica', 'normal'); doc.setFontSize(9); doc.setTextColor(15, 23, 42);
+      doc.text(w.week, margin, y);
+      doc.setFont('helvetica', 'bold');
+      doc.text(`${w.opened} new`, pageW - margin, y, { align: 'right' });
+      y += 14;
+    });
+  }
+  y += 4;
+
+  // Risk status breakdown
+  y = pdfSectionTitle(doc, 'Risk Status', margin, pageW, y);
+  Object.entries(report.riskByStatus).forEach(([k, v]) => {
+    ensureSpace(14);
+    doc.setFont('helvetica', 'normal'); doc.setFontSize(9); doc.setTextColor(15, 23, 42);
+    doc.text(k.charAt(0).toUpperCase() + k.slice(1), margin, y);
+    doc.setFont('helvetica', 'bold');
+    doc.text(String(v), pageW - margin, y, { align: 'right' });
+    y += 14;
+  });
+  ensureSpace(14);
+  doc.setFont('helvetica', 'normal'); doc.setFontSize(9); doc.setTextColor(100, 116, 139);
+  doc.text(`Average risk score: ${report.avgRiskScore}`, margin, y); y += 14;
+  y += 6;
+
   // Findings by severity
   y = pdfSectionTitle(doc, 'Open Findings by Severity', margin, pageW, y);
   ['critical', 'high', 'medium', 'low', 'info'].forEach((s) => {
@@ -272,13 +324,27 @@ function buildBoardTablesHtml(report) {
      <td style="padding:8px 14px;border-bottom:1px solid #f1f5f9;font-size:12px;text-transform:capitalize">${esc(r.status || '')}</td></tr>`
   ).join('') : '<tr><td style="padding:9px 14px;font-size:13px;color:#64748b">No open risks.</td></tr>';
 
-  const recList = report.recs.map((r) => `<p style="font-size:13px;margin:0 0 6px;padding-left:14px;border-left:3px solid ${scoreColor(report.complianceScore) ? '#10b981' : '#10b981'};color:#1e293b">${esc(r)}</p>`).join('');
+  const recList = report.recs.map((r) => `<p style="font-size:13px;margin:0 0 6px;padding-left:14px;border-left:3px solid #10b981;color:#1e293b">${esc(r)}</p>`).join('');
+
+  const trendRows = (report.riskTrends || []).map((w) =>
+    `<tr><td style="padding:8px 14px;border-bottom:1px solid #f1f5f9;font-size:13px">${esc(w.week)}</td>
+     <td style="padding:8px 14px;border-bottom:1px solid #f1f5f9;font-weight:700">${w.opened} new</td></tr>`
+  ).join('') || '<tr><td style="padding:9px 14px;font-size:13px;color:#64748b">No history.</td></tr>';
+
+  const statusRows = Object.entries(report.riskByStatus || {}).map(([k, v]) =>
+    `<tr><td style="padding:8px 14px;border-bottom:1px solid #f1f5f9;font-size:13px;text-transform:capitalize">${esc(k)}</td>
+     <td style="padding:8px 14px;border-bottom:1px solid #f1f5f9;font-weight:700">${v}</td></tr>`
+  ).join('');
 
   return `<table style="width:100%;border-collapse:collapse;margin-bottom:20px">
       <tr style="background:#f8fafc"><th colspan="2" style="padding:10px 14px;text-align:left;font-size:13px;color:#475569;border-bottom:1px solid #e2e8f0">Framework Readiness</th></tr>${fwRows}</table>
     <table style="width:100%;border-collapse:collapse;margin-bottom:20px">
       <tr style="background:#f8fafc"><th colspan="3" style="padding:10px 14px;text-align:left;font-size:13px;color:#475569;border-bottom:1px solid #e2e8f0">Top Open Risks</th></tr>
       <tr style="color:#64748b;font-size:11px"><th style="padding:6px 14px;text-align:left">Risk</th><th style="padding:6px 14px;text-align:left">Score</th><th style="padding:6px 14px;text-align:left">Status</th></tr>${riskRows}</table>
+    <table style="width:100%;border-collapse:collapse;margin-bottom:20px">
+      <tr style="background:#f8fafc"><th colspan="2" style="padding:10px 14px;text-align:left;font-size:13px;color:#475569;border-bottom:1px solid #e2e8f0">Risk Trends (last 6 weeks)</th></tr>${trendRows}</table>
+    <table style="width:100%;border-collapse:collapse;margin-bottom:20px">
+      <tr style="background:#f8fafc"><th colspan="2" style="padding:10px 14px;text-align:left;font-size:13px;color:#475569;border-bottom:1px solid #e2e8f0">Risk Status · Avg score ${report.avgRiskScore}</th></tr>${statusRows}</table>
     <div style="background:#f8fafc;border-radius:8px;padding:16px 20px;margin-bottom:8px">
       <p style="font-weight:700;font-size:13px;color:#475569;margin:0 0 10px">Recommendations</p>${recList}</div>`;
 }
