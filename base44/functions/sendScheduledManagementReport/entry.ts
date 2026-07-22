@@ -104,14 +104,21 @@ Deno.serve(async (req) => {
   try {
     const base44 = createClientFromRequest(req);
     const sr = base44.asServiceRole;
+    // Compute "today" in Africa/Johannesburg so day_of_month / weekday match the
+    // schedule the user configured in local time (the Deno runtime is UTC).
+    const TZ = 'Africa/Johannesburg';
     const now = new Date();
-    const today = now.getDate();
+    const parts = new Intl.DateTimeFormat('en-US', { timeZone: TZ, day: '2-digit', weekday: 'short' }).formatToParts(now);
+    const today = parseInt(parts.find((p) => p.type === 'day').value, 10);
+    const weekday = parts.find((p) => p.type === 'weekday').value;
+    const localDateStr = new Intl.DateTimeFormat('en-CA', { timeZone: TZ, year: 'numeric', month: '2-digit', day: '2-digit' }).format(now);
 
     const schedules = await sr.entities.ReportSchedule.filter({ is_active: true }).catch(() => []);
     const due = schedules.filter((s) => {
       if (!s.recipients) return false;
+      if (s.last_sent_at === localDateStr && s.last_sent_status === 'sent') return false; // dedup same-day re-runs
       if (s.frequency === 'monthly') return (s.day_of_month || 1) === today;
-      if (s.frequency === 'weekly') return now.getDay() === 1;
+      if (s.frequency === 'weekly') return weekday === 'Mon';
       return false; // manual — never auto-sent
     });
 
@@ -154,7 +161,7 @@ Deno.serve(async (req) => {
       }
 
       await sr.entities.ReportSchedule.update(s.id, {
-        last_sent_at: now.toISOString().slice(0, 10),
+        last_sent_at: localDateStr,
         last_sent_status: ok > 0 ? 'sent' : 'failed',
         total_sent: (s.total_sent || 0) + ok
       }).catch(() => {});
