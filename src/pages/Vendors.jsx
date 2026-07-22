@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
-import { Building2, Plus, Pencil, Trash2, Search, ExternalLink, ShieldCheck, Link2, X, ChevronDown, ChevronUp } from "lucide-react";
+import { Building2, Plus, Pencil, Trash2, Search, ExternalLink, ShieldCheck, Link2, X, ChevronDown, ChevronUp, UserMinus } from "lucide-react";
+import OffboardingChecklist from "@/components/vendors/OffboardingChecklist";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
@@ -20,7 +21,10 @@ const defaultForm = {
   name: "", description: "", category: "saas", risk_level: "medium", status: "pending_review",
   contact_name: "", contact_email: "", website: "", contract_start: "", contract_end: "",
   data_access: "none", soc2_compliant: false, iso27001_compliant: false, gdpr_compliant: false,
-  linked_control_ids: [], linked_control_names: [], compliance_notes: "", notes: ""
+  linked_control_ids: [], linked_control_names: [], compliance_notes: "",
+  offboarding_status: "not_started", offboarding_date: "", offboarding_owner_name: "",
+  access_revoked_confirmed: false, credentials_revoked_confirmed: false, data_returned_confirmed: false,
+  offboarding_notes: "", notes: ""
 };
 
 const riskColors = {
@@ -101,6 +105,13 @@ export default function Vendors() {
       linked_control_ids: item.linked_control_ids || [],
       linked_control_names: item.linked_control_names || [],
       compliance_notes: item.compliance_notes || "",
+      offboarding_status: item.offboarding_status || "not_started",
+      offboarding_date: item.offboarding_date || "",
+      offboarding_owner_name: item.offboarding_owner_name || "",
+      access_revoked_confirmed: !!item.access_revoked_confirmed,
+      credentials_revoked_confirmed: !!item.credentials_revoked_confirmed,
+      data_returned_confirmed: !!item.data_returned_confirmed,
+      offboarding_notes: item.offboarding_notes || "",
       notes: item.notes || ""
     });
     setEditId(item.id); setOpen(true);
@@ -117,6 +128,19 @@ export default function Vendors() {
   };
 
   const handleDelete = async (id) => { await base44.entities.Vendor.delete(id); load(); toast({ title: "Vendor deleted" }); };
+
+  const handleOffboard = async (v) => {
+    if (!window.confirm(`Start offboarding for ${v.name}? The vendor will be marked inactive and an offboarding checklist will open.`)) return;
+    await base44.entities.Vendor.update(v.id, { status: "inactive", offboarding_status: "in_progress" });
+    setExpandedId(v.id);
+    toast({ title: "Vendor offboarding started" });
+    load();
+  };
+
+  const contractDays = (end) => {
+    if (!end) return null;
+    return Math.round((new Date(end) - new Date(new Date().toDateString())) / 86400000);
+  };
 
   const filtered = items.filter((v) => {
     const matchSearch = !search || v.name?.toLowerCase().includes(search.toLowerCase());
@@ -236,6 +260,18 @@ export default function Vendors() {
                       <h3 className="font-heading font-semibold text-foreground">{v.name}</h3>
                       <StatusBadge status={v.risk_level} />
                       <StatusBadge status={v.status} />
+                      {(() => {
+                        const d = contractDays(v.contract_end);
+                        if (d === null) return null;
+                        if (d <= 0) return <span className="text-xs bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400 px-2 py-0.5 rounded-full font-medium">Contract expired</span>;
+                        if (d <= 60) return <span className="text-xs bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400 px-2 py-0.5 rounded-full font-medium">Expires in {d}d</span>;
+                        return null;
+                      })()}
+                      {v.offboarding_status && v.offboarding_status !== "not_started" && (
+                        <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${v.offboarding_status === "completed" ? "bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400" : "bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400"}`}>
+                          Offboarding {v.offboarding_status.replace(/_/g, " ")}
+                        </span>
+                      )}
                     </div>
                     <p className="text-xs text-muted-foreground capitalize mb-2">{(v.category || "").replace(/_/g, " ")} · Data access: {(v.data_access || "none").replace(/_/g, " ")}</p>
                     <div className="flex flex-wrap items-center gap-2">
@@ -256,6 +292,7 @@ export default function Vendors() {
                         <ExternalLink className="w-3.5 h-3.5 text-muted-foreground" />
                       </a>
                     )}
+                    <Can permission="vendors:write"><button onClick={() => handleOffboard(v)} className="p-1.5 rounded hover:bg-muted" title="Start offboarding"><UserMinus className="w-3.5 h-3.5 text-amber-600" /></button></Can>
                     <Can permission="vendors:write"><button onClick={() => handleEdit(v)} className="p-1.5 rounded hover:bg-muted"><Pencil className="w-3.5 h-3.5 text-muted-foreground" /></button></Can>
                     <Can permission="vendors:delete"><button onClick={() => handleDelete(v.id)} className="p-1.5 rounded hover:bg-muted"><Trash2 className="w-3.5 h-3.5 text-destructive" /></button></Can>
                     <button onClick={() => setExpandedId(isExpanded ? null : v.id)} className="p-1.5 rounded hover:bg-muted ml-1">
@@ -308,6 +345,8 @@ export default function Vendors() {
                         <p className="text-xs text-muted-foreground">{v.description}</p>
                       </div>
                     )}
+
+                    <OffboardingChecklist vendor={v} onChanged={load} />
                   </div>
                 )}
               </div>

@@ -1,0 +1,44 @@
+{
+  "trigger": {
+    "condition": null,
+    "config": {
+      "trigger_type": "scheduled",
+      "events": [],
+      "schedule_mode": "recurring",
+      "cron_expression": "0 8 * * *",
+      "one_time_date": null,
+      "timezone": "Africa/Johannesburg",
+      "interval_value": null,
+      "interval_unit": null,
+      "interval_anchor": null,
+      "ends_type": "never",
+      "ends_on_date": null,
+      "ends_after_count": null
+    }
+  },
+  "description": "Daily scan for vendor contracts expiring within 60 days or already expired \u2014 posts a Slack alert and, for expired contracts, marks the vendor inactive, starts offboarding and creates offboarding tasks.",
+  "definition": {
+    "document": {
+      "dsl": "1.0.0",
+      "name": "vendor_contract_expiry_scanner",
+      "version": "1.0",
+      "namespace": "base44"
+    },
+    "do": [
+      {
+        "scan": {
+          "call": "invoke_backend_function",
+          "with": {
+            "function_name": "scanVendorContractExpiry"
+          },
+          "then": "end",
+          "x-base44": {
+            "title": "Scan vendor contract expiry",
+            "description": "Daily 8am SAST"
+          }
+        }
+      }
+    ]
+  },
+  "name": "Vendor Contract Expiry Scanner"
+}

@@ -110,6 +110,44 @@
       "type": "string",
       "description": "Vendor-specific compliance obligations or gaps"
     },
+    "offboarding_status": {
+      "type": "string",
+      "enum": [
+        "not_started",
+        "in_progress",
+        "completed"
+      ],
+      "default": "not_started",
+      "description": "Formal vendor offboarding lifecycle stage"
+    },
+    "offboarding_date": {
+      "type": "string",
+      "format": "date",
+      "description": "Date the offboarding was completed"
+    },
+    "offboarding_owner_name": {
+      "type": "string",
+      "description": "Person/team responsible for executing the offboarding"
+    },
+    "access_revoked_confirmed": {
+      "type": "boolean",
+      "default": false,
+      "description": "System access revoked and verified"
+    },
+    "credentials_revoked_confirmed": {
+      "type": "boolean",
+      "default": false,
+      "description": "API keys / shared credentials revoked"
+    },
+    "data_returned_confirmed": {
+      "type": "boolean",
+      "default": false,
+      "description": "Data returned or securely destroyed"
+    },
+    "offboarding_notes": {
+      "type": "string",
+      "description": "Offboarding evidence and notes"
+    },
     "notes": {
       "type": "string"
     }
