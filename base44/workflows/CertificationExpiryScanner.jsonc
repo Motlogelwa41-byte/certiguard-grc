@@ -1,0 +1,45 @@
+{
+  "description": "Daily certification lifecycle scanner \u2014 flags renewals due within 90 days, marks expired certifications, and auto-creates renewal tasks",
+  "name": "Certification Expiry Scanner",
+  "trigger": {
+    "condition": null,
+    "config": {
+      "trigger_type": "scheduled",
+      "events": [],
+      "schedule_mode": "recurring",
+      "cron_expression": "15 6 * * *",
+      "one_time_date": null,
+      "timezone": "Africa/Johannesburg",
+      "interval_value": null,
+      "interval_unit": null,
+      "interval_anchor": null,
+      "ends_type": "never",
+      "ends_on_date": null,
+      "ends_after_count": null
+    }
+  },
+  "definition": {
+    "document": {
+      "dsl": "1.0.0",
+      "name": "certification_expiry_scanner",
+      "version": "1.0",
+      "namespace": "base44"
+    },
+    "do": [
+      {
+        "scan_certs": {
+          "call": "invoke_backend_function",
+          "with": {
+            "function_name": "scanCertificationExpiry",
+            "args": {}
+          },
+          "then": "end",
+          "x-base44": {
+            "title": "Scan certification expiries and renewals",
+            "description": "Update renewal status and create renewal tasks for certifications expiring within 90 days"
+          }
+        }
+      }
+    ]
+  }
+}

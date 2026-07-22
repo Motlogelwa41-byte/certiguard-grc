@@ -1,0 +1,190 @@
+{
+  "name": "Certification",
+  "type": "object",
+  "properties": {
+    "tenant_id": {
+      "type": "string",
+      "description": "Tenant isolation key"
+    },
+    "cert_id": {
+      "type": "string",
+      "description": "Unique identifier e.g. CERT-001"
+    },
+    "name": {
+      "type": "string",
+      "description": "e.g. SOC 2 Type II 2026"
+    },
+    "standard": {
+      "type": "string",
+      "enum": [
+        "SOC 2",
+        "ISO 27001",
+        "ISO 27017",
+        "ISO 27018",
+        "PCI DSS",
+        "HIPAA",
+        "GDPR",
+        "NIST CSF",
+        "CMMC",
+        "FedRAMP",
+        "ISAE 3402",
+        "Other"
+      ],
+      "default": "SOC 2"
+    },
+    "framework_id": {
+      "type": "string"
+    },
+    "framework_name": {
+      "type": "string"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "planned",
+        "gap_assessment",
+        "implementation",
+        "audit_in_progress",
+        "remediation",
+        "certified",
+        "suspended",
+        "expired",
+        "lapsed"
+      ],
+      "default": "planned"
+    },
+    "audit_type": {
+      "type": "string",
+      "enum": [
+        "type1",
+        "type2",
+        "certification",
+        "surveillance",
+        "recertification"
+      ],
+      "default": "type2"
+    },
+    "certifying_body": {
+      "type": "string",
+      "description": "Audit firm / registrar"
+    },
+    "auditor_lead": {
+      "type": "string"
+    },
+    "scope_description": {
+      "type": "string"
+    },
+    "start_date": {
+      "type": "string",
+      "format": "date"
+    },
+    "audit_start_date": {
+      "type": "string",
+      "format": "date"
+    },
+    "audit_end_date": {
+      "type": "string",
+      "format": "date"
+    },
+    "certification_date": {
+      "type": "string",
+      "format": "date"
+    },
+    "expiry_date": {
+      "type": "string",
+      "format": "date"
+    },
+    "next_surveillance_date": {
+      "type": "string",
+      "format": "date"
+    },
+    "renewal_status": {
+      "type": "string",
+      "enum": [
+        "not_due",
+        "due_soon",
+        "in_renewal",
+        "renewed",
+        "expired"
+      ],
+      "default": "not_due"
+    },
+    "cost": {
+      "type": "number"
+    },
+    "owner_name": {
+      "type": "string"
+    },
+    "owner_id": {
+      "type": "string"
+    },
+    "linked_control_ids": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "milestone_count": {
+      "type": "number",
+      "default": 0
+    },
+    "completed_milestones": {
+      "type": "number",
+      "default": 0
+    },
+    "notes": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "name"
+  ],
+  "rls": {
+    "create": {
+      "data.tenant_id": "{{user.data.tenant_id}}"
+    },
+    "read": {
+      "$or": [
+        {
+          "data.tenant_id": "{{user.data.tenant_id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "update": {
+      "$or": [
+        {
+          "data.tenant_id": "{{user.data.tenant_id}}",
+          "created_by_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        },
+        {
+          "user_condition": {
+            "role": "compliance_officer"
+          }
+        }
+      ]
+    },
+    "delete": {
+      "$or": [
+        {
+          "data.tenant_id": "{{user.data.tenant_id}}",
+          "created_by_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    }
+  }
+}

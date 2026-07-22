@@ -74,6 +74,8 @@ import ContinuousMonitoring from '@/pages/ContinuousMonitoring';
 import ControlTests from '@/pages/ControlTests';
 import AuditorPortal from '@/pages/AuditorPortal';
 import AuditorScopeAdmin from '@/pages/AuditorScopeAdmin';
+import Certifications from '@/pages/Certifications';
+import CertificationDetail from '@/pages/CertificationDetail';
 import IndustryDashboard from '@/pages/IndustryDashboard';
 import FinancialServicesDashboard from '@/pages/FinancialServicesDashboard';
 import Connections from '@/pages/Connections';
@@ -181,6 +183,8 @@ const AuthenticatedApp = () => {
           <Route path="/control-tests" element={<ControlTests />} />
           <Route path="/auditor-portal" element={<AuditorPortal />} />
           <Route path="/auditor-scope" element={<AuditorScopeAdmin />} />
+          <Route path="/certifications" element={<Certifications />} />
+          <Route path="/certifications/:id" element={<CertificationDetail />} />
           <Route path="/industry-dashboard" element={<IndustryDashboard />} />
           <Route path="/financial-dashboard" element={<FinancialServicesDashboard />} />
           <Route path="/connections" element={<Connections />} />
