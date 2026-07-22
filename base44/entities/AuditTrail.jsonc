@@ -101,12 +101,12 @@
     },
     "update": {
       "user_condition": {
-        "role": "admin"
+        "role": "__append_only_denied__"
       }
     },
     "delete": {
       "user_condition": {
-        "role": "admin"
+        "role": "__append_only_denied__"
       }
     }
   }
