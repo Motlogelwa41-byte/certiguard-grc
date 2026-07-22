@@ -1,4 +1,5 @@
 import { createClientFromRequest } from 'npm:@base44/sdk@0.8.38';
+import { sendGmail } from "../../shared/gmailSender.ts";
 
 function esc(s) { return String(s ?? '').replace(/[&<>]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;' }[c])); }
 
@@ -95,7 +96,7 @@ function wrapEmail({ subject, customMessage, summaryHtml, auditHtml }) {
   <div class="c">${msg}
   <p style="color:#475569;font-size:14px;margin-bottom:20px">Below is your monthly compliance summary and the latest audit trail, generated automatically from live data.</p>
   ${summaryHtml}${auditHtml}
-  <p style="margin-top:24px;font-size:12px;color:#64748b">Note: email delivery is limited to registered platform users. Ensure all recipients have active accounts.</p>
+  <p style="margin-top:24px;font-size:12px;color:#64748b">This report was sent via your connected Gmail account. Manage recipients and schedule in Scheduled Reports.</p>
   </div><div class="f">Confidential — sent by CertiGuard GRC · ${new Date().toISOString().slice(0, 10)}</div></div></body></html>`;
 }
 
@@ -148,7 +149,7 @@ Deno.serve(async (req) => {
       const emails = (s.recipients || '').split(',').map((e) => e.trim()).filter((e) => e.includes('@'));
       let ok = 0, fail = 0;
       for (const email of emails) {
-        try { await sr.integrations.Core.SendEmail({ to: email, subject, body }); ok++; }
+        try { await sendGmail(base44, email, subject, body); ok++; }
         catch (e) { console.error('sendScheduledManagementReport email failed:', email, e?.message || e); fail++; }
       }
 

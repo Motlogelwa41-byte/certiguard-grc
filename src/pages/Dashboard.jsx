@@ -15,6 +15,7 @@ import ActivityFeed from "@/components/dashboard/ActivityFeed";
 import QuickActions from "@/components/dashboard/QuickActions";
 import ComplianceHeatmap from "@/components/dashboard/ComplianceHeatmap";
 import FrameworkReadinessInsights from "@/components/dashboard/FrameworkReadinessInsights";
+import ComplianceTrendChart from "@/components/dashboard/ComplianceTrendChart";
 
 const COLORS = ["#1E293B", "#10B981", "#F59E0B", "#EF4444", "#7C3AED", "#64748B"];
 
@@ -135,6 +136,11 @@ export default function Dashboard() {
         <StatCard label="Controls" value={controls.length} icon={FileCheck} color="green" trendLabel={`${passingControls} passing`} trend={passingControls > failingControls ? "up" : "down"} />
         <StatCard label="Open Risks" value={openRisks} icon={AlertTriangle} color={openRisks > 0 ? "amber" : "green"} trendLabel={`${risks.length} total`} />
         <StatCard label="Pending Tasks" value={pendingTasks} icon={CheckSquare} color={overdueTasks > 0 ? "red" : "blue"} trendLabel={overdueTasks > 0 ? `${overdueTasks} overdue` : "On track"} trend={overdueTasks > 0 ? "down" : "up"} />
+      </div>
+
+      {/* Compliance Readiness Trend */}
+      <div className="mb-8">
+        <ComplianceTrendChart />
       </div>
 
       {/* Charts Row */}
