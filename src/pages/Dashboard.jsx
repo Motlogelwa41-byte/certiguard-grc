@@ -16,6 +16,7 @@ import QuickActions from "@/components/dashboard/QuickActions";
 import ComplianceHeatmap from "@/components/dashboard/ComplianceHeatmap";
 import FrameworkReadinessInsights from "@/components/dashboard/FrameworkReadinessInsights";
 import ComplianceTrendChart from "@/components/dashboard/ComplianceTrendChart";
+import FrameworkGlobalReadiness from "@/components/dashboard/FrameworkGlobalReadiness";
 
 const COLORS = ["hsl(var(--chart-1))", "hsl(var(--chart-2))", "hsl(var(--chart-3))", "hsl(var(--chart-4))", "hsl(var(--chart-5))", "hsl(var(--muted-foreground))"];
 
@@ -136,6 +137,11 @@ export default function Dashboard() {
         <StatCard label="Controls" value={controls.length} icon={FileCheck} color="green" trendLabel={`${passingControls} passing`} trend={passingControls > failingControls ? "up" : "down"} />
         <StatCard label="Open Risks" value={openRisks} icon={AlertTriangle} color={openRisks > 0 ? "amber" : "green"} trendLabel={`${risks.length} total`} />
         <StatCard label="Pending Tasks" value={pendingTasks} icon={CheckSquare} color={overdueTasks > 0 ? "red" : "blue"} trendLabel={overdueTasks > 0 ? `${overdueTasks} overdue` : "On track"} trend={overdueTasks > 0 ? "down" : "up"} />
+      </div>
+
+      {/* Global Readiness — real-time across active frameworks */}
+      <div className="mb-8">
+        <FrameworkGlobalReadiness />
       </div>
 
       {/* Compliance Readiness Trend */}

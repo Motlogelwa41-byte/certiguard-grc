@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
-import { CheckSquare, Plus, Pencil, Trash2, Search, Calendar } from "lucide-react";
+import { CheckSquare, Plus, Pencil, Trash2, Search, Calendar, MessageSquare } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
@@ -12,6 +12,7 @@ import StatusBadge from "@/components/shared/StatusBadge";
 import EmptyState from "@/components/shared/EmptyState";
 import { useToast } from "@/components/ui/use-toast";
 import Can from "@/components/shared/Can";
+import TaskFeedbackModal from "@/components/tasks/TaskFeedbackModal";
 
 const taskTypes = ["control_implementation","evidence_collection","policy_review","risk_assessment","audit_preparation","remediation","training","vendor_review","other"];
 const defaultForm = { title: "", description: "", type: "other", status: "todo", priority: "medium", assignee_name: "", assignee_email: "", due_date: "", notes: "" };
@@ -25,6 +26,7 @@ export default function Tasks() {
   const [search, setSearch] = useState("");
   const [filterStatus, setFilterStatus] = useState("all");
   const [filterPriority, setFilterPriority] = useState("all");
+  const [feedbackTask, setFeedbackTask] = useState(null);
   const { toast } = useToast();
 
   const load = () => base44.entities.ComplianceTask.list().then((d) => { setItems(d); setLoading(false); });
@@ -153,6 +155,7 @@ export default function Tasks() {
                         <div className="flex items-center gap-0.5">
                           <Can permission="tasks:write"><button onClick={() => handleEdit(t)} className="p-1 rounded hover:bg-muted"><Pencil className="w-3 h-3 text-muted-foreground" /></button></Can>
                           <Can permission="tasks:write"><button onClick={() => handleDelete(t.id)} className="p-1 rounded hover:bg-muted"><Trash2 className="w-3 h-3 text-destructive" /></button></Can>
+                          {t.status === "completed" && <button onClick={() => setFeedbackTask(t)} className="p-1 rounded hover:bg-muted" title="Submit feedback"><MessageSquare className="w-3 h-3 text-success" /></button>}
                         </div>
                       </div>
                     </div>
@@ -211,6 +214,8 @@ export default function Tasks() {
           </div>
         </DialogContent>
       </Dialog>
+
+      <TaskFeedbackModal taskId={feedbackTask?.id} taskTitle={feedbackTask?.title} open={!!feedbackTask} onOpenChange={(o) => !o && setFeedbackTask(null)} />
     </div>
   );
 }

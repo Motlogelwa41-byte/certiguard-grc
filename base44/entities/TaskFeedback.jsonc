@@ -1,0 +1,106 @@
+{
+  "name": "TaskFeedback",
+  "type": "object",
+  "properties": {
+    "tenant_id": {
+      "type": "string",
+      "description": "Tenant isolation key"
+    },
+    "task_id": {
+      "type": "string",
+      "description": "Linked ComplianceTask ID"
+    },
+    "task_title": {
+      "type": "string"
+    },
+    "rating": {
+      "type": "number",
+      "description": "Overall experience 1-5",
+      "minimum": 1,
+      "maximum": 5
+    },
+    "difficulty": {
+      "type": "string",
+      "enum": [
+        "easy",
+        "moderate",
+        "hard"
+      ],
+      "default": "moderate"
+    },
+    "clarity": {
+      "type": "string",
+      "enum": [
+        "clear",
+        "somewhat_clear",
+        "unclear"
+      ],
+      "default": "clear"
+    },
+    "time_to_complete_hours": {
+      "type": "number",
+      "description": "Approx hours spent on the task"
+    },
+    "comments": {
+      "type": "string",
+      "description": "What worked well"
+    },
+    "suggestions": {
+      "type": "string",
+      "description": "Ideas to refine the compliance process"
+    },
+    "submitted_by_name": {
+      "type": "string"
+    },
+    "submitted_by_id": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "task_id",
+    "rating"
+  ],
+  "rls": {
+    "create": {
+      "data.tenant_id": "{{user.data.tenant_id}}"
+    },
+    "read": {
+      "$or": [
+        {
+          "data.tenant_id": "{{user.data.tenant_id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "update": {
+      "$or": [
+        {
+          "data.tenant_id": "{{user.data.tenant_id}}",
+          "created_by_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "delete": {
+      "$or": [
+        {
+          "data.tenant_id": "{{user.data.tenant_id}}",
+          "created_by_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    }
+  }
+}

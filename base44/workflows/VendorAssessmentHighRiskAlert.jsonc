@@ -1,0 +1,40 @@
+{
+  "name": "Vendor Assessment High Risk Alert",
+  "description": "Posts a Slack alert to the compliance channel the moment a vendor assessment is flagged high risk. Alert-only \u2014 critical findings are escalated separately by the Vendor Assessment Critical Finding Alert workflow.",
+  "trigger": {
+    "config": {
+      "trigger_type": "entity",
+      "entity_name": "VendorAssessment",
+      "events": [
+        "update"
+      ]
+    },
+    "condition": "${ .trigger.changed_fields | index(\"risk_level\") != null and .trigger.data.risk_level == \"high\" }"
+  },
+  "definition": {
+    "document": {
+      "dsl": "1.0.0",
+      "name": "vendor_assessment_high_risk_alert",
+      "version": "1.0",
+      "namespace": "base44"
+    },
+    "do": [
+      {
+        "send_alert": {
+          "call": "invoke_backend_function",
+          "with": {
+            "function_name": "sendSlackAlert",
+            "args": {
+              "text": ":warning: Vendor assessment flagged HIGH risk: *${ .trigger.data.vendor_name }* \u2014 \"${ .trigger.data.title }\" scored ${ .trigger.data.risk_score }/100. Review in CertiGuard."
+            }
+          },
+          "then": "end",
+          "x-base44": {
+            "title": "Post Slack alert",
+            "description": "Alert #compliance channel"
+          }
+        }
+      }
+    ]
+  }
+}
