@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
-import { Activity, Search, ChevronDown, ChevronRight, User } from "lucide-react";
+import { Activity, Search, ChevronDown, ChevronRight, User, ShieldCheck, AlertTriangle, Lock } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import PageHeader from "@/components/shared/PageHeader";
@@ -47,12 +47,14 @@ export default function ActivityLog() {
   const [entityFilter, setEntityFilter] = useState("all");
   const [actionFilter, setActionFilter] = useState("all");
   const [expanded, setExpanded] = useState(null);
+  const [integrity, setIntegrity] = useState(null);
 
   useEffect(() => {
     base44.entities.AuditTrail.list("-created_date", 1000).then((d) => {
       setLogs((d || []).filter((l) => TRACKED.includes(l.entity_type)));
       setLoading(false);
     });
+    base44.functions.invoke("verifyAuditChain", { limit: 500 }).then((r) => setIntegrity(r?.data || null)).catch(() => setIntegrity(null));
   }, []);
 
   const filtered = logs.filter((l) => {
@@ -79,6 +81,19 @@ export default function ActivityLog() {
         title="Activity Log"
         subtitle="Every change to risks, policies, and controls — who did what, and exactly what was updated."
       />
+
+      {integrity && (
+        <div className={`flex items-center gap-2 rounded-lg border px-4 py-2.5 mb-4 text-sm ${integrity.integrity === "verified" ? "border-emerald-200 bg-emerald-50 text-emerald-700" : "border-red-200 bg-red-50 text-red-700"}`}>
+          {integrity.integrity === "verified" ? <ShieldCheck className="w-4 h-4 shrink-0" /> : <AlertTriangle className="w-4 h-4 shrink-0" />}
+          <span className="font-medium">
+            Audit chain integrity: {integrity.integrity === "verified" ? "Verified" : "Compromised"}
+          </span>
+          <span className="text-xs opacity-80">
+            {integrity.verified} entries verified{integrity.broken_count > 0 ? `, ${integrity.broken_count} flagged` : ""}{integrity.legacy > 0 ? `, ${integrity.legacy} legacy` : ""} · append-only · hash-chained
+          </span>
+          <Lock className="w-3.5 h-3.5 ml-auto shrink-0" />
+        </div>
+      )}
 
       <div className="flex flex-wrap items-center gap-3 mb-6">
         <div className="relative flex-1 min-w-[200px] max-w-sm">
