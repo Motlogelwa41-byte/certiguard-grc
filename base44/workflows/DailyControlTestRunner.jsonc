@@ -1,0 +1,45 @@
+{
+  "description": "Daily automated control testing engine \u2014 runs all enabled ControlTest definitions, updates linked control status, attaches evidence, and records immutable results",
+  "name": "Daily Control Test Runner",
+  "trigger": {
+    "condition": null,
+    "config": {
+      "trigger_type": "scheduled",
+      "events": [],
+      "schedule_mode": "recurring",
+      "cron_expression": "30 6 * * *",
+      "one_time_date": null,
+      "timezone": "Africa/Johannesburg",
+      "interval_value": null,
+      "interval_unit": null,
+      "interval_anchor": null,
+      "ends_type": "never",
+      "ends_on_date": null,
+      "ends_after_count": null
+    }
+  },
+  "definition": {
+    "document": {
+      "dsl": "1.0.0",
+      "name": "daily_control_test_runner",
+      "version": "1.0",
+      "namespace": "base44"
+    },
+    "do": [
+      {
+        "run_tests": {
+          "call": "invoke_backend_function",
+          "with": {
+            "function_name": "runControlTests",
+            "args": {}
+          },
+          "then": "end",
+          "x-base44": {
+            "title": "Run all automated control tests",
+            "description": "Execute every enabled control test, update control status, and record results"
+          }
+        }
+      }
+    ]
+  }
+}

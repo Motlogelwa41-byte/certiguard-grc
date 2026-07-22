@@ -1,0 +1,165 @@
+{
+  "name": "ControlTest",
+  "type": "object",
+  "properties": {
+    "tenant_id": {
+      "type": "string",
+      "description": "Tenant isolation key"
+    },
+    "test_id": {
+      "type": "string",
+      "description": "Unique test identifier e.g. CT-001"
+    },
+    "title": {
+      "type": "string"
+    },
+    "description": {
+      "type": "string"
+    },
+    "test_key": {
+      "type": "string",
+      "description": "Registry key of the built-in automated test evaluator"
+    },
+    "service": {
+      "type": "string",
+      "enum": [
+        "identity",
+        "cloud",
+        "security",
+        "vendor",
+        "code",
+        "internal",
+        "manual"
+      ],
+      "default": "internal"
+    },
+    "linked_control_ids": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "linked_control_names": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "linked_framework_ids": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "frequency": {
+      "type": "string",
+      "enum": [
+        "daily",
+        "weekly",
+        "monthly"
+      ],
+      "default": "daily"
+    },
+    "enabled": {
+      "type": "boolean",
+      "default": true
+    },
+    "severity_on_fail": {
+      "type": "string",
+      "enum": [
+        "critical",
+        "high",
+        "medium",
+        "low"
+      ],
+      "default": "high"
+    },
+    "auto_update_control": {
+      "type": "boolean",
+      "default": true,
+      "description": "Automatically set linked control status to passing or failing on each run"
+    },
+    "auto_create_evidence": {
+      "type": "boolean",
+      "default": false,
+      "description": "Create an approved Evidence record on each passing run"
+    },
+    "owner_name": {
+      "type": "string"
+    },
+    "last_run_at": {
+      "type": "string"
+    },
+    "last_result": {
+      "type": "string",
+      "enum": [
+        "pass",
+        "fail",
+        "error",
+        "not_run"
+      ],
+      "default": "not_run"
+    },
+    "last_run_summary": {
+      "type": "string"
+    },
+    "last_fail_count": {
+      "type": "number",
+      "default": 0
+    },
+    "last_run_details": {
+      "type": "string",
+      "description": "JSON array of failing item descriptions"
+    },
+    "notes": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "title",
+    "test_key"
+  ],
+  "rls": {
+    "create": {
+      "data.tenant_id": "{{user.data.tenant_id}}"
+    },
+    "read": {
+      "$or": [
+        {
+          "data.tenant_id": "{{user.data.tenant_id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "update": {
+      "$or": [
+        {
+          "data.tenant_id": "{{user.data.tenant_id}}",
+          "created_by_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "delete": {
+      "$or": [
+        {
+          "data.tenant_id": "{{user.data.tenant_id}}",
+          "created_by_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    }
+  }
+}

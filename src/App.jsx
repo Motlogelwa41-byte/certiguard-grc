@@ -71,6 +71,7 @@ import About from '@/pages/About';
 import RegulatoryChanges from '@/pages/RegulatoryChanges';
 import DPIA from '@/pages/DPIA';
 import ContinuousMonitoring from '@/pages/ContinuousMonitoring';
+import ControlTests from '@/pages/ControlTests';
 import IndustryDashboard from '@/pages/IndustryDashboard';
 import FinancialServicesDashboard from '@/pages/FinancialServicesDashboard';
 import Connections from '@/pages/Connections';
@@ -175,6 +176,7 @@ const AuthenticatedApp = () => {
           <Route path="/regulatory-changes" element={<RegulatoryChanges />} />
           <Route path="/dpia" element={<DPIA />} />
           <Route path="/control-monitoring" element={<ContinuousMonitoring />} />
+          <Route path="/control-tests" element={<ControlTests />} />
           <Route path="/industry-dashboard" element={<IndustryDashboard />} />
           <Route path="/financial-dashboard" element={<FinancialServicesDashboard />} />
           <Route path="/connections" element={<Connections />} />

@@ -1,0 +1,101 @@
+{
+  "name": "ControlTestResult",
+  "type": "object",
+  "properties": {
+    "tenant_id": {
+      "type": "string",
+      "description": "Tenant isolation key"
+    },
+    "test_id": {
+      "type": "string",
+      "description": "Linked ControlTest id"
+    },
+    "test_title": {
+      "type": "string"
+    },
+    "test_key": {
+      "type": "string"
+    },
+    "result": {
+      "type": "string",
+      "enum": [
+        "pass",
+        "fail",
+        "error"
+      ],
+      "default": "fail"
+    },
+    "run_at": {
+      "type": "string"
+    },
+    "summary": {
+      "type": "string"
+    },
+    "fail_count": {
+      "type": "number",
+      "default": 0
+    },
+    "details": {
+      "type": "string",
+      "description": "JSON array of failing item descriptions"
+    },
+    "controls_updated": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "evidence_created": {
+      "type": "number",
+      "default": 0
+    },
+    "triggered_by": {
+      "type": "string"
+    },
+    "linked_control_ids": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    }
+  },
+  "required": [
+    "test_id",
+    "result"
+  ],
+  "rls": {
+    "create": {
+      "data.tenant_id": "{{user.data.tenant_id}}"
+    },
+    "read": {
+      "$or": [
+        {
+          "data.tenant_id": "{{user.data.tenant_id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "update": {
+      "user_condition": {
+        "role": "__append_only_denied__"
+      }
+    },
+    "delete": {
+      "$or": [
+        {
+          "data.tenant_id": "{{user.data.tenant_id}}",
+          "created_by_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    }
+  }
+}
