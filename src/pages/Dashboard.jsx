@@ -21,6 +21,8 @@ import { useAuth } from "@/lib/AuthContext";
 import RiskManagerDashboard from "@/components/dashboard/role/RiskManagerDashboard";
 import AuditorDashboard from "@/components/dashboard/role/AuditorDashboard";
 import ExecutiveDashboard from "@/components/dashboard/role/ExecutiveDashboard";
+import HRDashboard from "@/components/dashboard/role/HRDashboard";
+import DepartmentHeadDashboard from "@/components/dashboard/role/DepartmentHeadDashboard";
 
 const COLORS = ["hsl(var(--chart-1))", "hsl(var(--chart-2))", "hsl(var(--chart-3))", "hsl(var(--chart-4))", "hsl(var(--chart-5))", "hsl(var(--muted-foreground))"];
 
@@ -37,7 +39,7 @@ export default function Dashboard() {
   const role = user?.role || "user";
 
   useEffect(() => {
-    if (role === "risk_manager" || role === "auditor" || role === "viewer" || role === "user") return;
+    if (["risk_manager", "auditor", "viewer", "user", "hr", "department_head"].includes(role)) return;
     Promise.all([
       base44.entities.Framework.list(),
       base44.entities.Control.list(),
@@ -58,6 +60,8 @@ export default function Dashboard() {
 
   if (role === "risk_manager") return <RiskManagerDashboard />;
   if (role === "auditor") return <AuditorDashboard />;
+  if (role === "hr") return <HRDashboard />;
+  if (role === "department_head") return <DepartmentHeadDashboard />;
   if (role === "viewer" || role === "user") return <ExecutiveDashboard />;
 
   if (loading) {

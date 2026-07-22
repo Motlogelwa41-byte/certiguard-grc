@@ -2,64 +2,64 @@ import { useCallback, useMemo } from "react";
 import { useAuth } from "@/lib/AuthContext";
 
 // Role hierarchy (higher index = more privileges)
-const ROLE_HIERARCHY = ["user", "viewer", "auditor", "risk_manager", "compliance_officer", "admin"];
+const ROLE_HIERARCHY = ["user", "viewer", "auditor", "hr", "department_head", "risk_manager", "compliance_officer", "admin"];
 
 // Permissions required for each operation
 const PERMISSIONS = {
-  "dashboard:view": ["user", "viewer", "auditor", "risk_manager", "compliance_officer", "admin"],
+  "dashboard:view": ["user", "viewer", "auditor", "hr", "department_head", "risk_manager", "compliance_officer", "admin"],
 
-  "frameworks:read": ["user", "viewer", "auditor", "risk_manager", "compliance_officer", "admin"],
+  "frameworks:read": ["user", "viewer", "auditor", "hr", "department_head", "risk_manager", "compliance_officer", "admin"],
   "frameworks:write": ["compliance_officer", "admin"],
   "frameworks:delete": ["admin"],
 
-  "controls:read": ["user", "viewer", "auditor", "risk_manager", "compliance_officer", "admin"],
+  "controls:read": ["user", "viewer", "auditor", "hr", "department_head", "risk_manager", "compliance_officer", "admin"],
   "controls:write": ["compliance_officer", "admin"],
   "controls:delete": ["admin"],
   "controls:approve": ["auditor", "admin"],
 
-  "risks:read": ["user", "viewer", "auditor", "risk_manager", "compliance_officer", "admin"],
+  "risks:read": ["user", "viewer", "auditor", "hr", "department_head", "risk_manager", "compliance_officer", "admin"],
   "risks:write": ["risk_manager", "compliance_officer", "admin"],
   "risks:delete": ["risk_manager", "admin"],
   "risks:approve": ["risk_manager", "auditor", "admin"],
 
-  "policies:read": ["user", "viewer", "auditor", "risk_manager", "compliance_officer", "admin"],
+  "policies:read": ["user", "viewer", "auditor", "hr", "department_head", "risk_manager", "compliance_officer", "admin"],
   "policies:write": ["compliance_officer", "admin"],
   "policies:delete": ["admin"],
   "policies:approve": ["compliance_officer", "admin"],
 
-  "evidence:read": ["user", "viewer", "auditor", "risk_manager", "compliance_officer", "admin"],
+  "evidence:read": ["user", "viewer", "auditor", "hr", "department_head", "risk_manager", "compliance_officer", "admin"],
   "evidence:write": ["auditor", "compliance_officer", "admin"],
   "evidence:delete": ["compliance_officer", "admin"],
   "evidence:approve": ["auditor", "compliance_officer", "admin"],
 
-  "audits:read": ["user", "viewer", "auditor", "risk_manager", "compliance_officer", "admin"],
+  "audits:read": ["user", "viewer", "auditor", "hr", "department_head", "risk_manager", "compliance_officer", "admin"],
   "audits:write": ["auditor", "compliance_officer", "admin"],
   "audits:delete": ["admin"],
   "audits:approve": ["auditor", "admin"],
 
-  "vendors:read": ["user", "viewer", "auditor", "risk_manager", "compliance_officer", "admin"],
+  "vendors:read": ["user", "viewer", "auditor", "hr", "department_head", "risk_manager", "compliance_officer", "admin"],
   "vendors:write": ["risk_manager", "compliance_officer", "admin"],
   "vendors:delete": ["risk_manager", "admin"],
 
-  "tasks:read": ["user", "viewer", "auditor", "risk_manager", "compliance_officer", "admin"],
+  "tasks:read": ["user", "viewer", "auditor", "hr", "department_head", "risk_manager", "compliance_officer", "admin"],
   "tasks:write": ["compliance_officer", "admin"],
-  "tasks:assign": ["risk_manager", "compliance_officer", "admin"],
+  "tasks:assign": ["department_head", "risk_manager", "compliance_officer", "admin"],
 
   "admin:users": ["admin"],
   "admin:tenants": ["admin"],
   "admin:settings": ["admin"],
 
-  "reports:view": ["user", "viewer", "auditor", "risk_manager", "compliance_officer", "admin"],
+  "reports:view": ["user", "viewer", "auditor", "hr", "department_head", "risk_manager", "compliance_officer", "admin"],
   "reports:export": ["auditor", "risk_manager", "compliance_officer", "admin"],
 
   "audit_trail:view": ["auditor", "compliance_officer", "admin"],
 
-  "incidents:read": ["user", "viewer", "auditor", "risk_manager", "compliance_officer", "admin"],
+  "incidents:read": ["user", "viewer", "auditor", "hr", "department_head", "risk_manager", "compliance_officer", "admin"],
   "incidents:write": ["risk_manager", "compliance_officer", "admin"],
   "incidents:close": ["risk_manager", "admin"],
 
-  "training:read": ["user", "viewer", "auditor", "risk_manager", "compliance_officer", "admin"],
-  "training:write": ["compliance_officer", "admin"],
+  "training:read": ["user", "viewer", "auditor", "hr", "department_head", "risk_manager", "compliance_officer", "admin"],
+  "training:write": ["hr", "compliance_officer", "admin"],
 
   "notifications:send": ["risk_manager", "compliance_officer", "admin"],
 

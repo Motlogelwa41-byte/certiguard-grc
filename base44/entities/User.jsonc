@@ -9,7 +9,9 @@
         "auditor",
         "viewer",
         "compliance_officer",
-        "risk_manager"
+        "risk_manager",
+        "hr",
+        "department_head"
       ],
       "default": "user"
     },

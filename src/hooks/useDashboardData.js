@@ -14,6 +14,9 @@ export function useDashboardData() {
     auditFindings: [],
     incidents: [],
     evidence: [],
+    training: [],
+    accessReviews: [],
+    policies: [],
   });
   const [loading, setLoading] = useState(true);
 
@@ -29,8 +32,11 @@ export function useDashboardData() {
       base44.entities.AuditFinding.list(),
       base44.entities.Incident.list(),
       base44.entities.Evidence.list(),
+      base44.entities.Training.list(),
+      base44.entities.AccessReviewCampaign.list(),
+      base44.entities.Policy.list(),
     ])
-      .then(([f, c, r, t, v, a, af, inc, ev]) => {
+      .then(([f, c, r, t, v, a, af, inc, ev, tr, ar, pol]) => {
         if (cancelled) return;
         setData({
           frameworks: f,
@@ -42,6 +48,9 @@ export function useDashboardData() {
           auditFindings: af,
           incidents: inc,
           evidence: ev,
+          training: tr,
+          accessReviews: ar,
+          policies: pol,
         });
         setLoading(false);
       })
