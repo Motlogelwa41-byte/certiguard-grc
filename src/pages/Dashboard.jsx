@@ -17,6 +17,10 @@ import ComplianceHeatmap from "@/components/dashboard/ComplianceHeatmap";
 import FrameworkReadinessInsights from "@/components/dashboard/FrameworkReadinessInsights";
 import ComplianceTrendChart from "@/components/dashboard/ComplianceTrendChart";
 import FrameworkGlobalReadiness from "@/components/dashboard/FrameworkGlobalReadiness";
+import { useAuth } from "@/lib/AuthContext";
+import RiskManagerDashboard from "@/components/dashboard/role/RiskManagerDashboard";
+import AuditorDashboard from "@/components/dashboard/role/AuditorDashboard";
+import ExecutiveDashboard from "@/components/dashboard/role/ExecutiveDashboard";
 
 const COLORS = ["hsl(var(--chart-1))", "hsl(var(--chart-2))", "hsl(var(--chart-3))", "hsl(var(--chart-4))", "hsl(var(--chart-5))", "hsl(var(--muted-foreground))"];
 
@@ -29,7 +33,11 @@ export default function Dashboard() {
   const [assessments, setAssessments] = useState([]);
   const [loading, setLoading] = useState(true);
 
+  const { user } = useAuth();
+  const role = user?.role || "user";
+
   useEffect(() => {
+    if (role === "risk_manager" || role === "auditor" || role === "viewer" || role === "user") return;
     Promise.all([
       base44.entities.Framework.list(),
       base44.entities.Control.list(),
@@ -46,7 +54,11 @@ export default function Dashboard() {
       setAssessments(a);
       setLoading(false);
     });
-  }, []);
+  }, [role]);
+
+  if (role === "risk_manager") return <RiskManagerDashboard />;
+  if (role === "auditor") return <AuditorDashboard />;
+  if (role === "viewer" || role === "user") return <ExecutiveDashboard />;
 
   if (loading) {
     return (
