@@ -124,6 +124,7 @@ export const navSections = [
     items: [
       { label: "Trust Center", path: "/trust-center-settings", icon: Globe, roles: ["admin", "compliance_officer"] },
       { label: "Security", path: "/security", icon: ShieldCheck, roles: ["admin"] },
+      { label: "Platform Governance", path: "/platform-governance", icon: ShieldCheck, roles: ["admin"] },
       { label: "Users", path: "/users", icon: Users, roles: ["admin"] },
       { label: "SSO & Directory", path: "/sso", icon: KeyRound, roles: ["admin"] },
       { label: "Tenants", path: "/tenant-admin", icon: PieChart, roles: ["admin"] },
