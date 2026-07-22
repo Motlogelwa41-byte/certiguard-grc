@@ -82,6 +82,8 @@ import ControlLibraries from '@/pages/ControlLibraries';
 import BoardReport from '@/pages/BoardReport';
 import ExecutiveRiskSummary from '@/pages/ExecutiveRiskSummary';
 import CalendarSync from '@/pages/CalendarSync';
+import GuidedOnboarding from '@/pages/GuidedOnboarding';
+import AuditReadinessReport from '@/pages/AuditReadinessReport';
 
 const AuthenticatedApp = () => {
   const { isLoadingAuth, isLoadingPublicSettings, authError, navigateToLogin } = useAuth();
@@ -180,6 +182,8 @@ const AuthenticatedApp = () => {
           <Route path="/board-report" element={<BoardReport />} />
           <Route path="/executive-risk-summary" element={<ExecutiveRiskSummary />} />
           <Route path="/calendar-sync" element={<CalendarSync />} />
+          <Route path="/guided-onboarding" element={<GuidedOnboarding />} />
+          <Route path="/audit-readiness-report" element={<AuditReadinessReport />} />
         </Route>
       </Route>
       <Route path="*" element={<PageNotFound />} />

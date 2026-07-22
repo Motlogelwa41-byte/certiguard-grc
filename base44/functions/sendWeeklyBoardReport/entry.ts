@@ -1,17 +1,15 @@
-import { createClientFromRequest } from 'npm:@base44/sdk@0.8.38';
+import { createClientFromRequest } from 'npm:@base44/sdk@0.8.40';
 import { jsPDF } from 'npm:jspdf@4.2.1';
+import {
+  esc, scoreColor, pdfFooter, pdfHeader, pdfScoreHero,
+  pdfMetricGrid, pdfSectionTitle, emailShell
+} from "../../shared/reportBuilder.ts";
 
 // Weekly board report — runs every Monday via the WeeklyBoardReportEmail workflow.
 // Generates a board-ready PDF server-side, uploads it to app storage, stores a
 // ManagementReport snapshot, and emails the management team (recipients of all
 // active ReportSchedule records) a rich HTML summary with a one-click PDF
 // download link so they can review compliance status without logging in.
-//
-// NOTE: the built-in SendEmail integration does not support file attachments,
-// so the PDF is delivered as a download link inside the email (the full report
-// is also rendered as HTML in the body so recipients can always review it).
-
-function esc(s) { return String(s ?? '').replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c])); }
 
 Deno.serve(async (req) => {
   try {
@@ -33,7 +31,7 @@ Deno.serve(async (req) => {
       sr.entities.ReportSchedule.filter({ is_active: true }).catch(() => []),
     ]);
 
-    // ── Compute metrics (mirrors BoardReport.jsx) ──────────────────────────
+    // ── Compute metrics ─────────────────────────────────────────────────────
     const passing = controls.filter((c) => c.status === 'passing').length;
     const total = controls.length;
     const complianceScore = total > 0 ? Math.round((passing / total) * 100) : 0;
@@ -124,10 +122,23 @@ Deno.serve(async (req) => {
 
     // ── Email each recipient ────────────────────────────────────────────────
     const subject = `Board Compliance Report — Monday ${now.toLocaleDateString('en-ZA', { day: 'numeric', month: 'long', year: 'numeric' })}`;
+    const tablesHtml = buildBoardTablesHtml(report);
     let sent = 0, failed = 0;
     for (const email of recipients) {
       try {
-        const html = buildEmailHtml({ report, dateStr, pdfUrl, subject });
+        const html = emailShell({
+          subject: `📊 ${subject}`, dateStr, score: report.complianceScore, verdict: '',
+          metrics: [
+            ['Controls Passing', `${report.passing} / ${report.total}`, '#10b981'],
+            ['Open Risks', String(report.openRisks), report.openRisks > 5 ? '#ef4444' : '#f59e0b'],
+            ['Open Findings', String(report.openFindings), report.sevCounts.critical > 0 ? '#ef4444' : '#0f172a'],
+            ['Overdue Tasks', String(report.overdueTasks), report.overdueTasks > 0 ? '#ef4444' : '#10b981'],
+            ['Open Incidents', String(report.openIncidents), report.openIncidents > 0 ? '#ef4444' : '#10b981'],
+            ['Tasks Completed', `${report.completedTasks} / ${report.totalTasks}`, '#3b82f6'],
+          ],
+          tablesHtml, pdfUrl, pdfFilename: `Board_Compliance_Report_${dateStr}.pdf`,
+          buttonLabel: '📄 Download Board Report (PDF)',
+        });
         await sr.integrations.Core.SendEmail({ to: email, subject, body: html });
         sent++;
       } catch (e) {
@@ -161,34 +172,11 @@ function buildBoardPdf({ report, dateStr, tenantName }) {
   const pageH = doc.internal.pageSize.getHeight();
   const margin = 40;
   const contentW = pageW - margin * 2;
-  let y = 0;
+  let y = pdfHeader(doc, pageW, margin, 'Board Compliance Report', `${tenantName || 'CertiGuard GRC'}  ·  ${dateStr}  ·  Confidential`);
+  const ensureSpace = (need) => { if (y + need > pageH - 40) { doc.addPage(); y = margin; } };
 
-  const ensureSpace = (need) => {
-    if (y + need > pageH - 40) { doc.addPage(); y = margin; }
-  };
-
-  // Header band
-  doc.setFillColor(30, 58, 95);
-  doc.rect(0, 0, pageW, 64, 'F');
-  doc.setTextColor(255, 255, 255);
-  doc.setFont('helvetica', 'bold'); doc.setFontSize(16);
-  doc.text('Board Compliance Report', margin, 28);
-  doc.setFont('helvetica', 'normal'); doc.setFontSize(9);
-  doc.text(`${tenantName || 'CertiGuard GRC'}  ·  ${dateStr}  ·  Confidential`, margin, 46);
-  doc.text(`Generated ${new Date().toLocaleString('en-ZA')}`, pageW - margin, 46, { align: 'right' });
-  y = 88;
-
-  // Compliance score hero
-  const scoreColor = report.complianceScore >= 80 ? [16, 185, 129] : report.complianceScore >= 50 ? [245, 158, 11] : [239, 68, 68];
-  doc.setFillColor(...scoreColor); doc.roundedRect(margin, y, 110, 64, 8, 8, 'F');
-  doc.setTextColor(255, 255, 255);
-  doc.setFont('helvetica', 'bold'); doc.setFontSize(28);
-  doc.text(`${report.complianceScore}%`, margin + 55, y + 38, { align: 'center' });
-  doc.setFontSize(8); doc.setFont('helvetica', 'normal');
-  doc.text('Compliance Score', margin + 55, y + 52, { align: 'center' });
-
-  // Headline metrics beside the score
-  doc.setTextColor(15, 23, 42);
+  const c = scoreColor(report.complianceScore);
+  pdfScoreHero(doc, margin, y, report.complianceScore, 'Compliance Score', c);
   const metrics = [
     ['Controls Passing', `${report.passing} / ${report.total}`],
     ['Open Risks', String(report.openRisks)],
@@ -197,50 +185,34 @@ function buildBoardPdf({ report, dateStr, tenantName }) {
     ['Overdue Tasks', String(report.overdueTasks)],
     ['Tasks Completed', `${report.completedTasks} / ${report.totalTasks}`],
   ];
-  let mx = margin + 130, my = y, colW = (contentW - 130) / 3;
-  metrics.forEach((m, i) => {
-    const col = i % 3, row = Math.floor(i / 3);
-    const x = margin + 130 + col * colW, yy = y + row * 34;
-    doc.setFillColor(248, 250, 252); doc.roundedRect(x, yy, colW - 8, 28, 4, 4, 'F');
-    doc.setFont('helvetica', 'normal'); doc.setFontSize(8); doc.setTextColor(100, 116, 139);
-    doc.text(m[0], x + 8, yy + 12);
-    doc.setFont('helvetica', 'bold'); doc.setFontSize(13); doc.setTextColor(15, 23, 42);
-    doc.text(m[1], x + 8, yy + 24);
-  });
+  const colW = (contentW - 130) / 3;
+  pdfMetricGrid(doc, margin + 130, y, metrics, colW);
   y += 80;
 
   // Framework readiness
-  ensureSpace(40);
-  doc.setFont('helvetica', 'bold'); doc.setFontSize(12); doc.setTextColor(15, 23, 42);
-  doc.text('Framework Readiness', margin, y); y += 8;
-  doc.setDrawColor(226, 232, 240); doc.setLineWidth(0.5);
-  doc.line(margin, y, pageW - margin, y); y += 14;
+  y = pdfSectionTitle(doc, 'Framework Readiness', margin, pageW, y);
   const fwEntries = Object.entries(report.fwScores);
   if (fwEntries.length === 0) {
     doc.setFont('helvetica', 'normal'); doc.setFontSize(9); doc.setTextColor(148, 163, 184);
     doc.text('No frameworks configured.', margin, y); y += 14;
   } else {
-    fwEntries.forEach(([name, score]) => {
+    fwEntries.forEach(([name, sc]) => {
       ensureSpace(18);
       doc.setFont('helvetica', 'normal'); doc.setFontSize(9); doc.setTextColor(15, 23, 42);
       doc.text(String(name).slice(0, 40), margin, y);
-      // bar
       const barX = margin + 220, barW = contentW - 220 - 44;
       doc.setFillColor(226, 232, 240); doc.roundedRect(barX, y - 8, barW, 10, 2, 2, 'F');
-      const c = score >= 80 ? [16, 185, 129] : score >= 50 ? [245, 158, 11] : [239, 68, 68];
-      doc.setFillColor(...c); doc.roundedRect(barX, y - 8, Math.max(2, (barW * score) / 100), 10, 2, 2, 'F');
-      doc.setTextColor(...c); doc.setFont('helvetica', 'bold'); doc.setFontSize(9);
-      doc.text(`${score}%`, pageW - margin, y, { align: 'right' });
+      const cc = scoreColor(sc);
+      doc.setFillColor(...cc); doc.roundedRect(barX, y - 8, Math.max(2, (barW * sc) / 100), 10, 2, 2, 'F');
+      doc.setTextColor(...cc); doc.setFont('helvetica', 'bold'); doc.setFontSize(9);
+      doc.text(`${sc}%`, pageW - margin, y, { align: 'right' });
       y += 18;
     });
   }
   y += 6;
 
   // Top open risks
-  ensureSpace(40);
-  doc.setFont('helvetica', 'bold'); doc.setFontSize(12); doc.setTextColor(15, 23, 42);
-  doc.text('Top Open Risks', margin, y); y += 8;
-  doc.line(margin, y, pageW - margin, y); y += 14;
+  y = pdfSectionTitle(doc, 'Top Open Risks', margin, pageW, y);
   if (report.topRisks.length === 0) {
     doc.setFont('helvetica', 'normal'); doc.setFontSize(9); doc.setTextColor(148, 163, 184);
     doc.text('No open risks.', margin, y); y += 14;
@@ -260,10 +232,7 @@ function buildBoardPdf({ report, dateStr, tenantName }) {
   y += 6;
 
   // Findings by severity
-  ensureSpace(40);
-  doc.setFont('helvetica', 'bold'); doc.setFontSize(12); doc.setTextColor(15, 23, 42);
-  doc.text('Open Findings by Severity', margin, y); y += 8;
-  doc.line(margin, y, pageW - margin, y); y += 14;
+  y = pdfSectionTitle(doc, 'Open Findings by Severity', margin, pageW, y);
   ['critical', 'high', 'medium', 'low', 'info'].forEach((s) => {
     ensureSpace(14);
     doc.setFont('helvetica', 'normal'); doc.setFontSize(9); doc.setTextColor(15, 23, 42);
@@ -275,10 +244,7 @@ function buildBoardPdf({ report, dateStr, tenantName }) {
   y += 6;
 
   // Recommendations
-  ensureSpace(40);
-  doc.setFont('helvetica', 'bold'); doc.setFontSize(12); doc.setTextColor(15, 23, 42);
-  doc.text('Recommendations', margin, y); y += 8;
-  doc.line(margin, y, pageW - margin, y); y += 14;
+  y = pdfSectionTitle(doc, 'Recommendations', margin, pageW, y);
   report.recs.forEach((r) => {
     const lines = doc.splitTextToSize(`•  ${r}`, contentW);
     ensureSpace(lines.length * 12 + 2);
@@ -287,33 +253,17 @@ function buildBoardPdf({ report, dateStr, tenantName }) {
     y += lines.length * 12 + 4;
   });
 
-  // Footer page numbers
-  const totalPages = doc.internal.getNumberOfPages();
-  for (let i = 1; i <= totalPages; i++) {
-    doc.setPage(i);
-    doc.setTextColor(150, 150, 150); doc.setFontSize(8); doc.setFont('helvetica', 'normal');
-    doc.text(`Page ${i} of ${totalPages} · Confidential — CertiGuard GRC`, pageW / 2, pageH - 16, { align: 'center' });
-  }
-
+  pdfFooter(doc, pageW, pageH, 'Confidential — CertiGuard GRC');
   return doc.output('arraybuffer');
 }
 
-// ── Rich HTML email with embedded PDF download button ────────────────────────
-function buildEmailHtml({ report, dateStr, pdfUrl, subject }) {
-  const scoreColor = report.complianceScore >= 80 ? '#10b981' : report.complianceScore >= 50 ? '#f59e0b' : '#ef4444';
-  const pdfBtn = pdfUrl
-    ? `<a href="${esc(pdfUrl)}" download="Board_Compliance_Report_${esc(dateStr)}.pdf" style="display:inline-block;background:#1e3a5f;color:#fff;text-decoration:none;font-weight:700;font-size:14px;padding:12px 22px;border-radius:8px;margin:0 4px 8px 0">📄 Download Board Report (PDF)</a>`
-    : '';
-
-  const metric = (label, value, color = '#0f172a') =>
-    `<tr><td style="padding:9px 14px;border-bottom:1px solid #f1f5f9;font-size:13px">${label}</td>
-     <td style="padding:9px 14px;border-bottom:1px solid #f1f5f9;font-weight:700;color:${color}">${value}</td></tr>`;
-
-  const fwRows = Object.entries(report.fwScores).map(([name, score]) => {
-    const c = score >= 80 ? '#dcfce7' : score >= 50 ? '#fef3c7' : '#fee2e2';
-    const t = score >= 80 ? '#166534' : score >= 50 ? '#92400e' : '#991b1b';
+// ── Board-specific HTML tables for the email shell ───────────────────────────
+function buildBoardTablesHtml(report) {
+  const fwRows = Object.entries(report.fwScores).map(([name, sc]) => {
+    const bg = sc >= 80 ? '#dcfce7' : sc >= 50 ? '#fef3c7' : '#fee2e2';
+    const t = sc >= 80 ? '#166534' : sc >= 50 ? '#92400e' : '#991b1b';
     return `<tr><td style="padding:8px 14px;border-bottom:1px solid #f1f5f9;font-size:13px">${esc(name)}</td>
-      <td style="padding:8px 14px;border-bottom:1px solid #f1f5f9"><span style="background:${c};color:${t};padding:2px 10px;border-radius:12px;font-weight:700;font-size:12px">${score}%</span></td></tr>`;
+      <td style="padding:8px 14px;border-bottom:1px solid #f1f5f9"><span style="background:${bg};color:${t};padding:2px 10px;border-radius:12px;font-weight:700;font-size:12px">${sc}%</span></td></tr>`;
   }).join('') || '<tr><td style="padding:9px 14px;font-size:13px;color:#64748b">No frameworks configured.</td></tr>';
 
   const riskRows = report.topRisks.length ? report.topRisks.map((r) =>
@@ -322,40 +272,13 @@ function buildEmailHtml({ report, dateStr, pdfUrl, subject }) {
      <td style="padding:8px 14px;border-bottom:1px solid #f1f5f9;font-size:12px;text-transform:capitalize">${esc(r.status || '')}</td></tr>`
   ).join('') : '<tr><td style="padding:9px 14px;font-size:13px;color:#64748b">No open risks.</td></tr>';
 
-  const recList = report.recs.map((r) => `<p style="font-size:13px;margin:0 0 6px;padding-left:14px;border-left:3px solid ${scoreColor};color:#1e293b">${esc(r)}</p>`).join('');
+  const recList = report.recs.map((r) => `<p style="font-size:13px;margin:0 0 6px;padding-left:14px;border-left:3px solid ${scoreColor(report.complianceScore) ? '#10b981' : '#10b981'};color:#1e293b">${esc(r)}</p>`).join('');
 
-  return `<!DOCTYPE html><html><head><meta charset="utf-8">
-  <style>body{font-family:system-ui,sans-serif;background:#f8fafc;padding:20px;color:#1e293b}
-  .w{max-width:920px;margin:0 auto}.h{background:linear-gradient(135deg,#1e3a5f,#2563eb);color:white;padding:24px 32px;border-radius:12px 12px 0 0}
-  .h h1{font-size:20px;margin:0 0 4px}.h p{margin:0;opacity:.85;font-size:13px}
-  .c{background:white;padding:28px 32px;border:1px solid #e2e8f0;border-top:0;border-radius:0 0 12px 12px}
-  .f{text-align:center;padding:16px;font-size:11px;color:#94a3b8}</style></head><body>
-  <div class="w"><div class="h"><h1>📊 ${esc(subject)}</h1>
-  <p>Weekly board compliance report — ${new Date().toLocaleDateString('en-ZA', { weekday:'long', day:'numeric', month:'long', year:'numeric' })}</p></div>
-  <div class="c">
-    ${pdfBtn ? `<div style="margin-bottom:20px;padding:16px;background:#eff6ff;border:1px solid #bfdbfe;border-radius:8px">
-      <p style="margin:0 0 8px;font-size:13px;color:#1e3a5f"><strong>Board-ready PDF attached below</strong> — no login required to review.</p>${pdfBtn}</div>` : ''}
-    <div style="display:flex;align-items:center;gap:20px;margin-bottom:20px">
-      <div style="background:linear-gradient(135deg,#1e3a5f,#2563eb);border-radius:12px;padding:18px 26px;color:white;text-align:center">
-        <div style="font-size:36px;font-weight:900">${report.complianceScore}%</div><div style="font-size:11px;opacity:.85">Compliance Score</div>
-      </div>
-      <div style="flex:1"><table style="width:100%;border-collapse:collapse">
-        <tr style="background:#f8fafc"><th colspan="2" style="padding:10px 14px;text-align:left;font-size:13px;color:#475569;border-bottom:1px solid #e2e8f0">Key Metrics</th></tr>
-        ${metric('Controls Passing', `${report.passing} / ${report.total}`, '#10b981')}
-        ${metric('Open Risks', report.openRisks, report.openRisks > 5 ? '#ef4444' : '#f59e0b')}
-        ${metric('Open Findings', report.openFindings, report.sevCounts.critical > 0 ? '#ef4444' : '#0f172a')}
-        ${metric('Overdue Tasks', report.overdueTasks, report.overdueTasks > 0 ? '#ef4444' : '#10b981')}
-        ${metric('Open Incidents', report.openIncidents, report.openIncidents > 0 ? '#ef4444' : '#10b981')}
-        ${metric('Tasks Completed', `${report.completedTasks} / ${report.totalTasks}`, '#3b82f6')}
-      </table></div>
-    </div>
-    <table style="width:100%;border-collapse:collapse;margin-bottom:20px">
+  return `<table style="width:100%;border-collapse:collapse;margin-bottom:20px">
       <tr style="background:#f8fafc"><th colspan="2" style="padding:10px 14px;text-align:left;font-size:13px;color:#475569;border-bottom:1px solid #e2e8f0">Framework Readiness</th></tr>${fwRows}</table>
     <table style="width:100%;border-collapse:collapse;margin-bottom:20px">
       <tr style="background:#f8fafc"><th colspan="3" style="padding:10px 14px;text-align:left;font-size:13px;color:#475569;border-bottom:1px solid #e2e8f0">Top Open Risks</th></tr>
       <tr style="color:#64748b;font-size:11px"><th style="padding:6px 14px;text-align:left">Risk</th><th style="padding:6px 14px;text-align:left">Score</th><th style="padding:6px 14px;text-align:left">Status</th></tr>${riskRows}</table>
     <div style="background:#f8fafc;border-radius:8px;padding:16px 20px;margin-bottom:8px">
-      <p style="font-weight:700;font-size:13px;color:#475569;margin:0 0 10px">Recommendations</p>${recList}</div>
-    <p style="font-size:11px;color:#94a3b8;margin-top:16px">${pdfUrl ? 'The PDF report is linked above for download. ' : ''}This report is generated automatically every Monday from live data — no login required to review.</p>
-  </div><div class="f">Confidential — CertiGuard GRC · ${dateStr}</div></div></body></html>`;
+      <p style="font-weight:700;font-size:13px;color:#475569;margin:0 0 10px">Recommendations</p>${recList}</div>`;
 }

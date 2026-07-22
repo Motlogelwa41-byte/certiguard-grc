@@ -3,7 +3,7 @@ import { base44 } from "@/api/base44Client";
 import { Link } from "react-router-dom";
 import {
   Shield, FileCheck, AlertTriangle, CheckSquare,
-  FileText, ArrowRight, FileDown, CalendarClock
+  FileText, ArrowRight, FileDown, CalendarClock, Rocket, ClipboardCheck
 } from "lucide-react";
 import { PieChart, Pie, Cell, ResponsiveContainer, BarChart, Bar, XAxis, YAxis, Tooltip } from "recharts";
 import PageHeader from "@/components/shared/PageHeader";
@@ -106,6 +106,12 @@ export default function Dashboard() {
             <div className="mt-4 flex flex-wrap items-center gap-2">
               <Link to="/board-report" className="inline-flex items-center gap-1.5 text-xs font-medium text-white bg-white/10 hover:bg-white/20 border border-white/15 rounded-lg px-3 py-1.5 transition-colors">
                 <FileDown className="w-3.5 h-3.5" /> Generate PDF Report
+              </Link>
+              <Link to="/guided-onboarding" className="inline-flex items-center gap-1.5 text-xs font-medium text-white bg-emerald-500/20 hover:bg-emerald-500/30 border border-emerald-400/30 rounded-lg px-3 py-1.5 transition-colors">
+                <Rocket className="w-3.5 h-3.5" /> Guided Onboarding
+              </Link>
+              <Link to="/audit-readiness-report" className="inline-flex items-center gap-1.5 text-xs font-medium text-white bg-white/10 hover:bg-white/20 border border-white/15 rounded-lg px-3 py-1.5 transition-colors">
+                <ClipboardCheck className="w-3.5 h-3.5" /> Audit Readiness Report
               </Link>
               <Link to="/scheduled-reports" className="inline-flex items-center gap-1.5 text-xs font-medium text-white bg-white/10 hover:bg-white/20 border border-white/15 rounded-lg px-3 py-1.5 transition-colors">
                 <CalendarClock className="w-3.5 h-3.5" /> Schedule Weekly Email
