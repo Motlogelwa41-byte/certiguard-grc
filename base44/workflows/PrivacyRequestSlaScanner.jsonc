@@ -1,0 +1,45 @@
+{
+  "description": "Daily privacy/DSAR request SLA scanner \u2014 flags overdue requests and resolves cleared breaches",
+  "name": "Privacy Request SLA Scanner",
+  "trigger": {
+    "condition": null,
+    "config": {
+      "trigger_type": "scheduled",
+      "events": [],
+      "schedule_mode": "recurring",
+      "cron_expression": "30 6 * * *",
+      "one_time_date": null,
+      "timezone": "Africa/Johannesburg",
+      "interval_value": null,
+      "interval_unit": null,
+      "interval_anchor": null,
+      "ends_type": "never",
+      "ends_on_date": null,
+      "ends_after_count": null
+    }
+  },
+  "definition": {
+    "document": {
+      "dsl": "1.0.0",
+      "name": "privacy_request_sla_scanner",
+      "version": "1.0",
+      "namespace": "base44"
+    },
+    "do": [
+      {
+        "scan_sla": {
+          "call": "invoke_backend_function",
+          "with": {
+            "function_name": "handlePrivacyRequestSla",
+            "args": {}
+          },
+          "then": "end",
+          "x-base44": {
+            "title": "Scan privacy request SLAs",
+            "description": "Flag overdue DSAR/privacy requests and clear resolved breaches"
+          }
+        }
+      }
+    ]
+  }
+}

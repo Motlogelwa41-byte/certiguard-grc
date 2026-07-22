@@ -80,6 +80,9 @@ import SecurityQuestionnaires from '@/pages/SecurityQuestionnaires';
 import QuestionnaireDetail from '@/pages/QuestionnaireDetail';
 import PenTests from '@/pages/PenTests';
 import PenTestDetail from '@/pages/PenTestDetail';
+import PrivacyRequests from '@/pages/PrivacyRequests';
+import PrivacyRequestDetail from '@/pages/PrivacyRequestDetail';
+import RiskQuantification from '@/pages/RiskQuantification';
 import IndustryDashboard from '@/pages/IndustryDashboard';
 import FinancialServicesDashboard from '@/pages/FinancialServicesDashboard';
 import Connections from '@/pages/Connections';
@@ -193,6 +196,9 @@ const AuthenticatedApp = () => {
           <Route path="/questionnaires/:id" element={<QuestionnaireDetail />} />
           <Route path="/pen-tests" element={<PenTests />} />
           <Route path="/pen-tests/:id" element={<PenTestDetail />} />
+          <Route path="/privacy-requests" element={<PrivacyRequests />} />
+          <Route path="/privacy-requests/:id" element={<PrivacyRequestDetail />} />
+          <Route path="/risk-quantification" element={<RiskQuantification />} />
           <Route path="/industry-dashboard" element={<IndustryDashboard />} />
           <Route path="/financial-dashboard" element={<FinancialServicesDashboard />} />
           <Route path="/connections" element={<Connections />} />

@@ -1,0 +1,156 @@
+{
+  "name": "RiskQuantification",
+  "type": "object",
+  "properties": {
+    "tenant_id": {
+      "type": "string",
+      "description": "Tenant isolation key"
+    },
+    "risk_id": {
+      "type": "string",
+      "description": "Linked Risk id (optional)"
+    },
+    "risk_title": {
+      "type": "string"
+    },
+    "scenario_name": {
+      "type": "string",
+      "description": "Loss event scenario being quantified"
+    },
+    "threat_agent": {
+      "type": "string"
+    },
+    "tef_level": {
+      "type": "string",
+      "enum": [
+        "low",
+        "medium",
+        "high"
+      ],
+      "default": "medium"
+    },
+    "tef_value": {
+      "type": "number",
+      "description": "Threat event frequency (events/year)"
+    },
+    "vuln_pct": {
+      "type": "number",
+      "description": "Vulnerability probability 0-100"
+    },
+    "lef": {
+      "type": "number",
+      "description": "Loss event frequency (computed)"
+    },
+    "primary_loss_min": {
+      "type": "number",
+      "description": "ZAR"
+    },
+    "primary_loss_max": {
+      "type": "number",
+      "description": "ZAR"
+    },
+    "secondary_loss_min": {
+      "type": "number",
+      "description": "ZAR"
+    },
+    "secondary_loss_max": {
+      "type": "number",
+      "description": "ZAR"
+    },
+    "loss_magnitude_min": {
+      "type": "number"
+    },
+    "loss_magnitude_max": {
+      "type": "number"
+    },
+    "loss_magnitude_avg": {
+      "type": "number"
+    },
+    "ale_min": {
+      "type": "number",
+      "description": "Annualized loss expectancy min (ZAR)"
+    },
+    "ale_max": {
+      "type": "number"
+    },
+    "ale_avg": {
+      "type": "number"
+    },
+    "exposure_rating": {
+      "type": "string",
+      "enum": [
+        "low",
+        "medium",
+        "high",
+        "critical"
+      ],
+      "default": "low"
+    },
+    "analysis_date": {
+      "type": "string",
+      "format": "date"
+    },
+    "analyst_name": {
+      "type": "string"
+    },
+    "notes": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "risk_title",
+    "scenario_name"
+  ],
+  "rls": {
+    "create": {
+      "data.tenant_id": "{{user.data.tenant_id}}"
+    },
+    "read": {
+      "$or": [
+        {
+          "data.tenant_id": "{{user.data.tenant_id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "update": {
+      "$or": [
+        {
+          "data.tenant_id": "{{user.data.tenant_id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        },
+        {
+          "user_condition": {
+            "role": "compliance_officer"
+          }
+        },
+        {
+          "user_condition": {
+            "role": "risk_manager"
+          }
+        }
+      ]
+    },
+    "delete": {
+      "$or": [
+        {
+          "data.tenant_id": "{{user.data.tenant_id}}",
+          "created_by_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    }
+  }
+}
