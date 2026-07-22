@@ -13,10 +13,10 @@ import { exportElementToPDF } from "@/lib/boardReportExport";
 
 const ZONE_COLOR = (likelihood, impact) => {
   const score = likelihood * impact;
-  if (score >= 20) return { bg: "bg-red-500/20", border: "border-red-500/40", label: "Critical", text: "text-red-400", dot: "#ef4444" };
-  if (score >= 12) return { bg: "bg-orange-500/20", border: "border-orange-500/40", label: "High", text: "text-orange-400", dot: "#f97316" };
-  if (score >= 6)  return { bg: "bg-amber-500/20", border: "border-amber-500/40", label: "Medium", text: "text-amber-400", dot: "#f59e0b" };
-  return { bg: "bg-emerald-500/20", border: "border-emerald-500/40", label: "Low", text: "text-emerald-400", dot: "#10b981" };
+  if (score >= 20) return { bg: "bg-gradient-to-br from-red-500/35 via-red-600/30 to-rose-700/35", border: "border-red-400/50", glow: "shadow-lg shadow-red-500/30", label: "Critical", text: "text-red-300", dot: "#ef4444", ring: "ring-red-400", accent: "#ef4444" };
+  if (score >= 12) return { bg: "bg-gradient-to-br from-orange-400/30 via-orange-500/30 to-orange-600/35", border: "border-orange-400/50", glow: "shadow-lg shadow-orange-500/25", label: "High", text: "text-orange-300", dot: "#f97316", ring: "ring-orange-400", accent: "#f97316" };
+  if (score >= 6)  return { bg: "bg-gradient-to-br from-amber-300/25 via-amber-400/30 to-amber-500/30", border: "border-amber-400/50", glow: "shadow-md shadow-amber-500/20", label: "Medium", text: "text-amber-200", dot: "#f59e0b", ring: "ring-amber-300", accent: "#f59e0b" };
+  return { bg: "bg-gradient-to-br from-emerald-400/20 via-emerald-500/25 to-teal-600/25", border: "border-emerald-400/40", glow: "shadow-md shadow-emerald-500/20", label: "Low", text: "text-emerald-200", dot: "#10b981", ring: "ring-emerald-300", accent: "#10b981" };
 };
 
 const SCORE_BG = (score) => {
@@ -253,9 +253,17 @@ export default function RiskHeatmap() {
 
       <div className="grid grid-cols-1 xl:grid-cols-3 gap-6">
         {/* Heatmap */}
-        <div className="xl:col-span-2 bg-card rounded-xl border border-border p-6">
-          <h3 className="font-heading font-semibold text-foreground mb-1">Risk Matrix</h3>
-          <p className="text-xs text-muted-foreground mb-5">Click a cell to see the risks plotted there. Numbers = count of risks in that zone.</p>
+        <div className="xl:col-span-2 bg-card rounded-2xl border border-border p-6 shadow-sm">
+          <div className="flex items-center justify-between mb-1">
+            <div className="flex items-center gap-2">
+              <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-indigo-500/20 to-violet-500/20 flex items-center justify-center">
+                <Target className="w-4 h-4 text-indigo-400" />
+              </div>
+              <h3 className="font-heading font-semibold text-foreground">Risk Matrix</h3>
+            </div>
+            <span className="text-xs text-muted-foreground">{filtered.length} risk{filtered.length !== 1 ? "s" : ""} plotted</span>
+          </div>
+          <p className="text-xs text-muted-foreground mb-5">Click a cell to inspect the risks in that zone. Dots = risk categories.</p>
 
           <div className="flex gap-3">
             {/* Y-axis label */}
@@ -277,28 +285,35 @@ export default function RiskHeatmap() {
                     const risksHere = getRisksInCell(likelihood, impact);
                     const isSelected = selectedCell?.likelihood === likelihood && selectedCell?.impact === impact;
                     const isHovered = hoveredCell?.likelihood === likelihood && hoveredCell?.impact === impact;
+                    const hasRisks = risksHere.length > 0;
                     return (
                       <div
                         key={likelihood}
                         onClick={() => setSelectedCell(isSelected ? null : { likelihood, impact })}
                         onMouseEnter={() => setHoveredCell({ likelihood, impact })}
                         onMouseLeave={() => setHoveredCell(null)}
-                        className={`flex-1 min-h-[64px] rounded-lg border-2 flex flex-col items-center justify-center cursor-pointer transition-all duration-150
+                        className={`relative flex-1 min-h-[68px] rounded-xl border flex flex-col items-center justify-center cursor-pointer transition-all duration-200 ease-out
                           ${zone.bg} ${zone.border}
-                          ${isSelected ? "ring-2 ring-primary ring-offset-1 scale-105 shadow-lg" : ""}
-                          ${isHovered && !isSelected ? "scale-102 brightness-110" : ""}`}
+                          ${hasRisks ? zone.glow : "shadow-sm"}
+                          ${isSelected ? `ring-2 ${zone.ring} ring-offset-2 ring-offset-card scale-[1.06] z-10` : ""}
+                          ${isHovered && !isSelected ? "scale-[1.03] brightness-110 -translate-y-0.5" : ""}
+                          ${!hasRisks && !isSelected ? "opacity-70 hover:opacity-100" : ""}`}
+                        style={hasRisks && !isSelected ? { boxShadow: `0 4px 14px -4px ${zone.accent}40` } : undefined}
                       >
-                        {risksHere.length > 0 ? (
+                        {/* subtle top sheen */}
+                        <span className="absolute inset-x-1 top-1 h-1/3 rounded-t-xl bg-gradient-to-b from-white/15 to-transparent pointer-events-none" />
+                        {hasRisks ? (
                           <>
-                            <span className="text-lg font-bold text-foreground">{risksHere.length}</span>
-                            <div className="flex gap-0.5 mt-1 flex-wrap justify-center px-1">
+                            <span className="relative text-lg font-bold text-white drop-shadow-sm">{risksHere.length}</span>
+                            <div className="relative flex gap-0.5 mt-1.5 flex-wrap justify-center px-1 max-w-[90%]">
                               {risksHere.slice(0, 6).map((r, idx) => (
-                                <div key={idx} className="w-2 h-2 rounded-full" style={{ backgroundColor: CATEGORY_COLORS[r.category] || "#6b7280" }} title={r.title} />
+                                <div key={idx} className="w-2 h-2 rounded-full ring-1 ring-white/30" style={{ backgroundColor: CATEGORY_COLORS[r.category] || "#6b7280" }} title={r.title} />
                               ))}
+                              {risksHere.length > 6 && <span className="text-[9px] text-white/80 font-medium leading-none">+{risksHere.length - 6}</span>}
                             </div>
                           </>
                         ) : (
-                          <span className="text-xs text-muted-foreground/40 font-medium">{likelihood * impact}</span>
+                          <span className="relative text-xs font-semibold text-muted-foreground/50">{likelihood * impact}</span>
                         )}
                       </div>
                     );
@@ -324,20 +339,20 @@ export default function RiskHeatmap() {
           {/* Legend */}
           <div className="flex flex-wrap items-center gap-3 mt-5 pt-4 border-t border-border">
             {[
-              { label: "Critical (≥20)", bg: "bg-red-500" },
-              { label: "High (12–19)", bg: "bg-orange-500" },
-              { label: "Medium (6–11)", bg: "bg-amber-500" },
-              { label: "Low (<6)", bg: "bg-emerald-500" },
-            ].map(({ label, bg }) => (
+              { label: "Critical (≥20)", grad: "from-red-500 to-rose-600", dot: "#ef4444" },
+              { label: "High (12–19)", grad: "from-orange-400 to-orange-600", dot: "#f97316" },
+              { label: "Medium (6–11)", grad: "from-amber-400 to-amber-500", dot: "#f59e0b" },
+              { label: "Low (<6)", grad: "from-emerald-400 to-teal-500", dot: "#10b981" },
+            ].map(({ label, grad, dot }) => (
               <span key={label} className="flex items-center gap-1.5 text-xs text-muted-foreground">
-                <span className={`w-3 h-3 rounded-sm ${bg}`} />{label}
+                <span className={`w-3.5 h-3.5 rounded-md bg-gradient-to-br ${grad} shadow-sm`} />{label}
               </span>
             ))}
-            <span className="ml-auto text-xs text-muted-foreground flex items-center gap-1">
+            <span className="ml-auto text-xs text-muted-foreground flex items-center gap-1.5">
               <span className="flex gap-0.5">
-                {categories.slice(0, 4).map(c => <span key={c} className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: CATEGORY_COLORS[c] || "#6b7280" }} />)}
+                {categories.slice(0, 4).map(c => <span key={c} className="w-2.5 h-2.5 rounded-full ring-1 ring-white/20" style={{ backgroundColor: CATEGORY_COLORS[c] || "#6b7280" }} />)}
               </span>
-              Dots = categories
+              Categories
             </span>
           </div>
         </div>
