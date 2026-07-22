@@ -1,0 +1,44 @@
+{
+  "trigger": {
+    "condition": null,
+    "config": {
+      "trigger_type": "scheduled",
+      "events": [],
+      "schedule_mode": "recurring",
+      "cron_expression": "0 8 * * *",
+      "one_time_date": null,
+      "timezone": "Africa/Johannesburg",
+      "interval_value": null,
+      "interval_unit": null,
+      "interval_anchor": null,
+      "ends_type": "never",
+      "ends_on_date": null,
+      "ends_after_count": null
+    }
+  },
+  "description": "Daily scan for evidence expiring within 7 days or already expired \u2014 posts a Slack alert and creates re-collection tasks for expired items.",
+  "definition": {
+    "document": {
+      "dsl": "1.0.0",
+      "name": "evidence_expiry_scanner",
+      "version": "1.0",
+      "namespace": "base44"
+    },
+    "do": [
+      {
+        "scan": {
+          "call": "invoke_backend_function",
+          "with": {
+            "function_name": "scanExpiringEvidence"
+          },
+          "then": "end",
+          "x-base44": {
+            "title": "Scan expiring evidence",
+            "description": "Daily 8am SAST"
+          }
+        }
+      }
+    ]
+  },
+  "name": "Evidence Expiry Scanner"
+}

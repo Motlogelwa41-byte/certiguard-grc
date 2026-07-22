@@ -1,0 +1,44 @@
+{
+  "trigger": {
+    "condition": null,
+    "config": {
+      "trigger_type": "scheduled",
+      "events": [],
+      "schedule_mode": "recurring",
+      "cron_expression": "15 8 * * *",
+      "one_time_date": null,
+      "timezone": "Africa/Johannesburg",
+      "interval_value": null,
+      "interval_unit": null,
+      "interval_anchor": null,
+      "ends_type": "never",
+      "ends_on_date": null,
+      "ends_after_count": null
+    }
+  },
+  "description": "Daily scan for open security findings past their SLA \u2014 posts an escalating Slack alert and creates remediation tasks for critical/high breaches.",
+  "definition": {
+    "document": {
+      "dsl": "1.0.0",
+      "name": "sla_breach_escalation",
+      "version": "1.0",
+      "namespace": "base44"
+    },
+    "do": [
+      {
+        "escalate": {
+          "call": "invoke_backend_function",
+          "with": {
+            "function_name": "escalateSlaBreachedFindings"
+          },
+          "then": "end",
+          "x-base44": {
+            "title": "Escalate SLA breaches",
+            "description": "Daily 8:15am SAST"
+          }
+        }
+      }
+    ]
+  },
+  "name": "SLA Breach Escalation"
+}

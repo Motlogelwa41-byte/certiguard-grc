@@ -1,0 +1,44 @@
+{
+  "name": "Control Regression Alert",
+  "description": "Alerts Slack and creates a remediation task the instant a control regresses from passing to failing.",
+  "trigger": {
+    "config": {
+      "trigger_type": "entity",
+      "entity_name": "Control",
+      "events": [
+        "update"
+      ]
+    },
+    "condition": "${ .trigger.changed_fields | index(\"status\") != null and .trigger.data.status == \"failing\" and .trigger.old_data.status == \"passing\" }"
+  },
+  "definition": {
+    "document": {
+      "dsl": "1.0.0",
+      "name": "control_regression_alert",
+      "version": "1.0",
+      "namespace": "base44"
+    },
+    "do": [
+      {
+        "handle_regression": {
+          "call": "invoke_backend_function",
+          "with": {
+            "function_name": "handleControlRegression",
+            "args": {
+              "control_id": "${ .trigger.data.control_id }",
+              "title": "${ .trigger.data.title }",
+              "category": "${ .trigger.data.category }",
+              "owner_name": "${ .trigger.data.owner_name }",
+              "severity": "${ .trigger.data.severity }"
+            }
+          },
+          "then": "end",
+          "x-base44": {
+            "title": "Handle control regression",
+            "description": "Slack alert + remediation task"
+          }
+        }
+      }
+    ]
+  }
+}
