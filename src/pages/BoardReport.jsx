@@ -25,13 +25,14 @@ export default function BoardReport() {
 
   const load = async () => {
     setLoading(true);
-    const [controls, frameworks, risks, findings, tasks, incidents] = await Promise.all([
+    const [controls, frameworks, risks, findings, tasks, incidents, certs] = await Promise.all([
       base44.entities.Control.list(),
       base44.entities.Framework.list().catch(() => []),
       base44.entities.Risk.list("-created_date", 200).catch(() => []),
       base44.entities.SecurityFinding.list("-created_date", 200).catch(() => []),
       base44.entities.ComplianceTask.list("-created_date", 300).catch(() => []),
       base44.entities.Incident.list("-created_date", 100).catch(() => []),
+      base44.entities.Certification.list("-expiry_date", 200).catch(() => []),
     ]);
     const passing = (controls || []).filter((c) => c.status === "passing").length;
     const total = (controls || []).length;
@@ -45,14 +46,21 @@ export default function BoardReport() {
     openFindings.forEach((f) => { sevCounts[f.severity] = (sevCounts[f.severity] || 0) + 1; });
     const overdueTasks = (tasks || []).filter((t) => t.status === "overdue").length;
     const openIncidents = (incidents || []).filter((i) => i.status !== "closed" && i.status !== "false_positive").length;
+    const nowStr = new Date().toISOString().slice(0, 10);
+    const plus90 = new Date(Date.now() + 90 * 86400000).toISOString().slice(0, 10);
+    const certStatusCounts = {};
+    (certs || []).forEach((c) => { certStatusCounts[c.status] = (certStatusCounts[c.status] || 0) + 1; });
+    const activeCerts = (certs || []).filter((c) => c.status !== "expired" && c.status !== "lapsed" && c.status !== "suspended");
+    const expiringCerts = (certs || []).filter((c) => c.expiry_date && c.expiry_date >= nowStr && c.expiry_date <= plus90 && c.status !== "expired" && c.status !== "lapsed");
     const recs = [];
     if (total - passing > 0) recs.push(`Remediate ${total - passing} non-passing controls to lift the compliance score.`);
+    if (expiringCerts.length > 0) recs.push(`Renew ${expiringCerts.length} certification(s) expiring within 90 days.`);
     if (sevCounts.critical + sevCounts.high > 0) recs.push(`Triage ${sevCounts.critical + sevCounts.high} critical/high security findings within SLA.`);
     if (overdueTasks > 0) recs.push(`Close ${overdueTasks} overdue compliance tasks.`);
     if (openRisks.length > 0) recs.push(`Mitigate ${openRisks.length} open risks — prioritise the top 3 by score.`);
     if (openIncidents > 0) recs.push(`Resolve ${openIncidents} open security incidents.`);
     if (recs.length === 0) recs.push("All indicators within acceptable ranges — maintain current posture and monitoring cadence.");
-    setData({ passing, total, complianceScore, fwScores, topRisks, sevCounts, openFindings: openFindings.length, overdueTasks, openIncidents, openRisks: openRisks.length, completedTasks: (tasks || []).filter((t) => t.status === "completed").length, totalTasks: (tasks || []).length, recs });
+    setData({ passing, total, complianceScore, fwScores, topRisks, sevCounts, openFindings: openFindings.length, overdueTasks, openIncidents, openRisks: openRisks.length, completedTasks: (tasks || []).filter((t) => t.status === "completed").length, totalTasks: (tasks || []).length, totalCerts: (certs || []).length, activeCerts: activeCerts.length, certStatusCounts, expiringCerts, recs });
     setLoading(false);
   };
   useEffect(() => { load(); }, []);
@@ -138,6 +146,24 @@ export default function BoardReport() {
               ))}
             </tbody>
           </table>
+        </div>
+
+        <div>
+          <h2 className="text-base font-semibold mb-2">Certifications</h2>
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-3">
+            <Metric label="Total Certs" value={data.totalCerts || 0} />
+            <Metric label="Active" value={data.activeCerts || 0} valueColor="#10b981" />
+            <Metric label="Expiring ≤90d" value={data.expiringCerts?.length || 0} valueColor={(data.expiringCerts?.length || 0) > 0 ? "#f59e0b" : "#10b981"} />
+            <Metric label="Certified" value={data.certStatusCounts?.certified || 0} valueColor="#10b981" />
+          </div>
+          {data.expiringCerts?.length > 0 ? (
+            <table className="w-full text-sm border border-slate-200">
+              <thead className="bg-slate-50 text-slate-600"><tr><th className="text-left p-2 font-medium">Certification</th><th className="text-left p-2 font-medium w-40">Standard</th><th className="text-left p-2 font-medium w-32">Expiry</th><th className="text-left p-2 font-medium w-28">Renewal</th></tr></thead>
+              <tbody>
+                {data.expiringCerts.map((c) => <tr key={c.id} className="border-t border-slate-100"><td className="p-2">{c.name}</td><td className="p-2">{c.standard}</td><td className="p-2 font-semibold">{c.expiry_date}</td><td className="p-2 capitalize text-xs">{c.renewal_status}</td></tr>)}
+              </tbody>
+            </table>
+          ) : <p className="text-sm text-slate-400">No certifications expiring within 90 days.</p>}
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
