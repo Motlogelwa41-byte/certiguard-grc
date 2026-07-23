@@ -115,7 +115,7 @@ export default function CalendarSync() {
     <div className="space-y-6">
       <PageHeader
         title="Calendar Sync"
-        subtitle="Push your assigned compliance training tasks and due dates straight to your Google Calendar."
+        subtitle="Push your assigned audit and compliance tasks with their due dates straight to your Google Calendar."
       />
 
       {/* Connection card */}
