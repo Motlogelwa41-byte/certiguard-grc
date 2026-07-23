@@ -8,7 +8,7 @@ const plans = [
   {
     tier: "trial",
     name: "Free Trial",
-    description: "Explore ComplianceOS with full access for 14 days",
+    description: "Explore CertiGuard with full access for 14 days",
     priceMonthly: 0,
     priceAnnual: 0,
     color: "border-slate-300",
@@ -127,7 +127,7 @@ export default function Pricing() {
           <Shield className="w-4 h-4" /> Enterprise-Grade Multi-Tenant Security
         </div>
         <h1 className="font-display text-4xl md:text-5xl font-bold text-foreground mb-4">
-          ComplianceOS Pricing
+          CertiGuard Pricing
         </h1>
         <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
           Choose the plan that fits your organization. Every plan includes complete tenant isolation — 
@@ -216,7 +216,7 @@ export default function Pricing() {
                 disabled={checkout === plan.tier}
                 onClick={async () => {
                   if (plan.tier === "trial") { window.location.href = "/register"; return; }
-                  if (plan.tier === "enterprise") { window.location.href = "mailto:sales@complianceos.com"; return; }
+                  if (plan.tier === "enterprise") { window.location.href = "mailto:sales@certiguard.com"; return; }
                   setCheckout(plan.tier);
                   try { await startCheckout(plan.tier, billingCycle); }
                   finally { setCheckout(null); }
@@ -275,7 +275,7 @@ export default function Pricing() {
       <div className="text-center py-8 border-t border-border">
         <p className="text-sm text-muted-foreground">
           All prices in USD. Volume discounts available for 500+ users.{" "}
-          <a href="mailto:sales@complianceos.com" className="text-primary underline">Contact sales</a>
+          <a href="mailto:sales@certiguard.com" className="text-primary underline">Contact sales</a>
         </p>
       </div>
     </div>

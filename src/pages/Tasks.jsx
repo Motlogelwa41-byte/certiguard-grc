@@ -55,9 +55,9 @@ export default function Tasks() {
       <p style="margin: 4px 0; color: #64748b;"><strong>Type:</strong> ${(task.type || "").replace(/_/g, " ")}</p>
       ${task.description ? `<p style="margin: 8px 0 0 0; color: #475569;">${task.description}</p>` : ""}
     </div>
-    <p>Please log in to ComplianceOS to view and update this task.</p>
+    <p>Please log in to CertiGuard to view and update this task.</p>
     <p style="color: #94a3b8; font-size: 13px; margin-top: 24px; border-top: 1px solid #e2e8f0; padding-top: 16px;">
-      This notification was sent by ComplianceOS. Do not reply to this email.
+      This notification was sent by CertiGuard. Do not reply to this email.
     </p>
   </div>
 </div>`,

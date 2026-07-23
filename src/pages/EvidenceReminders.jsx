@@ -109,7 +109,7 @@ This is an automated reminder regarding the following compliance evidence item t
 📅 Collected: ${item.collected_date || "Not recorded"}${expiryNote}
 
 ${displayStatus === "pending_review"
-  ? "This evidence is awaiting your review. Please log in to ComplianceOS to review and approve or reject it."
+  ? "This evidence is awaiting your review. Please log in to CertiGuard to review and approve or reject it."
   : displayStatus === "rejected"
   ? "This evidence was previously rejected. Please resubmit updated documentation as soon as possible."
   : displayStatus === "expiring_soon"
@@ -118,10 +118,10 @@ ${displayStatus === "pending_review"
 
 ${item.notes ? `\nNotes: ${item.notes}` : ""}
 
-Please log in to ComplianceOS to take action.
+Please log in to CertiGuard to take action.
 
 Regards,
-ComplianceOS Automated Notification System
+CertiGuard Automated Notification System
       `.trim(),
     });
 

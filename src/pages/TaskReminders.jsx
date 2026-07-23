@@ -97,9 +97,9 @@ export default function TaskReminders() {
       <p style="margin: 4px 0; color: #64748b;"><strong>Type:</strong> ${(task.type || "").replace(/_/g, " ")}</p>
       ${task.description ? `<p style="margin: 8px 0 0 0; color: #475569;">${task.description}</p>` : ""}
     </div>
-    <p>Please log in to the ComplianceOS platform to update the task status and take action.</p>
+    <p>Please log in to the CertiGuard platform to update the task status and take action.</p>
     <p style="color: #94a3b8; font-size: 13px; margin-top: 24px; border-top: 1px solid #e2e8f0; padding-top: 16px;">
-      This reminder was sent by ComplianceOS. Do not reply to this email.
+      This reminder was sent by CertiGuard. Do not reply to this email.
     </p>
   </div>
 </div>`,
@@ -156,7 +156,7 @@ export default function TaskReminders() {
         await base44.integrations.Core.SendEmail({
           to: email,
           subject: `⚠️ Compliance Task Reminder: "${task.title}" is ${urgencyLabel}`,
-          body: `Hi ${task.assignee_name || "Team"},\n\nThis is a reminder that "${task.title}" is ${urgencyLabel}.\n\nPriority: ${task.priority}\nDue: ${task.due_date}\n\nPlease log in to ComplianceOS to take action.\n\n— ComplianceOS`,
+          body: `Hi ${task.assignee_name || "Team"},\n\nThis is a reminder that "${task.title}" is ${urgencyLabel}.\n\nPriority: ${task.priority}\nDue: ${task.due_date}\n\nPlease log in to CertiGuard to take action.\n\n— CertiGuard`,
         });
         await base44.entities.TaskReminder.create({
           task_id: task.id, task_title: task.title,

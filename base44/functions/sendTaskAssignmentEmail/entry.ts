@@ -114,7 +114,7 @@ function buildNewTaskEmail(t) {
         ${t.description ? `<p style="margin:8px 0 0;font-size:13px;color:#475569;white-space:pre-wrap">${escapeHtml(t.description)}</p>` : ""}
       </div>
       <table style="border-collapse:collapse;margin-bottom:18px">${metaTable}</table>
-      <p style="color:#64748b;font-size:12px;margin:0">Log in to ComplianceOS to view the task, update its status, and upload any required evidence. — ComplianceOS Notifications</p>
+      <p style="color:#64748b;font-size:12px;margin:0">Log in to CertiGuard to view the task, update its status, and upload any required evidence. — CertiGuard Notifications</p>
     </div>
   </div>
 </body></html>`;

@@ -60,7 +60,7 @@ export default function Notifications() {
       const me = await base44.auth.me().catch(() => ({ email: "" }));
       if (!me.email) { toast({ title: "No email available", variant: "destructive" }); setSending(null); return; }
 
-      const body = `ComplianceOS — Daily Digest
+      const body = `CertiGuard — Daily Digest
 ${"=" .repeat(40)}
 
 🔴 OVERDUE TASKS (${overdueTasks.length}):
@@ -72,9 +72,9 @@ ${upcomingTasks.map(t => `  • ${t.title} — Due: ${t.due_date} — ${t.priori
 📎 EXPIRING EVIDENCE (${expiringEvidence.length}):
 ${expiringEvidence.map(e => `  • ${e.title} — Expires: ${e.expiry_date} — ${e.control_title || "N/A"}`).join("\n") || "  None"}
 
-Please log in to ComplianceOS to address these items.`;
+Please log in to CertiGuard to address these items.`;
 
-      await base44.integrations.Core.SendEmail({ to: me.email, subject: "ComplianceOS Daily Digest", body });
+      await base44.integrations.Core.SendEmail({ to: me.email, subject: "CertiGuard Daily Digest", body });
       toast({ title: "Digest email sent" });
     } catch (e) {
       toast({ title: "Failed to send digest", description: e.message, variant: "destructive" });

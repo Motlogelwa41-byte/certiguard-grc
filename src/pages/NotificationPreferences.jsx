@@ -117,7 +117,7 @@ export default function NotificationPreferences() {
       const upcomingTasks = tasks.filter(t => t.due_date && new Date(t.due_date) >= now && new Date(t.due_date) <= new Date(now.getTime() + prefs.upcoming_tasks_days * dayMs) && t.status !== "completed");
       const expiringEvidence = evidence.filter(e => e.expiry_date && new Date(e.expiry_date) <= new Date(now.getTime() + prefs.expiring_evidence_days * dayMs));
 
-      const body = `ComplianceOS Notification Digest
+      const body = `CertiGuard Notification Digest
 ${"=".repeat(40)}
 
 🔴 OVERDUE TASKS (${overdueTasks.length}):
@@ -131,7 +131,7 @@ ${expiringEvidence.map(e => `  • ${e.title} — Expires: ${e.expiry_date}`).jo
 
 Your notification preferences: ${prefs.digest_frequency} digest`;
 
-      await base44.integrations.Core.SendEmail({ to: me.email, subject: "ComplianceOS — Test Digest", body });
+      await base44.integrations.Core.SendEmail({ to: me.email, subject: "CertiGuard — Test Digest", body });
       toast({ title: "Test digest sent to " + me.email });
     } catch (e) {
       toast({ title: "Failed", description: e.message, variant: "destructive" });

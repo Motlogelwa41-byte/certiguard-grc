@@ -95,7 +95,7 @@ function buildOverdueEmail(items) {
         </thead>
         <tbody>${rows}</tbody>
       </table>
-      <p style="color:#64748b;font-size:12px;margin:16px 0 0">Log in to ComplianceOS → Privacy Requests to action these overdue items before regulator notification thresholds are crossed. — ComplianceOS SLA Monitoring</p>
+      <p style="color:#64748b;font-size:12px;margin:16px 0 0">Log in to CertiGuard → Privacy Requests to action these overdue items before regulator notification thresholds are crossed. — CertiGuard SLA Monitoring</p>
     </div>
   </div>
   </body></html>`;
