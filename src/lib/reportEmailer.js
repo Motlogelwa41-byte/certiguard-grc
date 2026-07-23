@@ -19,7 +19,7 @@ export async function sendReportToStakeholders({ base44, schedule, reportData = 
       base44.entities.ComplianceTask.list(),
       base44.entities.Framework.list(),
     ]);
-    html = generatePostureReportHTML({ controls, risks, evidence, tasks, frameworks, generatedBy: "ComplianceOS Scheduler" });
+    html = generatePostureReportHTML({ controls, risks, evidence, tasks, frameworks, generatedBy: "CertiGuard GRC Scheduler" });
   }
 
   const emails = (schedule.recipients || "")
@@ -56,7 +56,7 @@ export async function sendReportToStakeholders({ base44, schedule, reportData = 
     </p>
     ${html.replace(/<!DOCTYPE html>[\s\S]*?<body[^>]*>/i, "").replace(/<\/body>[\s\S]*?<\/html>/i, "").replace(/<div class="page"[^>]*>/, "").replace(/<\/div>\s*$/, "")}
   </div>
-  <div class="footer">Confidential — sent by ComplianceOS · Do not forward · ${new Date().toISOString().slice(0,10)}</div>
+  <div class="footer">Confidential — sent by CertiGuard GRC · Do not forward · ${new Date().toISOString().slice(0,10)}</div>
 </div>
 </body></html>`;
 

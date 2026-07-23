@@ -44,7 +44,7 @@ Deno.serve(async (req) => {
         </tr>`
       ).join("");
 
-      const subject = `⏰ ComplianceOS — ${list.length} task(s) due in the next 7 days`;
+      const subject = `⏰ CertiGuard GRC — ${list.length} task(s) due in the next 7 days`;
       const body = `<!DOCTYPE html><html><body style="font-family:system-ui,-apple-system,sans-serif;background:#f8fafc;padding:20px;margin:0">
         <div style="max-width:640px;margin:0 auto">
           <div style="background:linear-gradient(135deg,#1e3a5f,#2563eb);color:#fff;padding:22px 26px;border-radius:12px 12px 0 0">
@@ -64,7 +64,7 @@ Deno.serve(async (req) => {
               </thead>
               <tbody>${rows}</tbody>
             </table>
-            <p style="color:#64748b;font-size:12px;margin:0">Log in to ComplianceOS to update task status and upload evidence. — ComplianceOS Automated Reminders</p>
+            <p style="color:#64748b;font-size:12px;margin:0">Log in to CertiGuard GRC to update task status and upload evidence. — CertiGuard GRC Automated Reminders</p>
           </div>
         </div>
       </body></html>`;
