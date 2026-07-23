@@ -22,7 +22,11 @@ Deno.serve(async (req) => {
     const body = await req.json().catch(() => ({}));
     const limit = Math.min(body.limit || 500, 1000);
 
-    const entries = await sr.entities.AuditTrail.list('-created_date', limit).catch(() => []);
+    // Tenant isolation: only verify the calling admin's own audit chain.
+    // Service-role reads bypass RLS, so we must filter by tenant_id explicitly
+    // to avoid leaking other tenants' audit metadata.
+    const tenant_id = (user as any)?.tenant_id || (user as any)?.data?.tenant_id || '';
+    const entries = await sr.entities.AuditTrail.filter({ tenant_id }, '-created_date', limit).catch(() => []);
     const ordered = [...entries].sort((a, b) => new Date(a.created_date) - new Date(b.created_date));
 
     let verified = 0;

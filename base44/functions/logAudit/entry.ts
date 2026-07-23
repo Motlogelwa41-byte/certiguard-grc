@@ -18,8 +18,10 @@ Deno.serve(async (req) => {
       return Response.json({ error: 'action and entity_type are required' }, { status: 400 });
     }
 
-    const tenant_id = user.tenant_id || body.tenant_id || '';
-    let tenant_name = body.tenant_name || '';
+    // Use only the authenticated user's tenant_id — never trust a client-supplied
+    // tenant_id, which could be used to attribute audit entries to another tenant.
+    const tenant_id = user.tenant_id || '';
+    let tenant_name = '';
     if (tenant_id && !tenant_name) {
       try {
         const t = await base44.asServiceRole.entities.Tenant.get(tenant_id);
