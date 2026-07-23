@@ -6,8 +6,10 @@ Deno.serve(async (req) => {
     const sr = base44.asServiceRole;
 
     const certs = await sr.entities.Certification.list("-created_date", 500);
+    const evidence = await sr.entities.Evidence.list("-created_date", 1000);
     const today = new Date();
     const todayStr = today.toISOString().slice(0, 10);
+    const expiryHorizon = today.getTime() + 60 * 86400000;
 
     let updated = 0;
     let tasksCreated = 0;
@@ -21,9 +23,41 @@ Deno.serve(async (req) => {
       if (daysToExp < 0) renewal = "expired";
       else if (daysToExp <= 90 && cert.status === "certified") renewal = "due_soon";
 
-      if (renewal !== cert.renewal_status) {
+      // Auto-compute evidence linkage via the cert's linked controls.
+      const controlIds = cert.linked_control_ids || [];
+      let linkedEvidenceCount = 0;
+      let expiringEvidenceCount = 0;
+      let coveragePct = 0;
+
+      if (controlIds.length) {
+        const coveredControls = new Set();
+        for (const ev of evidence) {
+          if (!controlIds.includes(ev.control_id)) continue;
+          if (ev.status === "approved") {
+            linkedEvidenceCount++;
+            coveredControls.add(ev.control_id);
+            if (ev.expiry_date) {
+              const evExp = new Date(ev.expiry_date).getTime();
+              if (evExp <= expiryHorizon) expiringEvidenceCount++;
+            }
+          }
+        }
+        coveragePct = Math.round((coveredControls.size / controlIds.length) * 100);
+      }
+
+      const needsEvidenceUpdate =
+        cert.linked_evidence_count !== linkedEvidenceCount ||
+        cert.evidence_coverage_pct !== coveragePct ||
+        cert.expiring_evidence_count !== expiringEvidenceCount;
+
+      if (renewal !== cert.renewal_status || needsEvidenceUpdate) {
         try {
-          await sr.entities.Certification.update(cert.id, { renewal_status: renewal });
+          await sr.entities.Certification.update(cert.id, {
+            renewal_status: renewal,
+            linked_evidence_count: linkedEvidenceCount,
+            evidence_coverage_pct: coveragePct,
+            expiring_evidence_count: expiringEvidenceCount,
+          });
           updated++;
         } catch (_) { /* ignore single failure */ }
       }
@@ -41,7 +75,7 @@ Deno.serve(async (req) => {
               status: "todo",
               due_date: cert.expiry_date,
               related_framework_id: cert.framework_id,
-              notes: `Auto-created by certification expiry scanner: ${cert.name} (${cert.standard}) expires ${cert.expiry_date}.`,
+              notes: `Auto-created by certification expiry scanner: ${cert.name} (${cert.standard}) expires ${cert.expiry_date}. Evidence coverage ${coveragePct}% (${linkedEvidenceCount} approved, ${expiringEvidenceCount} expiring within 60 days).`,
             });
             tasksCreated++;
           }

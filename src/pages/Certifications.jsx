@@ -127,6 +127,7 @@ export default function Certifications() {
                   <th className="text-left px-4 py-3">Status</th>
                   <th className="text-left px-4 py-3">Renewal</th>
                   <th className="text-left px-4 py-3">Expiry</th>
+                  <th className="text-left px-4 py-3">Evidence</th>
                   <th className="text-left px-4 py-3">Owner</th>
                   <th className="text-right px-4 py-3">Actions</th>
                 </tr>
@@ -142,6 +143,15 @@ export default function Certifications() {
                     <td className="px-4 py-3"><StatusBadge status={c.status} /></td>
                     <td className="px-4 py-3"><StatusBadge status={c.renewal_status} /></td>
                     <td className="px-4 py-3 text-xs text-muted-foreground">{c.expiry_date || "—"}</td>
+                    <td className="px-4 py-3">
+                      {(c.linked_control_ids || []).length > 0 ? (
+                        <div className="flex flex-col gap-0.5">
+                          <span className={`text-xs font-semibold ${c.evidence_coverage_pct >= 100 ? "text-emerald-600" : c.evidence_coverage_pct >= 50 ? "text-amber-600" : "text-red-600"}`}>{c.evidence_coverage_pct ?? 0}% covered</span>
+                          {c.expiring_evidence_count > 0 && <span className="text-xs text-amber-600">{c.expiring_evidence_count} expiring</span>}
+                          <span className="text-xs text-muted-foreground">{c.linked_evidence_count ?? 0} approved</span>
+                        </div>
+                      ) : <span className="text-xs text-muted-foreground">—</span>}
+                    </td>
                     <td className="px-4 py-3 text-muted-foreground">{c.owner_name || "—"}</td>
                     <td className="px-4 py-3">
                       <div className="flex justify-end gap-1">

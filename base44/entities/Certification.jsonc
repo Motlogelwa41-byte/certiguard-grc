@@ -124,6 +124,21 @@
         "type": "string"
       }
     },
+    "linked_evidence_count": {
+      "type": "number",
+      "default": 0,
+      "description": "Approved evidence records linked via the certification's controls (auto-computed by the expiry scanner)"
+    },
+    "evidence_coverage_pct": {
+      "type": "number",
+      "default": 0,
+      "description": "Percentage of linked controls backed by approved evidence (auto-computed)"
+    },
+    "expiring_evidence_count": {
+      "type": "number",
+      "default": 0,
+      "description": "Approved evidence linked to this cert that expires within 60 days (auto-computed)"
+    },
     "milestone_count": {
       "type": "number",
       "default": 0
