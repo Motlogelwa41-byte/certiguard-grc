@@ -12,18 +12,17 @@
     "type": {
       "type": "string",
       "enum": [
-        "okta",
         "azure_ad",
         "google_workspace",
         "onelogin",
         "jumpcloud",
         "other"
       ],
-      "default": "okta"
+      "default": "azure_ad"
     },
     "scim_base_url": {
       "type": "string",
-      "description": "SCIM 2.0 endpoint base (e.g. https://tenant.okta.com/scim/v2)"
+      "description": "SCIM 2.0 endpoint base (e.g. https://tenant.scim.example/scim/v2)"
     },
     "api_base_url": {
       "type": "string"

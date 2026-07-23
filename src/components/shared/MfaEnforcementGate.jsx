@@ -63,7 +63,7 @@ export default function MfaEnforcementGate({ children }) {
         </Button>
       </div>
       <p className="text-xs text-slate-600 mt-6 max-w-sm text-center">
-        This gate blocks all platform access until MFA is enrolled. Enforce MFA at your identity provider (Okta / Azure AD / Google) for full protection.
+        This gate blocks all platform access until MFA is enrolled. Enforce MFA at your identity provider (Azure AD / Google) for full protection.
       </p>
     </div>
   );

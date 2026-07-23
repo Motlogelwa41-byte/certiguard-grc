@@ -79,7 +79,7 @@ Deno.serve(async (req) => {
 function secretForService(service) {
   const map = {
     aws: "AWS_ACCESS_KEY_ID", gcp: "GCP_SERVICE_ACCOUNT_JSON", azure: "AZURE_TENANT_ID",
-    okta: "OKTA_API_TOKEN", datadog: "DATADOG_API_KEY", jamf: "JAMF_API_TOKEN",
+    datadog: "DATADOG_API_KEY", jamf: "JAMF_API_TOKEN",
     kandji: "KANDJI_API_TOKEN", crowdstrike: "FALCON_CLIENT_ID", splunk: "SPLUNK_API_TOKEN",
     jira: "JIRA_API_TOKEN",
   };

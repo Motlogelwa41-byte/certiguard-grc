@@ -40,7 +40,7 @@ Users must report suspected security incidents or policy violations to the Platf
     summary: "Mandates least-privilege RBAC, MFA/SSO, and secure session management across the Platform.",
     content: `Access to the Platform is governed by role-based access control (RBAC) with least-privilege principles. Roles include admin, compliance officer, risk manager, auditor, and user; each role is granted only the permissions necessary for its function.
 
-Multi-factor authentication (MFA) and single sign-on (SSO) via enterprise identity providers (Okta, Azure AD, Google Workspace) are enforced for administrative access. Session tokens are cryptographically secured with Secure, HttpOnly, SameSite=Strict cookies and expire automatically.
+Multi-factor authentication (MFA) and single sign-on (SSO) via enterprise identity providers (Azure AD, Google Workspace) are enforced for administrative access. Session tokens are cryptographically secured with Secure, HttpOnly, SameSite=Strict cookies and expire automatically.
 
 Privileged actions — user management, tenant configuration, policy approval, and audit log access — are restricted to administrators and are themselves logged in the tamper-evident audit trail. Access reviews are conducted at least quarterly to certify that permissions remain appropriate.`,
   },

@@ -33,7 +33,7 @@ export default function SecurityPolicyBanner() {
       <div className="px-6 lg:px-8 py-2.5 flex items-center gap-3 text-sm">
         <ShieldAlert className="w-4 h-4 text-amber-600 dark:text-amber-400 shrink-0" />
         <span className="text-amber-900 dark:text-amber-200 flex-1">
-          <strong>Security policy:</strong> Enforce multi-factor authentication (MFA) for all admin accounts via your Identity Provider (Okta / Azure AD) to meet compliance requirements.
+          <strong>Security policy:</strong> Enforce multi-factor authentication (MFA) for all admin accounts via your Identity Provider (Azure AD / Google Workspace) to meet compliance requirements.
         </span>
         <Link
           to="/sso"

@@ -17,7 +17,6 @@
         "gcp",
         "azure",
         "github",
-        "okta",
         "google_workspace",
         "google_drive",
         "datadog",

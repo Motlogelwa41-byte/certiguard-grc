@@ -11,7 +11,6 @@ import StatusBadge from "@/components/shared/StatusBadge";
 import { Plus, RefreshCw, Trash2, KeyRound, Users, ShieldCheck, AlertCircle, Loader2 } from "lucide-react";
 
 const TYPES = [
-  { value: "okta", label: "Okta" },
   { value: "azure_ad", label: "Microsoft Entra ID" },
   { value: "google_workspace", label: "Google Workspace" },
   { value: "onelogin", label: "OneLogin" },
@@ -19,7 +18,7 @@ const TYPES = [
   { value: "other", label: "Other (SCIM 2.0)" },
 ];
 
-const emptyForm = { name: "", type: "okta", scim_base_url: "", api_base_url: "", token_secret: "", saml_entrypoint: "", saml_metadata_url: "", saml_certificate: "", sso_issuer: "", domains: "", provision_new_users: false };
+const emptyForm = { name: "", type: "azure_ad", scim_base_url: "", api_base_url: "", token_secret: "", saml_entrypoint: "", saml_metadata_url: "", saml_certificate: "", sso_issuer: "", domains: "", provision_new_users: false };
 
 export default function SSOSettings() {
   const [idps, setIdps] = useState([]);
@@ -95,7 +94,7 @@ export default function SSOSettings() {
       </div>
 
       <div className="space-y-3 mb-8">
-        {idps.length === 0 && <div className="bg-card rounded-2xl border border-border p-8 text-center"><KeyRound className="w-10 h-10 text-muted-foreground mx-auto mb-3" /><p className="text-sm text-muted-foreground mb-4">No identity providers configured. Add Okta, Entra ID, or Google Workspace to enable SSO and SCIM provisioning.</p><Button size="sm" onClick={openNew}><Plus className="w-4 h-4 mr-1" /> Add your first provider</Button></div>}
+        {idps.length === 0 && <div className="bg-card rounded-2xl border border-border p-8 text-center"><KeyRound className="w-10 h-10 text-muted-foreground mx-auto mb-3" /><p className="text-sm text-muted-foreground mb-4">No identity providers configured. Add Entra ID, Google Workspace, or another SCIM 2.0 provider to enable SSO and SCIM provisioning.</p><Button size="sm" onClick={openNew}><Plus className="w-4 h-4 mr-1" /> Add your first provider</Button></div>}
         {idps.map((idp) => (
           <div key={idp.id} className="bg-card rounded-2xl border border-border p-5">
             <div className="flex items-start justify-between mb-3">
@@ -163,11 +162,11 @@ export default function SSOSettings() {
           <DialogHeader><DialogTitle>{editing ? "Edit Provider" : "Add Identity Provider"}</DialogTitle></DialogHeader>
           <div className="space-y-4">
             <div className="grid grid-cols-2 gap-3">
-              <div><Label>Provider name</Label><Input value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} placeholder="Corporate Okta" /></div>
+              <div><Label>Provider name</Label><Input value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} placeholder="Corporate Identity Provider" /></div>
               <div><Label>Type</Label><Select value={form.type} onValueChange={(v) => setForm({ ...form, type: v })}><SelectTrigger><SelectValue /></SelectTrigger><SelectContent>{TYPES.map((t) => <SelectItem key={t.value} value={t.value}>{t.label}</SelectItem>)}</SelectContent></Select></div>
             </div>
-            <div><Label>SCIM base URL</Label><Input value={form.scim_base_url} onChange={(e) => setForm({ ...form, scim_base_url: e.target.value })} placeholder="https://tenant.okta.com/scim/v2" /></div>
-            <div><Label>Token secret name</Label><Input value={form.token_secret} onChange={(e) => setForm({ ...form, token_secret: e.target.value })} placeholder="OKTA_SCIM_TOKEN" /><p className="text-xs text-muted-foreground mt-1">Add this secret in Dashboard → Secrets with the SCIM bearer token value.</p></div>
+            <div><Label>SCIM base URL</Label><Input value={form.scim_base_url} onChange={(e) => setForm({ ...form, scim_base_url: e.target.value })} placeholder="https://tenant.scim.example/scim/v2" /></div>
+            <div><Label>Token secret name</Label><Input value={form.token_secret} onChange={(e) => setForm({ ...form, token_secret: e.target.value })} placeholder="SCIM_BEARER_TOKEN" /><p className="text-xs text-muted-foreground mt-1">Add this secret in Dashboard → Secrets with the SCIM bearer token value.</p></div>
             <div><Label>SSO domains (comma-separated)</Label><Input value={form.domains} onChange={(e) => setForm({ ...form, domains: e.target.value })} placeholder="company.com, subsidiary.com" /></div>
             <div className="grid grid-cols-2 gap-3">
               <div><Label>SAML metadata URL</Label><Input value={form.saml_metadata_url} onChange={(e) => setForm({ ...form, saml_metadata_url: e.target.value })} /></div>
