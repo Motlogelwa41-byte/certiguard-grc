@@ -15,13 +15,12 @@ async function sha256Hex(data) {
 }
 function hex(bytes) { return [...bytes].map((b) => b.toString(16).padStart(2, '0')).join(''); }
 
-async function awsGet(host, uri, query, region, service, accessKey, secretKey, sessionToken) {
+async function awsGet(host, uri, query, region, service, accessKey, secretKey) {
   const t = new Date();
   const amzDate = t.toISOString().replace(/[:-]|\.\d{3}/g, '');
   const dateStamp = amzDate.slice(0, 8);
   const payloadHash = await sha256Hex('');
   const hdrs = [['host', host], ['x-amz-content-sha256', payloadHash], ['x-amz-date', amzDate]];
-  if (sessionToken) hdrs.push(['x-amz-security-token', sessionToken]);
   hdrs.sort((a, b) => a[0].localeCompare(b[0]));
   const canonicalHeaders = hdrs.map((h) => `${h[0]}:${h[1]}\n`).join('');
   const signedHeaders = hdrs.map((h) => h[0]).join(';');
@@ -36,7 +35,6 @@ async function awsGet(host, uri, query, region, service, accessKey, secretKey, s
   const signature = hex(await hmac(kSigning, stringToSign));
   const auth = `AWS4-HMAC-SHA256 Credential=${accessKey}/${credentialScope}, SignedHeaders=${signedHeaders}, Signature=${signature}`;
   const headers = { host, 'x-amz-content-sha256': payloadHash, 'x-amz-date': amzDate, Authorization: auth };
-  if (sessionToken) headers['x-amz-security-token'] = sessionToken;
   return await fetch(`https://${host}${uri}?${canonicalQuery}`, { method: 'GET', headers });
 }
 
@@ -59,11 +57,10 @@ Deno.serve(async (req) => {
     try { region = JSON.parse(conn.config || '{}').region || region; } catch {}
     const accessKey = Deno.env.get('AWS_ACCESS_KEY_ID');
     const secretKey = Deno.env.get('AWS_SECRET_ACCESS_KEY');
-    const sessionToken = Deno.env.get('AWS_SESSION_TOKEN') || '';
     if (!accessKey || !secretKey) return Response.json({ error: 'AWS credentials not configured. Add AWS_ACCESS_KEY_ID and AWS_SECRET_ACCESS_KEY secrets.' }, { status: 400 });
 
     const host = `securityhub.${region}.amazonaws.com`;
-    const res = await awsGet(host, '/findings', { MaxResults: '100' }, region, 'securityhub', accessKey, secretKey, sessionToken);
+    const res = await awsGet(host, '/findings', { MaxResults: '100' }, region, 'securityhub', accessKey, secretKey);
     if (!res.ok) {
       const txt = await res.text();
       await base44.entities.Connection.update(conn.id, { last_sync_at: new Date().toISOString(), last_status: 'error', last_error: `Security Hub ${res.status}` }).catch(() => {});
