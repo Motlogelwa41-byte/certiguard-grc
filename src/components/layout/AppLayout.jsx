@@ -5,12 +5,14 @@ import GlobalSearch from "@/components/shared/GlobalSearch";
 import SubscriptionGate from "@/components/shared/SubscriptionGate";
 import RoleGuard from "@/components/shared/RoleGuard";
 import { Search } from "lucide-react";
-import useIdleTimeout from "@/hooks/useIdleTimeout";
+import useIdleLock from "@/hooks/useIdleLock";
+import ScreenLockOverlay from "@/components/shared/ScreenLockOverlay";
+import MfaEnforcementGate from "@/components/shared/MfaEnforcementGate";
 import SecurityPolicyBanner from "@/components/shared/SecurityPolicyBanner";
 
 export default function AppLayout() {
   const [searchOpen, setSearchOpen] = useState(false);
-  useIdleTimeout();
+  const locked = useIdleLock();
 
   useEffect(() => {
     const handler = (e) => {
@@ -24,6 +26,7 @@ export default function AppLayout() {
   }, []);
 
   return (
+    <MfaEnforcementGate>
     <div className="min-h-screen bg-background">
       <Sidebar />
       <main className="ml-16 lg:ml-60 transition-all duration-300">
@@ -48,6 +51,8 @@ export default function AppLayout() {
         </div>
       </main>
       <GlobalSearch open={searchOpen} onOpenChange={setSearchOpen} />
+      {locked && <ScreenLockOverlay />}
     </div>
+    </MfaEnforcementGate>
   );
 }
