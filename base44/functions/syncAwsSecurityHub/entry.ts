@@ -52,6 +52,9 @@ Deno.serve(async (req) => {
       conn = (awsConns && awsConns[0]) || null;
     }
     if (!conn) return Response.json({ error: 'No AWS connection found. Create an AWS connection in Connections first.' }, { status: 404 });
+    if (conn.status === 'disconnected' || conn.auto_collect === false) {
+      return Response.json({ ok: true, skipped: true, reason: 'AWS connection disabled by admin' });
+    }
 
     let region = 'us-east-1';
     try { region = JSON.parse(conn.config || '{}').region || region; } catch {}
