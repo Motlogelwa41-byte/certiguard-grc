@@ -33,24 +33,43 @@ export function TenantProvider({ children }) {
       const me = await base44.auth.me().catch(() => null);
       if (!me) { setLoading(false); return; }
 
-      // Stamp tenant context from the user profile so creates are isolated
-      setTenantContext(me.tenant_id);
+      const stampedTenantId = me.tenant_id || me.data?.tenant_id;
+      let userTenant = null;
+      let tenantId = stampedTenantId || null;
 
-      // Resolve the tenant record (admin can read it; non-admins rely on user.tenant_id only)
-      const tenants = await base44.entities.Tenant.filter({ is_active: true }).catch(() => []);
-      const userTenant = tenants.find((t) => t.admin_email === me.email) || tenants[0];
+      // 1. Read the tenant linked to the user profile (RLS allows id match)
+      if (tenantId) {
+        userTenant = await base44.entities.Tenant.get(tenantId).catch(() => null);
+      }
 
-      // Self-heal: assign this user to the tenant if their profile is missing tenant_id
-      if (userTenant && !me.tenant_id) {
-        try {
-          await base44.auth.updateMe({ tenant_id: userTenant.id });
-          setTenantContext(userTenant.id);
-        } catch (e) {
-          // non-admins may not be able to updateMe; ignore — tenant_id may already be set
+      // 2. Otherwise resolve by admin_email (user is the workspace owner)
+      if (!userTenant) {
+        const byEmail = await base44.entities.Tenant.filter({ admin_email: me.email }).catch(() => []);
+        if (byEmail.length > 0) {
+          userTenant = byEmail[0];
+          tenantId = byEmail[0].id;
         }
       }
 
-      if (userTenant) {
+      // 3. No tenant at all — provision a new 14-day trial workspace
+      if (!userTenant) {
+        try {
+          const res = await base44.functions.invoke("provisionTenant", {});
+          if (res?.data?.tenant_id) {
+            userTenant = res.data.tenant;
+            tenantId = res.data.tenant_id;
+          }
+        } catch (e) {
+          // Provisioning failed — fall through to trial defaults below
+        }
+      }
+
+      // Stamp the user profile + isolation context once we have a tenant
+      if (userTenant && tenantId) {
+        setTenantContext(tenantId);
+        if (!stampedTenantId) {
+          await base44.auth.updateMe({ tenant_id: tenantId }).catch(() => {});
+        }
         const tier = userTenant.subscription_tier || "trial";
         setTenant({
           ...userTenant,
