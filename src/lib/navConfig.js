@@ -138,6 +138,7 @@ export const navSections = [
       { label: "Security", path: "/security", icon: ShieldCheck, roles: ["admin"] },
       { label: "Platform Governance", path: "/platform-governance", icon: ShieldCheck, roles: ["admin"] },
       { label: "Users", path: "/users", icon: Users, roles: ["admin"] },
+      { label: "Security Command Center", path: "/security-command-center", icon: Shield, roles: ["admin", "compliance_officer", "risk_manager", "auditor"] },
       { label: "SSO & Directory", path: "/sso", icon: KeyRound, roles: ["admin"] },
       { label: "Tenants", path: "/tenant-admin", icon: PieChart, roles: ["admin"] },
       { label: "Billing", path: "/billing", icon: CreditCard, roles: ["admin"] },
