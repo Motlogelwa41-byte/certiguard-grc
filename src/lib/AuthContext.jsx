@@ -103,13 +103,11 @@ export const AuthProvider = ({ children }) => {
       setIsLoadingAuth(false);
       setIsAuthenticated(false);
       setAuthChecked(true);
-      
-      // If user auth fails, it might be an expired token
+
+      // If the token is expired/invalid, clear it and reload so the login
+      // page is reachable instead of looping on a stale session.
       if (error.status === 401 || error.status === 403) {
-        setAuthError({
-          type: 'auth_required',
-          message: 'Authentication required'
-        });
+        base44.auth.logout();
       }
     }
   };
