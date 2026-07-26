@@ -4,7 +4,7 @@ import {
   ShieldCheck, FileSearch, Brain, Play, FileSpreadsheet, FileDown, BarChart3, LineChart,
   History, ShieldAlert, GraduationCap, Calendar, Bell, Users, Copy, SlidersHorizontal,
   Target, Upload, Send, Globe, Users2, MapPin, Zap, ListChecks, BellRing,
-  PieChart,   Radar, Landmark, BarChart2, Network, GitCompare, Sparkles, CreditCard, Gauge, Info, ScrollText, Activity, Factory, Plug, UserCheck, Wand2, KeyRound, Bug, Library, Presentation, TrendingDown, CalendarCheck, Rocket, ClipboardCheck, FlaskRound, Award, FileQuestion, FlaskConical, Lock, Calculator
+  PieChart,   Radar, Landmark, BarChart2, Network, GitCompare, Sparkles, CreditCard, Gauge, Info, ScrollText, Activity, Factory, Plug, UserCheck, Wand2, KeyRound, Bug, Library, Presentation, TrendingDown, CalendarCheck, Rocket, ClipboardCheck, FlaskRound, Award, FileQuestion, FlaskConical, Lock, Calculator, Server
 } from "lucide-react";
 
 // Roles: admin, compliance_officer, risk_manager, auditor, user
@@ -15,6 +15,7 @@ export const navSections = [
     items: [
       { label: "Dashboard", path: "/", icon: LayoutDashboard, roles: ["admin", "compliance_officer", "risk_manager", "auditor", "user"] },
       { label: "About CertiGuard", path: "/about", icon: Info, roles: ["admin", "compliance_officer", "risk_manager", "auditor", "user"] },
+      { label: "Architecture", path: "/architecture", icon: Server, roles: ["admin", "compliance_officer", "risk_manager", "auditor"] },
       { label: "Posture Dashboard", path: "/posture", icon: BarChart3, roles: ["admin", "compliance_officer", "risk_manager", "auditor"] },
       { label: "GRC Education", path: "/grc-education", icon: Gauge, roles: ["admin", "compliance_officer", "risk_manager", "auditor", "user"] },
     ]

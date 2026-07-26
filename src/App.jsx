@@ -101,6 +101,7 @@ import PlatformGovernance from '@/pages/PlatformGovernance';
 import GrcEducation from '@/pages/GrcEducation';
 import ExecutiveRiskReport from '@/pages/ExecutiveRiskReport';
 import ComplianceReadinessReport from '@/pages/ComplianceReadinessReport';
+import Architecture from '@/pages/Architecture';
 
 const AuthenticatedApp = () => {
   const { isLoadingAuth, isLoadingPublicSettings, authError, navigateToLogin } = useAuth();
@@ -218,6 +219,7 @@ const AuthenticatedApp = () => {
           <Route path="/grc-education" element={<GrcEducation />} />
           <Route path="/executive-risk-report" element={<ExecutiveRiskReport />} />
           <Route path="/compliance-readiness-report" element={<ComplianceReadinessReport />} />
+          <Route path="/architecture" element={<Architecture />} />
         </Route>
       </Route>
       <Route path="*" element={<PageNotFound />} />
