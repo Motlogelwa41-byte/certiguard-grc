@@ -1,6 +1,5 @@
-import React, { useState, useEffect, useMemo } from "react";
-import { Link } from "react-router-dom";
-import { Check, X, Shield, Zap, Building2, ArrowRight, Star } from "lucide-react";
+import React, { useState } from "react";
+import { Check, X, Shield, Zap, Building2, ArrowRight, Star, Lock, Sparkles } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { startCheckout } from "@/lib/billing";
 
@@ -8,36 +7,36 @@ const plans = [
   {
     tier: "trial",
     name: "Free Trial",
-    description: "Explore CertiGuard with full access for 14 days",
+    description: "Full access for 14 days — no card required.",
     priceMonthly: 0,
     priceAnnual: 0,
     color: "border-slate-300",
     bg: "bg-slate-50",
     badge: null,
+    cta: "Start Free Trial",
     features: [
-      { name: "Full Professional tier features", included: true },
-      { name: "3 users", included: true },
+      { name: "Full Professional features", included: true },
+      { name: "3 users included", included: true },
       { name: "2 compliance frameworks", included: true },
-      { name: "Dashboard & basic analytics", included: true },
-      { name: "14-day access", included: true },
+      { name: "AI Compliance Auditor", included: true, highlight: true },
+      { name: "Dashboard & analytics", included: true },
+      { name: "14-day full access", included: true },
       { name: "Email support", included: true },
-      { name: "AI Auditor", included: true },
       { name: "Custom integrations", included: false },
       { name: "SSO / SAML", included: false },
-      { name: "White-label", included: false },
       { name: "Dedicated support", included: false },
-      { name: "API access", included: false },
     ]
   },
   {
     tier: "starter",
     name: "Starter",
-    description: "Essential compliance tracking for small teams getting started",
+    description: "Essential compliance tracking for small teams.",
     priceMonthly: 499,
     priceAnnual: 399,
     color: "border-blue-300",
     bg: "bg-blue-50",
     badge: null,
+    cta: "Get Started",
     features: [
       { name: "Up to 10 users", included: true },
       { name: "5 compliance frameworks", included: true },
@@ -46,73 +45,70 @@ const plans = [
       { name: "Policy management", included: true },
       { name: "Evidence collection", included: true },
       { name: "Vendor management", included: true },
-      { name: "Basic audit tracking", included: true },
-      { name: "Compliance calendar", included: true },
-      { name: "Basic PDF reports", included: true },
-      { name: "Audit trail", included: true },
+      { name: "Audit trail & PDF reports", included: true },
       { name: "AI Auditor", included: false },
-      { name: "Gap analysis", included: false },
-      { name: "Incident management", included: false },
-      { name: "Email notifications", included: false },
       { name: "SSO / SAML", included: false },
-      { name: "API access", included: false },
     ]
   },
   {
     tier: "professional",
     name: "Professional",
-    description: "Complete GRC suite for growing organizations pursuing certification",
+    description: "Complete GRC suite for teams pursuing certification.",
     priceMonthly: 1499,
     priceAnnual: 1199,
-    color: "border-primary ring-2 ring-primary",
+    color: "border-primary ring-2 ring-primary shadow-lg shadow-primary/20",
     bg: "bg-primary/5",
     badge: "Most Popular",
+    cta: "Get Started",
     features: [
       { name: "Up to 100 users", included: true },
       { name: "20 compliance frameworks", included: true },
       { name: "Everything in Starter", included: true },
       { name: "AI Compliance Auditor", included: true, highlight: true },
-      { name: "AI Gap Analysis", included: true, highlight: true },
-      { name: "Compliance runs", included: true },
-      { name: "ROPA register", included: true },
+      { name: "AI Gap Analysis & ROPA", included: true, highlight: true },
       { name: "Incident management", included: true },
       { name: "Training & awareness", included: true },
-      { name: "Email notifications", included: true },
-      { name: "Advanced board reports", included: true },
       { name: "King V, BDPA, POPIA ready", included: true },
       { name: "Priority email support", included: true },
-      { name: "Custom integrations", included: false },
       { name: "SSO / SAML", included: false },
-      { name: "Dedicated support", included: false },
-      { name: "API access", included: false },
     ]
   },
   {
     tier: "enterprise",
     name: "Enterprise",
-    description: "Unlimited everything with dedicated support for large organizations",
+    description: "Unlimited scale with dedicated support.",
     priceMonthly: null,
     priceAnnual: null,
     color: "border-purple-300",
     bg: "bg-purple-50",
     badge: null,
+    cta: "Contact Sales",
     features: [
       { name: "Unlimited users", included: true },
       { name: "Unlimited frameworks", included: true },
       { name: "Everything in Professional", included: true },
-      { name: "Custom integrations", included: true, highlight: true },
       { name: "SSO / SAML authentication", included: true, highlight: true },
       { name: "Full API access", included: true, highlight: true },
-      { name: "White-label option", included: true },
+      { name: "Custom integrations", included: true, highlight: true },
       { name: "Dedicated account manager", included: true },
-      { name: "Custom framework mapping", included: true },
-      { name: "On-premise deployment", included: true },
-      { name: "SLA guarantee (99.9%)", included: true },
-      { name: "Priority 24/7 support", included: true },
+      { name: "99.9% SLA guarantee", included: true },
+      { name: "24/7 priority support", included: true },
       { name: "Quarterly business review", included: true },
-      { name: "Staff training sessions", included: true },
     ]
   }
+];
+
+const securityHighlights = [
+  { icon: Shield, title: "Data Isolation", desc: "Each tenant runs in a logically isolated environment. Cross-tenant access is architecturally impossible." },
+  { icon: Building2, title: "Dedicated Tenancy", desc: "Enterprise plans include dedicated infrastructure. Your compliance data is never co-mingled." },
+  { icon: Zap, title: "Role-Based Access", desc: "Six granular roles ensure only authorized personnel access sensitive compliance data." },
+];
+
+const trustBadges = [
+  { label: "Encrypted at rest", icon: Lock },
+  { label: "TLS 1.3 in transit", icon: Lock },
+  { label: "SOC 2 ready", icon: Shield },
+  { label: "GDPR / POPIA ready", icon: Shield },
 ];
 
 export default function Pricing() {
@@ -122,7 +118,7 @@ export default function Pricing() {
   return (
     <div className="min-h-screen bg-background">
       {/* Header */}
-      <div className="text-center py-16 px-4">
+      <div className="text-center pt-20 pb-12 px-4">
         <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary/10 text-primary text-sm font-medium mb-6">
           <Shield className="w-4 h-4" /> Enterprise-Grade Multi-Tenant Security
         </div>
@@ -130,47 +126,47 @@ export default function Pricing() {
           CertiGuard Pricing
         </h1>
         <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-          Choose the plan that fits your organization. Every plan includes complete tenant isolation — 
-          your data is never visible to other companies on the platform.
+          Choose the plan that fits your organization. Every plan includes complete tenant isolation —
+          your data is never visible to other companies.
         </p>
 
         {/* Billing toggle */}
-        <div className="inline-flex items-center gap-2 mt-8 bg-muted rounded-lg p-1">
+        <div className="inline-flex items-center gap-1 mt-8 bg-muted rounded-lg p-1">
           <button
             onClick={() => setBillingCycle("monthly")}
-            className={`px-4 py-2 rounded-md text-sm font-medium transition-colors ${billingCycle === "monthly" ? "bg-card text-foreground shadow-sm" : "text-muted-foreground"}`}
+            className={`px-4 py-2 rounded-md text-sm font-medium transition-colors ${billingCycle === "monthly" ? "bg-card text-foreground shadow-sm" : "text-muted-foreground hover:text-foreground"}`}
           >Monthly</button>
           <button
             onClick={() => setBillingCycle("annual")}
-            className={`px-4 py-2 rounded-md text-sm font-medium transition-colors flex items-center gap-1.5 ${billingCycle === "annual" ? "bg-card text-foreground shadow-sm" : "text-muted-foreground"}`}
+            className={`px-4 py-2 rounded-md text-sm font-medium transition-colors flex items-center gap-1.5 ${billingCycle === "annual" ? "bg-card text-foreground shadow-sm" : "text-muted-foreground hover:text-foreground"}`}
           >Annual <span className="text-[10px] bg-emerald-100 text-emerald-700 px-1.5 py-0.5 rounded-full font-bold">Save 20%</span></button>
         </div>
       </div>
 
       {/* Plans */}
-      <div className="max-w-7xl mx-auto px-4 pb-24">
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+      <div className="max-w-7xl mx-auto px-4 pb-20">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 items-stretch">
           {plans.map((plan) => (
             <div key={plan.tier} className={`relative rounded-2xl border-2 ${plan.color} ${plan.bg} p-6 flex flex-col`}>
               {plan.badge && (
                 <div className="absolute -top-3 left-1/2 -translate-x-1/2">
-                  <span className="bg-primary text-primary-foreground text-xs font-bold px-3 py-1 rounded-full flex items-center gap-1">
+                  <span className="bg-primary text-primary-foreground text-xs font-bold px-3 py-1 rounded-full flex items-center gap-1 whitespace-nowrap">
                     <Star className="w-3 h-3 fill-current" /> {plan.badge}
                   </span>
                 </div>
               )}
 
-              <div className="mb-6">
+              <div className="mb-5">
                 <h3 className="font-heading text-xl font-bold text-foreground">{plan.name}</h3>
-                <p className="text-sm text-muted-foreground mt-1">{plan.description}</p>
+                <p className="text-sm text-muted-foreground mt-1 min-h-[40px]">{plan.description}</p>
               </div>
 
               {/* Price */}
-              <div className="mb-6">
+              <div className="mb-6 min-h-[72px]">
                 {plan.priceMonthly === 0 ? (
                   <div>
                     <span className="text-4xl font-bold text-foreground">Free</span>
-                    <span className="text-muted-foreground ml-1">/ 14 days</span>
+                    <span className="text-muted-foreground ml-1.5 text-sm">/ 14 days</span>
                   </div>
                 ) : plan.priceMonthly === null ? (
                   <div>
@@ -182,7 +178,7 @@ export default function Pricing() {
                     <span className="text-4xl font-bold text-foreground">
                       ${billingCycle === "annual" ? plan.priceAnnual?.toLocaleString() : plan.priceMonthly?.toLocaleString()}
                     </span>
-                    <span className="text-muted-foreground ml-1">/mo</span>
+                    <span className="text-muted-foreground ml-1.5 text-sm">/mo</span>
                     {billingCycle === "annual" && (
                       <p className="text-xs text-emerald-600 font-medium mt-1">
                         Billed annually (${(plan.priceAnnual * 12).toLocaleString()}/yr)
@@ -193,7 +189,7 @@ export default function Pricing() {
               </div>
 
               {/* Features */}
-              <div className="flex-1 space-y-3 mb-6">
+              <div className="flex-1 space-y-2.5 mb-6">
                 {plan.features.map((f, i) => (
                   <div key={i} className="flex items-start gap-2.5">
                     {f.included ? (
@@ -201,7 +197,7 @@ export default function Pricing() {
                     ) : (
                       <X className="w-4 h-4 mt-0.5 shrink-0 text-slate-300" />
                     )}
-                    <span className={`text-sm ${f.included ? (f.highlight ? "text-foreground font-medium" : "text-foreground") : "text-muted-foreground"}`}>
+                    <span className={`text-sm ${f.included ? (f.highlight ? "text-foreground font-semibold" : "text-foreground") : "text-muted-foreground/70"}`}>
                       {f.name}
                     </span>
                   </div>
@@ -211,7 +207,7 @@ export default function Pricing() {
               {/* CTA */}
               <Button
                 className="w-full"
-                variant={plan.tier === "professional" ? "default" : "outline"}
+                variant={plan.tier === "professional" ? "default" : plan.tier === "trial" ? "secondary" : "outline"}
                 size="lg"
                 disabled={checkout === plan.tier}
                 onClick={async () => {
@@ -222,17 +218,25 @@ export default function Pricing() {
                   finally { setCheckout(null); }
                 }}
               >
-                {checkout === plan.tier ? "Redirecting…" : plan.tier === "trial" ? "Start Free Trial" : plan.tier === "enterprise" ? "Contact Sales" : "Get Started"}
+                {checkout === plan.tier ? "Redirecting…" : plan.cta}
                 <ArrowRight className="w-4 h-4 ml-1" />
               </Button>
             </div>
           ))}
         </div>
 
+        {/* Trial nudge */}
+        <div className="mt-8 text-center">
+          <p className="text-sm text-muted-foreground">
+            <Sparkles className="w-4 h-4 inline mr-1 text-primary" />
+            Not sure where to start? <a href="/register" className="text-primary font-medium underline">Start a free 14-day trial</a> — no credit card required.
+          </p>
+        </div>
+
         {/* Security & Tenant Isolation Block */}
         <div className="mt-16 bg-card rounded-2xl border border-border p-8">
-          <div className="flex items-center gap-4 mb-6">
-            <div className="w-12 h-12 rounded-xl bg-emerald-100 flex items-center justify-center">
+          <div className="flex items-center gap-4 mb-8">
+            <div className="w-12 h-12 rounded-xl bg-emerald-100 flex items-center justify-center shrink-0">
               <Shield className="w-6 h-6 text-emerald-600" />
             </div>
             <div>
@@ -242,11 +246,7 @@ export default function Pricing() {
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            {[
-              { icon: Shield, title: "Data Isolation", desc: "Each tenant operates in a logically isolated environment. Data queries are scoped to your organization only — cross-tenant access is architecturally impossible." },
-              { icon: Building2, title: "Dedicated Tenancy", desc: "Enterprise plans include dedicated infrastructure. Your compliance data, controls, risks, and audit trails are never co-mingled with other organizations." },
-              { icon: Zap, title: "Role-Based Access", desc: "Six granular roles (Admin, Auditor, Viewer, Compliance Officer, Risk Manager, User) ensure only authorized personnel access sensitive compliance data." },
-            ].map((item, i) => (
+            {securityHighlights.map((item, i) => (
               <div key={i} className="bg-muted/50 rounded-xl p-5">
                 <item.icon className="w-8 h-8 text-primary mb-3" />
                 <h3 className="font-heading font-semibold text-foreground mb-1">{item.title}</h3>
@@ -255,16 +255,11 @@ export default function Pricing() {
             ))}
           </div>
 
-          <div className="mt-6 grid grid-cols-2 md:grid-cols-4 gap-4 text-center">
-            {[
-              { label: "Data encrypted at rest", icon: "🔒" },
-              { label: "TLS 1.3 in transit", icon: "🔐" },
-              { label: "SOC 2 compliant infra", icon: "✅" },
-              { label: "GDPR / POPIA ready", icon: "🛡️" },
-            ].map((s, i) => (
-              <div key={i} className="bg-muted/30 rounded-lg p-3">
-                <span className="text-lg">{s.icon}</span>
-                <p className="text-xs text-muted-foreground mt-1 font-medium">{s.label}</p>
+          <div className="mt-6 grid grid-cols-2 md:grid-cols-4 gap-4">
+            {trustBadges.map((s, i) => (
+              <div key={i} className="bg-muted/30 rounded-lg p-3 text-center flex flex-col items-center gap-1.5">
+                <s.icon className="w-5 h-5 text-emerald-600" />
+                <p className="text-xs text-muted-foreground font-medium">{s.label}</p>
               </div>
             ))}
           </div>
