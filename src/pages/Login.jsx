@@ -146,7 +146,7 @@ export default function Login() {
             <p className="text-center text-sm text-muted-foreground mt-6">
               New to CertiGuard?{" "}
               <Link to="/register" className="text-primary font-medium hover:underline">
-                Request access
+                Start free trial
               </Link>
             </p>
 
