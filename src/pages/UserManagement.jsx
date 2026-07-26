@@ -83,13 +83,15 @@ export default function UserManagement() {
     setBulkSending(true);
     let ok = 0, fail = 0;
     for (const email of emails) {
+      if (!canAddUser(users.length + ok)) { fail = emails.length - ok; break; }
       try { await base44.users.inviteUser(email, "user"); ok++; }
       catch { fail++; }
     }
     setBulkSending(false);
     setBulkOpen(false);
     setBulkText("");
-    toast({ title: `Invited ${ok} user${ok !== 1 ? "s" : ""}`, description: fail > 0 ? `${fail} failed (already invited or limit reached)` : "All invitations sent." });
+    const capped = fail > 0 && ok > 0 && ok < emails.length;
+    toast({ title: `Invited ${ok} user${ok !== 1 ? "s" : ""}`, description: fail > 0 ? (capped ? `Stopped at plan limit (${users.length + ok}/${userLimit}). Upgrade to invite more.` : `${fail} failed (already invited)`) : "All invitations sent." });
     load();
   };
 
