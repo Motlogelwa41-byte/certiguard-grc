@@ -42,7 +42,7 @@ export default async function(req) {
     const origin = req.headers.get('origin') || 'https://app.base44.com';
     const token = await paypalAccessToken();
 
-    const orderRes = await fetch('https://api-m.paypal.com/v2/checkout/orders', {
+    const orderRes = await fetch(`${paypalBase()}/v2/checkout/orders`, {
       method: 'POST',
       headers: {
         Authorization: `Bearer ${token}`,
