@@ -106,11 +106,6 @@
           "user_condition": {
             "role": "compliance_officer"
           }
-        },
-        {
-          "user_condition": {
-            "role": "external_auditor"
-          }
         }
       ]
     },
