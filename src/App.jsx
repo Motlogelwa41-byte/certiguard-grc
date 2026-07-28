@@ -103,6 +103,7 @@ import ExecutiveRiskReport from '@/pages/ExecutiveRiskReport';
 import ComplianceReadinessReport from '@/pages/ComplianceReadinessReport';
 import Architecture from '@/pages/Architecture';
 import SecurityCommandCenter from '@/pages/SecurityCommandCenter';
+import TestingChecklist from '@/pages/TestingChecklist';
 
 const AuthenticatedApp = () => {
   const { isLoadingAuth, isLoadingPublicSettings, authError, navigateToLogin } = useAuth();
@@ -222,6 +223,7 @@ const AuthenticatedApp = () => {
           <Route path="/compliance-readiness-report" element={<ComplianceReadinessReport />} />
           <Route path="/architecture" element={<Architecture />} />
           <Route path="/security-command-center" element={<SecurityCommandCenter />} />
+          <Route path="/testing-checklist" element={<TestingChecklist />} />
         </Route>
       </Route>
       <Route path="*" element={<PageNotFound />} />
