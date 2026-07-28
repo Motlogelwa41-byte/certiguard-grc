@@ -4,11 +4,19 @@ Deno.serve(async (req) => {
   try {
     const base44 = createClientFromRequest(req);
     const sr = base44.asServiceRole;
+    const user = await base44.auth.me().catch(() => null);
+    if (!user) return Response.json({ error: "Unauthorized" }, { status: 401 });
+    if (!["admin", "compliance_officer"].includes(user.role)) {
+      return Response.json({ error: "Insufficient permissions" }, { status: 403 });
+    }
     const body = await req.json().catch(() => ({}));
     const questionnaireId = body.questionnaire_id;
     if (!questionnaireId) return Response.json({ error: "questionnaire_id required" }, { status: 400 });
 
     const questionnaire = await sr.entities.SecurityQuestionnaire.get(questionnaireId);
+    if (questionnaire.tenant_id && user.data?.tenant_id && user.data.tenant_id !== questionnaire.tenant_id) {
+      return Response.json({ error: "Cross-tenant access denied" }, { status: 403 });
+    }
     const items = await sr.entities.QuestionnaireItem.filter({ questionnaire_id: questionnaireId }, "created_date", 500);
     const pending = (items || []).filter((i) => !i.answer && i.status !== "answered");
     if (!pending.length) return Response.json({ message: "No pending items to draft", drafted: 0 });

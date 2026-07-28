@@ -1,4 +1,5 @@
 import { createClientFromRequest } from 'npm:@base44/sdk@0.8.40';
+import { secrets } from 'base44:runtime';
 import { jsPDF } from 'npm:jspdf@4.2.1';
 import {
   esc, scoreColor, pdfFooter, pdfHeader, pdfScoreHero,
@@ -16,6 +17,20 @@ Deno.serve(async (req) => {
     const base44 = createClientFromRequest(req);
     const sr = base44.asServiceRole;
     const body = await req.json().catch(() => ({}));
+
+    let user = null;
+    try { user = await base44.auth.me(); } catch (_) { user = null; }
+    if (user) {
+      if (user.role !== 'admin') {
+        return Response.json({ error: 'Insufficient permissions' }, { status: 403 });
+      }
+    } else {
+      const expected = secrets.get('INTERNAL_INVOKE_TOKEN');
+      if (!expected || body._internal_token !== expected) {
+        return Response.json({ error: 'Unauthorized' }, { status: 401 });
+      }
+    }
+
     const dryRun = body.dry_run === true;
     const now = new Date();
     const dateStr = now.toISOString().slice(0, 10);

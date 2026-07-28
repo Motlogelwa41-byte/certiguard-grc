@@ -1,4 +1,5 @@
 import { createClientFromRequest } from 'npm:@base44/sdk@0.8.38';
+import { secrets } from 'base44:runtime';
 
 // Built-in automated test evaluators. Each receives (test, ctx) and returns
 // { result: 'pass'|'fail', summary, failCount, details: string[] }.
@@ -97,19 +98,23 @@ Deno.serve(async (req) => {
   try {
     const base44 = createClientFromRequest(req);
     const sr = base44.asServiceRole;
+    const body = await req.json().catch(() => ({}));
 
     let triggeredBy = "scheduled";
-    try {
-      const user = await base44.auth.me();
-      if (user) {
-        triggeredBy = user.full_name || user.email || "manual";
-        if (!["admin", "compliance_officer"].includes(user.role)) {
-          return Response.json({ error: "Insufficient permissions" }, { status: 403 });
-        }
+    let user = null;
+    try { user = await base44.auth.me(); } catch (_) { user = null; }
+    if (user) {
+      triggeredBy = user.full_name || user.email || "manual";
+      if (!["admin", "compliance_officer"].includes(user.role)) {
+        return Response.json({ error: "Insufficient permissions" }, { status: 403 });
       }
-    } catch (_) { /* scheduled run — no user */ }
+    } else {
+      const expected = secrets.get("INTERNAL_INVOKE_TOKEN");
+      if (!expected || body._internal_token !== expected) {
+        return Response.json({ error: "Unauthorized" }, { status: 401 });
+      }
+    }
 
-    const body = await req.json().catch(() => ({}));
     const singleTestId = body.test_id || null;
 
     // Load test definitions
