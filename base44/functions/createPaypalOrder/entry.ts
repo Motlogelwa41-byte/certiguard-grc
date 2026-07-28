@@ -8,12 +8,17 @@ const PLAN_AMOUNTS = {
   professional_annual: 1438800
 };
 
+function paypalBase() {
+  const mode = (secrets.get('PAYPAL_MODE') || 'live').toLowerCase();
+  return mode === 'sandbox' ? 'https://api-m.sandbox.paypal.com' : 'https://api-m.paypal.com';
+}
+
 async function paypalAccessToken() {
   const clientId = secrets.get('PAYPAL_CLIENT_ID');
   const secret = secrets.get('PAYPAL_CLIENT_SECRET');
   if (!clientId || !secret) throw new Error('PayPal credentials not configured. Add PAYPAL_CLIENT_ID and PAYPAL_CLIENT_SECRET in app secrets.');
   const auth = btoa(`${clientId}:${secret}`);
-  const res = await fetch('https://api-m.paypal.com/v1/oauth2/token', {
+  const res = await fetch(`${paypalBase()}/v1/oauth2/token`, {
     method: 'POST',
     headers: { Authorization: `Basic ${auth}`, 'Content-Type': 'application/x-www-form-urlencoded' },
     body: 'grant_type=client_credentials'
