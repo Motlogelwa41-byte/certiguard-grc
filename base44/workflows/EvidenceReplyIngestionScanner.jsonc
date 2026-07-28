@@ -1,0 +1,47 @@
+{
+  "name": "Evidence Reply Ingestion Scanner",
+  "description": "Daily scan of the connected Gmail inbox for replies to CertiGuard evidence-request emails carrying file attachments. Downloads attachments, uploads them to app storage, and creates pending_review Evidence records linked to the matching control (by Control ID in filename or reply body).",
+  "trigger": {
+    "condition": null,
+    "config": {
+      "trigger_type": "scheduled",
+      "events": [],
+      "schedule_mode": "recurring",
+      "cron_expression": "45 8 * * *",
+      "one_time_date": null,
+      "timezone": "Africa/Johannesburg",
+      "interval_value": null,
+      "interval_unit": null,
+      "interval_anchor": null,
+      "ends_type": "never",
+      "ends_on_date": null,
+      "ends_after_count": null
+    }
+  },
+  "definition": {
+    "document": {
+      "dsl": "1.0.0",
+      "name": "evidence_reply_ingestion_scanner",
+      "version": "1.0",
+      "namespace": "base44"
+    },
+    "do": [
+      {
+        "ingest_replies": {
+          "call": "invoke_backend_function",
+          "with": {
+            "function_name": "ingestEvidenceReplies",
+            "args": {
+              "_internal_token": "cg-internal-invoke-7f3a9c2e1b8d4a6f9e2c"
+            }
+          },
+          "then": "end",
+          "x-base44": {
+            "title": "Ingest emailed evidence replies",
+            "description": "Daily 8:45am SAST \u2014 scans Gmail inbox for evidence-request replies with attachments"
+          }
+        }
+      }
+    ]
+  }
+}

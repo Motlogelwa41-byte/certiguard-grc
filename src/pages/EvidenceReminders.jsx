@@ -26,6 +26,7 @@ export default function EvidenceReminders() {
   const [sending, setSending] = useState({});
   const [sendingAll, setSendingAll] = useState(false);
   const [sendingRequests, setSendingRequests] = useState(false);
+  const [ingesting, setIngesting] = useState(false);
   const [sentLog, setSentLog] = useState({});
   const [search, setSearch] = useState("");
   const [filterStatus, setFilterStatus] = useState("all");
@@ -164,6 +165,21 @@ CertiGuard Automated Notification System
     }
   };
 
+  const ingestReplies = async () => {
+    setIngesting(true);
+    try {
+      const res = await base44.functions.invoke("ingestEvidenceReplies", {});
+      const d = res?.data || res || {};
+      const desc = `Scanned ${d.scanned || 0} reply email(s). Created ${d.created || 0} evidence record(s) (${d.matched || 0} matched, ${d.unmatched || 0} unmatched, ${d.skipped || 0} already processed).`;
+      toast({ title: "Email replies ingested", description: desc, duration: 4000 });
+      if ((d.created || 0) > 0) load();
+    } catch (e) {
+      toast({ title: "Ingest failed", description: e?.message || "Could not ingest email replies.", variant: "destructive", duration: 4000 });
+    } finally {
+      setIngesting(false);
+    }
+  };
+
   if (loading) return (
     <div className="flex items-center justify-center h-64">
       <div className="w-8 h-8 border-4 border-primary/20 border-t-primary rounded-full animate-spin" />
@@ -182,6 +198,9 @@ CertiGuard Automated Notification System
             </Button>
             <Button variant="outline" size="sm" onClick={sendEvidenceRequests} disabled={sendingRequests}>
               {sendingRequests ? <RefreshCw className="w-4 h-4 mr-1 animate-spin" /> : <Send className="w-4 h-4 mr-1" />} Request evidence
+            </Button>
+            <Button variant="outline" size="sm" onClick={ingestReplies} disabled={ingesting}>
+              {ingesting ? <RefreshCw className="w-4 h-4 mr-1 animate-spin" /> : <Mail className="w-4 h-4 mr-1" />} Ingest replies
             </Button>
             <Button size="sm" onClick={sendAllReminders} disabled={sendingAll || filtered.length === 0}>
               <Send className="w-4 h-4 mr-1" />
