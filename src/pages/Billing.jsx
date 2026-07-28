@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
-import { CreditCard, Crown, Check, AlertCircle, ExternalLink, Loader2, Calendar, Users, Layers } from "lucide-react";
+import { CreditCard, Crown, Check, AlertCircle, ExternalLink, Loader2, Calendar, Users, Layers, Wallet } from "lucide-react";
 import PageHeader from "@/components/shared/PageHeader";
 import { Button } from "@/components/ui/button";
+import { useToast } from "@/components/ui/use-toast";
 import { useTenant } from "@/lib/TenantContext";
 import { useAuth } from "@/lib/AuthContext";
 import { base44 } from "@/api/base44Client";
@@ -18,8 +19,11 @@ const TIER_LABELS = {
 export default function Billing() {
   const { tenant, loading, refreshTenant } = useTenant();
   const { user } = useAuth();
+  const { toast } = useToast();
   const [portalLoading, setPortalLoading] = useState(false);
   const [usage, setUsage] = useState({ users: 0, frameworks: 0 });
+  const [manual, setManual] = useState({ tier: "professional", status: "active", billing_cycle: "monthly", payment_ref: "" });
+  const [saving, setSaving] = useState(false);
 
   useEffect(() => {
     (async () => {
@@ -30,6 +34,42 @@ export default function Billing() {
       setUsage({ users: users.length || 0, frameworks: frameworks.length || 0 });
     })();
   }, []);
+
+  // Sync manual form defaults from the loaded tenant
+  useEffect(() => {
+    if (!tenant) return;
+    setManual((m) => ({
+      ...m,
+      tier: tenant.subscription_tier || m.tier,
+      status: tenant.subscription_status || m.status,
+      billing_cycle: tenant.billing_cycle || m.billing_cycle,
+    }));
+  }, [tenant]);
+
+  const handleManualProvision = async () => {
+    if (!tenant?.id) return;
+    setSaving(true);
+    try {
+      const limitFor = (t) =>
+        t === "enterprise" ? { max_users: 999999, max_frameworks: 999999 } :
+        t === "professional" ? { max_users: 100, max_frameworks: 20 } :
+        t === "starter" ? { max_users: 10, max_frameworks: 5 } :
+        { max_users: 3, max_frameworks: 2 };
+      await base44.entities.Tenant.update(tenant.id, {
+        subscription_tier: manual.tier,
+        subscription_status: manual.status,
+        billing_cycle: manual.billing_cycle,
+        ...limitFor(manual.tier),
+        notes: `Manually provisioned${manual.payment_ref ? ` — payment ref: ${manual.payment_ref}` : ""} (${user?.email || "admin"}, ${new Date().toISOString()})`
+      });
+      await refreshTenant();
+      toast({ title: "Subscription updated", description: `Plan set to ${TIER_LABELS[manual.tier]} (${manual.status}).`, duration: 2500 });
+    } catch (e) {
+      toast({ title: "Update failed", description: e?.message || "Could not update subscription.", variant: "destructive", duration: 2500 });
+    } finally {
+      setSaving(false);
+    }
+  };
 
   const handlePortal = async () => {
     setPortalLoading(true);
@@ -142,6 +182,78 @@ export default function Billing() {
           </div>
         </div>
       </div>
+
+      {/* Manual subscription provisioning (admin) — for off-platform payments */}
+      {isAdmin && (
+        <div className="mt-6 bg-card rounded-2xl border border-amber-200 p-6">
+          <div className="flex items-start gap-3 mb-4">
+            <div className="w-9 h-9 rounded-lg bg-amber-100 flex items-center justify-center shrink-0">
+              <Wallet className="w-5 h-5 text-amber-600" />
+            </div>
+            <div>
+              <h3 className="font-heading font-semibold text-foreground">Manual subscription provisioning</h3>
+              <p className="text-sm text-muted-foreground mt-0.5">
+                Use this to set the plan after collecting payment off-platform (EFT, PayFast, Yoco, etc.). Stripe checkout is not required.
+              </p>
+            </div>
+          </div>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+            <div>
+              <label className="text-xs font-medium text-muted-foreground mb-1 block">Plan tier</label>
+              <select
+                value={manual.tier}
+                onChange={(e) => setManual({ ...manual, tier: e.target.value })}
+                className="w-full h-9 rounded-md border border-input bg-transparent px-3 text-sm focus:outline-none focus:ring-1 focus:ring-ring"
+              >
+                {Object.entries(TIER_LABELS).map(([k, v]) => (
+                  <option key={k} value={k}>{v}</option>
+                ))}
+              </select>
+            </div>
+            <div>
+              <label className="text-xs font-medium text-muted-foreground mb-1 block">Status</label>
+              <select
+                value={manual.status}
+                onChange={(e) => setManual({ ...manual, status: e.target.value })}
+                className="w-full h-9 rounded-md border border-input bg-transparent px-3 text-sm focus:outline-none focus:ring-1 focus:ring-ring"
+              >
+                <option value="active">Active</option>
+                <option value="trial">Trial</option>
+                <option value="past_due">Past due</option>
+                <option value="cancelled">Cancelled</option>
+                <option value="expired">Expired</option>
+              </select>
+            </div>
+            <div>
+              <label className="text-xs font-medium text-muted-foreground mb-1 block">Billing cycle</label>
+              <select
+                value={manual.billing_cycle}
+                onChange={(e) => setManual({ ...manual, billing_cycle: e.target.value })}
+                className="w-full h-9 rounded-md border border-input bg-transparent px-3 text-sm focus:outline-none focus:ring-1 focus:ring-ring"
+              >
+                <option value="monthly">Monthly</option>
+                <option value="annual">Annual</option>
+              </select>
+            </div>
+            <div>
+              <label className="text-xs font-medium text-muted-foreground mb-1 block">Payment reference (optional)</label>
+              <input
+                value={manual.payment_ref}
+                onChange={(e) => setManual({ ...manual, payment_ref: e.target.value })}
+                placeholder="e.g. EFT-20260728-001"
+                className="w-full h-9 rounded-md border border-input bg-transparent px-3 text-sm focus:outline-none focus:ring-1 focus:ring-ring"
+              />
+            </div>
+          </div>
+          <div className="flex items-center justify-between mt-4">
+            <p className="text-xs text-muted-foreground">This updates plan limits and feature flags instantly. Record the payment reference for audit purposes.</p>
+            <Button onClick={handleManualProvision} disabled={saving || !tenant?.id}>
+              {saving ? <Loader2 className="w-4 h-4 mr-1 animate-spin" /> : <Check className="w-4 h-4 mr-1" />}
+              Apply subscription
+            </Button>
+          </div>
+        </div>
+      )}
 
       {/* Plan comparison nudge */}
       <div className="mt-6 bg-gradient-to-br from-primary/5 to-primary/10 rounded-2xl border border-primary/20 p-6 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
