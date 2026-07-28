@@ -21,15 +21,23 @@ const lvlMeta = (n) => MATURITY_LEVELS[(Math.round(n || 1)) - 1] || MATURITY_LEV
 
 export default function MaturityDashboard() {
   const [assessments, setAssessments] = useState([]);
+  const [frameworks, setFrameworks] = useState([]);
+  const [controls, setControls] = useState([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    base44.entities.MaturityAssessment.list("-created_date", 100)
-      .then((list) => {
+    Promise.all([
+      base44.entities.MaturityAssessment.list("-created_date", 100),
+      base44.entities.Framework.list("-updated_date", 200),
+      base44.entities.Control.list("-updated_date", 500),
+    ])
+      .then(([list, fw, ctl]) => {
         const sorted = [...(list || [])].sort((a, b) =>
           (a.assessment_date || a.created_date || "").localeCompare(b.assessment_date || b.created_date || "")
         );
         setAssessments(sorted);
+        setFrameworks(fw || []);
+        setControls(ctl || []);
       })
       .finally(() => setLoading(false));
   }, []);
@@ -48,6 +56,23 @@ export default function MaturityDashboard() {
   );
 
   const latestDomains = latest ? parseArr(latest.domain_scores) : [];
+
+  // Derived maturity from framework implementation progress
+  const fwStageMap = { not_started: 1, in_progress: 3, audit_ready: 4, certified: 5 };
+  const frameworkMaturity = useMemo(() => {
+    const fwWithStage = frameworks.map((f) => {
+      const fControls = controls.filter((c) => (c.framework_ids || []).includes(f.id));
+      const passing = fControls.filter((c) => c.status === "passing").length;
+      const readiness = fControls.length ? Math.round((passing / fControls.length) * 100) : (f.readiness_score || 0);
+      const stage = fwStageMap[f.status] || 1;
+      return { ...f, stage, readiness, controlCount: fControls.length, passing };
+    });
+    const avgStage = fwWithStage.length
+      ? Math.round((fwWithStage.reduce((s, f) => s + f.stage, 0) / fwWithStage.length) * 10) / 10
+      : 0;
+    return { fwWithStage, avgStage };
+  }, [frameworks, controls]);
+  const fwStageMeta = lvlMeta(frameworkMaturity.avgStage || 1);
 
   if (loading) {
     return <div className="flex justify-center py-20"><Loader2 className="w-8 h-8 animate-spin text-muted-foreground" /></div>;
@@ -140,6 +165,50 @@ export default function MaturityDashboard() {
             })}
           </div>
           <p className="text-xs text-muted-foreground mt-3">{meta.description}</p>
+        </CardContent>
+      </Card>
+
+      {/* Framework implementation maturity (derived from framework progress) */}
+      <Card className="mb-6">
+        <CardHeader>
+          <CardTitle className="text-sm">Framework Implementation Maturity</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-4 pb-4 border-b border-border">
+            <div>
+              <div className="text-xs text-muted-foreground">Derived org maturity from framework implementation</div>
+              <div className="flex items-center gap-2 mt-1">
+                <span className="text-3xl font-bold" style={{ color: fwStageMeta.color }}>{frameworkMaturity.avgStage || "—"}</span>
+                <Badge variant="secondary" style={{ color: fwStageMeta.color }}>{fwStageMeta.name}</Badge>
+              </div>
+            </div>
+            <div className="text-xs text-muted-foreground sm:text-right">
+              {frameworks.length} frameworks tracked · {controls.length} controls
+            </div>
+          </div>
+          <div className="space-y-2">
+            {frameworkMaturity.fwWithStage.length === 0 && (
+              <p className="text-sm text-muted-foreground py-3 text-center">No frameworks tracked yet.</p>
+            )}
+            {frameworkMaturity.fwWithStage.map((f) => {
+              const sm = lvlMeta(f.stage);
+              return (
+                <div key={f.id} className="flex items-center justify-between gap-3 py-1.5 border-b border-border last:border-0">
+                  <div className="flex items-center gap-2 min-w-0">
+                    <div className="w-7 h-7 rounded-full flex items-center justify-center text-white text-xs font-bold shrink-0" style={{ background: sm.color }}>{f.stage}</div>
+                    <div className="min-w-0">
+                      <div className="font-medium text-sm truncate">{f.name}</div>
+                      <div className="text-xs text-muted-foreground">{f.controlCount} controls · {f.passing} passing</div>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-3 shrink-0">
+                    <span className="text-xs text-muted-foreground">{f.readiness}%</span>
+                    <Badge variant="secondary" style={{ color: sm.color }}>{sm.name}</Badge>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
         </CardContent>
       </Card>
 

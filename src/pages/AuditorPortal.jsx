@@ -14,6 +14,7 @@ import AuditorRequestDialog from "@/components/auditor/AuditorRequestDialog";
 
 export default function AuditorPortal() {
   const { user } = useAuth();
+  const canWrite = user?.role !== "external_auditor";
   const { toast } = useToast();
   const [loading, setLoading] = useState(true);
   const [scope, setScope] = useState(null);
@@ -84,7 +85,7 @@ export default function AuditorPortal() {
 
   return (
     <div>
-      <PageHeader title="Auditor Portal" subtitle={`Scoped engagement — ${allFw ? "All frameworks" : scope.framework_names?.join(", ") || "Scoped frameworks"}`} />
+      <PageHeader title="Auditor Portal" subtitle={`Scoped engagement — ${allFw ? "All frameworks" : scope.framework_names?.join(", ") || "Scoped frameworks"}${!canWrite ? " · Observation only" : ""}`} />
 
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
         <StatCard label="Scoped Frameworks" value={allFw ? frameworks.length : scopedFwIds.length} icon={ShieldCheck} color="blue" />
@@ -127,7 +128,13 @@ export default function AuditorPortal() {
                       <td className="px-4 py-3"><StatusBadge status={e.status} /></td>
                       <td className="px-4 py-3 text-xs text-muted-foreground">{e.collected_date || "—"}</td>
                       <td className="px-4 py-3 text-right">
-                        <Button size="sm" variant="outline" onClick={() => setReviewItem(e)}>Review</Button>
+                        {canWrite ? (
+                          <Button size="sm" variant="outline" onClick={() => setReviewItem(e)}>Review</Button>
+                        ) : e.file_url ? (
+                          <a href={e.file_url} target="_blank" rel="noreferrer" className="text-xs text-primary underline">View file</a>
+                        ) : (
+                          <span className="text-xs text-muted-foreground">—</span>
+                        )}
                       </td>
                     </tr>
                   ))}
@@ -168,9 +175,11 @@ export default function AuditorPortal() {
         </TabsContent>
 
         <TabsContent value="findings" className="mt-4">
-          <div className="flex justify-end mb-3">
-            <Button onClick={() => { setEditingFinding(null); setFindingOpen(true); }}><Plus className="w-4 h-4" /> Raise finding</Button>
-          </div>
+          {canWrite && (
+            <div className="flex justify-end mb-3">
+              <Button onClick={() => { setEditingFinding(null); setFindingOpen(true); }}><Plus className="w-4 h-4" /> Raise finding</Button>
+            </div>
+          )}
           <div className="bg-card rounded-xl border border-border overflow-hidden">
             <div className="overflow-x-auto">
               <table className="w-full text-sm">
@@ -193,7 +202,7 @@ export default function AuditorPortal() {
                       <td className="px-4 py-3 text-muted-foreground capitalize">{(f.finding_type || "").replace(/_/g, " ")}</td>
                       <td className="px-4 py-3"><StatusBadge status={f.status} /></td>
                       <td className="px-4 py-3 text-xs text-muted-foreground">{f.due_date || "—"}</td>
-                      <td className="px-4 py-3 text-right"><Button size="sm" variant="ghost" onClick={() => { setEditingFinding(f); setFindingOpen(true); }}>Edit</Button></td>
+                      <td className="px-4 py-3 text-right">{canWrite && <Button size="sm" variant="ghost" onClick={() => { setEditingFinding(f); setFindingOpen(true); }}>Edit</Button>}</td>
                     </tr>
                   ))}
                 </tbody>
@@ -203,9 +212,11 @@ export default function AuditorPortal() {
         </TabsContent>
 
         <TabsContent value="requests" className="mt-4">
-          <div className="flex justify-end mb-3">
-            <Button onClick={() => setRequestOpen(true)}><Plus className="w-4 h-4" /> New request</Button>
-          </div>
+          {canWrite && (
+            <div className="flex justify-end mb-3">
+              <Button onClick={() => setRequestOpen(true)}><Plus className="w-4 h-4" /> New request</Button>
+            </div>
+          )}
           <div className="space-y-3">
             {myRequests.length === 0 && <p className="text-center py-10 text-sm text-muted-foreground">No requests raised.</p>}
             {myRequests.map((r) => (
