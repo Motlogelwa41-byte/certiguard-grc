@@ -106,6 +106,7 @@ import Architecture from '@/pages/Architecture';
 import SecurityCommandCenter from '@/pages/SecurityCommandCenter';
 import TestingChecklist from '@/pages/TestingChecklist';
 import StakeholderSummary from '@/pages/StakeholderSummary';
+import AuditorLinkAccess from '@/pages/AuditorLinkAccess';
 
 const AuthenticatedApp = () => {
   const { isLoadingAuth, isLoadingPublicSettings, authError, navigateToLogin } = useAuth();
@@ -136,6 +137,7 @@ const AuthenticatedApp = () => {
       <Route path="/pricing" element={<Pricing />} />
       <Route path="/vendor-questionnaire" element={<VendorQuestionnaire />} />
       <Route path="/trust-center" element={<TrustCenterPublic />} />
+      <Route path="/auditor-link/:token" element={<AuditorLinkAccess />} />
       <Route element={<ProtectedRoute unauthenticatedElement={<Navigate to="/login" replace />} />}>
         <Route element={<TenantProvider><AppLayout /></TenantProvider>}>
           <Route path="/" element={<Dashboard />} />

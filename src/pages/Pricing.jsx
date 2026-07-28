@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { Check, X, Shield, Zap, Building2, ArrowRight, Star, Lock, Sparkles } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { startCheckout } from "@/lib/billing";
+import { startCheckout, startPaypalCheckout } from "@/lib/billing";
 
 const plans = [
   {
@@ -221,6 +221,21 @@ export default function Pricing() {
                 {checkout === plan.tier ? "Redirecting…" : plan.cta}
                 <ArrowRight className="w-4 h-4 ml-1" />
               </Button>
+              {plan.tier !== "trial" && plan.tier !== "enterprise" && (
+                <Button
+                  variant="outline"
+                  className="w-full mt-2"
+                  size="sm"
+                  disabled={checkout === plan.tier + "_paypal"}
+                  onClick={async () => {
+                    setCheckout(plan.tier + "_paypal");
+                    try { await startPaypalCheckout(plan.tier, billingCycle); }
+                    finally { setCheckout(null); }
+                  }}
+                >
+                  {checkout === plan.tier + "_paypal" ? "Redirecting…" : "Pay with PayPal"}
+                </Button>
+              )}
             </div>
           ))}
         </div>

@@ -1,0 +1,70 @@
+{
+  "name": "AuditorLink",
+  "type": "object",
+  "properties": {
+    "tenant_id": {
+      "type": "string",
+      "description": "Tenant isolation key"
+    },
+    "scope_id": {
+      "type": "string",
+      "description": "Linked AuditorScope id"
+    },
+    "auditor_name": {
+      "type": "string"
+    },
+    "token": {
+      "type": "string",
+      "description": "Unique unguessable access token used in the share URL"
+    },
+    "passphrase_hash": {
+      "type": "string",
+      "description": "SHA-256 hash of the required passphrase"
+    },
+    "expires_at": {
+      "type": "string",
+      "format": "date"
+    },
+    "revoked": {
+      "type": "boolean",
+      "default": false
+    },
+    "accessed_at": {
+      "type": "string"
+    },
+    "access_count": {
+      "type": "number",
+      "default": 0
+    },
+    "created_by_name": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "scope_id",
+    "token",
+    "passphrase_hash"
+  ],
+  "rls": {
+    "create": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "read": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "update": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "delete": {
+      "user_condition": {
+        "role": "admin"
+      }
+    }
+  }
+}
