@@ -31,7 +31,9 @@
           "call": "invoke_backend_function",
           "with": {
             "function_name": "sendWeeklyBoardReport",
-            "args": {}
+            "args": {
+              "_internal_token": "cg-internal-invoke-7f3a9c2e1b8d4a6f9e2c"
+            }
           },
           "then": "end",
           "x-base44": {
