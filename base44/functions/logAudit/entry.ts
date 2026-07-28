@@ -20,7 +20,8 @@ Deno.serve(async (req) => {
 
     // Use only the authenticated user's tenant_id — never trust a client-supplied
     // tenant_id, which could be used to attribute audit entries to another tenant.
-    const tenant_id = user.tenant_id || '';
+    // tenant_id is stamped on the user profile via updateMe(), landing at user.data.tenant_id.
+    const tenant_id = user.data?.tenant_id || user.tenant_id || '';
     let tenant_name = '';
     if (tenant_id && !tenant_name) {
       try {
