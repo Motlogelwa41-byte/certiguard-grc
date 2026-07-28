@@ -25,6 +25,7 @@ export default function EvidenceReminders() {
   const [loading, setLoading] = useState(true);
   const [sending, setSending] = useState({});
   const [sendingAll, setSendingAll] = useState(false);
+  const [sendingRequests, setSendingRequests] = useState(false);
   const [sentLog, setSentLog] = useState({});
   const [search, setSearch] = useState("");
   const [filterStatus, setFilterStatus] = useState("all");
@@ -150,6 +151,19 @@ CertiGuard Automated Notification System
     toast({ title: `${successCount} reminders sent`, description: `Notified owners of ${successCount} evidence items.` });
   };
 
+  const sendEvidenceRequests = async () => {
+    setSendingRequests(true);
+    try {
+      const res = await base44.functions.invoke("sendEvidenceDueRequests", {});
+      const d = res?.data || res || {};
+      toast({ title: "Evidence requests sent", description: `${d.sent || 0} email(s) sent to control owners (${d.dueControls || 0} controls due).`, duration: 2500 });
+    } catch (e) {
+      toast({ title: "Request failed", description: e?.message || "Could not send evidence requests.", variant: "destructive", duration: 2500 });
+    } finally {
+      setSendingRequests(false);
+    }
+  };
+
   if (loading) return (
     <div className="flex items-center justify-center h-64">
       <div className="w-8 h-8 border-4 border-primary/20 border-t-primary rounded-full animate-spin" />
@@ -165,6 +179,9 @@ CertiGuard Automated Notification System
           <div className="flex items-center gap-2">
             <Button variant="outline" size="sm" onClick={load}>
               <RefreshCw className="w-4 h-4 mr-1" /> Refresh
+            </Button>
+            <Button variant="outline" size="sm" onClick={sendEvidenceRequests} disabled={sendingRequests}>
+              {sendingRequests ? <RefreshCw className="w-4 h-4 mr-1 animate-spin" /> : <Send className="w-4 h-4 mr-1" />} Request evidence
             </Button>
             <Button size="sm" onClick={sendAllReminders} disabled={sendingAll || filtered.length === 0}>
               <Send className="w-4 h-4 mr-1" />

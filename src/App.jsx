@@ -36,6 +36,7 @@ import PolicyAcknowledgments from '@/pages/PolicyAcknowledgments';
 import VendorAssessments from '@/pages/VendorAssessments';
 import VendorScorecard from '@/pages/VendorScorecard';
 import FrameworkControlMap from '@/pages/FrameworkControlMap';
+import FrameworkProgress from '@/pages/FrameworkProgress';
 import ComplianceCalendar from '@/pages/ComplianceCalendar';
 import PolicyTemplates from '@/pages/PolicyTemplates';
 import NotificationPreferences from '@/pages/NotificationPreferences';
@@ -168,6 +169,7 @@ const AuthenticatedApp = () => {
           <Route path="/vendor-assessments" element={<VendorAssessments />} />
           <Route path="/vendor-scorecard" element={<VendorScorecard />} />
           <Route path="/framework-map" element={<FrameworkControlMap />} />
+          <Route path="/framework-progress" element={<FrameworkProgress />} />
           <Route path="/policy-templates" element={<PolicyTemplates />} />
           <Route path="/notification-preferences" element={<NotificationPreferences />} />
           <Route path="/task-reminders" element={<TaskReminders />} />

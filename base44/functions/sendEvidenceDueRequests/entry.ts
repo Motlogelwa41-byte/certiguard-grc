@@ -73,18 +73,27 @@ Deno.serve(async (req) => {
     let failed = 0;
 
     for (const [email, group] of Object.entries(byEmail)) {
+      const statusFor = (c) => {
+        if (!c.next_review) return { label: "Due", color: "#475569" };
+        const d = new Date(c.next_review); d.setHours(0, 0, 0, 0);
+        if (d < today) return { label: "Overdue", color: "#b91c1c" };
+        const days = Math.ceil((d - today) / 86400000);
+        return { label: `Due in ${days}d`, color: days <= 3 ? "#b91c1c" : "#b45309" };
+      };
       const rows = group.items
-        .map(
-          (c) =>
-            `<tr>
+        .map((c) => {
+          const s = statusFor(c);
+          return `<tr>
               <td style="padding:8px 10px;border-bottom:1px solid #eef2f7;font-size:13px;font-family:monospace">${escapeHtml(c.control_id || "—")}</td>
               <td style="padding:8px 10px;border-bottom:1px solid #eef2f7;font-size:13px">${escapeHtml(c.title || "")}</td>
-              <td style="padding:8px 10px;border-bottom:1px solid #eef2f7;font-size:13px;white-space:nowrap;color:#b91c1c;font-weight:600">${escapeHtml(c.next_review)}</td>
-            </tr>`
-        )
+              <td style="padding:8px 10px;border-bottom:1px solid #eef2f7;font-size:13px;white-space:nowrap;color:${s.color};font-weight:600">${escapeHtml(c.next_review || "—")}</td>
+              <td style="padding:8px 10px;border-bottom:1px solid #eef2f7;font-size:12px;white-space:nowrap"><span style="background:${s.color};color:#fff;padding:2px 8px;border-radius:10px;font-weight:600">${s.label}</span></td>
+            </tr>`;
+        })
         .join("");
 
-      const subject = `📁 Evidence documentation due — ${group.items.length} control(s) need your attention`;
+      const overdueCount = group.items.filter((c) => c.next_review && new Date(c.next_review) < today).length;
+      const subject = `${overdueCount > 0 ? "⏰ Action needed:" : "📁"} [CertiGuard Evidence] ${group.items.length} control(s) need documentation`;
       const body = `<!DOCTYPE html><html><body style="font-family:system-ui,-apple-system,sans-serif;background:#f8fafc;padding:20px;margin:0">
         <div style="max-width:640px;margin:0 auto">
           <div style="background:linear-gradient(135deg,#1e3a5f,#2563eb);color:#fff;padding:22px 26px;border-radius:12px 12px 0 0">
@@ -100,6 +109,7 @@ Deno.serve(async (req) => {
                   <th style="text-align:left;padding:8px 10px;font-size:12px;color:#475569;border-bottom:1px solid #e2e8f0">Control ID</th>
                   <th style="text-align:left;padding:8px 10px;font-size:12px;color:#475569;border-bottom:1px solid #e2e8f0">Control</th>
                   <th style="text-align:left;padding:8px 10px;font-size:12px;color:#475569;border-bottom:1px solid #e2e8f0">Review Date</th>
+                  <th style="text-align:left;padding:8px 10px;font-size:12px;color:#475569;border-bottom:1px solid #e2e8f0">Status</th>
                 </tr>
               </thead>
               <tbody>${rows}</tbody>
@@ -107,6 +117,10 @@ Deno.serve(async (req) => {
             <p style="margin:0 0 16px">
               <a href="${escapeHtml(portalBase)}" style="display:inline-block;background:#2563eb;color:#fff;text-decoration:none;font-size:14px;font-weight:600;padding:11px 22px;border-radius:8px">Upload evidence in CertiGuard →</a>
             </p>
+            <div style="border:1px solid #bfdbfe;background:#eff6ff;border-radius:8px;padding:12px 14px;margin:0 0 16px">
+              <p style="margin:0 0 4px;font-size:13px;font-weight:600;color:#1e3a8a">📎 Prefer to reply by email?</p>
+              <p style="margin:0;font-size:13px;color:#1e3a8a">Simply <strong>reply to this email and attach your evidence file(s)</strong> (screenshots, reports, certificates). Include the <strong>Control ID</strong> in your reply so we can match it to the right control — we'll capture your submission automatically.</p>
+            </div>
             <p style="color:#64748b;font-size:12px;margin:0">If the button above doesn't work, log in to CertiGuard and go to <strong>Evidence → Upload</strong>. This is a secure portal — only authenticated members of your organisation can access it. — CertiGuard GRC</p>
           </div>
         </div>
