@@ -118,6 +118,7 @@ export const navSections = [
   {
     label: "Reporting",
     items: [
+      { label: "Stakeholder Summary", path: "/stakeholder-summary", icon: FileDown, roles: ["admin", "compliance_officer", "risk_manager", "auditor"] },
       { label: "Exec Risk Report", path: "/executive-risk-report", icon: LineChart, roles: ["admin", "compliance_officer", "risk_manager", "auditor"] },
       { label: "Board Report", path: "/board-report", icon: Presentation, roles: ["admin", "compliance_officer", "risk_manager", "auditor"] },
       { label: "Audit Readiness Report", path: "/audit-readiness-report", icon: ClipboardCheck, roles: ["admin", "compliance_officer", "risk_manager", "auditor"] },

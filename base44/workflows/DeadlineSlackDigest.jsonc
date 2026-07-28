@@ -1,0 +1,44 @@
+{
+  "name": "Deadline Slack Digest",
+  "description": "Posts a daily actionable Slack digest to #compliance listing compliance tasks due within 7 days and audit engagements starting within 14 days.",
+  "trigger": {
+    "condition": null,
+    "config": {
+      "trigger_type": "scheduled",
+      "events": [],
+      "schedule_mode": "recurring",
+      "cron_expression": "30 8 * * *",
+      "one_time_date": null,
+      "timezone": "Africa/Johannesburg",
+      "interval_value": null,
+      "interval_unit": null,
+      "interval_anchor": null,
+      "ends_type": "never",
+      "ends_on_date": null,
+      "ends_after_count": null
+    }
+  },
+  "definition": {
+    "document": {
+      "dsl": "1.0.0",
+      "name": "deadline_slack_digest",
+      "version": "1.0",
+      "namespace": "base44"
+    },
+    "do": [
+      {
+        "post_digest": {
+          "call": "invoke_backend_function",
+          "with": {
+            "function_name": "postDeadlineSlackDigest"
+          },
+          "then": "end",
+          "x-base44": {
+            "title": "Post deadline digest to Slack",
+            "description": "Daily 8:30am SAST"
+          }
+        }
+      }
+    ]
+  }
+}

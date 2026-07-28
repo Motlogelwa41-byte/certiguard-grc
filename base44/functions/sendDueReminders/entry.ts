@@ -94,23 +94,9 @@ Deno.serve(async (req) => {
       }
     }
 
-    // Post a single aggregated Slack alert to #compliance when tasks are due soon,
-    // so the whole team (not just assignees) stays informed of approaching deadlines.
-    if (due.length > 0) {
-      try {
-        const { accessToken } = await base44.asServiceRole.connectors.getConnection("slackbot");
-        if (accessToken) {
-          const top = due.slice(0, 8).map((t) => `• *${t.title || "Untitled"}* — due ${t.due_date}${t.assignee_name ? ` (@${t.assignee_name})` : ""}`).join("\n");
-          const more = due.length > 8 ? `\n…and ${due.length - 8} more` : "";
-          const text = `:alarm_clock: *${due.length} compliance task(s) due within 7 days:*\n${top}${more}`;
-          await fetch("https://slack.com/api/chat.postMessage", {
-            method: "POST",
-            headers: { Authorization: `Bearer ${accessToken}`, "Content-Type": "application/json" },
-            body: JSON.stringify({ channel: "C0BJB8240RF", text, username: "CertiGuard", icon_emoji: ":shield:" }),
-          });
-        }
-      } catch (e) { /* Slack alert is best-effort; never fail the reminder run */ }
-    }
+    // Slack deadline notifications are handled by the dedicated
+    // DeadlineSlackDigest workflow (postDeadlineSlackDigest), which covers both
+    // compliance tasks and audit deadlines in a single actionable digest.
 
     if (reminders.length) {
       await base44.asServiceRole.entities.TaskReminder.bulkCreate(reminders);

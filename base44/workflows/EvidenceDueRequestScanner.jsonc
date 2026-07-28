@@ -1,0 +1,44 @@
+{
+  "name": "Evidence Due Request Scanner",
+  "description": "Daily scan that emails department heads (control owners) when evidence documentation for their controls is due and not yet uploaded, with a link to the secure evidence portal.",
+  "trigger": {
+    "condition": null,
+    "config": {
+      "trigger_type": "scheduled",
+      "events": [],
+      "schedule_mode": "recurring",
+      "cron_expression": "15 8 * * *",
+      "one_time_date": null,
+      "timezone": "Africa/Johannesburg",
+      "interval_value": null,
+      "interval_unit": null,
+      "interval_anchor": null,
+      "ends_type": "never",
+      "ends_on_date": null,
+      "ends_after_count": null
+    }
+  },
+  "definition": {
+    "document": {
+      "dsl": "1.0.0",
+      "name": "evidence_due_request_scanner",
+      "version": "1.0",
+      "namespace": "base44"
+    },
+    "do": [
+      {
+        "send_requests": {
+          "call": "invoke_backend_function",
+          "with": {
+            "function_name": "sendEvidenceDueRequests"
+          },
+          "then": "end",
+          "x-base44": {
+            "title": "Email evidence-due requests",
+            "description": "Daily 8:15am SAST"
+          }
+        }
+      }
+    ]
+  }
+}
