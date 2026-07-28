@@ -8,6 +8,8 @@ import {
 import PageHeader from "@/components/shared/PageHeader";
 import StatusBadge from "@/components/shared/StatusBadge";
 import ComplianceScoreRing from "@/components/dashboard/ComplianceScoreRing";
+import { exportToCsv, exportToExcel } from "@/lib/exportCsv";
+import { FileSpreadsheet } from "lucide-react";
 
 export default function ComplianceReadinessReport() {
   const [frameworks, setFrameworks] = useState([]);
@@ -74,6 +76,43 @@ export default function ComplianceReadinessReport() {
   const scoreColor = (pct) => pct >= 80 ? "text-emerald-600" : pct >= 50 ? "text-amber-600" : "text-rose-600";
   const barColor = (pct) => pct >= 80 ? "#10B981" : pct >= 50 ? "#f59e0b" : "#ef4444";
 
+  const buildReportData = () => {
+    const overall = {
+      Framework: "OVERALL",
+      Status: "",
+      Total_Controls: controls.length,
+      Passing: passingControls,
+      Readiness_Pct: complianceScore,
+      Failing: failingControls,
+      Untested: notTested,
+      Certification_Date: "",
+      Expiry_Date: "",
+    };
+    const frameworkRows = frameworks.map((fw) => {
+      const pct = fw.total_controls > 0
+        ? Math.round((fw.passing_controls / fw.total_controls) * 100)
+        : fw.readiness_score || 0;
+      const fwControls = controls.filter((c) =>
+        c.framework_ids?.includes(fw.id) || c.framework_names?.includes(fw.name)
+      );
+      return {
+        Framework: fw.name,
+        Status: fw.status,
+        Total_Controls: fw.total_controls || 0,
+        Passing: fw.passing_controls || 0,
+        Readiness_Pct: pct,
+        Failing: fwControls.filter((c) => c.status === "failing").length,
+        Untested: fwControls.filter((c) => c.status === "not_tested").length,
+        Certification_Date: fw.certification_date || "",
+        Expiry_Date: fw.expiry_date || "",
+      };
+    });
+    return [overall, ...frameworkRows];
+  };
+
+  const handleExportCsv = () => exportToCsv(buildReportData(), "compliance-readiness-report");
+  const handleExportExcel = () => exportToExcel(buildReportData(), "compliance-readiness-report");
+
   return (
     <div className="print:bg-white">
       <div className="print:hidden">
@@ -81,12 +120,26 @@ export default function ComplianceReadinessReport() {
           title="Compliance Readiness Report"
           subtitle={`Generated ${today} · Framework-by-framework readiness and gap summary`}
           actions={
-            <button
-              onClick={() => window.print()}
-              className="inline-flex items-center gap-2 text-sm font-medium text-foreground bg-card border border-border rounded-lg px-4 py-2 hover:bg-muted transition-colors"
-            >
-              <Printer className="w-4 h-4" /> Print / PDF
-            </button>
+            <div className="flex items-center gap-2">
+              <button
+                onClick={handleExportCsv}
+                className="inline-flex items-center gap-2 text-sm font-medium text-foreground bg-card border border-border rounded-lg px-3 py-2 hover:bg-muted transition-colors"
+              >
+                <FileDown className="w-4 h-4" /> CSV
+              </button>
+              <button
+                onClick={handleExportExcel}
+                className="inline-flex items-center gap-2 text-sm font-medium text-foreground bg-card border border-border rounded-lg px-3 py-2 hover:bg-muted transition-colors"
+              >
+                <FileSpreadsheet className="w-4 h-4" /> Excel
+              </button>
+              <button
+                onClick={() => window.print()}
+                className="inline-flex items-center gap-2 text-sm font-medium text-foreground bg-card border border-border rounded-lg px-3 py-2 hover:bg-muted transition-colors"
+              >
+                <Printer className="w-4 h-4" /> Print / PDF
+              </button>
+            </div>
           }
         />
       </div>

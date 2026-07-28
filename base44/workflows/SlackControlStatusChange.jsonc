@@ -1,0 +1,40 @@
+{
+  "name": "Slack Control Status Change",
+  "description": "Posts a Slack alert to #compliance whenever a control's status changes (e.g. passing \u2192 failing), so the team is notified in real time without checking the dashboard.",
+  "trigger": {
+    "config": {
+      "trigger_type": "entity",
+      "entity_name": "Control",
+      "events": [
+        "update"
+      ]
+    },
+    "condition": "${ .trigger.data.status != .trigger.old_data.status }"
+  },
+  "definition": {
+    "document": {
+      "dsl": "1.0.0",
+      "name": "slack_control_status_change",
+      "version": "1.0",
+      "namespace": "base44"
+    },
+    "do": [
+      {
+        "post_alert": {
+          "call": "invoke_backend_function",
+          "with": {
+            "function_name": "sendSlackAlert",
+            "args": {
+              "text": ":shield: Control status changed\n*${ .trigger.data.title // \"Untitled control\" }* (${ .trigger.data.control_id // \"\u2014\" })\n${ .trigger.old_data.status // \"unknown\" } \u2192 ${ .trigger.data.status }\nOwner: ${ .trigger.data.owner_name // \"Unassigned\" } \u2022 Category: ${ .trigger.data.category // \"\u2014\" }"
+            }
+          },
+          "then": "end",
+          "x-base44": {
+            "title": "Post Slack alert",
+            "description": "Control status changed \u2192 #compliance"
+          }
+        }
+      }
+    ]
+  }
+}
