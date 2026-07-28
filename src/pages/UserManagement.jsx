@@ -65,7 +65,8 @@ export default function UserManagement() {
     }
     setInviting(true);
     try {
-      await base44.users.inviteUser(inviteEmail, inviteRole);
+      const res = await base44.functions.invoke('inviteUsersWithinPlan', { emails: inviteEmail, role: inviteRole });
+      if (res.data?.error) throw new Error(res.data.error);
       toast({ title: "Invitation sent", description: `${inviteEmail} has been invited as ${roleLabels[inviteRole]}.` });
       setInviteOpen(false);
       setInviteEmail("");
@@ -82,16 +83,21 @@ export default function UserManagement() {
     if (emails.length === 0) return;
     setBulkSending(true);
     let ok = 0, fail = 0;
-    for (const email of emails) {
-      if (!canAddUser(users.length + ok)) { fail = emails.length - ok; break; }
-      try { await base44.users.inviteUser(email, "user"); ok++; }
-      catch { fail++; }
+    try {
+      const res = await base44.functions.invoke('inviteUsersWithinPlan', { emails, role: "user" });
+      ok = res.data?.invited ?? 0;
+      fail = res.data?.failed ?? 0;
+      if (res.data?.error) throw new Error(res.data.error);
+    } catch (e) {
+      if (ok === 0) fail = emails.length;
+      toast({ title: "Invite failed", description: e.message, variant: "destructive" });
     }
     setBulkSending(false);
     setBulkOpen(false);
     setBulkText("");
-    const capped = fail > 0 && ok > 0 && ok < emails.length;
-    toast({ title: `Invited ${ok} user${ok !== 1 ? "s" : ""}`, description: fail > 0 ? (capped ? `Stopped at plan limit (${users.length + ok}/${userLimit}). Upgrade to invite more.` : `${fail} failed (already invited)`) : "All invitations sent." });
+    if (ok > 0) {
+      toast({ title: `Invited ${ok} user${ok !== 1 ? "s" : ""}`, description: fail > 0 ? `${fail} not invited (plan limit or already invited).` : "All invitations sent." });
+    }
     load();
   };
 

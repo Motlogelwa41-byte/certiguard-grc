@@ -38,7 +38,8 @@ export default function Frameworks() {
           toast({ title: "Framework limit reached", description: "Upgrade your plan to add more frameworks.", variant: "destructive" });
           return;
         }
-        await base44.entities.Framework.create(form);
+        const res = await base44.functions.invoke('createFrameworkWithinPlan', { framework: form });
+        if (res.data?.error) throw new Error(res.data.error);
       }
       setOpen(false);
       setForm(defaultForm);

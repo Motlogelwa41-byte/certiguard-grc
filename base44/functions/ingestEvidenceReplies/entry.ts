@@ -7,6 +7,18 @@ import { secrets } from 'base44:runtime';
 // matching control (matched by Control ID found in the filename or reply body).
 // Unmatched submissions are still captured for manual linking by a compliance
 // officer. Runs on a daily schedule and can be triggered manually.
+//
+// REPLY-PATH REQUIREMENT (operational — must hold or evidence is lost):
+// Evidence-request emails are sent via sendGmail() (shared/gmailSender.ts),
+// which resolves the connected SHARED Gmail account's address from the Gmail
+// profile and sets it as the From: header. Owners who hit "Reply" therefore
+// send their attachments back to THAT SAME inbox, which this function reads
+// via the same shared gmail connector (gmail.readonly). The loop is only
+// closed if the Gmail account authorised in the dashboard is the one owners
+// actually reply to. If the connected Gmail account is ever changed, replies
+// sent to the old address will NOT be ingested and the evidence is silently
+// lost. The request email body tells owners to "reply to this email and attach
+// your evidence" and to include the Control ID — matching here depends on that.
 
 const GMAIL_BASE = 'https://gmail.googleapis.com/gmail/v1/users/me';
 const LOOKBACK_DAYS = 14;
