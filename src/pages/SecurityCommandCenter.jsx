@@ -48,7 +48,7 @@ function ControlCard({ name, desc, Icon }) {
   return (
     <div className="flex items-start gap-3 rounded-xl border border-border bg-card p-3.5">
       <div className="w-9 h-9 rounded-lg bg-emerald-50 dark:bg-emerald-900/20 flex items-center justify-center shrink-0">
-        <Icon className="w-4.5 h-4.5 text-emerald-600 dark:text-emerald-400" />
+        <Icon className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
       </div>
       <div className="min-w-0">
         <p className="text-sm font-semibold text-foreground leading-tight">{name}</p>
