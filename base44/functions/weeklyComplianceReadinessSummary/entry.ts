@@ -68,9 +68,25 @@ Deno.serve(async (req) => {
       `*Risks:* ${openRisks} open (${criticalRisks} critical)`,
       `*Tasks:* ${openTasks} open · ${overdueTasks} overdue`,
       `*Incidents:* ${openIncidents} open (${criticalIncidents} critical)`,
-      ``,
-      `Review the full dashboard: https://app.base44.com/`,
     ];
+
+    // Pending high-priority tasks (critical/high, not completed) — actionable list for stakeholders
+    const highPriority = tsk
+      .filter((t) => (t.priority === 'critical' || t.priority === 'high') && t.status !== 'completed')
+      .sort((a, b) => (a.due_date || '9999').localeCompare(b.due_date || '9999'))
+      .slice(0, 8);
+
+    if (highPriority.length > 0) {
+      lines.push('', `*🔴 Pending high-priority tasks (${highPriority.length}):*`);
+      highPriority.forEach((t) => {
+        const when = t.due_date ? ` — due ${t.due_date}` : '';
+        const owner = t.assignee_name ? ` · ${t.assignee_name}` : '';
+        const icon = t.priority === 'critical' ? '🔴' : '🟠';
+        lines.push(`${icon} *${t.title || 'Untitled'}*${when}${owner}`);
+      });
+    }
+
+    lines.push('', `Review the full dashboard: https://app.base44.com/`);
 
     const text = lines.join('\n');
 

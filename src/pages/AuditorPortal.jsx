@@ -99,6 +99,7 @@ export default function AuditorPortal() {
           <TabsTrigger value="controls">Controls</TabsTrigger>
           <TabsTrigger value="findings">Findings</TabsTrigger>
           <TabsTrigger value="requests">Requests</TabsTrigger>
+          <TabsTrigger value="mapping">Framework Mapping</TabsTrigger>
         </TabsList>
 
         <TabsContent value="evidence" className="mt-4">
@@ -223,6 +224,73 @@ export default function AuditorPortal() {
                 )}
               </div>
             ))}
+          </div>
+        </TabsContent>
+
+        <TabsContent value="mapping" className="mt-4">
+          <div className="space-y-4">
+            {(allFw ? frameworks : frameworks.filter((f) => scopedFwIds.includes(f.id))).map((f) => {
+              const fControls = scopedControls.filter((c) => (c.framework_ids || []).includes(f.id));
+              const fEvidence = scopedEvidence.filter((e) => fControls.some((c) => c.id === e.control_id));
+              const passing = fControls.filter((c) => c.status === "passing").length;
+              const failing = fControls.filter((c) => c.status === "failing").length;
+              const notTested = fControls.filter((c) => c.status === "not_tested").length;
+              const readiness = fControls.length ? Math.round((passing / fControls.length) * 100) : 0;
+              return (
+                <div key={f.id} className="bg-card rounded-xl border border-border p-5">
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-3">
+                    <div>
+                      <h3 className="font-heading font-semibold text-foreground">{f.name}</h3>
+                      <p className="text-xs text-muted-foreground">{f.version ? `v${f.version} · ` : ""}{fControls.length} controls · {fEvidence.length} evidence items</p>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <StatusBadge status={f.status} />
+                      <span className="text-sm font-semibold" style={{ color: readiness >= 80 ? "#10b981" : readiness >= 50 ? "#eab308" : "#ef4444" }}>{readiness}% ready</span>
+                    </div>
+                  </div>
+                  <div className="grid grid-cols-3 gap-3 mb-3">
+                    <div className="bg-emerald-50 dark:bg-emerald-950/30 rounded-lg p-2 text-center">
+                      <div className="text-lg font-bold text-emerald-600">{passing}</div>
+                      <div className="text-xs text-muted-foreground">Passing</div>
+                    </div>
+                    <div className="bg-red-50 dark:bg-red-950/30 rounded-lg p-2 text-center">
+                      <div className="text-lg font-bold text-red-600">{failing}</div>
+                      <div className="text-xs text-muted-foreground">Failing</div>
+                    </div>
+                    <div className="bg-slate-50 dark:bg-slate-800/40 rounded-lg p-2 text-center">
+                      <div className="text-lg font-bold text-muted-foreground">{notTested}</div>
+                      <div className="text-xs text-muted-foreground">Not tested</div>
+                    </div>
+                  </div>
+                  {fControls.length === 0 ? (
+                    <p className="text-sm text-muted-foreground py-3 text-center">No controls mapped to this framework.</p>
+                  ) : (
+                    <div className="border border-border rounded-lg overflow-hidden">
+                      <table className="w-full text-sm">
+                        <thead className="bg-muted/50 text-muted-foreground text-xs uppercase">
+                          <tr>
+                            <th className="text-left px-3 py-2">Control</th>
+                            <th className="text-left px-3 py-2">Status</th>
+                            <th className="text-left px-3 py-2">Evidence</th>
+                            <th className="text-left px-3 py-2">Owner</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {fControls.map((c) => (
+                            <tr key={c.id} className="border-t border-border">
+                              <td className="px-3 py-2"><span className="font-medium">{c.control_id ? `${c.control_id} — ` : ""}{c.title}</span></td>
+                              <td className="px-3 py-2"><StatusBadge status={c.status} /></td>
+                              <td className="px-3 py-2 text-muted-foreground">{c.evidence_count || 0}</td>
+                              <td className="px-3 py-2 text-muted-foreground text-xs">{c.owner_name || "—"}</td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    </div>
+                  )}
+                </div>
+              );
+            })}
           </div>
         </TabsContent>
       </Tabs>

@@ -19,6 +19,7 @@ export const navSections = [
       { label: "Architecture", path: "/architecture", icon: Server, roles: ["admin", "compliance_officer", "risk_manager", "auditor"] },
       { label: "Posture Dashboard", path: "/posture", icon: BarChart3, roles: ["admin", "compliance_officer", "risk_manager", "auditor"] },
       { label: "GRC Education", path: "/grc-education", icon: Gauge, roles: ["admin", "compliance_officer", "risk_manager", "auditor", "user"] },
+      { label: "Maturity Dashboard", path: "/maturity-dashboard", icon: LineChart, roles: ["admin", "compliance_officer", "risk_manager", "auditor"] },
     ]
   },
   {
