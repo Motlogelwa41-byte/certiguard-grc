@@ -8,6 +8,7 @@ import {
   Lock, BarChart3, Zap, CreditCard, Users, ListChecks, BookOpen, ChevronRight,
   Workflow, Mail, Plug, Bell, ScrollText, Target
 } from "lucide-react";
+import SampleWalkthrough from "@/components/user-guide/SampleWalkthrough";
 
 const ROLES = [
   { role: "admin", desc: "Full access — manages the tenant, users, billing, security, and all modules." },
@@ -36,6 +37,7 @@ const SECTIONS = [
   { id: "reporting", icon: BarChart3, title: "9. Reporting", to: "/reports" },
   { id: "security", icon: ShieldCheck, title: "10. Security & Multi-Tenancy", to: "/security" },
   { id: "billing", icon: CreditCard, title: "11. Billing & Plans", to: "/billing" },
+  { id: "sample", icon: Building2, title: "12. Sample Company Walkthrough", to: null },
 ];
 
 export default function UserGuide() {
@@ -292,6 +294,11 @@ export default function UserGuide() {
               ))}
             </div>
             <p className="text-xs text-muted-foreground">Checkout supports Stripe and PayPal. For regions where automated checkout isn't available, plans can be manually provisioned from the Billing page.</p>
+          </Section>
+
+          {/* 12. Sample Company Walkthrough */}
+          <Section id="sample" icon={Building2} title="Sample Company Walkthrough">
+            <SampleWalkthrough />
           </Section>
 
           {/* Footer */}
