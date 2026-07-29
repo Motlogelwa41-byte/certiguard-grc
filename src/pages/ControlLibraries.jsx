@@ -5,7 +5,9 @@ import PageHeader from "@/components/shared/PageHeader";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/components/ui/use-toast";
 import { CONTROL_LIBRARIES } from "@/lib/controlLibraries";
-import { Library, Check, Loader2, ArrowRight, ShieldCheck } from "lucide-react";
+import { Library, Check, Loader2, ArrowRight, ShieldCheck, Eye } from "lucide-react";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { ScrollArea } from "@/components/ui/scroll-area";
 
 export default function ControlLibraries() {
   const navigate = useNavigate();
@@ -13,6 +15,7 @@ export default function ControlLibraries() {
   const [frameworks, setFrameworks] = useState([]);
   const [loading, setLoading] = useState(true);
   const [importing, setImporting] = useState(null);
+  const [previewLib, setPreviewLib] = useState(null);
 
   useEffect(() => {
     (async () => {
@@ -57,7 +60,10 @@ export default function ControlLibraries() {
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        {CONTROL_LIBRARIES.map((lib) => {
+        {[...CONTROL_LIBRARIES].sort((a, b) => {
+          const order = { Starter: 0, SADC: 1 };
+          return (order[a.tag] ?? 2) - (order[b.tag] ?? 2);
+        }).map((lib) => {
           const imported = isImported(lib);
           return (
             <div key={lib.key} className="bg-card rounded-2xl border border-border p-6 flex flex-col">
@@ -66,7 +72,12 @@ export default function ControlLibraries() {
                   <div className="w-11 h-11 rounded-xl bg-primary/10 flex items-center justify-center"><Library className="w-5 h-5 text-primary" /></div>
                   <div>
                     <h3 className="font-heading font-bold text-foreground">{lib.name}</h3>
-                    <p className="text-[11px] text-muted-foreground">v{lib.version} · {lib.controls.length} controls</p>
+                    <p className="text-[11px] text-muted-foreground flex items-center gap-1.5">
+                      v{lib.version} · {lib.controls.length} controls
+                      {lib.tag && (
+                        <span className={`text-[10px] font-semibold px-1.5 py-0.5 rounded-full ${lib.tag === "SADC" ? "bg-amber-100 text-amber-700" : "bg-blue-100 text-blue-700"}`}>{lib.tag}</span>
+                      )}
+                    </p>
                   </div>
                 </div>
                 {imported && <span className="text-xs font-medium px-2.5 py-1 rounded-full bg-success/10 text-success border border-success/20 flex items-center gap-1"><Check className="w-3.5 h-3.5" /> Imported</span>}
@@ -78,12 +89,15 @@ export default function ControlLibraries() {
                 ))}
               </div>
               <div className="flex items-center gap-2">
+                <Button size="sm" variant="ghost" onClick={() => setPreviewLib(lib)}>
+                  <Eye className="w-4 h-4 mr-1" /> Preview
+                </Button>
                 {imported ? (
                   <>
                     <Button size="sm" variant="outline" onClick={() => doImport(lib)} disabled={importing === lib.key}>
                       {importing === lib.key ? <Loader2 className="w-4 h-4 mr-1 animate-spin" /> : <Check className="w-4 h-4 mr-1" />} Re-sync missing
                     </Button>
-                    <Button size="sm" variant="ghost" onClick={() => navigate("/controls")}>View controls <ArrowRight className="w-4 h-4 ml-1" /></Button>
+                    <Button size="sm" variant="ghost" onClick={() => navigate("/controls")}>View <ArrowRight className="w-4 h-4 ml-1" /></Button>
                   </>
                 ) : (
                   <Button size="sm" onClick={() => doImport(lib)} disabled={importing === lib.key}>
@@ -95,6 +109,41 @@ export default function ControlLibraries() {
           );
         })}
       </div>
+
+      {/* Pre-import preview modal */}
+      <Dialog open={!!previewLib} onOpenChange={(o) => !o && setPreviewLib(null)}>
+        <DialogContent className="max-w-2xl max-h-[80vh] flex flex-col">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Library className="w-5 h-5 text-primary" />
+              {previewLib?.name}
+            </DialogTitle>
+            <p className="text-sm text-muted-foreground">{previewLib?.description}</p>
+            <p className="text-xs text-muted-foreground mt-1">{previewLib?.controls?.length} controls · v{previewLib?.version}</p>
+          </DialogHeader>
+          <ScrollArea className="flex-1 -mx-6 px-6">
+            <div className="space-y-1">
+              {previewLib?.controls?.map((c) => (
+                <div key={c.control_id} className="flex items-start gap-3 py-2 border-b border-border last:border-0">
+                  <span className="text-xs font-mono font-semibold text-primary shrink-0 mt-0.5 w-20">{c.control_id}</span>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-sm font-medium text-foreground">{c.title}</p>
+                    <p className="text-xs text-muted-foreground">{c.description}</p>
+                  </div>
+                  <span className="text-[10px] capitalize text-muted-foreground bg-muted px-1.5 py-0.5 rounded-full shrink-0">{c.category.replace(/_/g, " ")}</span>
+                </div>
+              ))}
+            </div>
+          </ScrollArea>
+          <div className="flex items-center justify-end gap-2 pt-4 border-t border-border mt-2">
+            <Button size="sm" variant="ghost" onClick={() => setPreviewLib(null)}>Cancel</Button>
+            <Button size="sm" onClick={() => { doImport(previewLib); setPreviewLib(null); }} disabled={importing === previewLib?.key}>
+              {importing === previewLib?.key ? <Loader2 className="w-4 h-4 mr-1 animate-spin" /> : <Library className="w-4 h-4 mr-1" />}
+              Import {previewLib?.controls?.length} controls
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
