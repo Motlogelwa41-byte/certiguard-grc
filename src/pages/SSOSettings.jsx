@@ -8,7 +8,8 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useToast } from "@/components/ui/use-toast";
 import StatusBadge from "@/components/shared/StatusBadge";
-import { Plus, RefreshCw, Trash2, KeyRound, Users, ShieldCheck, AlertCircle, Loader2 } from "lucide-react";
+import { Plus, RefreshCw, Trash2, KeyRound, Users, ShieldCheck, AlertCircle, Loader2, Wifi } from "lucide-react";
+import ProviderSetupGuide from "@/components/sso/ProviderSetupGuide";
 
 const TYPES = [
   { value: "azure_ad", label: "Microsoft Entra ID" },
@@ -28,7 +29,22 @@ export default function SSOSettings() {
   const [editing, setEditing] = useState(null);
   const [form, setForm] = useState(emptyForm);
   const [syncing, setSyncing] = useState(null);
+  const [testing, setTesting] = useState(null);
   const { toast } = useToast();
+
+  const testConnection = async (idp) => {
+    setTesting(idp.id);
+    try {
+      const res = await base44.functions.invoke("testScimConnection", { idp_id: idp.id });
+      const data = res?.data || res;
+      if (data?.ok) toast({ title: "Connection verified", description: data.message, duration: 2500 });
+      else toast({ title: "Connection failed", description: data?.error, variant: "destructive", duration: 4000 });
+      load();
+    } catch (e) {
+      toast({ title: "Connection test failed", description: e.message, variant: "destructive", duration: 4000 });
+    }
+    setTesting(null);
+  };
 
   const load = async () => {
     setLoading(true);
@@ -116,7 +132,8 @@ export default function SSOSettings() {
             {idp.last_error && <p className="text-rose-500 text-xs mb-3 flex items-center gap-1"><AlertCircle className="w-3.5 h-3.5" /> {idp.last_error}</p>}
             <div className="flex items-center gap-2">
               <Button size="sm" variant="outline" onClick={() => openEdit(idp)}>Configure</Button>
-              <Button size="sm" onClick={() => sync(idp)} disabled={syncing === idp.id}>{syncing === idp.id ? <Loader2 className="w-3.5 h-3.5 mr-1 animate-spin" /> : <RefreshCw className="w-3.5 h-3.5 mr-1" />} Sync Directory</Button>
+              <Button size="sm" variant="outline" onClick={() => testConnection(idp)} disabled={testing === idp.id}>{testing === idp.id ? <Loader2 className="w-3.5 h-3.5 mr-1 animate-spin" /> : <Wifi className="w-3.5 h-3.5 mr-1" />} Test</Button>
+              <Button size="sm" onClick={() => sync(idp)} disabled={syncing === idp.id}>{syncing === idp.id ? <Loader2 className="w-3.5 h-3.5 mr-1 animate-spin" /> : <RefreshCw className="w-3.5 h-3.5 mr-1" />} Sync</Button>
               <Button size="sm" variant="ghost" onClick={() => remove(idp)}><Trash2 className="w-3.5 h-3.5 text-destructive" /></Button>
             </div>
           </div>
@@ -165,6 +182,7 @@ export default function SSOSettings() {
               <div><Label>Provider name</Label><Input value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} placeholder="Corporate Identity Provider" /></div>
               <div><Label>Type</Label><Select value={form.type} onValueChange={(v) => setForm({ ...form, type: v })}><SelectTrigger><SelectValue /></SelectTrigger><SelectContent>{TYPES.map((t) => <SelectItem key={t.value} value={t.value}>{t.label}</SelectItem>)}</SelectContent></Select></div>
             </div>
+            <ProviderSetupGuide type={form.type} />
             <div><Label>SCIM base URL</Label><Input value={form.scim_base_url} onChange={(e) => setForm({ ...form, scim_base_url: e.target.value })} placeholder="https://tenant.scim.example/scim/v2" /></div>
             <div><Label>Token secret name</Label><Input value={form.token_secret} onChange={(e) => setForm({ ...form, token_secret: e.target.value })} placeholder="SCIM_BEARER_TOKEN" /><p className="text-xs text-muted-foreground mt-1">Add this secret in Dashboard → Secrets with the SCIM bearer token value.</p></div>
             <div><Label>SSO domains (comma-separated)</Label><Input value={form.domains} onChange={(e) => setForm({ ...form, domains: e.target.value })} placeholder="company.com, subsidiary.com" /></div>
