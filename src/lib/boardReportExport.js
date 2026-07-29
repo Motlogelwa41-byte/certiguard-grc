@@ -6,6 +6,16 @@ import { jsPDF } from "jspdf";
  * and page-numbered footer — designed for board presentations.
  */
 export async function exportElementToPDF(element, { filename = "report.pdf", title = "Report", subtitle = "" } = {}) {
+  // Lock export to light theme: temporarily remove `dark` from <html> so html2canvas
+  // captures light-mode computed styles (white background, dark text) regardless of
+  // the user's current theme preference. Restored in finally after capture completes.
+  const _root = document.documentElement;
+  const _wasDark = _root.classList.contains("dark");
+  if (_wasDark) _root.classList.remove("dark");
+  // Force reflow + wait one frame so the browser repaints with light-theme styles
+  void element.offsetWidth;
+  await new Promise((r) => requestAnimationFrame(() => r()));
+  try {
   const canvas = await html2canvas(element, {
     scale: 2,
     backgroundColor: "#ffffff",
@@ -80,4 +90,7 @@ export async function exportElementToPDF(element, { filename = "report.pdf", tit
   }
 
   pdf.save(filename);
+  } finally {
+    if (_wasDark) _root.classList.add("dark");
+  }
 }
