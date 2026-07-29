@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from "react";
+import { Link } from "react-router-dom";
 import { base44 } from "@/api/base44Client";
+import PlatformStatus from "@/components/trust/PlatformStatus";
 import {
   Shield, CheckCircle, Lock, Eye, Server, Globe, Mail, Award,
   AlertTriangle, Activity, Zap, FileCheck, Users, Clock,
@@ -362,10 +364,18 @@ export default function TrustCenterPublic() {
           </section>
         ))}
 
+        {/* Platform Status */}
+        <PlatformStatus />
+
         {/* Footer */}
         <footer className="border-t border-slate-100 pt-8 text-center space-y-1">
           <p className="text-xs text-slate-400">
             This Trust Center is powered by <strong className="text-slate-600">CertiGuard GRC</strong> — Africa's leading compliance platform
+          </p>
+          <p className="text-xs text-slate-400 flex items-center justify-center gap-3">
+            <Link to="/privacy" className="underline hover:text-slate-600">Privacy Policy</Link>
+            <span>·</span>
+            <Link to="/terms" className="underline hover:text-slate-600">Terms of Service</Link>
           </p>
           <p className="text-xs text-slate-400">Last updated: {new Date().toLocaleDateString("en-GB", { day: "numeric", month: "long", year: "numeric" })}</p>
           {config.contact_email && (

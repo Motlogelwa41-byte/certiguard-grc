@@ -109,6 +109,8 @@ import TestingChecklist from '@/pages/TestingChecklist';
 import StakeholderSummary from '@/pages/StakeholderSummary';
 import AuditorLinkAccess from '@/pages/AuditorLinkAccess';
 import UserGuide from '@/pages/UserGuide';
+import PrivacyPolicy from '@/pages/PrivacyPolicy';
+import Terms from '@/pages/Terms';
 
 const AuthenticatedApp = () => {
   const { isLoadingAuth, isLoadingPublicSettings, authError, navigateToLogin } = useAuth();
@@ -139,6 +141,8 @@ const AuthenticatedApp = () => {
       <Route path="/pricing" element={<Pricing />} />
       <Route path="/vendor-questionnaire" element={<VendorQuestionnaire />} />
       <Route path="/trust-center" element={<TrustCenterPublic />} />
+      <Route path="/privacy" element={<PrivacyPolicy />} />
+      <Route path="/terms" element={<Terms />} />
       <Route path="/auditor-link/:token" element={<AuditorLinkAccess />} />
       <Route element={<ProtectedRoute unauthenticatedElement={<Navigate to="/login" replace />} />}>
         <Route element={<TenantProvider><AppLayout /></TenantProvider>}>
