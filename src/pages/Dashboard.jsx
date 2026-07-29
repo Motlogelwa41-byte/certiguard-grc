@@ -13,6 +13,7 @@ import VendorAssessmentWidget from "@/components/dashboard/VendorAssessmentWidge
 import ComplianceScoreRing from "@/components/dashboard/ComplianceScoreRing";
 import ActivityFeed from "@/components/dashboard/ActivityFeed";
 import QuickActions from "@/components/dashboard/QuickActions";
+import OnboardingProgress from "@/components/dashboard/OnboardingProgress";
 import ComplianceHeatmap from "@/components/dashboard/ComplianceHeatmap";
 import FrameworkReadinessInsights from "@/components/dashboard/FrameworkReadinessInsights";
 import ComplianceTrendChart from "@/components/dashboard/ComplianceTrendChart";
@@ -142,6 +143,9 @@ export default function Dashboard() {
           </div>
         </div>
       </div>
+
+      {/* Onboarding Progress */}
+      <OnboardingProgress />
 
       {/* Quick Actions */}
       <div className="mb-8">

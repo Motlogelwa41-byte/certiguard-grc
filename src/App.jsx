@@ -111,6 +111,7 @@ import AuditorLinkAccess from '@/pages/AuditorLinkAccess';
 import UserGuide from '@/pages/UserGuide';
 import PrivacyPolicy from '@/pages/PrivacyPolicy';
 import Terms from '@/pages/Terms';
+import DataPrivacy from '@/pages/DataPrivacy';
 
 const AuthenticatedApp = () => {
   const { isLoadingAuth, isLoadingPublicSettings, authError, navigateToLogin } = useAuth();
@@ -238,6 +239,7 @@ const AuthenticatedApp = () => {
           <Route path="/testing-checklist" element={<TestingChecklist />} />
           <Route path="/stakeholder-summary" element={<StakeholderSummary />} />
           <Route path="/user-guide" element={<UserGuide />} />
+          <Route path="/data-privacy" element={<DataPrivacy />} />
         </Route>
       </Route>
       <Route path="*" element={<PageNotFound />} />

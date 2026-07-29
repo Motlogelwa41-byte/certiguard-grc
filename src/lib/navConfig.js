@@ -146,6 +146,7 @@ export const navSections = [
       { label: "Security Command Center", path: "/security-command-center", icon: Shield, roles: ["admin", "compliance_officer", "risk_manager", "auditor"] },
       { label: "UAT Checklist", path: "/testing-checklist", icon: ClipboardList, roles: ["admin", "compliance_officer", "risk_manager", "auditor"] },
       { label: "SSO & Directory", path: "/sso", icon: KeyRound, roles: ["admin"] },
+      { label: "Data Privacy", path: "/data-privacy", icon: Lock, roles: ["admin", "compliance_officer"] },
       { label: "Tenants", path: "/tenant-admin", icon: PieChart, roles: ["admin"] },
       { label: "Billing", path: "/billing", icon: CreditCard, roles: ["admin"] },
       { label: "Policy Acknowledgments", path: "/policy-acknowledgments", icon: FileCheck, roles: ["admin", "compliance_officer"] },
