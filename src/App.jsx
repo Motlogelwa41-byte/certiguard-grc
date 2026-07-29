@@ -108,6 +108,7 @@ import SecurityCommandCenter from '@/pages/SecurityCommandCenter';
 import TestingChecklist from '@/pages/TestingChecklist';
 import StakeholderSummary from '@/pages/StakeholderSummary';
 import AuditorLinkAccess from '@/pages/AuditorLinkAccess';
+import UserGuide from '@/pages/UserGuide';
 
 const AuthenticatedApp = () => {
   const { isLoadingAuth, isLoadingPublicSettings, authError, navigateToLogin } = useAuth();
@@ -232,6 +233,7 @@ const AuthenticatedApp = () => {
           <Route path="/security-command-center" element={<SecurityCommandCenter />} />
           <Route path="/testing-checklist" element={<TestingChecklist />} />
           <Route path="/stakeholder-summary" element={<StakeholderSummary />} />
+          <Route path="/user-guide" element={<UserGuide />} />
         </Route>
       </Route>
       <Route path="*" element={<PageNotFound />} />
