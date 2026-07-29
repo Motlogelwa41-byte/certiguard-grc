@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { Check, X, Shield, Zap, Building2, ArrowRight, Star, Lock, Sparkles } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { startCheckout, startPaypalCheckout } from "@/lib/billing";
+import { startDpoCheckout, startPaypalCheckout } from "@/lib/billing";
 
 const plans = [
   {
@@ -214,7 +214,7 @@ export default function Pricing() {
                   if (plan.tier === "trial") { window.location.href = "/register"; return; }
                   if (plan.tier === "enterprise") { window.location.href = "mailto:sales@certiguard.com"; return; }
                   setCheckout(plan.tier);
-                  try { await startCheckout(plan.tier, billingCycle); }
+                  try { await startDpoCheckout(plan.tier, billingCycle); }
                   finally { setCheckout(null); }
                 }}
               >
