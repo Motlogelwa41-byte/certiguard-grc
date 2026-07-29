@@ -6,9 +6,10 @@ import { Badge } from "@/components/ui/badge";
 import {
   Rocket, ShieldCheck, FileCheck, Paperclip, Award, AlertTriangle, Building2,
   Lock, BarChart3, Zap, CreditCard, Users, ListChecks, BookOpen, ChevronRight,
-  Workflow, Mail, Plug, Bell, ScrollText, Target
+  Workflow, Mail, Plug, Bell, ScrollText, Target, PlayCircle
 } from "lucide-react";
 import SampleWalkthrough from "@/components/user-guide/SampleWalkthrough";
+import VideoTutorials from "@/components/user-guide/VideoTutorials";
 
 const ROLES = [
   { role: "admin", desc: "Full access — manages the tenant, users, billing, security, and all modules." },
@@ -38,6 +39,7 @@ const SECTIONS = [
   { id: "security", icon: ShieldCheck, title: "10. Security & Multi-Tenancy", to: "/security" },
   { id: "billing", icon: CreditCard, title: "11. Billing & Plans", to: "/billing" },
   { id: "sample", icon: Building2, title: "12. Sample Company Walkthrough", to: null },
+  { id: "videos", icon: PlayCircle, title: "13. Video Tutorials", to: null },
 ];
 
 export default function UserGuide() {
@@ -299,6 +301,11 @@ export default function UserGuide() {
           {/* 12. Sample Company Walkthrough */}
           <Section id="sample" icon={Building2} title="Sample Company Walkthrough">
             <SampleWalkthrough />
+          </Section>
+
+          {/* 13. Video Tutorials */}
+          <Section id="videos" icon={PlayCircle} title="Video Tutorials">
+            <VideoTutorials />
           </Section>
 
           {/* Footer */}
