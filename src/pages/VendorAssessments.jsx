@@ -48,6 +48,8 @@ export default function VendorAssessments() {
   const [sendTarget, setSendTarget] = useState(null);
   const [recipientEmail, setRecipientEmail] = useState("");
   const [sending, setSending] = useState(false);
+  const [reviewMode, setReviewMode] = useState(false);
+  const [reviewNotes, setReviewNotes] = useState("");
   const { toast } = useToast();
 
   const getQuestionnaireUrl = (id) =>
@@ -83,7 +85,29 @@ export default function VendorAssessments() {
     const map = {};
     parsed.forEach((q, i) => { map[i] = q.answer || ""; });
     setAnswers(map);
+    setReviewMode(a.status === "submitted" || a.status === "completed");
+    setReviewNotes(a.notes || "");
     setViewOpen(true);
+  };
+
+  const handleCompleteReview = async () => {
+    try {
+      const user = await base44.auth.me().catch(() => null);
+      await base44.entities.VendorAssessment.update(selected.id, {
+        status: "completed",
+        reviewer_name: user?.full_name || user?.email || "",
+        notes: reviewNotes,
+      });
+      // Auto-update the vendor's risk level based on the assessment score
+      if (selected.vendor_id && selected.risk_level) {
+        await base44.entities.Vendor.update(selected.vendor_id, { risk_level: selected.risk_level }).catch(() => {});
+      }
+      setViewOpen(false);
+      load();
+      toast({ title: "Assessment completed", description: "Vendor risk level updated from assessment score" });
+    } catch (e) {
+      toast({ title: "Error", description: e?.message || "Failed to complete review", variant: "destructive" });
+    }
   };
 
   const handleSaveAnswers = async (submit = false) => {
@@ -266,6 +290,7 @@ export default function VendorAssessments() {
                       {ANSWER_OPTIONS.map((opt) => (
                         <button
                           key={opt}
+                          disabled={reviewMode}
                           onClick={() => setAnswers((prev) => ({ ...prev, [i]: opt }))}
                           className={`px-3 py-1 rounded-full text-xs font-medium border transition-colors ${
                             answers[i] === opt
@@ -283,9 +308,35 @@ export default function VendorAssessments() {
               </div>
             ))}
           </div>
-          <div className="flex gap-2 pt-2 border-t border-border">
-            <Button variant="outline" className="flex-1" onClick={() => handleSaveAnswers(false)}>Save Progress</Button>
-            <Button className="flex-1" onClick={() => handleSaveAnswers(true)}><CheckCircle className="w-4 h-4 mr-1" /> Submit & Score</Button>
+          <div className="pt-3 border-t border-border">
+            {reviewMode ? (
+              <div className="space-y-3">
+                <div className="flex items-center justify-between text-sm">
+                  <span className="text-muted-foreground">Risk Score: <span className="font-semibold text-foreground">{selected?.risk_score}/100</span></span>
+                  <StatusBadge status={selected?.risk_level || "medium"} />
+                </div>
+                {selected?.status === "submitted" && (
+                  <>
+                    <div>
+                      <Label>Review Notes</Label>
+                      <Textarea value={reviewNotes} onChange={(e) => setReviewNotes(e.target.value)} placeholder="Add review notes before approving..." rows={2} />
+                    </div>
+                    <Button className="w-full" onClick={handleCompleteReview}><CheckCircle className="w-4 h-4 mr-1" /> Approve & Complete — Update Vendor Risk</Button>
+                  </>
+                )}
+                {selected?.status === "completed" && (
+                  <div className="flex items-center justify-center gap-2 text-sm text-muted-foreground py-1">
+                    <CheckCircle className="w-5 h-5 text-emerald-500" />
+                    Assessment completed by {selected?.reviewer_name || "reviewer"}
+                  </div>
+                )}
+              </div>
+            ) : (
+              <div className="flex gap-2">
+                <Button variant="outline" className="flex-1" onClick={() => handleSaveAnswers(false)}>Save Progress</Button>
+                <Button className="flex-1" onClick={() => handleSaveAnswers(true)}><CheckCircle className="w-4 h-4 mr-1" /> Submit & Score</Button>
+              </div>
+            )}
           </div>
         </DialogContent>
       </Dialog>

@@ -39,8 +39,11 @@ export default function VendorQuestionnaire() {
 
   useEffect(() => {
     if (!assessmentId) { setError("Invalid link — no assessment ID provided."); setLoading(false); return; }
-    base44.entities.VendorAssessment.get(assessmentId)
-      .then((a) => {
+    // Public endpoint — uses a service-role backend function because RLS
+    // blocks unauthenticated reads/writes on the VendorAssessment entity.
+    base44.functions.invoke("submitVendorAssessment", { action: "load", assessment_id: assessmentId })
+      .then((res) => {
+        const a = res?.data;
         if (!a) { setError("Assessment not found."); setLoading(false); return; }
         setAssessment(a);
         const parsed = (() => { try { return JSON.parse(a.answers || "[]"); } catch { return []; } })();
@@ -55,25 +58,21 @@ export default function VendorQuestionnaire() {
 
   const handleSubmit = async () => {
     setSubmitting(true);
-    const answeredList = QUESTIONNAIRE.map((q, i) => ({
-      ...q,
-      answer: answers[i] || "",
-      score: SCORE_MAP[answers[i]] ?? 0,
-    }));
-    const answered = answeredList.filter((a) => a.answer).length;
-    const rawScore = answeredList.reduce((s, a) => s + a.score, 0);
-    const maxScore = QUESTIONNAIRE.length * 10;
-    const risk_score = Math.round((rawScore / maxScore) * 100);
-
-    await base44.entities.VendorAssessment.update(assessmentId, {
-      answers: JSON.stringify(answeredList),
-      answered_questions: answered,
-      risk_score,
-      risk_level: calcRiskLevel(risk_score),
-      status: "submitted",
-      completed_date: new Date().toISOString().split("T")[0],
-    });
-    setSubmitted(true);
+    try {
+      const res = await base44.functions.invoke("submitVendorAssessment", {
+        action: "submit",
+        assessment_id: assessmentId,
+        answers,
+      });
+      if (res?.data?.error) {
+        setError(res.data.error);
+        setSubmitting(false);
+        return;
+      }
+      setSubmitted(true);
+    } catch (e) {
+      setError(e?.response?.data?.error || "Failed to submit. Please try again.");
+    }
     setSubmitting(false);
   };
 
