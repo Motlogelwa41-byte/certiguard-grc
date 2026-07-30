@@ -22,7 +22,7 @@ const entities = [
 ];
 
 const functions = [
-  "provisionTenant", "sendDueReminders", "stripeWebhook", "createCheckoutSession",
+  "provisionTenant", "sendDueReminders", "createDpoPayment",
   "syncAwsSecurityHub", "runControlTests", "scanCertificationExpiry", "logAudit",
   "verifyAuditChain", "syncIdpDirectory", "ingestSecurityFindings",
 ];
@@ -39,7 +39,7 @@ const connectors = [
   { name: "Slack Bot", icon: Slack, color: "text-purple-500 bg-purple-50 border-purple-200" },
   { name: "Google Drive", icon: FileCheck, color: "text-blue-500 bg-blue-50 border-blue-200" },
   { name: "Google Calendar", icon: Calendar, color: "text-emerald-500 bg-emerald-50 border-emerald-200" },
-  { name: "Stripe", icon: CreditCard, color: "text-indigo-500 bg-indigo-50 border-indigo-200" },
+  { name: "DPO Pay", icon: CreditCard, color: "text-indigo-500 bg-indigo-50 border-indigo-200" },
   { name: "AWS Sec Hub", icon: Cloud, color: "text-amber-500 bg-amber-50 border-amber-200" },
   { name: "Jira", icon: Bug, color: "text-sky-500 bg-sky-50 border-sky-200" },
 ];
@@ -249,7 +249,7 @@ export default function Architecture() {
         </h3>
         <div className="space-y-2 text-xs text-muted-foreground">
           <p><span className="font-semibold text-foreground">Signup:</span> Pricing → Register → OTP → provisionTenant → Tenant created → Dashboard</p>
-          <p><span className="font-semibold text-foreground">Billing:</span> Pricing → createCheckoutSession → Stripe Checkout → stripeWebhook → Tenant upgraded</p>
+          <p><span className="font-semibold text-foreground">Billing:</span> Pricing → createDpoPayment → DPO Pay Checkout → Tenant upgraded</p>
           <p><span className="font-semibold text-foreground">Task Reminders:</span> Daily 8am → sendDueReminders → Gmail to assignees + Slack alert</p>
           <p><span className="font-semibold text-foreground">Control Monitoring:</span> Daily → runControlTests → Control status updated → Evidence auto-collected</p>
           <p><span className="font-semibold text-foreground">Audit:</span> Every entity mutation → logAudit → AuditTrail (hash-chained)</p>

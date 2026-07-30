@@ -7,7 +7,6 @@ import { useToast } from "@/components/ui/use-toast";
 import { useTenant } from "@/lib/TenantContext";
 import { useAuth } from "@/lib/AuthContext";
 import { base44 } from "@/api/base44Client";
-import { openBillingPortal } from "@/lib/billing";
 
 const TIER_LABELS = {
   trial: "Free Trial",
@@ -20,7 +19,6 @@ export default function Billing() {
   const { tenant, loading, refreshTenant } = useTenant();
   const { user } = useAuth();
   const { toast } = useToast();
-  const [portalLoading, setPortalLoading] = useState(false);
   const [usage, setUsage] = useState({ users: 0, frameworks: 0 });
   const [manual, setManual] = useState({ tier: "professional", status: "active", billing_cycle: "monthly", payment_ref: "" });
   const [saving, setSaving] = useState(false);
@@ -71,12 +69,6 @@ export default function Billing() {
     }
   };
 
-  const handlePortal = async () => {
-    setPortalLoading(true);
-    try { await openBillingPortal(); }
-    finally { setPortalLoading(false); }
-  };
-
   if (loading) {
     return <div className="flex items-center justify-center min-h-[60vh]"><Loader2 className="w-6 h-6 animate-spin text-muted-foreground" /></div>;
   }
@@ -94,7 +86,6 @@ export default function Billing() {
 
   const maxUsers = tenant?.max_users ?? (tier === "trial" ? 3 : 5);
   const maxFrameworks = tenant?.max_frameworks ?? (tier === "trial" ? 2 : 5);
-  const hasStripeAccount = !!tenant?.stripe_customer_id;
   const statusColor = {
     active: "bg-emerald-100 text-emerald-700",
     trial: "bg-blue-100 text-blue-700",
@@ -108,14 +99,6 @@ export default function Billing() {
       <PageHeader
         title="Billing & Plan"
         subtitle="Manage your subscription, billing cycle, and payment method"
-        actions={
-          isAdmin && hasStripeAccount ? (
-            <Button variant="outline" onClick={handlePortal} disabled={portalLoading}>
-              {portalLoading ? <Loader2 className="w-4 h-4 mr-1 animate-spin" /> : <ExternalLink className="w-4 h-4 mr-1" />}
-              Manage billing in Stripe
-            </Button>
-          ) : null
-        }
       />
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
@@ -160,11 +143,6 @@ export default function Billing() {
           {isAdmin ? (
             <div className="flex flex-wrap gap-3">
               <Link to="/pricing"><Button><Crown className="w-4 h-4 mr-1" /> {status === "trial" ? "Upgrade plan" : "Change plan"}</Button></Link>
-              {hasStripeAccount && (
-                <Button variant="outline" onClick={handlePortal} disabled={portalLoading}>
-                  <CreditCard className="w-4 h-4 mr-1" /> Update payment method
-                </Button>
-              )}
             </div>
           ) : (
             <p className="text-sm text-muted-foreground">Only your workspace admin can manage billing.</p>
@@ -193,7 +171,7 @@ export default function Billing() {
             <div>
               <h3 className="font-heading font-semibold text-foreground">Manual subscription provisioning</h3>
               <p className="text-sm text-muted-foreground mt-0.5">
-                Use this to set the plan after collecting payment off-platform (EFT, PayFast, Yoco, etc.). Stripe checkout is not required.
+                Use this to set the plan after collecting payment off-platform (EFT, PayFast, Yoco, etc.). DPO Pay checkout is not required.
               </p>
             </div>
           </div>
