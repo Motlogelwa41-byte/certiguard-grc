@@ -37,18 +37,17 @@ export function TenantProvider({ children }) {
       let userTenant = null;
       let tenantId = stampedTenantId || null;
 
-      // 1. Read the tenant linked to the user profile (RLS allows id match)
-      if (tenantId) {
-        userTenant = await base44.entities.Tenant.get(tenantId).catch(() => null);
-      }
+      // Fire both lookups in parallel — saves a full round trip on every page load
+      const [tenantById, tenantsByEmail] = await Promise.all([
+        tenantId ? base44.entities.Tenant.get(tenantId).catch(() => null) : null,
+        base44.entities.Tenant.filter({ admin_email: me.email }).catch(() => []),
+      ]);
 
-      // 2. Otherwise resolve by admin_email (user is the workspace owner)
-      if (!userTenant) {
-        const byEmail = await base44.entities.Tenant.filter({ admin_email: me.email }).catch(() => []);
-        if (byEmail.length > 0) {
-          userTenant = byEmail[0];
-          tenantId = byEmail[0].id;
-        }
+      if (tenantById) {
+        userTenant = tenantById;
+      } else if (tenantsByEmail && tenantsByEmail.length > 0) {
+        userTenant = tenantsByEmail[0];
+        tenantId = tenantsByEmail[0].id;
       }
 
       // 3. No tenant at all — provision a new 14-day trial workspace

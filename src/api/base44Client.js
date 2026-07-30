@@ -95,10 +95,12 @@ base44.entities = new Proxy(_origEntities, {
         }
         if (key === 'update') {
           return async (id, data) => {
-            let auditPayload = null;
-            if (audit && DIFF_ENTITIES.has(entityName)) {
-              try {
-                const old = await e.get(id);
+            // Start the pre-fetch concurrently with the mutation — don't block the user on audit logging
+            const getPromise = (audit && DIFF_ENTITIES.has(entityName)) ? e.get(id).catch(() => null) : null;
+            const result = await fn.call(e, id, data);
+            if (getPromise) {
+              // Compute diff and fire audit log asynchronously
+              getPromise.then(old => {
                 const safeNew = safeChanges(data);
                 const diff = {};
                 for (const k of Object.keys(safeNew)) {
@@ -106,15 +108,11 @@ base44.entities = new Proxy(_origEntities, {
                   const nv = safeNew[k];
                   if (JSON.stringify(ov) !== JSON.stringify(nv)) diff[k] = { from: ov ?? '', to: nv ?? '' };
                 }
-                auditPayload = { action: 'update', entity_type: entityName, entity_id: id, entity_name: nameOf(old) || nameOf(data), changes: JSON.stringify(diff), severity: 'info' };
-              } catch (err) {
-                auditPayload = { action: 'update', entity_type: entityName, entity_id: id, entity_name: nameOf(data), changes: JSON.stringify(safeChanges(data)), severity: 'info' };
-              }
+                logAudit({ action: 'update', entity_type: entityName, entity_id: id, entity_name: nameOf(old) || nameOf(data), changes: JSON.stringify(diff), severity: 'info' });
+              }).catch(() => {});
             } else if (audit) {
-              auditPayload = { action: 'update', entity_type: entityName, entity_id: id, entity_name: nameOf(data), changes: JSON.stringify(safeChanges(data)), severity: 'info' };
+              logAudit({ action: 'update', entity_type: entityName, entity_id: id, entity_name: nameOf(data), changes: JSON.stringify(safeChanges(data)), severity: 'info' });
             }
-            const result = await fn.call(e, id, data);
-            if (auditPayload) logAudit(auditPayload);
             return result;
           };
         }
@@ -134,19 +132,15 @@ base44.entities = new Proxy(_origEntities, {
         }
         if (key === 'delete') {
           return async (id) => {
-            let auditPayload = null;
-            if (audit && DIFF_ENTITIES.has(entityName)) {
-              try {
-                const old = await e.get(id);
-                auditPayload = { action: 'delete', entity_type: entityName, entity_id: id, entity_name: nameOf(old), changes: null, severity: 'warning' };
-              } catch (err) {
-                auditPayload = { action: 'delete', entity_type: entityName, entity_id: id, entity_name: '', changes: null, severity: 'warning' };
-              }
-            } else if (audit) {
-              auditPayload = { action: 'delete', entity_type: entityName, entity_id: id, entity_name: '', changes: null, severity: 'warning' };
-            }
+            const getPromise = (audit && DIFF_ENTITIES.has(entityName)) ? e.get(id).catch(() => null) : null;
             const result = await fn.call(e, id);
-            if (auditPayload) logAudit(auditPayload);
+            if (getPromise) {
+              getPromise.then(old => {
+                logAudit({ action: 'delete', entity_type: entityName, entity_id: id, entity_name: nameOf(old), changes: null, severity: 'warning' });
+              }).catch(() => {});
+            } else if (audit) {
+              logAudit({ action: 'delete', entity_type: entityName, entity_id: id, entity_name: '', changes: null, severity: 'warning' });
+            }
             return result;
           };
         }
