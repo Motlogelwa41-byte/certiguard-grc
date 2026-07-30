@@ -112,6 +112,9 @@ import UserGuide from '@/pages/UserGuide';
 import PrivacyPolicy from '@/pages/PrivacyPolicy';
 import Terms from '@/pages/Terms';
 import DataPrivacy from '@/pages/DataPrivacy';
+import SLA from '@/pages/SLA';
+import DataResidency from '@/pages/DataResidency';
+import SecurityOverview from '@/pages/SecurityOverview';
 
 const AuthenticatedApp = () => {
   const { isLoadingAuth, isLoadingPublicSettings, authError, navigateToLogin } = useAuth();
@@ -144,6 +147,9 @@ const AuthenticatedApp = () => {
       <Route path="/trust-center" element={<TrustCenterPublic />} />
       <Route path="/privacy" element={<PrivacyPolicy />} />
       <Route path="/terms" element={<Terms />} />
+      <Route path="/sla" element={<SLA />} />
+      <Route path="/data-residency" element={<DataResidency />} />
+      <Route path="/security-overview" element={<SecurityOverview />} />
       <Route path="/auditor-link/:token" element={<AuditorLinkAccess />} />
       <Route element={<ProtectedRoute unauthenticatedElement={<Navigate to="/login" replace />} />}>
         <Route element={<TenantProvider><AppLayout /></TenantProvider>}>

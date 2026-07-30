@@ -372,7 +372,13 @@ export default function TrustCenterPublic() {
           <p className="text-xs text-slate-400">
             This Trust Center is powered by <strong className="text-slate-600">CertiGuard GRC</strong> — Africa's leading compliance platform
           </p>
-          <p className="text-xs text-slate-400 flex items-center justify-center gap-3">
+          <p className="text-xs text-slate-400 flex items-center justify-center gap-3 flex-wrap">
+            <Link to="/security-overview" className="underline hover:text-slate-600">Security Overview</Link>
+            <span>·</span>
+            <Link to="/sla" className="underline hover:text-slate-600">SLA</Link>
+            <span>·</span>
+            <Link to="/data-residency" className="underline hover:text-slate-600">Data Residency</Link>
+            <span>·</span>
             <Link to="/privacy" className="underline hover:text-slate-600">Privacy Policy</Link>
             <span>·</span>
             <Link to="/terms" className="underline hover:text-slate-600">Terms of Service</Link>
