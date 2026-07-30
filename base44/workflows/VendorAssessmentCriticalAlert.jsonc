@@ -30,7 +30,8 @@
               "vendor_name": "${ .trigger.data.vendor_name }",
               "assessment_title": "${ .trigger.data.title }",
               "risk_score": "${ .trigger.data.risk_score }",
-              "risk_level": "${ .trigger.data.risk_level }"
+              "risk_level": "${ .trigger.data.risk_level }",
+              "tenant_id": "${ .trigger.data.tenant_id }"
             }
           },
           "then": "end",

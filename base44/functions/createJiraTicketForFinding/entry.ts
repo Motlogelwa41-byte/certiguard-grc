@@ -3,6 +3,14 @@ import { createClientFromRequest } from 'npm:@base44/sdk@0.8.38';
 Deno.serve(async (req) => {
   try {
     const base44 = createClientFromRequest(req);
+
+    // Auth: block authenticated non-privileged users. Allow no-auth (workflow) calls.
+    let authUser = null;
+    try { authUser = await base44.auth.me(); } catch (_) { authUser = null; }
+    if (authUser && !['admin', 'compliance_officer'].includes(authUser.role)) {
+      return Response.json({ error: 'Insufficient permissions — only admins or compliance officers may create Jira tickets.' }, { status: 403 });
+    }
+
     const body = await req.json().catch(() => ({}));
     const f = body.finding || {};
     const title = f.title || "Untitled security finding";

@@ -18,6 +18,7 @@ Deno.serve(async (req) => {
       const sla = SLA[sev] ?? 720;
       const due = new Date(now.getTime() + sla * 3600 * 1000);
       return {
+        tenant_id: user.data?.tenant_id || '',
         finding_id: f.finding_id || `SF-${now.getFullYear()}-${String(i + 1).padStart(4, '0')}`,
         source: f.source || 'other',
         title: f.title || 'Untitled finding',

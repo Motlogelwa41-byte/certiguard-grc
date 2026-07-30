@@ -15,8 +15,10 @@ Deno.serve(async (req) => {
       return Response.json({ error: 'library_name and controls[] required' }, { status: 400 });
     }
 
-    // Find or create the framework
-    const existingFws = await db.entities.Framework.filter({ name: library_name });
+    // Find or create the framework (tenant-scoped to prevent cross-tenant matches)
+    const existingFws = tenantId
+      ? await db.entities.Framework.filter({ name: library_name, tenant_id: tenantId })
+      : await db.entities.Framework.filter({ name: library_name });
     let framework = existingFws && existingFws[0];
     if (!framework) {
       // Enforce framework cap before creating a new one
@@ -49,8 +51,10 @@ Deno.serve(async (req) => {
       });
     }
 
-    // Skip controls that already exist for this framework
-    const allControls = await db.entities.Control.list('-updated_date', 1000);
+    // Skip controls that already exist for this framework (tenant-scoped)
+    const allControls = tenantId
+      ? await db.entities.Control.filter({ tenant_id: tenantId }, '-updated_date', 1000)
+      : await db.entities.Control.list('-updated_date', 1000);
     const existing = (allControls || []).filter((c) => Array.isArray(c.framework_ids) && c.framework_ids.includes(framework.id));
     const existingIds = new Set((existing || []).map((c) => c.control_id).filter(Boolean));
     const toCreate = controls

@@ -24,7 +24,9 @@ Deno.serve(async (req) => {
       const period = `Q${q} ${year}`;
       const start = new Date(year, month, 1).toISOString().slice(0, 10);
       const deadline = new Date(year, month + 1, 28).toISOString().slice(0, 10);
+      const tenantId = user.data?.tenant_id || '';
       const created = await sr.entities.AccessReviewCampaign.create({
+        tenant_id: tenantId,
         name: `${period} Access Recertification`,
         description: 'Auto-launched quarterly access review enforcing least-privilege compliance.',
         period, scope: 'all_users', status: 'draft',
@@ -34,6 +36,7 @@ Deno.serve(async (req) => {
       });
       const users = await sr.entities.User.list('-created_date', 500);
       const toCreate = (users || []).map((u) => ({
+        tenant_id: tenantId,
         campaign_id: created.id, campaign_name: created.name,
         user_id: u.id, user_name: u.full_name || u.email, user_email: u.email,
         role: u.role || 'user',
@@ -66,6 +69,7 @@ Deno.serve(async (req) => {
           const key = `${u.id}|platform`;
           if (existingKeys.has(key)) return;
           toCreate.push({
+            tenant_id: campaign.tenant_id || user.data?.tenant_id || '',
             campaign_id: campaignId, campaign_name: campaign.name,
             user_id: u.id, user_name: u.full_name || u.email, user_email: u.email,
             role: u.role || 'user',
@@ -83,6 +87,7 @@ Deno.serve(async (req) => {
           const groups = (d.groups || []).join(', ') || 'none';
           const roles = (d.roles || []).join(', ') || 'none';
           toCreate.push({
+            tenant_id: campaign.tenant_id || user.data?.tenant_id || '',
             campaign_id: campaignId, campaign_name: campaign.name,
             user_id: d.user_id || d.external_id, user_name: d.full_name || d.email, user_email: d.email,
             role: roles,

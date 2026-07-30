@@ -22,7 +22,14 @@ const TENANT_SCOPED_ENTITIES = new Set([
   'Control', 'Risk', 'Policy', 'Vendor', 'ComplianceTask', 'Framework', 'Incident', 'Evidence',
   'Audit', 'VendorAssessment', 'ComplianceRun', 'GapAnalysis', 'TaskReminder', 'AuditFinding',
   'AuditChecklist', 'MitigationStep', 'Training', 'ComplianceEvent', 'ROPA', 'TrustCenter',
-  'ReportSchedule', 'SecurityAlert', 'ManagementReport', 'Subscription'
+  'ReportSchedule', 'SecurityAlert', 'ManagementReport', 'Subscription',
+  // Added 2026-07-30: these entities all have tenant_id + RLS but were missing from the auto-stamp set,
+  // causing frontend creates to fail RLS or (if RLS were absent) leak across tenants.
+  'Certification', 'CertificationMilestone', 'ControlTest', 'ControlTestResult',
+  'SecurityQuestionnaire', 'QuestionnaireItem', 'PenTest', 'PenTestFinding',
+  'RegulatoryChange', 'SecurityFinding', 'AccessReviewCampaign', 'AccessReviewItem',
+  'DirectoryUser', 'DPIA', 'RiskQuantification', 'PrivacyRequest', 'PrivacyRequestTask',
+  'IdentityProvider', 'Connection', 'TaskFeedback', 'AuditorScope', 'AuditorRequest', 'AuditorLink'
 ]);
 
 // AuditTrail is created server-side via the logAudit function; skip client logging for it.

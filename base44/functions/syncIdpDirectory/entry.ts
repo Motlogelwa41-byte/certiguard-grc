@@ -77,7 +77,7 @@ Deno.serve(async (req) => {
             pstatus = 'error';
           }
         }
-        await base44.entities.DirectoryUser.create({ ...payload, provisioning_status: pstatus, user_id: userId });
+        await base44.entities.DirectoryUser.create({ ...payload, tenant_id: user.data?.tenant_id || '', provisioning_status: pstatus, user_id: userId });
       }
       synced++;
     }

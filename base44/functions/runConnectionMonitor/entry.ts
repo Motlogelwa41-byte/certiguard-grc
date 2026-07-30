@@ -91,6 +91,7 @@ async function createEvidenceForConnection(sr, conn, snapshot, collectedAt) {
   const title = `${conn.name} — automated collection ${collectedAt.slice(0,10)}`;
   const notes = typeof snapshot === "string" ? snapshot : JSON.stringify(snapshot).slice(0, 2000);
   await sr.entities.Evidence.create({
+    tenant_id: conn.tenant_id || undefined,
     title,
     type: "report",
     status: "pending_review",

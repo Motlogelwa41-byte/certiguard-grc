@@ -71,6 +71,7 @@ Deno.serve(async (req) => {
       for (const e of expired.slice(0, 25)) {
         try {
           const task = await base44.asServiceRole.entities.ComplianceTask.create({
+            tenant_id: e.tenant_id || undefined,
             title: `Re-collect expired evidence: ${e.title}`,
             type: 'evidence_collection',
             status: 'todo',

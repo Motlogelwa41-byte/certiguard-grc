@@ -61,6 +61,7 @@ Deno.serve(async (req) => {
     const created = [];
     for (const td of taskDefs) {
       const t = await base44.entities.ComplianceTask.create({
+        tenant_id: change.tenant_id || user.data?.tenant_id || '',
         title: td.title,
         description: td.desc,
         type: td.type,

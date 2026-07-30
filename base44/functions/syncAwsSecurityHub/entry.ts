@@ -110,6 +110,7 @@ Deno.serve(async (req) => {
       const haystack = [f.Title, f.Description, types, f.GeneratorId].filter(Boolean).join(' ').toLowerCase();
       const linked = linkControls(haystack);
       records.push({
+        tenant_id: user.data?.tenant_id || '',
         finding_id: fid || `SF-${now.getFullYear()}-${records.length}`,
         source: 'security_hub', title: f.Title || f.Description || 'AWS Security Hub finding',
         description: f.Description || '', severity: sev,

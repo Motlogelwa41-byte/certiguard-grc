@@ -61,6 +61,7 @@ Deno.serve(async (req) => {
       for (const f of critical.slice(0, 25)) {
         try {
           const task = await base44.asServiceRole.entities.ComplianceTask.create({
+            tenant_id: f.tenant_id || undefined,
             title: `Escalate SLA-breached finding: ${f.title}`,
             type: 'remediation',
             status: 'todo',

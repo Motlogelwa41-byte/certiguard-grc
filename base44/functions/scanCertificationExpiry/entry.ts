@@ -69,6 +69,7 @@ Deno.serve(async (req) => {
           const existing = await sr.entities.ComplianceTask.filter({ title: renewalTitle }, "-created_date", 1);
           if (!existing || !existing.length) {
             await sr.entities.ComplianceTask.create({
+              tenant_id: cert.tenant_id || undefined,
               title: renewalTitle,
               type: "audit_preparation",
               priority: "high",

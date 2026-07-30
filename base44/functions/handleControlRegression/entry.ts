@@ -18,6 +18,7 @@ Deno.serve(async (req) => {
       category = '',
       owner_name = '',
       severity = 'medium',
+      tenant_id = '',
     } = body;
 
     const text =
@@ -58,6 +59,7 @@ Deno.serve(async (req) => {
     let taskError = null;
     try {
       const task = await base44.asServiceRole.entities.ComplianceTask.create({
+        tenant_id: tenant_id || undefined,
         title: `Remediate control regression: ${title || control_id}`,
         type: 'remediation',
         status: 'todo',

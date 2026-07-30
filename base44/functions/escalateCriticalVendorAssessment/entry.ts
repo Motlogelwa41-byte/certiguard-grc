@@ -22,6 +22,7 @@ Deno.serve(async (req) => {
       assessment_title = '',
       risk_score = 0,
       risk_level = 'critical',
+      tenant_id = '',
     } = body;
 
     if (!vendor_id) {
@@ -80,6 +81,7 @@ Deno.serve(async (req) => {
     let taskError = null;
     try {
       const task = await base44.asServiceRole.entities.ComplianceTask.create({
+        tenant_id: tenant_id || undefined,
         title: `Review critical vendor assessment: ${vendor_name || vendor_id}`,
         type: 'vendor_review',
         status: 'todo',

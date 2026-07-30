@@ -80,6 +80,7 @@ Deno.serve(async (req) => {
             offboarded++;
           }
           const task = await base44.asServiceRole.entities.ComplianceTask.create({
+            tenant_id: v.tenant_id || undefined,
             title: `Offboard expired vendor: ${v.name}`,
             type: 'vendor_review',
             status: 'todo',

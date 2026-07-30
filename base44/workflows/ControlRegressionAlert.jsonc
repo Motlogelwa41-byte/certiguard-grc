@@ -29,7 +29,8 @@
               "title": "${ .trigger.data.title }",
               "category": "${ .trigger.data.category }",
               "owner_name": "${ .trigger.data.owner_name }",
-              "severity": "${ .trigger.data.severity }"
+              "severity": "${ .trigger.data.severity }",
+              "tenant_id": "${ .trigger.data.tenant_id }"
             }
           },
           "then": "end",

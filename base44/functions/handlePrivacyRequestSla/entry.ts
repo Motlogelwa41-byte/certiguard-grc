@@ -5,6 +5,14 @@ Deno.serve(async (req) => {
   try {
     const base44 = createClientFromRequest(req);
     const sr = base44.asServiceRole;
+
+    // Auth: block authenticated non-privileged users. Allow no-auth (workflow) calls.
+    let authUser = null;
+    try { authUser = await base44.auth.me(); } catch (_) { authUser = null; }
+    if (authUser && !['admin', 'compliance_officer'].includes(authUser.role)) {
+      return Response.json({ error: 'Insufficient permissions' }, { status: 403 });
+    }
+
     const reqs = await sr.entities.PrivacyRequest.list("-created_date", 500);
     const today = new Date();
     const todayStr = today.toISOString().slice(0, 10);
