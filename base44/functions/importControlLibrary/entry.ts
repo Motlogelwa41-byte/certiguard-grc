@@ -19,6 +19,26 @@ Deno.serve(async (req) => {
     const existingFws = await db.entities.Framework.filter({ name: library_name });
     let framework = existingFws && existingFws[0];
     if (!framework) {
+      // Enforce framework cap before creating a new one
+      const TIER_MAX_FRAMEWORKS = { trial: 2, starter: 5, professional: 20, enterprise: 999999 };
+      let tenant = null;
+      if (tenantId) tenant = await db.entities.Tenant.get(tenantId).catch(() => null);
+      if (!tenant) {
+        const byEmail = await db.entities.Tenant.filter({ admin_email: user.email }).catch(() => []);
+        if (byEmail.length > 0) tenant = byEmail[0];
+      }
+      if (tenant) {
+        const tier = tenant.subscription_tier || 'trial';
+        const cap = tenant.max_frameworks ?? TIER_MAX_FRAMEWORKS[tier] ?? 2;
+        const visible = await base44.entities.Framework.list().catch(() => []);
+        if ((visible || []).length >= cap) {
+          return Response.json({
+            error: `Framework limit reached (${(visible || []).length}/${cap}). Upgrade your plan to import more frameworks.`,
+            limit: cap,
+            count: (visible || []).length,
+          }, { status: 402 });
+        }
+      }
       framework = await db.entities.Framework.create({
         tenant_id: tenantId,
         name: library_name,

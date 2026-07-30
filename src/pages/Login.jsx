@@ -9,6 +9,7 @@ import {
 } from "lucide-react";
 import AuthBrandPanel from "@/components/auth/AuthBrandPanel";
 import GoogleIcon from "@/components/GoogleIcon";
+import MicrosoftIcon from "@/components/MicrosoftIcon";
 import { logLogin } from "@/lib/authAudit";
 
 export default function Login() {
@@ -34,6 +35,10 @@ export default function Login() {
 
   const handleGoogle = () => {
     base44.auth.loginWithProvider("google", "/");
+  };
+
+  const handleMicrosoft = () => {
+    base44.auth.loginWithProvider("microsoft", "/");
   };
 
   return (
@@ -64,14 +69,24 @@ export default function Login() {
               </p>
             </div>
 
-            <Button
-              variant="outline"
-              className="w-full h-12 text-sm font-medium mb-5"
-              onClick={handleGoogle}
-            >
-              <GoogleIcon className="w-5 h-5 mr-2.5" />
-              Continue with Google
-            </Button>
+            <div className="grid grid-cols-2 gap-3 mb-5">
+              <Button
+                variant="outline"
+                className="h-12 text-sm font-medium"
+                onClick={handleGoogle}
+              >
+                <GoogleIcon className="w-5 h-5 mr-2" />
+                Google
+              </Button>
+              <Button
+                variant="outline"
+                className="h-12 text-sm font-medium"
+                onClick={handleMicrosoft}
+              >
+                <MicrosoftIcon className="w-5 h-5 mr-2" />
+                Microsoft
+              </Button>
+            </div>
 
             <div className="relative mb-5">
               <div className="absolute inset-0 flex items-center">

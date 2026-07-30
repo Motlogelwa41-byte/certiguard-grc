@@ -103,6 +103,14 @@ export default function SSOSettings() {
     <div>
       <PageHeader title="SSO & Directory" subtitle="Configure SAML/OIDC identity providers and SCIM directory sync" actions={<Button size="sm" onClick={openNew}><Plus className="w-4 h-4 mr-1" /> Add Provider</Button>} />
 
+      <div className="bg-emerald-50 dark:bg-emerald-950/30 border border-emerald-200 dark:border-emerald-800 rounded-xl p-4 mb-6 flex items-start gap-3">
+        <ShieldCheck className="w-5 h-5 text-emerald-600 dark:text-emerald-400 flex-shrink-0 mt-0.5" />
+        <div className="text-sm">
+          <p className="font-medium text-emerald-900 dark:text-emerald-200">Enterprise SSO is live</p>
+          <p className="text-emerald-700 dark:text-emerald-300 text-xs mt-0.5">Users can now sign in via the <strong>Microsoft</strong> button on the login page for Entra ID (Azure AD) SSO. Configure SCIM below to auto-provision users from your IdP directory.</p>
+        </div>
+      </div>
+
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 mb-6">
         <StatTile label="Providers" value={idps.length} icon={KeyRound} color="text-primary" />
         <StatTile label="Synced Users" value={dirUsers.length} icon={Users} color="text-emerald-500" />
