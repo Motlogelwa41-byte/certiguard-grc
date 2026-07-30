@@ -103,6 +103,7 @@ import GrcEducation from '@/pages/GrcEducation';
 import MaturityDashboard from '@/pages/MaturityDashboard';
 import ExecutiveRiskReport from '@/pages/ExecutiveRiskReport';
 import ComplianceReadinessReport from '@/pages/ComplianceReadinessReport';
+import ExecutiveSummary from '@/pages/ExecutiveSummary';
 import Architecture from '@/pages/Architecture';
 import SecurityCommandCenter from '@/pages/SecurityCommandCenter';
 import TestingChecklist from '@/pages/TestingChecklist';
@@ -240,6 +241,7 @@ const AuthenticatedApp = () => {
           <Route path="/maturity-dashboard" element={<MaturityDashboard />} />
           <Route path="/executive-risk-report" element={<ExecutiveRiskReport />} />
           <Route path="/compliance-readiness-report" element={<ComplianceReadinessReport />} />
+          <Route path="/executive-summary" element={<ExecutiveSummary />} />
           <Route path="/architecture" element={<Architecture />} />
           <Route path="/security-command-center" element={<SecurityCommandCenter />} />
           <Route path="/testing-checklist" element={<TestingChecklist />} />

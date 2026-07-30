@@ -1,0 +1,40 @@
+{
+  "name": "Vendor Status Slack Alert",
+  "description": "Posts a Slack alert to the compliance channel whenever a vendor's status changes to approved (active) or inactive.",
+  "trigger": {
+    "config": {
+      "trigger_type": "entity",
+      "entity_name": "Vendor",
+      "events": [
+        "update"
+      ]
+    },
+    "condition": "${ .trigger.changed_fields | index(\"status\") != null and .trigger.old_data.status != .trigger.data.status and (.trigger.data.status == \"approved\" or .trigger.data.status == \"inactive\") }"
+  },
+  "definition": {
+    "document": {
+      "dsl": "1.0.0",
+      "name": "vendor_status_slack_alert",
+      "version": "1.0",
+      "namespace": "base44"
+    },
+    "do": [
+      {
+        "send_alert": {
+          "call": "invoke_backend_function",
+          "with": {
+            "function_name": "sendSlackAlert",
+            "args": {
+              "text": "Vendor status changed: *${ .trigger.data.name }* moved from ${ .trigger.old_data.status } \u2192 ${ .trigger.data.status }. Risk level: ${ .trigger.data.risk_level }. Review in CertiGuard."
+            }
+          },
+          "then": "end",
+          "x-base44": {
+            "title": "Post Slack alert",
+            "description": "Notify #compliance of vendor status change"
+          }
+        }
+      }
+    ]
+  }
+}

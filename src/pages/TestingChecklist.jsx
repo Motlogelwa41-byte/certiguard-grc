@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import PageHeader from "@/components/shared/PageHeader";
-import { ClipboardCheck, ShieldCheck, Users2, Database, FileText, Activity, Network, FlaskConical, Lock, BarChart3, CheckCircle2, Circle, RotateCcw } from "lucide-react";
+import PermissionDiagnostics from "@/components/testing/PermissionDiagnostics";
+import { ClipboardCheck, ShieldCheck, Users2, Database, FileText, Activity, Network, FlaskConical, Lock, BarChart3, CheckCircle2, Circle, RotateCcw, Stethoscope } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
@@ -234,6 +235,26 @@ export default function TestingChecklist() {
               </p>
             </div>
           </div>
+        </CardContent>
+      </Card>
+
+      {/* Permission diagnostics */}
+      <Card className="border-primary/20">
+        <CardHeader className="pb-3">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded-lg bg-primary/10 text-primary flex items-center justify-center shrink-0">
+              <Stethoscope className="w-5 h-5" />
+            </div>
+            <div>
+              <CardTitle className="text-base">Access & Permission Diagnostics</CardTitle>
+              <CardDescription className="text-xs mt-0.5">
+                When a test fails with an access error, use these tools to identify the exact missing permission for the tenant user.
+              </CardDescription>
+            </div>
+          </div>
+        </CardHeader>
+        <CardContent>
+          <PermissionDiagnostics />
         </CardContent>
       </Card>
 
