@@ -66,7 +66,9 @@ export function TenantProvider({ children }) {
 
       // Stamp the user profile + isolation context once we have a tenant
       if (userTenant && tenantId) {
-        setTenantContext(tenantId);
+        // Always stamp creates with the user's own tenant_id from their profile/token —
+        // RLS checks data.tenant_id against user.data.tenant_id, so the stamp must match that.
+        setTenantContext(stampedTenantId || tenantId);
         if (!stampedTenantId) {
           await base44.auth.updateMe({ tenant_id: tenantId }).catch(() => {});
         }
