@@ -4,11 +4,13 @@ import {
   LineChart, Line, BarChart, Bar, PieChart, Pie, Cell,
   XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, AreaChart, Area
 } from "recharts";
-import { ShieldCheck, TrendingUp, TrendingDown, AlertTriangle, CheckCircle2, XCircle, Clock, Target, Download } from "lucide-react";
+import { ShieldCheck, TrendingUp, TrendingDown, AlertTriangle, CheckCircle2, XCircle, Clock, Target, Download, FileText } from "lucide-react";
 import PageHeader from "@/components/shared/PageHeader";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/components/ui/use-toast";
+import { useTenant } from "@/lib/TenantContext";
 import { exportElementToPDF } from "@/lib/boardReportExport";
+import StakeholderRiskSummary from "@/components/management/StakeholderRiskSummary";
 
 const SEVERITY_COLORS = { critical: "#ef4444", high: "#f97316", medium: "#f59e0b", low: "#10b981" };
 const STATUS_COLORS = { passing: "#10b981", failing: "#ef4444", not_tested: "#6b7280", not_applicable: "#94a3b8" };
@@ -53,8 +55,11 @@ export default function ManagementDashboard() {
   const [incidents, setIncidents] = useState([]);
   const [loading, setLoading] = useState(true);
   const exportRef = useRef(null);
+  const stakeholderRef = useRef(null);
   const [exporting, setExporting] = useState(false);
+  const [exportingSummary, setExportingSummary] = useState(false);
   const { toast } = useToast();
+  const { tenant } = useTenant();
 
   const handleExportPDF = async () => {
     if (!exportRef.current) return;
@@ -70,6 +75,23 @@ export default function ManagementDashboard() {
       toast({ title: "Export failed", description: e.message, variant: "destructive" });
     } finally {
       setExporting(false);
+    }
+  };
+
+  const handleStakeholderPDF = async () => {
+    if (!stakeholderRef.current) return;
+    setExportingSummary(true);
+    try {
+      await exportElementToPDF(stakeholderRef.current, {
+        filename: `stakeholder-risk-summary-${new Date().toISOString().slice(0, 10)}.pdf`,
+        title: "Risk & Control Summary",
+        subtitle: tenant?.name || "CertiGuard GRC",
+      });
+      toast({ title: "Stakeholder PDF exported" });
+    } catch (e) {
+      toast({ title: "Export failed", description: e.message, variant: "destructive" });
+    } finally {
+      setExportingSummary(false);
     }
   };
 
@@ -195,9 +217,14 @@ export default function ManagementDashboard() {
         title="Management Security Dashboard"
         subtitle="Executive-level overview of risk posture, control health, and compliance readiness"
         actions={
-          <Button variant="outline" size="sm" onClick={handleExportPDF} disabled={exporting}>
-            <Download className="w-4 h-4 mr-1" />{exporting ? "Exporting…" : "Export PDF"}
-          </Button>
+          <div className="flex gap-2">
+            <Button variant="outline" size="sm" onClick={handleStakeholderPDF} disabled={exportingSummary}>
+              <FileText className="w-4 h-4 mr-1" />{exportingSummary ? "Generating…" : "Stakeholder Summary PDF"}
+            </Button>
+            <Button variant="outline" size="sm" onClick={handleExportPDF} disabled={exporting}>
+              <Download className="w-4 h-4 mr-1" />{exporting ? "Exporting…" : "Export Full Dashboard"}
+            </Button>
+          </div>
         }
       />
       <div className="space-y-6" ref={exportRef}>
@@ -389,6 +416,17 @@ export default function ManagementDashboard() {
         </ResponsiveContainer>
       </div>
     </div>
+
+      {/* Hidden stakeholder summary — rendered off-screen for PDF capture */}
+      <div style={{ position: "absolute", left: "-9999px", top: 0 }}>
+        <StakeholderRiskSummary
+          ref={stakeholderRef}
+          controls={controls}
+          risks={risks}
+          frameworks={frameworks}
+          tenantName={tenant?.name || "CertiGuard GRC"}
+        />
+      </div>
     </>
   );
 }
