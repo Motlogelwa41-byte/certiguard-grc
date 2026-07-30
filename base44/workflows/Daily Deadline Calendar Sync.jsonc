@@ -1,0 +1,44 @@
+{
+  "name": "Daily Deadline Calendar Sync",
+  "trigger": {
+    "condition": null,
+    "config": {
+      "trigger_type": "scheduled",
+      "events": [],
+      "schedule_mode": "recurring",
+      "cron_expression": "0 7 * * *",
+      "one_time_date": null,
+      "timezone": "Africa/Johannesburg",
+      "interval_value": null,
+      "interval_unit": null,
+      "interval_anchor": null,
+      "ends_type": "never",
+      "ends_on_date": null,
+      "ends_after_count": null
+    }
+  },
+  "definition": {
+    "document": {
+      "dsl": "1.0.0",
+      "name": "daily_deadline_calendar_sync",
+      "version": "1.0",
+      "namespace": "base44"
+    },
+    "do": [
+      {
+        "sync_deadlines": {
+          "call": "invoke_backend_function",
+          "with": {
+            "function_name": "syncAllDeadlinesToCalendar"
+          },
+          "then": "end",
+          "x-base44": {
+            "title": "Sync deadlines to Google Calendar",
+            "description": "Push all audit deadlines and control review dates"
+          }
+        }
+      }
+    ]
+  },
+  "description": "Syncs all audit deadlines (compliance task due dates) and internal control review dates to the builder's Google Calendar via the Compliance Calendar Sync workspace connector."
+}
