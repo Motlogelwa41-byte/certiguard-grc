@@ -101,13 +101,15 @@ export default function SSOSettings() {
 
   return (
     <div>
-      <PageHeader title="SSO & Directory" subtitle="Configure SAML/OIDC identity providers and SCIM directory sync" actions={<Button size="sm" onClick={openNew}><Plus className="w-4 h-4 mr-1" /> Add Provider</Button>} />
+      <PageHeader title="SSO & Directory" subtitle="Configure OIDC identity providers and SCIM directory sync" actions={<Button size="sm" onClick={openNew}><Plus className="w-4 h-4 mr-1" /> Add Provider</Button>} />
 
-      <div className="bg-emerald-50 dark:bg-emerald-950/30 border border-emerald-200 dark:border-emerald-800 rounded-xl p-4 mb-6 flex items-start gap-3">
-        <ShieldCheck className="w-5 h-5 text-emerald-600 dark:text-emerald-400 flex-shrink-0 mt-0.5" />
-        <div className="text-sm">
-          <p className="font-medium text-emerald-900 dark:text-emerald-200">Enterprise SSO is live</p>
-          <p className="text-emerald-700 dark:text-emerald-300 text-xs mt-0.5">Users can now sign in via the <strong>Microsoft</strong> button on the login page for Entra ID (Azure AD) SSO. Configure SCIM below to auto-provision users from your IdP directory.</p>
+      <div className="bg-sky-50 dark:bg-sky-950/30 border border-sky-200 dark:border-sky-800 rounded-xl p-4 mb-6 flex items-start gap-3">
+        <ShieldCheck className="w-5 h-5 text-sky-600 dark:text-sky-400 flex-shrink-0 mt-0.5" />
+        <div className="text-sm space-y-2">
+          <p className="font-medium text-sky-900 dark:text-sky-200">SSO Login — OIDC (not SAML)</p>
+          <p className="text-sky-700 dark:text-sky-300 text-xs">This platform uses <strong>OIDC / OAuth 2.0</strong> for single sign-on, not SAML. Users sign in via the <strong>Google</strong> or <strong>Microsoft</strong> buttons on the login page. For enterprise workspace SSO (Entra ID, Okta, Google Workspace), configure the OIDC callback URL in your Base44 dashboard → Settings → SSO.</p>
+          <p className="text-sky-700 dark:text-sky-300 text-xs"><strong>OIDC Callback URL:</strong> <code className="bg-sky-100 dark:bg-sky-900/50 px-1.5 py-0.5 rounded text-[11px]">https://app.base44.com/api/apps/&#123;APP_ID&#125;/auth/sso/callback</code> — find your App ID in the editor URL.</p>
+          <p className="text-sky-700 dark:text-sky-300 text-xs">The SCIM providers configured below handle <strong>user provisioning</strong> (auto-creating/updating app users from your IdP directory), which complements OIDC login.</p>
         </div>
       </div>
 

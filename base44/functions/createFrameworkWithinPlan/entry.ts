@@ -46,12 +46,10 @@ Deno.serve(async (req) => {
       }, { status: 402 });
     }
 
-    const createPayload = { ...framework };
-    if (userTenantId) createPayload.tenant_id = tenant.id;
-    const created = await base44.entities.Framework.create(createPayload);
-    if (!userTenantId && tenant.id) {
-      await base44.asServiceRole.entities.Framework.update(created.id, { tenant_id: tenant.id }).catch(() => {});
-    }
+    // Create via service role so the admin-only RLS create rule (defense-in-depth
+    // for plan limits) doesn't block. created_by_id is stamped via audit log below.
+    const createPayload = { ...framework, tenant_id: tenant.id };
+    const created = await base44.asServiceRole.entities.Framework.create(createPayload);
 
     await base44.asServiceRole.functions.invoke('logAudit', {
       action: 'create',
