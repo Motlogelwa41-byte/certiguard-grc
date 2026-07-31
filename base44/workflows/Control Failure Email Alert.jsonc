@@ -1,0 +1,47 @@
+{
+  "name": "Control Failure Email Alert",
+  "description": "Sends an email alert to the support team whenever a control status changes to failing.",
+  "trigger": {
+    "config": {
+      "trigger_type": "entity",
+      "entity_name": "Control",
+      "events": [
+        "update"
+      ]
+    },
+    "condition": "${ .trigger.changed_fields | index(\"status\") != null and .trigger.data.status == \"failing\" and .trigger.old_data.status != \"failing\" }"
+  },
+  "definition": {
+    "document": {
+      "dsl": "1.0.0",
+      "name": "control_failure_email_alert",
+      "version": "1.0",
+      "namespace": "base44"
+    },
+    "do": [
+      {
+        "send_alert": {
+          "call": "invoke_backend_function",
+          "with": {
+            "function_name": "sendControlFailureAlert",
+            "args": {
+              "control_id": "${ .trigger.data.control_id }",
+              "title": "${ .trigger.data.title }",
+              "category": "${ .trigger.data.category }",
+              "owner_name": "${ .trigger.data.owner_name }",
+              "severity": "${ .trigger.data.severity }",
+              "notes": "${ .trigger.data.notes }",
+              "automation_status": "${ .trigger.data.automation_status }",
+              "last_tested": "${ .trigger.data.last_tested }"
+            }
+          },
+          "then": "end",
+          "x-base44": {
+            "title": "Send failure email alert",
+            "description": "Email support team about failed control"
+          }
+        }
+      }
+    ]
+  }
+}

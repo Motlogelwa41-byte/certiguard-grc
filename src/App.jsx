@@ -116,6 +116,8 @@ import DataPrivacy from '@/pages/DataPrivacy';
 import SLA from '@/pages/SLA';
 import DataResidency from '@/pages/DataResidency';
 import SecurityOverview from '@/pages/SecurityOverview';
+import ExecutiveReadinessDashboard from '@/pages/ExecutiveReadinessDashboard';
+import AuditorExport from '@/pages/AuditorExport';
 
 const AuthenticatedApp = () => {
   const { isLoadingAuth, isLoadingPublicSettings, authError, navigateToLogin } = useAuth();
@@ -248,6 +250,8 @@ const AuthenticatedApp = () => {
           <Route path="/stakeholder-summary" element={<StakeholderSummary />} />
           <Route path="/user-guide" element={<UserGuide />} />
           <Route path="/data-privacy" element={<DataPrivacy />} />
+          <Route path="/executive-readiness-dashboard" element={<ExecutiveReadinessDashboard />} />
+          <Route path="/auditor-export" element={<AuditorExport />} />
         </Route>
       </Route>
       <Route path="*" element={<PageNotFound />} />
