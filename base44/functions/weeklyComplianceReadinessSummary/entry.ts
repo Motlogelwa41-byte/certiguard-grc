@@ -1,4 +1,7 @@
 import { createClientFromRequest } from 'npm:@base44/sdk@0.8.38';
+import { sendGmail } from "../../shared/gmailSender.ts";
+
+const SUPPORT_EMAIL = "support.certiguardgrc@gmail.com";
 
 // Computes a weekly compliance readiness summary and posts it to the
 // #compliance Slack channel by reusing the existing sendSlackAlert function.
@@ -94,8 +97,59 @@ Deno.serve(async (req) => {
     const slackRes = await sr.functions.invoke('sendSlackAlert', { text });
     const slackData = slackRes?.data || slackRes;
 
+    // Send HTML email summary to the support team
+    const verdictClean = verdict.replace(/[\u{1F300}-\u{1FAFF}\u2600-\u27BF]/gu, '').trim();
+    const taskRows = highPriority.length > 0
+      ? highPriority.map((t) => {
+          const icon = t.priority === 'critical' ? '🔴' : '🟠';
+          const when = t.due_date ? ` — due ${t.due_date}` : '';
+          const owner = t.assignee_name ? ` · ${t.assignee_name}` : '';
+          return `<tr><td style="padding:6px 0;">${icon} <strong>${t.title || 'Untitled'}</strong>${when}${owner}</td></tr>`;
+        }).join('')
+      : '<tr><td style="padding:6px 0;color:#64748B;">No pending high-priority tasks.</td></tr>';
+
+    const emailHtml = `
+      <div style="font-family:Inter,Arial,sans-serif;max-width:600px;margin:0 auto;">
+        <div style="background:#1E293B;padding:24px;border-radius:8px 8px 0 0;">
+          <h1 style="color:#fff;margin:0;font-size:20px;">🛡️ Weekly Compliance Readiness Summary</h1>
+          <p style="color:#94A3B8;margin:4px 0 0;font-size:13px;">Week of ${weekOf} — ${verdict}</p>
+        </div>
+        <div style="background:#F8FAFC;padding:24px;border:1px solid #E2E8F0;border-top:none;border-radius:0 0 8px 8px;">
+          <table style="width:100%;border-collapse:collapse;font-size:14px;margin-bottom:16px;">
+            <tr style="background:#E2E8F0;"><td style="padding:10px;font-weight:700;color:#1E293B;" colspan="2">Frameworks</td></tr>
+            <tr><td style="padding:6px 0;color:#64748B;">Tracked / Audit-ready</td><td style="padding:6px 0;color:#1E293B;font-weight:600;text-align:right;">${fwTotal} / ${fwReady}</td></tr>
+            <tr><td style="padding:6px 0;color:#64748B;">Average readiness</td><td style="padding:6px 0;color:${avgReadiness >= 80 ? '#10B981' : '#F59E0B'};font-weight:700;text-align:right;">${avgReadiness}%</td></tr>
+            <tr style="background:#E2E8F0;"><td style="padding:10px;font-weight:700;color:#1E293B;" colspan="2">Controls</td></tr>
+            <tr><td style="padding:6px 0;color:#64748B;">Passing / Total</td><td style="padding:6px 0;color:#1E293B;font-weight:600;text-align:right;">${ctlPassing} / ${ctlTotal} (${ctlPassRate}%)</td></tr>
+            <tr><td style="padding:6px 0;color:#64748B;">Failing</td><td style="padding:6px 0;color:${ctlFailing > 0 ? '#EF4444' : '#10B981'};font-weight:700;text-align:right;">${ctlFailing}</td></tr>
+            <tr><td style="padding:6px 0;color:#64748B;">Not tested</td><td style="padding:6px 0;color:#F59E0B;font-weight:600;text-align:right;">${ctlNotTested}</td></tr>
+            <tr style="background:#E2E8F0;"><td style="padding:10px;font-weight:700;color:#1E293B;" colspan="2">Risks</td></tr>
+            <tr><td style="padding:6px 0;color:#64748B;">Open / Mitigating</td><td style="padding:6px 0;color:#1E293B;font-weight:600;text-align:right;">${openRisks}</td></tr>
+            <tr><td style="padding:6px 0;color:#64748B;">Critical (score ≥ 15)</td><td style="padding:6px 0;color:${criticalRisks > 0 ? '#EF4444' : '#10B981'};font-weight:700;text-align:right;">${criticalRisks}</td></tr>
+            <tr style="background:#E2E8F0;"><td style="padding:10px;font-weight:700;color:#1E293B;" colspan="2">Tasks & Incidents</td></tr>
+            <tr><td style="padding:6px 0;color:#64748B;">Open tasks</td><td style="padding:6px 0;color:#1E293B;font-weight:600;text-align:right;">${openTasks}</td></tr>
+            <tr><td style="padding:6px 0;color:#64748B;">Overdue tasks</td><td style="padding:6px 0;color:${overdueTasks > 0 ? '#EF4444' : '#1E293B'};font-weight:700;text-align:right;">${overdueTasks}</td></tr>
+            <tr><td style="padding:6px 0;color:#64748B;">Open incidents</td><td style="padding:6px 0;color:#1E293B;font-weight:600;text-align:right;">${openIncidents}</td></tr>
+            <tr><td style="padding:6px 0;color:#64748B;">Critical incidents</td><td style="padding:6px 0;color:${criticalIncidents > 0 ? '#EF4444' : '#10B981'};font-weight:700;text-align:right;">${criticalIncidents}</td></tr>
+          </table>
+          <div style="margin-top:16px;padding:12px;background:#FFF7ED;border-radius:6px;border-left:4px solid #F59E0B;">
+            <strong style="color:#92400E;">Pending high-priority tasks (${highPriority.length}):</strong>
+            <table style="width:100%;font-size:13px;margin-top:6px;">${taskRows}</table>
+          </div>
+          <p style="margin-top:20px;color:#64748B;font-size:12px;">Automated weekly summary from CertiGuard GRC · ${new Date().toISOString()}</p>
+        </div>
+      </div>
+    `;
+
+    let emailResult = null;
+    try {
+      emailResult = await sendGmail(base44, SUPPORT_EMAIL, `Weekly Compliance Readiness Summary — ${verdictClean}`, emailHtml);
+    } catch (e) {
+      console.error('Weekly summary email failed:', e?.message || e);
+    }
+
     console.log('Weekly readiness summary posted:', JSON.stringify({
-      weekOf, avgReadiness, ctlPassRate, openRisks, criticalRisks, openIncidents, slackOk: slackData?.ok,
+      weekOf, avgReadiness, ctlPassRate, openRisks, criticalRisks, openIncidents, slackOk: slackData?.ok, emailOk: !!emailResult,
     }));
 
     return Response.json({
@@ -110,6 +164,7 @@ Deno.serve(async (req) => {
         incidents: { open: openIncidents, critical: criticalIncidents },
       },
       slack: slackData,
+      email: emailResult ? { ok: true, messageId: emailResult.id, to: SUPPORT_EMAIL } : { ok: false },
     });
   } catch (error) {
     console.error('weeklyComplianceReadinessSummary error:', error?.message || error);

@@ -13,6 +13,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { MATURITY_LEVELS, GRC_DOMAINS } from "@/lib/grcMaturity";
 import MaturityRadarChart from "@/components/maturity/MaturityRadarChart";
+import PostureSummary from "@/components/maturity/PostureSummary";
 
 const parseArr = (s) => {
   try { return JSON.parse(s || "[]"); } catch { return []; }
@@ -211,6 +212,9 @@ export default function MaturityDashboard() {
           </div>
         </CardContent>
       </Card>
+
+      {/* Security posture summary: risk heatmap + control status */}
+      <PostureSummary />
 
       <div className="grid gap-4 lg:grid-cols-3 mb-6">
         {/* Trend chart */}
