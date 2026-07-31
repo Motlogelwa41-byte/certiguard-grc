@@ -59,20 +59,21 @@ Deno.serve(async (req) => {
       }
     }
 
-    // Group by owner email (one consolidated email per department head)
+    // Group by tenant_id + owner email so reminders never mix tenants
     const byEmail = {};
     for (const c of needsRequest) {
       const info = c.owner_id ? ownerInfo[c.owner_id] : null;
       if (!info) continue;
-      const key = info.email.toLowerCase();
-      (byEmail[key] = byEmail[key] || { name: info.name, items: [] }).items.push(c);
+      const key = `${c.tenant_id || ""}|${info.email.toLowerCase()}`;
+      (byEmail[key] = byEmail[key] || { name: info.name, email: info.email, items: [] }).items.push(c);
     }
 
     const portalBase = APP_URL ? `${APP_URL}${PORTAL_PATH}` : `Log in to CertiGuard → Evidence Manager (${PORTAL_PATH})`;
     let sent = 0;
     let failed = 0;
 
-    for (const [email, group] of Object.entries(byEmail)) {
+    for (const [, group] of Object.entries(byEmail)) {
+      const email = group.email;
       const statusFor = (c) => {
         if (!c.next_review) return { label: "Due", color: "#475569" };
         const d = new Date(c.next_review); d.setHours(0, 0, 0, 0);

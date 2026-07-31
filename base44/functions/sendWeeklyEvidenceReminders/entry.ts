@@ -38,13 +38,13 @@ Deno.serve(async (req) => {
       } catch (e) { /* skip unresolvable */ }
     }
 
-    // Group by assignee email (one consolidated digest per employee)
+    // Group by tenant_id + assignee email so reminders never mix tenants
     const byEmail = {};
     for (const t of pending) {
       let email = t.assignee_email || (t.assignee_id && userInfo[t.assignee_id]?.email);
       let name = t.assignee_name || (t.assignee_id && userInfo[t.assignee_id]?.name) || email;
       if (!email) continue;
-      const key = email.toLowerCase();
+      const key = `${t.tenant_id || ""}|${email.toLowerCase()}`;
       (byEmail[key] = byEmail[key] || { name, email, items: [] }).items.push(t);
     }
 

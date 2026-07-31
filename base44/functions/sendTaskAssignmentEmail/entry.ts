@@ -37,6 +37,7 @@ Deno.serve(async (req) => {
       // Log the failure as a reminder record, then return the error.
       try {
         await base44.asServiceRole.entities.TaskReminder.create({
+          tenant_id: task.tenant_id,
           task_id: task.id,
           task_title: task.title,
           assignee_name: task.assignee_name,
@@ -55,6 +56,7 @@ Deno.serve(async (req) => {
 
     try {
       await base44.asServiceRole.entities.TaskReminder.create({
+        tenant_id: task.tenant_id,
         task_id: task.id,
         task_title: task.title,
         assignee_name: task.assignee_name,
