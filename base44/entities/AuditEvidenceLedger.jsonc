@@ -1,0 +1,80 @@
+{
+  "name": "AuditEvidenceLedger",
+  "type": "object",
+  "properties": {
+    "tenant_id": {
+      "type": "string",
+      "description": "Tenant isolation key \u2014 mandatory on every record"
+    },
+    "user_id": {
+      "type": "string",
+      "description": "ID of the user who submitted the evidence"
+    },
+    "user_name": {
+      "type": "string",
+      "description": "Display name of the submitting user"
+    },
+    "timestamp": {
+      "type": "string",
+      "format": "date-time",
+      "description": "Exact submission timestamp (ISO-8601)"
+    },
+    "file_url": {
+      "type": "string",
+      "description": "Stored evidence file URL"
+    },
+    "file_name": {
+      "type": "string",
+      "description": "Original filename of the uploaded evidence"
+    },
+    "sha256_hash": {
+      "type": "string",
+      "description": "SHA-256 cryptographic hash of the file content for integrity verification"
+    },
+    "control_id": {
+      "type": "string",
+      "description": "Optional linked control this evidence supports"
+    },
+    "framework_id": {
+      "type": "string",
+      "description": "Optional linked framework"
+    },
+    "notes": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "tenant_id",
+    "user_id",
+    "timestamp",
+    "file_url",
+    "sha256_hash"
+  ],
+  "rls": {
+    "create": {
+      "data.tenant_id": "{{user.data.tenant_id}}"
+    },
+    "read": {
+      "$or": [
+        {
+          "data.tenant_id": "{{user.data.tenant_id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "update": {
+      "user_condition": {
+        "role": "__append_only_denied__"
+      }
+    },
+    "delete": {
+      "user_condition": {
+        "role": "__append_only_denied__"
+      }
+    }
+  }
+}

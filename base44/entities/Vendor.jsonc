@@ -55,6 +55,10 @@
     "website": {
       "type": "string"
     },
+    "secure_token": {
+      "type": "string",
+      "description": "Unique unguessable token for remote vendor portal access (e.g. security questionnaire submission)"
+    },
     "contract_start": {
       "type": "string",
       "format": "date"
