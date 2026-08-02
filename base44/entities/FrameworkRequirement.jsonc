@@ -1,0 +1,123 @@
+{
+  "name": "FrameworkRequirement",
+  "type": "object",
+  "properties": {
+    "tenant_id": {
+      "type": "string",
+      "description": "Tenant isolation key \u2014 mandatory on every record"
+    },
+    "framework_id": {
+      "type": "string",
+      "description": "Linked RegulatoryFramework id"
+    },
+    "framework_name": {
+      "type": "string"
+    },
+    "framework_code": {
+      "type": "string"
+    },
+    "requirement_id": {
+      "type": "string",
+      "description": "Clause/reference number (e.g., A.5.1.1, PR.AC-1, Article 5)"
+    },
+    "title": {
+      "type": "string"
+    },
+    "description": {
+      "type": "string",
+      "description": "Full text of the clause or legal requirement"
+    },
+    "section": {
+      "type": "string",
+      "description": "Section or domain grouping"
+    },
+    "category": {
+      "type": "string",
+      "enum": [
+        "access_control",
+        "data_protection",
+        "incident_response",
+        "change_management",
+        "risk_management",
+        "security_operations",
+        "business_continuity",
+        "network_security",
+        "physical_security",
+        "compliance",
+        "human_resources",
+        "asset_management",
+        "governance",
+        "privacy"
+      ],
+      "default": "access_control"
+    },
+    "is_mandatory": {
+      "type": "boolean",
+      "default": true
+    },
+    "guidance": {
+      "type": "string",
+      "description": "Implementation guidance or interpretation notes"
+    },
+    "order_index": {
+      "type": "number",
+      "default": 0
+    },
+    "mapped_control_count": {
+      "type": "number",
+      "default": 0,
+      "description": "Number of universal controls mapped to this requirement"
+    },
+    "notes": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "framework_id",
+    "requirement_id",
+    "title"
+  ],
+  "rls": {
+    "create": {
+      "data.tenant_id": "{{user.data.tenant_id}}"
+    },
+    "read": {
+      "$or": [
+        {
+          "data.tenant_id": "{{user.data.tenant_id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "update": {
+      "$or": [
+        {
+          "data.tenant_id": "{{user.data.tenant_id}}",
+          "created_by_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "delete": {
+      "$or": [
+        {
+          "data.tenant_id": "{{user.data.tenant_id}}",
+          "created_by_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    }
+  }
+}

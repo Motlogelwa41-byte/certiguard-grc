@@ -1,0 +1,41 @@
+{
+  "name": "Risk Metrics Auto-Calculation",
+  "description": "Database trigger: auto-calculates risk_score (likelihood \u00d7 impact) and annualized_loss_expectancy (single_loss \u00d7 annual_rate) whenever a risk is created or updated. Only fires when qualitative or quantitative input fields change \u2014 not when the auto-calculated outputs change \u2014 to prevent infinite loops.",
+  "trigger": {
+    "config": {
+      "trigger_type": "entity",
+      "entity_name": "Risk",
+      "events": [
+        "create",
+        "update"
+      ]
+    },
+    "condition": "${ (.trigger.changed_fields // []) | index(\"likelihood\") != null or (.trigger.changed_fields // []) | index(\"impact\") != null or (.trigger.changed_fields // []) | index(\"quantitative_single_loss\") != null or (.trigger.changed_fields // []) | index(\"quantitative_annual_rate\") != null }"
+  },
+  "definition": {
+    "document": {
+      "dsl": "1.0.0",
+      "name": "risk_metrics_auto_calculation",
+      "version": "1.0",
+      "namespace": "base44"
+    },
+    "do": [
+      {
+        "calculate_metrics": {
+          "call": "invoke_backend_function",
+          "with": {
+            "function_name": "calculateRiskMetrics",
+            "args": {
+              "risk_id": "${ .trigger.entity_id }"
+            }
+          },
+          "then": "end",
+          "x-base44": {
+            "title": "Calculate risk metrics",
+            "description": "Auto-compute risk_score and ALE"
+          }
+        }
+      }
+    ]
+  }
+}

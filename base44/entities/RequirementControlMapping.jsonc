@@ -1,0 +1,124 @@
+{
+  "name": "RequirementControlMapping",
+  "type": "object",
+  "properties": {
+    "tenant_id": {
+      "type": "string",
+      "description": "Tenant isolation key \u2014 mandatory on every record"
+    },
+    "requirement_id": {
+      "type": "string",
+      "description": "Linked FrameworkRequirement id"
+    },
+    "requirement_title": {
+      "type": "string"
+    },
+    "requirement_ref": {
+      "type": "string",
+      "description": "Clause/reference number for display"
+    },
+    "framework_id": {
+      "type": "string",
+      "description": "Linked RegulatoryFramework id"
+    },
+    "framework_name": {
+      "type": "string"
+    },
+    "framework_code": {
+      "type": "string"
+    },
+    "control_id": {
+      "type": "string",
+      "description": "Linked UniversalControl id"
+    },
+    "control_title": {
+      "type": "string"
+    },
+    "control_ref": {
+      "type": "string",
+      "description": "UniversalControl control_id for display"
+    },
+    "mapping_confidence": {
+      "type": "string",
+      "enum": [
+        "full",
+        "partial",
+        "indirect"
+      ],
+      "default": "full",
+      "description": "How completely the control satisfies the requirement"
+    },
+    "mapping_notes": {
+      "type": "string"
+    },
+    "evidence_url": {
+      "type": "string",
+      "description": "Single evidence upload that satisfies this mapping across multiple regulations"
+    },
+    "evidence_title": {
+      "type": "string"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "active",
+        "needs_review",
+        "deprecated"
+      ],
+      "default": "active"
+    },
+    "mapped_by_name": {
+      "type": "string"
+    },
+    "mapped_by_id": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "requirement_id",
+    "control_id"
+  ],
+  "rls": {
+    "create": {
+      "data.tenant_id": "{{user.data.tenant_id}}"
+    },
+    "read": {
+      "$or": [
+        {
+          "data.tenant_id": "{{user.data.tenant_id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "update": {
+      "$or": [
+        {
+          "data.tenant_id": "{{user.data.tenant_id}}",
+          "created_by_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "delete": {
+      "$or": [
+        {
+          "data.tenant_id": "{{user.data.tenant_id}}",
+          "created_by_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    }
+  }
+}

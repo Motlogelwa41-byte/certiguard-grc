@@ -4,7 +4,7 @@
   "properties": {
     "tenant_id": {
       "type": "string",
-      "description": "Tenant isolation key"
+      "description": "Tenant isolation key \u2014 mandatory on every record"
     },
     "risk_id": {
       "type": "string"
@@ -37,7 +37,8 @@
         4,
         5
       ],
-      "default": 3
+      "default": 3,
+      "description": "Qualitative likelihood (1-5)"
     },
     "impact": {
       "type": "number",
@@ -48,11 +49,26 @@
         4,
         5
       ],
-      "default": 3
+      "default": 3,
+      "description": "Qualitative impact (1-5)"
     },
     "risk_score": {
       "type": "number",
-      "default": 0
+      "default": 0,
+      "description": "Auto-calculated: likelihood \u00d7 impact"
+    },
+    "quantitative_single_loss": {
+      "type": "number",
+      "description": "Single loss expectancy (SLE) in currency \u2014 decimal"
+    },
+    "quantitative_annual_rate": {
+      "type": "number",
+      "description": "Annualized rate of occurrence (ARO) \u2014 decimal (events per year)"
+    },
+    "annualized_loss_expectancy": {
+      "type": "number",
+      "default": 0,
+      "description": "Auto-calculated ALE: single_loss \u00d7 annual_rate"
     },
     "status": {
       "type": "string",

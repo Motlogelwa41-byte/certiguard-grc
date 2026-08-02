@@ -1,0 +1,138 @@
+{
+  "name": "UniversalControl",
+  "type": "object",
+  "properties": {
+    "tenant_id": {
+      "type": "string",
+      "description": "Tenant isolation key \u2014 mandatory on every record"
+    },
+    "control_id": {
+      "type": "string",
+      "description": "Unique internal control identifier (e.g., UC-001)"
+    },
+    "title": {
+      "type": "string"
+    },
+    "description": {
+      "type": "string",
+      "description": "Internal actionable security rule"
+    },
+    "category": {
+      "type": "string",
+      "enum": [
+        "access_control",
+        "data_protection",
+        "incident_response",
+        "change_management",
+        "risk_management",
+        "security_operations",
+        "business_continuity",
+        "network_security",
+        "physical_security",
+        "compliance",
+        "human_resources",
+        "asset_management"
+      ],
+      "default": "access_control"
+    },
+    "implementation_guidance": {
+      "type": "string"
+    },
+    "evidence_requirements": {
+      "type": "string",
+      "description": "What evidence proves this control is operating"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "active",
+        "draft",
+        "deprecated"
+      ],
+      "default": "active"
+    },
+    "automation_status": {
+      "type": "string",
+      "enum": [
+        "automated",
+        "manual",
+        "partially_automated"
+      ],
+      "default": "manual"
+    },
+    "owner_name": {
+      "type": "string"
+    },
+    "owner_id": {
+      "type": "string"
+    },
+    "linked_framework_ids": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "Regulatory frameworks this control satisfies"
+    },
+    "mapped_requirement_count": {
+      "type": "number",
+      "default": 0,
+      "description": "Number of framework requirements this control maps to"
+    },
+    "tags": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "notes": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "control_id",
+    "title"
+  ],
+  "rls": {
+    "create": {
+      "data.tenant_id": "{{user.data.tenant_id}}"
+    },
+    "read": {
+      "$or": [
+        {
+          "data.tenant_id": "{{user.data.tenant_id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "update": {
+      "$or": [
+        {
+          "data.tenant_id": "{{user.data.tenant_id}}",
+          "created_by_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "delete": {
+      "$or": [
+        {
+          "data.tenant_id": "{{user.data.tenant_id}}",
+          "created_by_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    }
+  }
+}
