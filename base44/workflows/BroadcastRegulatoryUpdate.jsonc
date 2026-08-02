@@ -1,0 +1,49 @@
+{
+  "name": "Broadcast Regulatory Update",
+  "description": "When a RegulatoryChange is posted with affected frameworks, broadcast a Regulatory Alert banner to every tenant tracking that framework.",
+  "trigger": {
+    "config": {
+      "trigger_type": "entity",
+      "entity_name": "RegulatoryChange",
+      "events": [
+        "create"
+      ]
+    },
+    "condition": "${ ((.trigger.data.affected_framework_ids // []) | length) > 0 }"
+  },
+  "definition": {
+    "document": {
+      "dsl": "1.0.0",
+      "name": "broadcast_regulatory_update",
+      "version": "1.0",
+      "namespace": "base44"
+    },
+    "do": [
+      {
+        "broadcast": {
+          "call": "invoke_backend_function",
+          "with": {
+            "function_name": "broadcastRegulatoryUpdate",
+            "args": {
+              "title": "${ .trigger.data.title }",
+              "message": "${ .trigger.data.change_summary }",
+              "framework_code": "${ .trigger.data.regulation_name }",
+              "framework_name": "${ .trigger.data.regulation_name }",
+              "priority": "${ .trigger.data.priority }",
+              "change_type": "${ .trigger.data.change_type }",
+              "effective_date": "${ .trigger.data.effective_date }",
+              "compliance_deadline": "${ .trigger.data.compliance_deadline }",
+              "source_url": "${ .trigger.data.source_url }",
+              "_internal_token": "cg-internal-invoke-7f3a9c2e1b8d4a6f9e2c"
+            }
+          },
+          "then": "end",
+          "x-base44": {
+            "title": "Broadcast regulatory alert",
+            "description": "Pin alert banner to all affected tenants' dashboards"
+          }
+        }
+      }
+    ]
+  }
+}

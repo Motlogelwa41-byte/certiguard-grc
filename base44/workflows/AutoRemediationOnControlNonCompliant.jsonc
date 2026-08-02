@@ -1,0 +1,43 @@
+{
+  "name": "Auto-Remediation on Control Non-Compliant",
+  "description": "When a universal control status changes to non_compliant, auto-create a 48-hour remediation task and notify the control owner in-app.",
+  "trigger": {
+    "config": {
+      "trigger_type": "entity",
+      "entity_name": "UniversalControl",
+      "events": [
+        "update"
+      ]
+    },
+    "condition": "${ .trigger.data.status == \"non_compliant\" and .trigger.old_data.status != \"non_compliant\" }"
+  },
+  "definition": {
+    "document": {
+      "dsl": "1.0.0",
+      "name": "auto_remediation_control_noncompliant",
+      "version": "1.0",
+      "namespace": "base44"
+    },
+    "do": [
+      {
+        "create_task": {
+          "call": "invoke_backend_function",
+          "with": {
+            "function_name": "autoCreateRemediationTask",
+            "args": {
+              "entity_type": "control",
+              "control_id": "${ .trigger.entity_id }",
+              "control": "${ .trigger.data }",
+              "_internal_token": "cg-internal-invoke-7f3a9c2e1b8d4a6f9e2c"
+            }
+          },
+          "then": "end",
+          "x-base44": {
+            "title": "Create 48h remediation task",
+            "description": "Auto-generate urgent remediation for non-compliant control"
+          }
+        }
+      }
+    ]
+  }
+}

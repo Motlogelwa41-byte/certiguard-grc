@@ -1,0 +1,44 @@
+{
+  "name": "Auto-Remediation on Critical Risk",
+  "description": "When a risk score hits the red/critical threshold (>= 20), auto-create a 48-hour remediation task and notify the risk owner in-app.",
+  "trigger": {
+    "config": {
+      "trigger_type": "entity",
+      "entity_name": "Risk",
+      "events": [
+        "create",
+        "update"
+      ]
+    },
+    "condition": "${ (.trigger.data.likelihood * .trigger.data.impact) >= 20 }"
+  },
+  "definition": {
+    "document": {
+      "dsl": "1.0.0",
+      "name": "auto_remediation_critical_risk",
+      "version": "1.0",
+      "namespace": "base44"
+    },
+    "do": [
+      {
+        "create_task": {
+          "call": "invoke_backend_function",
+          "with": {
+            "function_name": "autoCreateRemediationTask",
+            "args": {
+              "entity_type": "risk",
+              "risk_id": "${ .trigger.entity_id }",
+              "risk": "${ .trigger.data }",
+              "_internal_token": "cg-internal-invoke-7f3a9c2e1b8d4a6f9e2c"
+            }
+          },
+          "then": "end",
+          "x-base44": {
+            "title": "Create 48h remediation task",
+            "description": "Auto-generate urgent remediation for critical (red) risk"
+          }
+        }
+      }
+    ]
+  }
+}
