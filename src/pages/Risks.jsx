@@ -42,7 +42,26 @@ export default function Risks() {
   const [bulkStatus, setBulkStatus] = useState("");
   const [bulkOwner, setBulkOwner] = useState("");
   const [acceptRisk, setAcceptRisk] = useState(null);
+  const [tenantSettings, setTenantSettings] = useState(null);
   const { toast } = useToast();
+
+  const IMPACT_LABELS = ["", "Negligible", "Minor", "Moderate", "Major", "Catastrophic"];
+  const LIKELIHOOD_LABELS = ["", "Rare", "Unlikely", "Possible", "Likely", "Almost Certain"];
+
+  const fmtCurrency = (val) => {
+    if (val == null) return "";
+    if (val >= 1000000) return "$" + (val / 1000000).toFixed(val % 1000000 === 0 ? 0 : 1) + "M";
+    if (val >= 1000) return "$" + (val / 1000).toFixed(val % 1000 === 0 ? 0 : 1) + "K";
+    return "$" + val.toLocaleString();
+  };
+
+  const formatImpactRange = (level) => {
+    if (!tenantSettings) return "";
+    const min = tenantSettings[`impact_${level}_min`];
+    const max = tenantSettings[`impact_${level}_max`];
+    if (min == null || max == null) return "";
+    return `${fmtCurrency(min)} – ${fmtCurrency(max)}`;
+  };
 
   const handleExport = () => exportToCsv(items, "risks", ["risk_id", "title", "category", "status", "likelihood", "impact", "risk_score", "treatment", "owner_name"]);
 
@@ -64,9 +83,14 @@ export default function Risks() {
   ];
 
   const load = async () => {
-    const [risks, ctls] = await Promise.all([base44.entities.Risk.list(), base44.entities.Control.list()]);
+    const [risks, ctls, settings] = await Promise.all([
+      base44.entities.Risk.list(),
+      base44.entities.Control.list(),
+      base44.entities.TenantSettings.list().catch(() => []),
+    ]);
     setItems(risks);
     setControls(ctls);
+    setTenantSettings(settings?.[0] || null);
     setLoading(false);
   };
   useEffect(() => { load(); }, []);
@@ -308,17 +332,36 @@ export default function Risks() {
               </div>
             </div>
             <div className="grid grid-cols-3 gap-3">
-              <div><Label>Likelihood (1-5)</Label>
+              <div>
+                <Label>Likelihood (1-5)</Label>
                 <Select value={String(form.likelihood)} onValueChange={(v) => setForm({ ...form, likelihood: parseInt(v) })}>
                   <SelectTrigger><SelectValue placeholder="1-5" /></SelectTrigger>
-                  <SelectContent>{[1,2,3,4,5].map((n) => <SelectItem key={n} value={String(n)}>{n}</SelectItem>)}</SelectContent>
+                  <SelectContent>{[1,2,3,4,5].map((n) => (
+                    <SelectItem key={n} value={String(n)}>
+                      {n} — {LIKELIHOOD_LABELS[n]}
+                    </SelectItem>
+                  ))}</SelectContent>
                 </Select>
+                <p className="text-[10px] text-muted-foreground mt-1">Qualitative frequency</p>
               </div>
-              <div><Label>Impact (1-5)</Label>
+              <div>
+                <Label>Impact (1-5)</Label>
                 <Select value={String(form.impact)} onValueChange={(v) => setForm({ ...form, impact: parseInt(v) })}>
                   <SelectTrigger><SelectValue placeholder="1-5" /></SelectTrigger>
-                  <SelectContent>{[1,2,3,4,5].map((n) => <SelectItem key={n} value={String(n)}>{n}</SelectItem>)}</SelectContent>
+                  <SelectContent>{[1,2,3,4,5].map((n) => {
+                    const range = formatImpactRange(n);
+                    return (
+                      <SelectItem key={n} value={String(n)}>
+                        {n} — {IMPACT_LABELS[n]}{range ? ` (${range})` : ""}
+                      </SelectItem>
+                    );
+                  })}</SelectContent>
                 </Select>
+                <p className="text-[10px] text-muted-foreground mt-1">
+                  {tenantSettings
+                    ? `Company policy: ${formatImpactRange(form.impact) || "range not set"}`
+                    : "Financial ranges from Tenant Settings"}
+                </p>
               </div>
               <div><Label>Treatment</Label>
                 <Select value={form.treatment} onValueChange={(v) => setForm({ ...form, treatment: v })}>

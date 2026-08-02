@@ -71,6 +71,21 @@ export default function EvidenceManager() {
     try {
       if (editId) await base44.entities.Evidence.update(editId, form);
       else await base44.entities.Evidence.create({ ...form, status: "pending_review" });
+
+      // Hash the uploaded file and write to the append-only audit ledger (SHA-256 integrity proof)
+      if (form.file_url) {
+        try {
+          await base44.functions.invoke('hashEvidenceToLedger', {
+            file_url: form.file_url,
+            file_name: form.file_name,
+            control_id: form.control_id,
+            notes: `Evidence: ${form.title}`,
+          });
+        } catch (hashErr) {
+          console.error('Ledger hashing failed:', hashErr);
+        }
+      }
+
       setOpen(false); setForm(defaultForm); setEditId(null); load();
       toast({ title: editId ? "Evidence updated" : "Evidence added", description: editId ? undefined : "Sent to compliance manager for review." });
     } catch (e) { toast({ title: "Error", description: e.message, variant: "destructive" }); }
