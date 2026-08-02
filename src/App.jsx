@@ -120,9 +120,11 @@ import ExecutiveReadinessDashboard from '@/pages/ExecutiveReadinessDashboard';
 import AuditorExport from '@/pages/AuditorExport';
 import TenantSettings from '@/pages/TenantSettings';
 import MyPolicies from '@/pages/MyPolicies';
+import VendorPortal from '@/pages/VendorPortal';
+import AuditorDashboard from '@/pages/AuditorDashboard';
 
 const AuthenticatedApp = () => {
-  const { isLoadingAuth, isLoadingPublicSettings, authError, navigateToLogin } = useAuth();
+  const { isLoadingAuth, isLoadingPublicSettings, authError, navigateToLogin, user, isAuthenticated } = useAuth();
 
   if (isLoadingPublicSettings || isLoadingAuth) {
     return (
@@ -141,6 +143,11 @@ const AuthenticatedApp = () => {
     }
   }
 
+  // External auditors are redirected to an isolated, sidebar-free dashboard
+  if (isAuthenticated && user?.role === 'external_auditor' && !window.location.pathname.startsWith('/auditor-dashboard')) {
+    return <Navigate to="/auditor-dashboard" replace />;
+  }
+
   return (
     <Routes>
       <Route path="/login" element={<Login />} />
@@ -149,6 +156,7 @@ const AuthenticatedApp = () => {
       <Route path="/reset-password" element={<ResetPassword />} />
       <Route path="/pricing" element={<Pricing />} />
       <Route path="/vendor-questionnaire" element={<VendorQuestionnaire />} />
+      <Route path="/vendor-portal" element={<VendorPortal />} />
       <Route path="/trust-center" element={<TrustCenterPublic />} />
       <Route path="/privacy" element={<PrivacyPolicy />} />
       <Route path="/terms" element={<Terms />} />
@@ -157,6 +165,7 @@ const AuthenticatedApp = () => {
       <Route path="/security-overview" element={<SecurityOverview />} />
       <Route path="/auditor-link/:token" element={<AuditorLinkAccess />} />
       <Route element={<ProtectedRoute unauthenticatedElement={<Navigate to="/login" replace />} />}>
+        <Route path="/auditor-dashboard" element={<AuditorDashboard />} />
         <Route element={<TenantProvider><AppLayout /></TenantProvider>}>
           <Route path="/" element={<Dashboard />} />
           <Route path="/frameworks" element={<Frameworks />} />
