@@ -46,6 +46,7 @@
       "type": "string",
       "enum": [
         "active",
+        "non_compliant",
         "draft",
         "deprecated"
       ],
