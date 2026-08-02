@@ -122,6 +122,7 @@ import TenantSettings from '@/pages/TenantSettings';
 import MyPolicies from '@/pages/MyPolicies';
 import VendorPortal from '@/pages/VendorPortal';
 import AuditorDashboard from '@/pages/AuditorDashboard';
+import ExecutiveReport from '@/pages/ExecutiveReport';
 
 const AuthenticatedApp = () => {
   const { isLoadingAuth, isLoadingPublicSettings, authError, navigateToLogin, user, isAuthenticated } = useAuth();
@@ -265,6 +266,7 @@ const AuthenticatedApp = () => {
           <Route path="/auditor-export" element={<AuditorExport />} />
           <Route path="/tenant-settings" element={<TenantSettings />} />
           <Route path="/my-policies" element={<MyPolicies />} />
+          <Route path="/executive-report" element={<ExecutiveReport />} />
         </Route>
       </Route>
       <Route path="*" element={<PageNotFound />} />

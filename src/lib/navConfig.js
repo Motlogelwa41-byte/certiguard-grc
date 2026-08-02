@@ -138,6 +138,7 @@ export const navSections = [
       { label: "Scheduled Reports", path: "/scheduled-reports", icon: Send, roles: ["admin", "compliance_officer", "auditor"] },
       { label: "Exec Readiness Dashboard", path: "/executive-readiness-dashboard", icon: LineChart, roles: ["admin", "compliance_officer", "risk_manager", "auditor"] },
       { label: "Auditor Export", path: "/auditor-export", icon: FileDown, roles: ["admin", "compliance_officer", "risk_manager", "auditor"] },
+      { label: "Executive Report", path: "/executive-report", icon: FileText, roles: ["admin", "compliance_officer", "risk_manager", "auditor"] },
     ]
   },
   {
