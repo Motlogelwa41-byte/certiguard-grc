@@ -47,9 +47,26 @@ export default function ExecutiveReport() {
     ? Math.round(controlPct * 0.4 + avgReadiness * 0.6)
     : controlPct;
 
-  const criticalRisks = risks.filter(
-    (r) => (r.risk_score || 0) >= 20 || r.appetite_band === "unacceptable"
+  // Traffic-light risk classification: Red / Yellow / Green
+  const redRisks = risks.filter(
+    (r) => (r.risk_score || 0) >= 20 || r.appetite_band === "unacceptable" || r.appetite_band === "above_appetite"
   );
+  const yellowRisks = risks.filter(
+    (r) => {
+      const score = r.risk_score || 0;
+      const band = r.appetite_band;
+      return (score >= 10 && score < 20) || band === "tolerance_zone";
+    }
+  );
+  const greenRisks = risks.filter(
+    (r) => {
+      const score = r.risk_score || 0;
+      const band = r.appetite_band;
+      return score < 10 && (band === "within_appetite" || !band);
+    }
+  );
+
+  const criticalRisks = redRisks;
   const openCriticalRisks = criticalRisks.filter((r) => r.status === "open" || r.status === "mitigating");
 
   const totalALE = risks.reduce((sum, r) => sum + (Number(r.annualized_loss_expectancy) || 0), 0);
@@ -185,6 +202,52 @@ export default function ExecutiveReport() {
                 <span className="font-semibold text-slate-700">
                   {fmtCurrency(Math.max(0, ...risks.map((r) => Number(r.annualized_loss_expectancy) || 0)))}
                 </span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Risk Traffic-Light Summary */}
+        <div className="bg-white rounded-xl border border-slate-200 shadow-sm mb-6 print-card">
+          <div className="px-6 py-4 border-b border-slate-100">
+            <h2 className="text-lg font-semibold text-slate-900">Risk Traffic-Light Summary</h2>
+            <p className="text-xs text-slate-500 mt-0.5">Distribution by risk score and appetite band</p>
+          </div>
+          <div className="grid grid-cols-1 sm:grid-cols-3 divide-x divide-slate-100">
+            {/* Red */}
+            <div className="p-6 text-center">
+              <div className="inline-flex items-center justify-center w-12 h-12 rounded-full bg-red-50 border-2 border-red-200 mb-3">
+                <div className="w-5 h-5 rounded-full bg-red-500" />
+              </div>
+              <div className="text-3xl font-bold text-red-600">{redRisks.length}</div>
+              <div className="text-sm font-semibold text-slate-700 mt-1">Red Risks</div>
+              <div className="text-xs text-slate-500 mt-0.5">Score {"\u2265"} 20 · Above appetite</div>
+              <div className="mt-2 pt-2 border-t border-slate-100 text-xs text-slate-500">
+                {redRisks.filter((r) => r.status === "open" || r.status === "mitigating").length} open · {redRisks.filter((r) => r.status === "closed" || r.status === "accepted").length} resolved
+              </div>
+            </div>
+            {/* Yellow */}
+            <div className="p-6 text-center">
+              <div className="inline-flex items-center justify-center w-12 h-12 rounded-full bg-amber-50 border-2 border-amber-200 mb-3">
+                <div className="w-5 h-5 rounded-full bg-amber-500" />
+              </div>
+              <div className="text-3xl font-bold text-amber-600">{yellowRisks.length}</div>
+              <div className="text-sm font-semibold text-slate-700 mt-1">Yellow Risks</div>
+              <div className="text-xs text-slate-500 mt-0.5">Score 10–19 · Tolerance zone</div>
+              <div className="mt-2 pt-2 border-t border-slate-100 text-xs text-slate-500">
+                {yellowRisks.filter((r) => r.status === "open" || r.status === "mitigating").length} open · {yellowRisks.filter((r) => r.status === "closed" || r.status === "accepted").length} resolved
+              </div>
+            </div>
+            {/* Green */}
+            <div className="p-6 text-center">
+              <div className="inline-flex items-center justify-center w-12 h-12 rounded-full bg-emerald-50 border-2 border-emerald-200 mb-3">
+                <div className="w-5 h-5 rounded-full bg-emerald-500" />
+              </div>
+              <div className="text-3xl font-bold text-emerald-600">{greenRisks.length}</div>
+              <div className="text-sm font-semibold text-slate-700 mt-1">Green Risks</div>
+              <div className="text-xs text-slate-500 mt-0.5">Score &lt; 10 · Within appetite</div>
+              <div className="mt-2 pt-2 border-t border-slate-100 text-xs text-slate-500">
+                {greenRisks.filter((r) => r.status === "open" || r.status === "mitigating").length} open · {greenRisks.filter((r) => r.status === "closed" || r.status === "accepted").length} resolved
               </div>
             </div>
           </div>

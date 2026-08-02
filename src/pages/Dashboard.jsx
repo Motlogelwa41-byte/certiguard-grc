@@ -175,8 +175,11 @@ export default function Dashboard() {
       {/* Charts Row */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
         {/* Control Status Chart */}
-        <div className="bg-card rounded-xl border border-border p-6">
-          <h3 className="font-heading font-semibold text-foreground mb-4">Control Status</h3>
+        <div className="bg-card rounded-xl border border-border p-6 shadow-sm">
+          <div className="flex items-center justify-between mb-4">
+            <h3 className="font-heading font-semibold text-foreground">Control Status</h3>
+            <span className="text-[11px] text-muted-foreground font-medium uppercase tracking-wider">{controls.length} Total</span>
+          </div>
           {controlStatusData.length > 0 ? (
             <div className="flex items-center gap-6">
               <ResponsiveContainer width={160} height={160}>
@@ -204,8 +207,11 @@ export default function Dashboard() {
         </div>
 
         {/* Risk Distribution */}
-        <div className="bg-card rounded-xl border border-border p-6">
-          <h3 className="font-heading font-semibold text-foreground mb-4">Risk Distribution</h3>
+        <div className="bg-card rounded-xl border border-border p-6 shadow-sm">
+          <div className="flex items-center justify-between mb-4">
+            <h3 className="font-heading font-semibold text-foreground">Risk Distribution</h3>
+            <span className="text-[11px] text-muted-foreground font-medium uppercase tracking-wider">{risks.length} Total</span>
+          </div>
           {riskByCategory.length > 0 ? (
             <ResponsiveContainer width="100%" height={160}>
               <BarChart data={riskByCategory} layout="vertical" margin={{ left: 0 }}>
@@ -230,7 +236,7 @@ export default function Dashboard() {
       </div>
 
       {/* Framework Readiness */}
-      <div className="bg-card rounded-xl border border-border p-6 mb-8">
+      <div className="bg-card rounded-xl border border-border p-6 mb-8 shadow-sm">
         <div className="flex items-center justify-between mb-4">
           <h3 className="font-heading font-semibold text-foreground">Framework Readiness</h3>
           <Link to="/frameworks" className="text-xs text-primary hover:underline flex items-center gap-1">
@@ -264,7 +270,7 @@ export default function Dashboard() {
       {/* Recent Items + Activity Row */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Recent Tasks */}
-        <div className="bg-card rounded-xl border border-border p-6">
+        <div className="bg-card rounded-xl border border-border p-6 shadow-sm">
           <div className="flex items-center justify-between mb-4">
             <h3 className="font-heading font-semibold text-foreground">Recent Tasks</h3>
             <Link to="/tasks" className="text-xs text-primary hover:underline flex items-center gap-1">
