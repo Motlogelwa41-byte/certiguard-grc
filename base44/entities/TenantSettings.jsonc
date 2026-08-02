@@ -20,6 +20,13 @@
       },
       "description": "Display names of active frameworks (denormalized for tooltips)"
     },
+    "active_jurisdictions": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "Active jurisdictions/countries for this tenant (e.g. South Africa, Botswana, Angola) \u2014 drives SADC cross-border data sovereignty checks"
+    },
     "impact_1_min": {
       "type": "number",
       "description": "Monetary range minimum for impact level 1 (Negligible)"
@@ -62,7 +69,7 @@
     },
     "risk_appetite_limit": {
       "type": "number",
-      "description": "Corporate Risk Appetite Limit in currency \u2014 maximum acceptable loss exposure"
+      "description": "Corporate Financial Risk Appetite Limit in currency \u2014 maximum acceptable loss exposure (COSO ERM)"
     },
     "updated_by_name": {
       "type": "string"

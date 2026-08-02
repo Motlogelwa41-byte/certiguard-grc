@@ -59,16 +59,29 @@
     },
     "quantitative_single_loss": {
       "type": "number",
-      "description": "Single loss expectancy (SLE) in currency \u2014 decimal"
+      "description": "Inherent Impact ($) \u2014 single loss expectancy (SLE)"
     },
     "quantitative_annual_rate": {
       "type": "number",
-      "description": "Annualized rate of occurrence (ARO) \u2014 decimal (events per year)"
+      "description": "Inherent Likelihood \u2014 annualized rate of occurrence (ARO, events per year)"
     },
     "annualized_loss_expectancy": {
       "type": "number",
       "default": 0,
-      "description": "Auto-calculated ALE: single_loss \u00d7 annual_rate"
+      "description": "Auto-calculated inherent ALE: single_loss \u00d7 annual_rate"
+    },
+    "residual_financial_impact": {
+      "type": "number",
+      "description": "Residual Impact ($) \u2014 financial impact after mitigations (COSO ERM)"
+    },
+    "residual_likelihood_pct": {
+      "type": "number",
+      "description": "Residual Likelihood (%) \u2014 probability after mitigations (0-100, COSO ERM)"
+    },
+    "residual_annualized_loss_expectancy": {
+      "type": "number",
+      "default": 0,
+      "description": "Auto-calculated residual ALE: residual_financial_impact \u00d7 (residual_likelihood_pct / 100)"
     },
     "status": {
       "type": "string",
@@ -132,6 +145,11 @@
       "type": "boolean",
       "default": false,
       "description": "Flagged when risk score exceeds the company tolerance threshold"
+    },
+    "exceeds_appetite_limit": {
+      "type": "boolean",
+      "default": false,
+      "description": "Flagged when financial exposure (ALE) exceeds the tenant's risk_appetite_limit (COSO ERM)"
     },
     "tolerance_justification": {
       "type": "string",

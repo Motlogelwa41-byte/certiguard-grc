@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
 import { useAuth } from "@/lib/AuthContext";
 import { useTenant } from "@/lib/TenantContext";
-import { Settings, Save, Shield, DollarSign } from "lucide-react";
+import { Settings, Save, Shield, DollarSign, Globe } from "lucide-react";
 import PageHeader from "@/components/shared/PageHeader";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -20,6 +20,12 @@ const IMPACT_LABELS = [
   { level: 5, name: "Catastrophic" },
 ];
 
+const SADC_JURISDICTIONS = [
+  "South Africa", "Botswana", "Angola", "Mozambique", "Zambia", "Zimbabwe",
+  "Namibia", "Lesotho", "Eswatini", "Malawi", "Tanzania", "DRC",
+  "Madagascar", "Mauritius", "Seychelles",
+];
+
 export default function TenantSettings() {
   const { user } = useAuth();
   const { tenant } = useTenant();
@@ -32,6 +38,7 @@ export default function TenantSettings() {
 
   // Form state
   const [activeIds, setActiveIds] = useState([]);
+  const [activeJurisdictions, setActiveJurisdictions] = useState([]);
   const [impactRanges, setImpactRanges] = useState({
     1: { min: 0, max: 10000 },
     2: { min: 10001, max: 50000 },
@@ -51,6 +58,7 @@ export default function TenantSettings() {
       if (s) {
         setSettings(s);
         setActiveIds(s.active_framework_ids || []);
+        setActiveJurisdictions(s.active_jurisdictions || []);
         if (s.impact_1_min !== undefined) {
           setImpactRanges({
             1: { min: s.impact_1_min, max: s.impact_1_max },
@@ -82,6 +90,7 @@ export default function TenantSettings() {
         tenant_id: tenantId,
         active_framework_ids: activeIds,
         active_framework_names: activeNames,
+        active_jurisdictions: activeJurisdictions,
         impact_1_min: impactRanges[1].min,
         impact_1_max: impactRanges[1].max,
         impact_2_min: impactRanges[2].min,
@@ -153,6 +162,31 @@ export default function TenantSettings() {
                 ))}
               </div>
             )}
+          </CardContent>
+        </Card>
+
+        {/* Active Jurisdictions — SADC Cross-Border Data Sovereignty */}
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2 text-base">
+              <Globe className="w-4 h-4 text-primary" /> Active Jurisdictions (SADC Data Sovereignty)
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <p className="text-sm text-muted-foreground mb-4">Select the countries your organization operates in. Cross-border data transfers to countries outside this list (or without SADC adequacy agreements) will be automatically flagged as High Risk.</p>
+            <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
+              {SADC_JURISDICTIONS.map((country) => {
+                const checked = activeJurisdictions.includes(country);
+                return (
+                  <label key={country} className="flex items-center gap-2 p-2.5 border border-border rounded-lg cursor-pointer hover:bg-muted/30 transition-colors">
+                    <Checkbox checked={checked} onCheckedChange={() => {
+                      setActiveJurisdictions((prev) => prev.includes(country) ? prev.filter((c) => c !== country) : [...prev, country]);
+                    }} />
+                    <span className="text-sm text-foreground">{country}</span>
+                  </label>
+                );
+              })}
+            </div>
           </CardContent>
         </Card>
 
