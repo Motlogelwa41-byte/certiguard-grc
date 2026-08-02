@@ -20,6 +20,8 @@
         "unusual_api_usage",
         "config_change",
         "tenant_isolation_breach",
+        "remediation_alert",
+        "regulatory_alert",
         "other"
       ],
       "default": "other"
@@ -74,9 +76,16 @@
   ],
   "rls": {
     "create": {
-      "user_condition": {
-        "role": "admin"
-      }
+      "$or": [
+        {
+          "data.tenant_id": "{{user.data.tenant_id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
     },
     "read": {
       "$or": [
@@ -91,9 +100,16 @@
       ]
     },
     "update": {
-      "user_condition": {
-        "role": "admin"
-      }
+      "$or": [
+        {
+          "data.tenant_id": "{{user.data.tenant_id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
     },
     "delete": {
       "user_condition": {
