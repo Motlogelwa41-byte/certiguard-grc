@@ -118,6 +118,8 @@ import DataResidency from '@/pages/DataResidency';
 import SecurityOverview from '@/pages/SecurityOverview';
 import ExecutiveReadinessDashboard from '@/pages/ExecutiveReadinessDashboard';
 import AuditorExport from '@/pages/AuditorExport';
+import TenantSettings from '@/pages/TenantSettings';
+import MyPolicies from '@/pages/MyPolicies';
 
 const AuthenticatedApp = () => {
   const { isLoadingAuth, isLoadingPublicSettings, authError, navigateToLogin } = useAuth();
@@ -252,6 +254,8 @@ const AuthenticatedApp = () => {
           <Route path="/data-privacy" element={<DataPrivacy />} />
           <Route path="/executive-readiness-dashboard" element={<ExecutiveReadinessDashboard />} />
           <Route path="/auditor-export" element={<AuditorExport />} />
+          <Route path="/tenant-settings" element={<TenantSettings />} />
+          <Route path="/my-policies" element={<MyPolicies />} />
         </Route>
       </Route>
       <Route path="*" element={<PageNotFound />} />

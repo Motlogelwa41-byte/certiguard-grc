@@ -16,6 +16,7 @@ import { useToast } from "@/components/ui/use-toast";
 import { logAuditTrail } from "@/lib/auditLogger";
 import { useAuth } from "@/lib/AuthContext";
 import RiskCardDetail from "@/components/risks/RiskCardDetail";
+import RiskHeatmapGrid from "@/components/risks/RiskHeatmapGrid";
 import RiskAcceptanceDialog from "@/components/risks/RiskAcceptanceDialog";
 import BulkActionBar from "@/components/shared/BulkActionBar";
 import Can from "@/components/shared/Can";
@@ -158,9 +159,20 @@ export default function Risks() {
 
       {/* Risk Heatmap */}
       {items.length > 0 && (
+        <div className="mb-6">
+          <RiskHeatmapGrid risks={filtered} />
+        </div>
+      )}
+
+      {/* High-impact risks by department / owner (category-aware) */}
+      {items.length > 0 && (
         <div className="bg-card rounded-xl border border-border p-6 mb-6">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-4">
-            <h3 className="font-heading font-semibold text-foreground">Risk Heatmap</h3>
+            <h4 className="text-sm font-semibold text-foreground flex items-center gap-2">
+              <AlertTriangle className="w-4 h-4 text-orange-500" />
+              High-Impact Risks by Department / Owner
+              <span className="text-xs font-normal text-muted-foreground ml-1">(score ≥ 12{filterCategory !== "all" ? ` · ${filterCategory.replace(/_/g, " ")}` : ""})</span>
+            </h4>
             <Select value={filterCategory} onValueChange={setFilterCategory}>
               <SelectTrigger className="w-full sm:w-[200px]"><SelectValue placeholder="All Categories" /></SelectTrigger>
               <SelectContent>
@@ -169,66 +181,38 @@ export default function Risks() {
               </SelectContent>
             </Select>
           </div>
-          <div className="flex gap-6 items-start">
-            <div className="text-xs text-muted-foreground font-medium -rotate-90 self-center whitespace-nowrap">IMPACT →</div>
-            <div className="flex-1">
-              <div className="grid grid-cols-5 gap-1">
-                {[5,4,3,2,1].map((impact) =>
-                  [1,2,3,4,5].map((likelihood) => {
-                    const score = impact * likelihood;
-                    const risksInCell = filtered.filter(r => r.likelihood === likelihood && r.impact === impact);
-                    return (
-                      <div key={`${impact}-${likelihood}`} className={`aspect-square rounded-md flex items-center justify-center text-xs font-bold text-white relative ${score >= 20 ? "bg-red-500" : score >= 12 ? "bg-orange-500" : score >= 6 ? "bg-amber-500" : "bg-emerald-500"} ${risksInCell.length > 0 ? 'ring-2 ring-foreground/20' : 'opacity-60'}`}>
-                        {risksInCell.length > 0 && risksInCell.length}
-                      </div>
-                    );
-                  })
-                )}
-              </div>
-              <div className="text-xs text-muted-foreground font-medium text-center mt-2">LIKELIHOOD →</div>
-            </div>
-          </div>
-
-          {/* High-impact risks by department / owner (category-aware) */}
-          <div className="mt-6 pt-5 border-t border-border">
-            <h4 className="text-sm font-semibold text-foreground mb-3 flex items-center gap-2">
-              <AlertTriangle className="w-4 h-4 text-orange-500" />
-              High-Impact Risks by Department / Owner
-              <span className="text-xs font-normal text-muted-foreground ml-1">(score ≥ 12{filterCategory !== "all" ? ` · ${filterCategory.replace(/_/g, " ")}` : ""})</span>
-            </h4>
-            {(() => {
-              const highImpact = filtered.filter(r => (r.likelihood * r.impact) >= 12);
-              const byDept = {};
-              highImpact.forEach(r => {
-                const k = r.owner_name?.trim() || "Unassigned";
-                if (!byDept[k]) byDept[k] = { owner: k, count: 0, maxScore: 0, open: 0, critical: 0 };
-                byDept[k].count += 1;
-                const s = r.likelihood * r.impact;
-                byDept[k].maxScore = Math.max(byDept[k].maxScore, s);
-                if (s >= 20) byDept[k].critical += 1;
-                if (r.status === "open" || r.status === "mitigating") byDept[k].open += 1;
-              });
-              const depts = Object.values(byDept).sort((a, b) => b.maxScore - a.maxScore || b.count - a.count);
-              if (depts.length === 0) return <p className="text-sm text-muted-foreground">No high-impact risks for the selected category.</p>;
-              const maxCount = Math.max(...depts.map(d => d.count));
-              return (
-                <div className="space-y-2.5">
-                  {depts.map(d => (
-                    <div key={d.owner} className="flex items-center gap-3">
-                      <div className="w-44 shrink-0 truncate text-sm font-medium text-foreground" title={d.owner}>{d.owner}</div>
-                      <div className="flex-1 h-7 bg-muted rounded-full overflow-hidden relative flex items-center">
-                        <div className="h-full rounded-full bg-gradient-to-r from-orange-500 to-red-500 transition-all" style={{ width: `${(d.count / maxCount) * 100}%` }} />
-                        <span className="absolute right-2 text-xs font-medium text-foreground/70">{d.open} open · {d.count} total</span>
-                      </div>
-                      <div className="w-16 shrink-0 text-right">
-                        <span className={`text-xs font-bold px-2 py-1 rounded-full ${d.critical > 0 ? "bg-red-100 text-red-700" : "bg-orange-100 text-orange-700"}`}>{d.maxScore}</span>
-                      </div>
+          {(() => {
+            const highImpact = filtered.filter(r => (r.likelihood * r.impact) >= 12);
+            const byDept = {};
+            highImpact.forEach(r => {
+              const k = r.owner_name?.trim() || "Unassigned";
+              if (!byDept[k]) byDept[k] = { owner: k, count: 0, maxScore: 0, open: 0, critical: 0 };
+              byDept[k].count += 1;
+              const s = r.likelihood * r.impact;
+              byDept[k].maxScore = Math.max(byDept[k].maxScore, s);
+              if (s >= 20) byDept[k].critical += 1;
+              if (r.status === "open" || r.status === "mitigating") byDept[k].open += 1;
+            });
+            const depts = Object.values(byDept).sort((a, b) => b.maxScore - a.maxScore || b.count - a.count);
+            if (depts.length === 0) return <p className="text-sm text-muted-foreground">No high-impact risks for the selected category.</p>;
+            const maxCount = Math.max(...depts.map(d => d.count));
+            return (
+              <div className="space-y-2.5">
+                {depts.map(d => (
+                  <div key={d.owner} className="flex items-center gap-3">
+                    <div className="w-44 shrink-0 truncate text-sm font-medium text-foreground" title={d.owner}>{d.owner}</div>
+                    <div className="flex-1 h-7 bg-muted rounded-full overflow-hidden relative flex items-center">
+                      <div className="h-full rounded-full bg-gradient-to-r from-orange-500 to-red-500 transition-all" style={{ width: `${(d.count / maxCount) * 100}%` }} />
+                      <span className="absolute right-2 text-xs font-medium text-foreground/70">{d.open} open · {d.count} total</span>
                     </div>
-                  ))}
-                </div>
-              );
-            })()}
-          </div>
+                    <div className="w-16 shrink-0 text-right">
+                      <span className={`text-xs font-bold px-2 py-1 rounded-full ${d.critical > 0 ? "bg-red-100 text-red-700" : "bg-orange-100 text-orange-700"}`}>{d.maxScore}</span>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            );
+          })()}
         </div>
       )}
 

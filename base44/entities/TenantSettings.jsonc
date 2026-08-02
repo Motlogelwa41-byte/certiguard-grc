@@ -1,0 +1,108 @@
+{
+  "name": "TenantSettings",
+  "type": "object",
+  "properties": {
+    "tenant_id": {
+      "type": "string",
+      "description": "Tenant isolation key \u2014 mandatory on every record"
+    },
+    "active_framework_ids": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "IDs of frameworks this tenant has activated for compliance tracking"
+    },
+    "active_framework_names": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "Display names of active frameworks (denormalized for tooltips)"
+    },
+    "impact_1_min": {
+      "type": "number",
+      "description": "Monetary range minimum for impact level 1 (Negligible)"
+    },
+    "impact_1_max": {
+      "type": "number",
+      "description": "Monetary range maximum for impact level 1 (Negligible)"
+    },
+    "impact_2_min": {
+      "type": "number",
+      "description": "Monetary range minimum for impact level 2 (Minor)"
+    },
+    "impact_2_max": {
+      "type": "number",
+      "description": "Monetary range maximum for impact level 2 (Minor)"
+    },
+    "impact_3_min": {
+      "type": "number",
+      "description": "Monetary range minimum for impact level 3 (Moderate)"
+    },
+    "impact_3_max": {
+      "type": "number",
+      "description": "Monetary range maximum for impact level 3 (Moderate)"
+    },
+    "impact_4_min": {
+      "type": "number",
+      "description": "Monetary range minimum for impact level 4 (Major)"
+    },
+    "impact_4_max": {
+      "type": "number",
+      "description": "Monetary range maximum for impact level 4 (Major)"
+    },
+    "impact_5_min": {
+      "type": "number",
+      "description": "Monetary range minimum for impact level 5 (Catastrophic)"
+    },
+    "impact_5_max": {
+      "type": "number",
+      "description": "Monetary range maximum for impact level 5 (Catastrophic)"
+    },
+    "risk_appetite_limit": {
+      "type": "number",
+      "description": "Corporate Risk Appetite Limit in currency \u2014 maximum acceptable loss exposure"
+    },
+    "updated_by_name": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "tenant_id"
+  ],
+  "rls": {
+    "create": {
+      "data.tenant_id": "{{user.data.tenant_id}}"
+    },
+    "read": {
+      "$or": [
+        {
+          "data.tenant_id": "{{user.data.tenant_id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "update": {
+      "$or": [
+        {
+          "data.tenant_id": "{{user.data.tenant_id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "delete": {
+      "user_condition": {
+        "role": "admin"
+      }
+    }
+  }
+}
