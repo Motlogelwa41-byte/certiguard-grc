@@ -123,6 +123,9 @@ import MyPolicies from '@/pages/MyPolicies';
 import VendorPortal from '@/pages/VendorPortal';
 import AuditorDashboard from '@/pages/AuditorDashboard';
 import ExecutiveReport from '@/pages/ExecutiveReport';
+import ApiDocs from '@/pages/ApiDocs';
+import ControlTestLibrary from '@/pages/ControlTestLibrary';
+import { LanguageProvider } from '@/contexts/LanguageContext';
 
 const AuthenticatedApp = () => {
   const { isLoadingAuth, isLoadingPublicSettings, authError, navigateToLogin, user, isAuthenticated } = useAuth();
@@ -267,6 +270,8 @@ const AuthenticatedApp = () => {
           <Route path="/tenant-settings" element={<TenantSettings />} />
           <Route path="/my-policies" element={<MyPolicies />} />
           <Route path="/executive-report" element={<ExecutiveReport />} />
+          <Route path="/api-docs" element={<ApiDocs />} />
+          <Route path="/control-test-library" element={<ControlTestLibrary />} />
         </Route>
       </Route>
       <Route path="*" element={<PageNotFound />} />
@@ -277,13 +282,15 @@ const AuthenticatedApp = () => {
 function App() {
   return (
     <AuthProvider>
-      <QueryClientProvider client={queryClientInstance}>
-        <Router>
-          <ScrollToTop />
-          <AuthenticatedApp />
-        </Router>
-        <Toaster />
-      </QueryClientProvider>
+      <LanguageProvider>
+        <QueryClientProvider client={queryClientInstance}>
+          <Router>
+            <ScrollToTop />
+            <AuthenticatedApp />
+          </Router>
+          <Toaster />
+        </QueryClientProvider>
+      </LanguageProvider>
     </AuthProvider>
   )
 }

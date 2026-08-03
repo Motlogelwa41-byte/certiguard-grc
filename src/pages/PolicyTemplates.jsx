@@ -8,6 +8,7 @@ import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import PageHeader from "@/components/shared/PageHeader";
 import { useToast } from "@/components/ui/use-toast";
+import { policyTemplates as libraryTemplates } from "@/lib/policyTemplatesLibrary";
 
 const TEMPLATES = [
   {
@@ -226,9 +227,18 @@ Violations of this policy may result in:
 
 Version: [VERSION] | Owner: [HR / IT SECURITY] | Next Review: [DATE]`
   },
-];
+].concat(libraryTemplates.map(t => ({
+  id: t.id,
+  name: t.title,
+  framework: t.frameworks.join(" / "),
+  category: t.category,
+  description: `Pre-built ${t.frameworks.join(", ")} policy template.`,
+  tags: t.frameworks.slice(0, 3),
+  sections: (t.content.match(/## (.+)/g) || ["Policy Content"]).map(s => s.replace("## ", "")),
+  content: t.content.replace(/^## /gm, "").replace(/\n\n\n/g, "\n\n"),
+})));
 
-const FRAMEWORKS = ["All", "ISO 27001", "SOC 2", "POPIA / GDPR", "NIST CSF", "ISO 22301", "King V", "General"];
+const FRAMEWORKS = ["All", "ISO 27001", "SOC 2", "POPIA / GDPR", "NIST CSF", "ISO 22301", "King V", "General", "PCI DSS", "COSO ERM"];
 
 export default function PolicyTemplates() {
   const [filterFramework, setFilterFramework] = useState("All");

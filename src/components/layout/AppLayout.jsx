@@ -9,6 +9,8 @@ import useIdleLock from "@/hooks/useIdleLock";
 import ScreenLockOverlay from "@/components/shared/ScreenLockOverlay";
 import MfaEnforcementGate from "@/components/shared/MfaEnforcementGate";
 import SecurityPolicyBanner from "@/components/shared/SecurityPolicyBanner";
+import { useLanguage } from "@/contexts/LanguageContext";
+import { Globe } from "lucide-react";
 
 export default function AppLayout() {
   const [searchOpen, setSearchOpen] = useState(false);
@@ -41,6 +43,7 @@ export default function AppLayout() {
             <span className="flex-1 text-left">Search everything…</span>
             <kbd className="hidden sm:inline-flex px-1.5 py-0.5 rounded bg-background border border-border text-xs font-mono">⌘K</kbd>
           </button>
+          <LanguageSwitcher />
         </div>
         <div className="p-6 lg:p-8 max-w-[1400px] mx-auto">
           <SubscriptionGate>
@@ -54,5 +57,23 @@ export default function AppLayout() {
       {locked && <ScreenLockOverlay />}
     </div>
     </MfaEnforcementGate>
+  );
+}
+
+function LanguageSwitcher() {
+  const { language, setLanguage, languages } = useLanguage();
+  return (
+    <div className="flex items-center gap-1.5">
+      <Globe className="w-4 h-4 text-muted-foreground" />
+      <select
+        value={language}
+        onChange={(e) => setLanguage(e.target.value)}
+        className="text-xs bg-transparent border border-border rounded-md px-2 py-1 text-muted-foreground hover:text-foreground cursor-pointer focus:outline-none focus:border-primary/40"
+      >
+        {Object.entries(languages).map(([code, lang]) => (
+          <option key={code} value={code}>{lang.flag} {lang.label}</option>
+        ))}
+      </select>
+    </div>
   );
 }
