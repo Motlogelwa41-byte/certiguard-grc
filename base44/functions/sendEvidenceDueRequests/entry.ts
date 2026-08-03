@@ -7,9 +7,9 @@ import { sendGmail } from "../../shared/gmailSender.ts";
 // to the secure evidence portal where they can upload files.
 // Runs on a daily schedule via the EvidenceDueRequestScanner workflow.
 
-// Public URL of the published CertiGuard app (no trailing slash), e.g. https://certiguard.app
-// Configured via the BASE44_APP_URL app secret. Falls back to a text instruction if unset.
-const APP_URL = Deno.env.get("BASE44_APP_URL") || "";
+// Auto-derive the public app URL from BASE44_APP_ID (always available in the runtime).
+const APP_ID = Deno.env.get("BASE44_APP_ID") || "";
+const APP_URL = APP_ID ? `https://base44.app/apps/${APP_ID}` : "";
 const PORTAL_PATH = "/evidence";
 
 function escapeHtml(str) {

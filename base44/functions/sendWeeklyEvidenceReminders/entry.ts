@@ -6,7 +6,9 @@ import { sendGmail } from "../../shared/gmailSender.ts";
 // includes a direct link to the Evidence Manager in the app.
 // Runs weekly via the "Weekly Evidence Reminders" workflow.
 
-const APP_URL = Deno.env.get("BASE44_APP_URL") || "";
+// Auto-derive the public app URL from BASE44_APP_ID (always available in the runtime).
+const APP_ID = Deno.env.get("BASE44_APP_ID") || "";
+const APP_URL = APP_ID ? `https://base44.app/apps/${APP_ID}` : "";
 const PORTAL_PATH = "/evidence";
 
 function escapeHtml(str) {
