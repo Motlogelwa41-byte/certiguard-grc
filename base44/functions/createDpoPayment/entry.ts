@@ -2,6 +2,8 @@ import { secrets } from 'base44:runtime';
 
 // USD amounts in cents for each plan + billing cycle (matches Stripe/PayPal pricing)
 const PLAN_AMOUNTS = {
+  ngo_monthly: 19900,
+  ngo_annual: 178800,
   starter_monthly: 49900,
   starter_annual: 478800,
   professional_monthly: 149900,

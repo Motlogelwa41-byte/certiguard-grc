@@ -10,6 +10,7 @@ import { base44 } from "@/api/base44Client";
 
 const TIER_LABELS = {
   trial: "Free Trial",
+  ngo: "NGO / Non-Profit",
   starter: "Starter",
   professional: "Professional",
   enterprise: "Enterprise"
@@ -51,6 +52,7 @@ export default function Billing() {
       const limitFor = (t) =>
         t === "enterprise" ? { max_users: 999999, max_frameworks: 999999 } :
         t === "professional" ? { max_users: 100, max_frameworks: 20 } :
+        t === "ngo" ? { max_users: 25, max_frameworks: 10 } :
         t === "starter" ? { max_users: 10, max_frameworks: 5 } :
         { max_users: 3, max_frameworks: 2 };
       await base44.entities.Tenant.update(tenant.id, {

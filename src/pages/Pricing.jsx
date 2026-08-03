@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { Check, X, Shield, Zap, Building2, ArrowRight, Star, Lock, Sparkles } from "lucide-react";
+import { Check, X, Shield, Zap, Building2, ArrowRight, Star, Lock, Sparkles, Heart, Building, Mountain } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { startDpoCheckout } from "@/lib/billing";
 
@@ -25,6 +25,29 @@ const plans = [
       { name: "Custom integrations", included: false },
       { name: "SSO / SAML", included: false },
       { name: "Dedicated support", included: false },
+    ]
+  },
+  {
+    tier: "ngo",
+    name: "NGO / Non-Profit",
+    description: "Special impact pricing for registered non-profits and charities.",
+    priceMonthly: 199,
+    priceAnnual: 149,
+    color: "border-emerald-300",
+    bg: "bg-emerald-50",
+    badge: "Impact Pricing",
+    cta: "Get Started",
+    features: [
+      { name: "Up to 25 users", included: true },
+      { name: "10 compliance frameworks", included: true },
+      { name: "Control management", included: true },
+      { name: "Risk register & heatmap", included: true },
+      { name: "Policy management", included: true },
+      { name: "Evidence collection", included: true },
+      { name: "AI Compliance Auditor", included: true, highlight: true },
+      { name: "POPIA / GDPR ready", included: true },
+      { name: "Donor reporting templates", included: true },
+      { name: "SSO / SAML", included: false },
     ]
   },
   {
@@ -111,6 +134,13 @@ const trustBadges = [
   { label: "GDPR / POPIA ready", icon: Shield },
 ];
 
+const industries = [
+  { icon: Heart, title: "NGOs & Non-Profits", desc: "POPIA-compliant donor data protection, governance reporting, and impact pricing for registered charities.", plan: "NGO / Non-Profit" },
+  { icon: Building, title: "SMEs", desc: "Essential compliance tracking, risk register, and policy management for growing teams.", plan: "Starter" },
+  { icon: Building2, title: "Enterprises", desc: "Full GRC suite with SSO, API access, and dedicated support for large organizations.", plan: "Enterprise" },
+  { icon: Mountain, title: "Mining & Extractives", desc: "SADC cross-border sovereignty, environmental compliance, and King V governance for mining giants.", plan: "Enterprise" },
+];
+
 export default function Pricing() {
   const [billingCycle, setBillingCycle] = useState("annual");
   const [checkout, setCheckout] = useState(null);
@@ -145,7 +175,7 @@ export default function Pricing() {
 
       {/* Plans */}
       <div className="max-w-7xl mx-auto px-4 pb-20">
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 items-stretch">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-6 items-stretch">
           {plans.map((plan) => (
             <div key={plan.tier} className={`relative rounded-2xl border-2 ${plan.color} ${plan.bg} p-6 flex flex-col`}>
               {plan.badge && (
@@ -234,6 +264,26 @@ export default function Pricing() {
           </p>
         </div>
 
+        {/* Industries We Serve */}
+        <div className="mt-16">
+          <div className="text-center mb-10">
+            <h2 className="font-heading text-2xl font-bold text-foreground mb-2">Built for Every Organization</h2>
+            <p className="text-muted-foreground max-w-2xl mx-auto">From startups to mining giants — CertiGuard scales with your compliance needs.</p>
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+            {industries.map((ind, i) => (
+              <div key={i} className="bg-card rounded-xl border border-border p-6 hover:shadow-md transition-shadow">
+                <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center mb-4">
+                  <ind.icon className="w-5 h-5 text-primary" />
+                </div>
+                <h3 className="font-heading font-semibold text-foreground mb-1">{ind.title}</h3>
+                <p className="text-sm text-muted-foreground">{ind.desc}</p>
+                <p className="text-xs text-primary font-medium mt-3">Recommended: {ind.plan}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+
         {/* Security & Tenant Isolation Block */}
         <div className="mt-16 bg-card rounded-2xl border border-border p-8">
           <div className="flex items-center gap-4 mb-8">
@@ -270,7 +320,7 @@ export default function Pricing() {
       {/* Footer */}
       <div className="text-center py-8 border-t border-border">
         <p className="text-sm text-muted-foreground">
-          All prices in USD. Volume discounts available for 500+ users.{" "}
+          All prices in USD. NGO impact pricing requires valid non-profit registration. Volume discounts available for 500+ users.{" "}
           <a href="mailto:sales@certiguard.com" className="text-primary underline">Contact sales</a>
         </p>
       </div>
