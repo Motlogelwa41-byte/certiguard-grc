@@ -168,6 +168,10 @@ export default function Login() {
             <p className="text-center text-xs text-muted-foreground/70 mt-8">
               By signing in you agree to your tenant's acceptable use & data processing terms.
             </p>
+
+            <p className="text-center text-xs text-muted-foreground mt-4">
+              <Link to="/landing" className="hover:text-foreground transition-colors">← Back to home</Link>
+            </p>
           </div>
         </div>
       </div>

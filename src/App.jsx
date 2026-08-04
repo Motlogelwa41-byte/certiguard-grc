@@ -125,6 +125,7 @@ import AuditorDashboard from '@/pages/AuditorDashboard';
 import ExecutiveReport from '@/pages/ExecutiveReport';
 import ApiDocs from '@/pages/ApiDocs';
 import ControlTestLibrary from '@/pages/ControlTestLibrary';
+import Landing from '@/pages/Landing';
 import { LanguageProvider } from '@/contexts/LanguageContext';
 
 const AuthenticatedApp = () => {
@@ -158,6 +159,7 @@ const AuthenticatedApp = () => {
       <Route path="/register" element={<Register />} />
       <Route path="/forgot-password" element={<ForgotPassword />} />
       <Route path="/reset-password" element={<ResetPassword />} />
+      <Route path="/landing" element={<Landing />} />
       <Route path="/pricing" element={<Pricing />} />
       <Route path="/vendor-questionnaire" element={<VendorQuestionnaire />} />
       <Route path="/vendor-portal" element={<VendorPortal />} />
