@@ -1,0 +1,112 @@
+{
+  "name": "ComplianceBenchmark",
+  "type": "object",
+  "properties": {
+    "tenant_id": {
+      "type": "string",
+      "description": "Tenant isolation key"
+    },
+    "industry": {
+      "type": "string",
+      "description": "Industry cohort e.g. Financial Services, Healthcare, Technology/SaaS, Mining"
+    },
+    "framework_code": {
+      "type": "string",
+      "description": "Framework being benchmarked (ISO, NIST, SOC2, GDPR, POPIA)"
+    },
+    "framework_name": {
+      "type": "string"
+    },
+    "metric_name": {
+      "type": "string",
+      "description": "Benchmark metric e.g. Control pass rate, Mean time to remediate, Risk density"
+    },
+    "your_value": {
+      "type": "number",
+      "description": "Your organisation's measured value for this metric"
+    },
+    "industry_median": {
+      "type": "number",
+      "description": "Median value across the industry cohort"
+    },
+    "top_quartile": {
+      "type": "number",
+      "description": "75th percentile (top performers) in the cohort"
+    },
+    "bottom_quartile": {
+      "type": "number",
+      "description": "25th percentile (bottom performers) in the cohort"
+    },
+    "percentile_rank": {
+      "type": "number",
+      "description": "Your percentile rank within the cohort (0-100)"
+    },
+    "benchmark_period": {
+      "type": "string",
+      "description": "Reporting period e.g. 2026, H1 2026"
+    },
+    "unit": {
+      "type": "string",
+      "description": "Unit of measure e.g. %, days, count"
+    },
+    "better_direction": {
+      "type": "string",
+      "enum": [
+        "higher",
+        "lower"
+      ],
+      "default": "higher",
+      "description": "Whether a higher or lower value is better for this metric"
+    },
+    "notes": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "industry",
+    "metric_name"
+  ],
+  "rls": {
+    "create": {
+      "data.tenant_id": "{{user.data.tenant_id}}"
+    },
+    "read": {
+      "$or": [
+        {
+          "data.tenant_id": "{{user.data.tenant_id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "update": {
+      "$or": [
+        {
+          "data.tenant_id": "{{user.data.tenant_id}}",
+          "created_by_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "delete": {
+      "$or": [
+        {
+          "data.tenant_id": "{{user.data.tenant_id}}",
+          "created_by_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    }
+  }
+}

@@ -1,0 +1,145 @@
+{
+  "name": "Contract",
+  "type": "object",
+  "properties": {
+    "tenant_id": {
+      "type": "string",
+      "description": "Tenant isolation key"
+    },
+    "title": {
+      "type": "string",
+      "description": "Contract title or reference"
+    },
+    "contract_id": {
+      "type": "string",
+      "description": "Unique contract identifier e.g. CTR-2026-001"
+    },
+    "counterparty": {
+      "type": "string",
+      "description": "The other party to the contract (vendor, client, partner)"
+    },
+    "contract_type": {
+      "type": "string",
+      "enum": [
+        "msa",
+        "saas",
+        "services",
+        "nda",
+        "dpa",
+        "sla",
+        "license",
+        "consulting",
+        "other"
+      ],
+      "default": "services"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "draft",
+        "under_review",
+        "active",
+        "expiring",
+        "expired",
+        "terminated"
+      ],
+      "default": "draft"
+    },
+    "effective_date": {
+      "type": "string",
+      "format": "date"
+    },
+    "end_date": {
+      "type": "string",
+      "format": "date"
+    },
+    "renewal_notice_days": {
+      "type": "number",
+      "default": 60,
+      "description": "Days before end_date to trigger renewal review alert"
+    },
+    "auto_renew": {
+      "type": "boolean",
+      "default": false
+    },
+    "contract_value": {
+      "type": "number",
+      "description": "Total contract value"
+    },
+    "currency": {
+      "type": "string",
+      "default": "ZAR"
+    },
+    "linked_vendor_id": {
+      "type": "string",
+      "description": "Linked Vendor entity id if this contract is with a vendor"
+    },
+    "linked_vendor_name": {
+      "type": "string"
+    },
+    "obligations": {
+      "type": "string",
+      "description": "Key contractual obligations, SLAs, or compliance commitments"
+    },
+    "owner_name": {
+      "type": "string"
+    },
+    "owner_id": {
+      "type": "string"
+    },
+    "document_url": {
+      "type": "string",
+      "description": "URL to the signed contract document"
+    },
+    "notes": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "title",
+    "counterparty"
+  ],
+  "rls": {
+    "create": {
+      "data.tenant_id": "{{user.data.tenant_id}}"
+    },
+    "read": {
+      "$or": [
+        {
+          "data.tenant_id": "{{user.data.tenant_id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "update": {
+      "$or": [
+        {
+          "data.tenant_id": "{{user.data.tenant_id}}",
+          "created_by_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "delete": {
+      "$or": [
+        {
+          "data.tenant_id": "{{user.data.tenant_id}}",
+          "created_by_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    }
+  }
+}

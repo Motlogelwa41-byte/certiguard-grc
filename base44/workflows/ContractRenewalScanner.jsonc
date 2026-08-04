@@ -1,0 +1,45 @@
+{
+  "description": "Daily contract renewal scanner \u2014 flags contracts within their renewal notice window, creates review tasks, marks expired contracts, and posts a Slack digest",
+  "name": "Contract Renewal Scanner",
+  "trigger": {
+    "condition": null,
+    "config": {
+      "trigger_type": "scheduled",
+      "events": [],
+      "schedule_mode": "recurring",
+      "cron_expression": "20 6 * * *",
+      "one_time_date": null,
+      "timezone": "Africa/Johannesburg",
+      "interval_value": null,
+      "interval_unit": null,
+      "interval_anchor": null,
+      "ends_type": "never",
+      "ends_on_date": null,
+      "ends_after_count": null
+    }
+  },
+  "definition": {
+    "document": {
+      "dsl": "1.0.0",
+      "name": "contract_renewal_scanner",
+      "version": "1.0",
+      "namespace": "base44"
+    },
+    "do": [
+      {
+        "scan_renewals": {
+          "call": "invoke_backend_function",
+          "with": {
+            "function_name": "scanContractRenewals",
+            "args": {}
+          },
+          "then": "end",
+          "x-base44": {
+            "title": "Scan contracts for renewal deadlines",
+            "description": "Flag expiring contracts, create renewal review tasks, mark expired contracts, and post a Slack digest"
+          }
+        }
+      }
+    ]
+  }
+}

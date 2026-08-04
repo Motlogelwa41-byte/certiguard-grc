@@ -4,7 +4,7 @@ import {
   ShieldCheck, FileSearch, Brain, Play, FileSpreadsheet, FileDown, BarChart3, LineChart,
   History, ShieldAlert, GraduationCap, Calendar, Bell, Users, Copy, SlidersHorizontal,
   Target, Upload, Send, Globe, Users2, MapPin, Zap, ListChecks, BellRing,
-  PieChart,   Radar, Landmark, BarChart2, Network, GitCompare, Sparkles, CreditCard, Gauge, Info, ScrollText, Activity, Factory, Plug, UserCheck, Wand2, KeyRound, Bug, Library, Presentation, TrendingDown, CalendarCheck, Rocket, ClipboardCheck, FlaskRound, Award, FileQuestion, FlaskConical, Lock, Calculator, Server, BookOpen, Settings, Code, Cloud, Webhook, Leaf
+  PieChart,   Radar, Landmark, BarChart2, Network, GitCompare, Sparkles, CreditCard, Gauge, Info, ScrollText, Activity, Factory, Plug, UserCheck, Wand2, KeyRound, Bug, Library, Presentation, TrendingDown, CalendarCheck, Rocket, ClipboardCheck, FlaskRound, Award, FileQuestion, FlaskConical, Lock, Calculator, Server, BookOpen, Settings, Code, Cloud, Webhook, Leaf, Trophy
 } from "lucide-react";
 // NOTE: ClipboardList imported above is reused for the UAT checklist item below.
 
@@ -107,6 +107,7 @@ export const navSections = [
     label: "Vendors & Third Parties",
     items: [
       { label: "Vendors", path: "/vendors", icon: Building2, roles: ["admin", "compliance_officer", "risk_manager", "auditor"] },
+      { label: "Contracts (CLM)", path: "/contracts", icon: FileText, roles: ["admin", "compliance_officer", "risk_manager", "auditor"] },
       { label: "Vendor Assessments", path: "/vendor-assessments", icon: ClipboardList, roles: ["admin", "compliance_officer", "risk_manager", "auditor"] },
       { label: "Vendor Scorecard", path: "/vendor-scorecard", icon: Gauge, roles: ["admin", "compliance_officer", "risk_manager", "auditor"] },
     ]
@@ -136,6 +137,7 @@ export const navSections = [
       { label: "SADC Exec Dashboard", path: "/sadc-executive-dashboard", icon: Globe, roles: ["admin", "compliance_officer", "risk_manager", "auditor"] },
       { label: "Industry Dashboard", path: "/industry-dashboard", icon: Factory, roles: ["admin", "compliance_officer", "risk_manager", "auditor"] },
       { label: "Financial Dashboard", path: "/financial-dashboard", icon: Landmark, roles: ["admin", "compliance_officer", "risk_manager", "auditor"] },
+      { label: "Compliance Benchmarking", path: "/compliance-benchmarking", icon: Trophy, roles: ["admin", "compliance_officer", "risk_manager", "auditor"] },
       { label: "Security Posture", path: "/security-posture", icon: Radar, roles: ["admin", "compliance_officer", "risk_manager", "auditor"] },
       { label: "Reports", path: "/reports", icon: FileDown, roles: ["admin", "compliance_officer", "risk_manager", "auditor"] },
       { label: "Mgmt Reports", path: "/management-reports", icon: BarChart2, roles: ["admin", "compliance_officer", "risk_manager", "auditor"] },
