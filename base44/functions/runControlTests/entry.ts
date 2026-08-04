@@ -91,6 +91,41 @@ const evaluators = {
       details: failing.slice(0, 25).map((c) => c.title),
     };
   },
+  "vendor_soc2_freshness_check": (_test, ctx) => {
+    const soc2Vendors = ctx.vendors.filter((v) => v.soc2_compliant);
+    const oneYearAgo = new Date(Date.now() - 365 * 86400000);
+    const stale = soc2Vendors.filter((v) => !v.last_assessment_date || new Date(v.last_assessment_date) < oneYearAgo);
+    return {
+      result: stale.length ? "fail" : "pass",
+      summary: stale.length ? `${stale.length} vendor(s) with stale SOC 2 reports (>1yr)` : `All ${soc2Vendors.length} SOC 2-compliant vendor(s) have fresh reports`,
+      failCount: stale.length,
+      details: stale.slice(0, 25).map((v) => `${v.name} (last assessed: ${v.last_assessment_date || "never"})`),
+    };
+  },
+  "s3_public_access_check_v2": (_test, ctx) => {
+    const open = ctx.findings.filter((f) => {
+      const text = `${f.title} ${f.description || ""} ${f.posture_check || ""}`.toLowerCase();
+      return (text.includes("s3") || text.includes("public") || text.includes("acl") || text.includes("block public")) && ["open", "in_progress"].includes(f.status);
+    });
+    return {
+      result: open.length ? "fail" : "pass",
+      summary: open.length ? `${open.length} open S3 public access finding(s)` : "No open S3 public access findings",
+      failCount: open.length,
+      details: open.slice(0, 25).map((f) => `${f.title} (${f.severity}, ${f.status})`),
+    };
+  },
+  "ad_password_policy_evaluator": (_test, ctx) => {
+    const open = ctx.findings.filter((f) => {
+      const text = `${f.title} ${f.description || ""} ${f.posture_check || ""}`.toLowerCase();
+      return (text.includes("password") || text.includes("active directory") || text.includes("ad password")) && ["open", "in_progress"].includes(f.status);
+    });
+    return {
+      result: open.length ? "fail" : "pass",
+      summary: open.length ? `${open.length} open password policy finding(s)` : "Password policy compliant — no open findings",
+      failCount: open.length,
+      details: open.slice(0, 25).map((f) => `${f.title} (${f.severity})`),
+    };
+  },
 };
 
 Deno.serve(async (req) => {

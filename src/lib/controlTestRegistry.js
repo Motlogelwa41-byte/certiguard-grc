@@ -64,6 +64,27 @@ export const CONTROL_TEST_REGISTRY = [
     service: "internal",
     defaultSeverity: "critical",
   },
+  {
+    key: "vendor_soc2_freshness_check",
+    label: "Vendor SOC 2 report freshness",
+    description: "Fails if any SOC 2-compliant vendor has a stale report (>1yr since last assessment).",
+    service: "vendor",
+    defaultSeverity: "high",
+  },
+  {
+    key: "s3_public_access_check_v2",
+    label: "S3 public access audit",
+    description: "Fails if any open security finding relates to S3 public access or ACL misconfiguration.",
+    service: "cloud",
+    defaultSeverity: "critical",
+  },
+  {
+    key: "ad_password_policy_evaluator",
+    label: "AD password policy strength",
+    description: "Fails if any open security finding relates to Active Directory password policy weakness.",
+    service: "identity",
+    defaultSeverity: "high",
+  },
 ];
 
 export const controlTestByKey = (key) => CONTROL_TEST_REGISTRY.find((t) => t.key === key);
