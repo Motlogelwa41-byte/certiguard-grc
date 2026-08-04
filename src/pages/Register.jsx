@@ -15,6 +15,7 @@ import { toast } from "@/components/ui/use-toast";
 import { logLogin } from "@/lib/authAudit";
 import PasswordStrengthMeter from "@/components/auth/PasswordStrengthMeter";
 import { meetsPasswordPolicy } from "@/lib/passwordPolicy";
+import { safeReturnTo } from "@/lib/authReturnTo";
 
 function MobileBrandHeader() {
   return (
@@ -70,7 +71,7 @@ export default function Register() {
         base44.auth.setToken(result.access_token);
       }
       await logLogin("otp");
-      window.location.href = "/";
+      window.location.href = safeReturnTo();
     } catch (err) {
       setError(err.message || "Invalid verification code");
     } finally {
@@ -92,11 +93,11 @@ export default function Register() {
   };
 
   const handleGoogle = () => {
-    base44.auth.loginWithProvider("google", "/");
+    base44.auth.loginWithProvider("google", safeReturnTo());
   };
 
   const handleMicrosoft = () => {
-    base44.auth.loginWithProvider("microsoft", "/");
+    base44.auth.loginWithProvider("microsoft", safeReturnTo());
   };
 
   if (showOtp) {
