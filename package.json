@@ -12,6 +12,7 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@aws-sdk/client-securityhub": "^3.1103.0",
     "@base44/sdk": "^0.8.41",
     "@base44/vite-plugin": "^1.0.30",
     "@hello-pangea/dnd": "^17.0.0",
