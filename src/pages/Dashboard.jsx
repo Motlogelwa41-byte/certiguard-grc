@@ -19,6 +19,7 @@ import FrameworkReadinessInsights from "@/components/dashboard/FrameworkReadines
 import ComplianceTrendChart from "@/components/dashboard/ComplianceTrendChart";
 import FrameworkGlobalReadiness from "@/components/dashboard/FrameworkGlobalReadiness";
 import RegulatoryAlertBanner from "@/components/dashboard/RegulatoryAlertBanner";
+import GeoCoverageStrip from "@/components/dashboard/GeoCoverageStrip";
 import { useAuth } from "@/lib/AuthContext";
 import RiskManagerDashboard from "@/components/dashboard/role/RiskManagerDashboard";
 import AuditorDashboard from "@/components/dashboard/role/AuditorDashboard";
@@ -110,6 +111,8 @@ export default function Dashboard() {
   return (
     <div>
       <RegulatoryAlertBanner />
+      {/* Geo coverage & marketing strip */}
+      <GeoCoverageStrip />
       {/* RegTech hero */}
       <div className="mb-8 relative overflow-hidden rounded-2xl border border-white/10 bg-gradient-to-br from-[hsl(222_47%_11%)] via-[hsl(217_33%_15%)] to-[hsl(215_28%_9%)] p-6 sm:p-8">
         <div className="absolute -top-20 -right-16 w-72 h-72 rounded-full bg-[hsl(160_84%_37%)]/20 blur-3xl pointer-events-none" />
