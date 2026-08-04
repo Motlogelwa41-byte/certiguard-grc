@@ -3,7 +3,7 @@ import { base44 } from "@/api/base44Client";
 import PageHeader from "@/components/shared/PageHeader";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/components/ui/use-toast";
-import { Radar, Loader2, RefreshCw, ShieldAlert, CheckCircle2, XCircle } from "lucide-react";
+import { Radar, Loader2, RefreshCw, ShieldAlert, CheckCircle2, XCircle, Cloud } from "lucide-react";
 
 const SEVERITY_COLOR = {
   critical: "text-red-600 dark:text-red-400",
@@ -29,9 +29,9 @@ export default function EdrDashboard() {
 
   const load = useCallback(() => {
     setLoading(true);
-    base44.entities.SecurityFinding.filter({ source: { $in: ["crowdstrike", "defender"] } }, "-detected_date")
+    base44.entities.SecurityFinding.filter({ source: "security_hub" }, "-detected_date")
       .then((d) => setFindings(d || []))
-      .catch(() => toast({ title: "Failed to load EDR findings", variant: "destructive" }))
+      .catch(() => toast({ title: "Failed to load Security Hub findings", variant: "destructive" }))
       .finally(() => setLoading(false));
   }, [toast]);
 
@@ -41,7 +41,7 @@ export default function EdrDashboard() {
     setSyncing(true);
     setSyncResult(null);
     try {
-      const res = await fetch("/api/base44/functions/syncEdrFindings", {
+      const res = await fetch("/api/base44/functions/syncAwsSecurityHub", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({}),
@@ -49,10 +49,10 @@ export default function EdrDashboard() {
       const data = await res.json();
       setSyncResult(data);
       if (data.ok) {
-        toast({ title: `EDR sync complete — ${data.totalSynced || 0} new findings` });
+        toast({ title: `Security Hub sync complete — ${data.count || 0} new findings` });
         load();
       } else {
-        toast({ title: "EDR sync failed", description: data.error, variant: "destructive" });
+        toast({ title: "Security Hub sync failed", description: data.error, variant: "destructive" });
       }
     } catch (e) {
       toast({ title: "Sync request failed", description: e.message, variant: "destructive" });
@@ -61,10 +61,14 @@ export default function EdrDashboard() {
     }
   };
 
-  const crowdstrike = findings.filter((f) => f.source === "crowdstrike");
-  const defender = findings.filter((f) => f.source === "defender");
   const open = findings.filter((f) => f.status === "open");
   const critical = findings.filter((f) => f.severity === "critical" || f.severity === "high");
+  const remediated = findings.filter((f) => f.status === "remediated");
+  const postureCounts = findings.reduce((acc, f) => {
+    const pc = f.posture_check || "Configuration";
+    acc[pc] = (acc[pc] || 0) + 1;
+    return acc;
+  }, {});
 
   if (loading) {
     return (
@@ -78,7 +82,7 @@ export default function EdrDashboard() {
     <div>
       <PageHeader
         title="EDR / XDR Integration"
-        subtitle="Endpoint detection and response findings from CrowdStrike Falcon and Microsoft Defender for Endpoint"
+        subtitle="Endpoint and cloud security findings from AWS Security Hub (CSPM + EDR coverage)"
         actions={
           <Button onClick={runSync} disabled={syncing} size="sm">
             {syncing ? <Loader2 className="w-4 h-4 mr-1 animate-spin" /> : <RefreshCw className="w-4 h-4 mr-1" />}
@@ -90,11 +94,11 @@ export default function EdrDashboard() {
       {/* Config status banner */}
       <div className="rounded-xl border border-border bg-card p-4 mb-6">
         <div className="flex items-start gap-3">
-          <Radar className="w-5 h-5 text-primary mt-0.5" />
+          <Cloud className="w-5 h-5 text-primary mt-0.5" />
           <div className="flex-1">
-            <h3 className="font-heading font-semibold text-foreground text-sm">Provider Configuration</h3>
+            <h3 className="font-heading font-semibold text-foreground text-sm">AWS Security Hub — Active Provider</h3>
             <p className="text-xs text-muted-foreground mt-1">
-              Set <code className="text-xs bg-muted px-1 rounded">EDR_PROVIDER</code> (crowdstrike, defender, or all) and the corresponding credentials in app secrets to activate automated daily sync.
+              Findings are pulled from AWS Security Hub using your configured AWS credentials (<code className="text-xs bg-muted px-1 rounded">AWS_ACCESS_KEY_ID</code>, <code className="text-xs bg-muted px-1 rounded">AWS_SECRET_ACCESS_KEY</code>). The daily automated sync keeps findings fresh. No paid EDR license required.
             </p>
           </div>
         </div>
@@ -127,31 +131,33 @@ export default function EdrDashboard() {
         </div>
         <div className="rounded-xl border border-border bg-card p-4">
           <div className="flex items-center gap-2 text-emerald-600 dark:text-emerald-400"><CheckCircle2 className="w-4 h-4" /><span className="text-xs font-medium uppercase">Remediated</span></div>
-          <p className="text-2xl font-bold text-foreground mt-1">{findings.filter((f) => f.status === "remediated").length}</p>
+          <p className="text-2xl font-bold text-foreground mt-1">{remediated.length}</p>
         </div>
       </div>
 
-      {/* Provider breakdown */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
-        <div className="rounded-xl border border-border bg-card p-4">
-          <h3 className="font-heading font-semibold text-foreground text-sm mb-1">CrowdStrike Falcon</h3>
-          <p className="text-2xl font-bold text-foreground">{crowdstrike.length}</p>
-          <p className="text-xs text-muted-foreground">findings ingested</p>
-        </div>
-        <div className="rounded-xl border border-border bg-card p-4">
-          <h3 className="font-heading font-semibold text-foreground text-sm mb-1">Microsoft Defender</h3>
-          <p className="text-2xl font-bold text-foreground">{defender.length}</p>
-          <p className="text-xs text-muted-foreground">findings ingested</p>
+      {/* Posture breakdown */}
+      <div className="rounded-xl border border-border bg-card p-4 mb-6">
+        <h3 className="font-heading font-semibold text-foreground text-sm mb-3">Posture Check Categories</h3>
+        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3">
+          {Object.entries(postureCounts).sort((a, b) => b[1] - a[1]).map(([cat, count]) => (
+            <div key={cat} className="rounded-lg bg-muted/40 p-3 text-center">
+              <p className="text-lg font-bold text-foreground">{count}</p>
+              <p className="text-[10px] text-muted-foreground uppercase tracking-wider">{cat}</p>
+            </div>
+          ))}
+          {Object.keys(postureCounts).length === 0 && (
+            <p className="text-xs text-muted-foreground col-span-full text-center py-2">No posture data yet — run a sync to populate.</p>
+          )}
         </div>
       </div>
 
       {/* Findings table */}
       {findings.length === 0 ? (
         <div className="rounded-xl border border-dashed border-border bg-muted/30 p-12 text-center">
-          <Radar className="w-10 h-10 text-muted-foreground mx-auto mb-3" />
-          <h3 className="font-heading font-semibold text-foreground">No EDR findings yet</h3>
+          <Cloud className="w-10 h-10 text-muted-foreground mx-auto mb-3" />
+          <h3 className="font-heading font-semibold text-foreground">No Security Hub findings yet</h3>
           <p className="text-sm text-muted-foreground mt-1 max-w-md mx-auto">
-            Configure EDR credentials in app secrets and run a sync, or wait for the daily automated sync to pull detections.
+            Click <strong>Sync Now</strong> to pull findings from AWS Security Hub, or wait for the daily automated sync. Ensure your AWS connection is enabled in the Connections page.
           </p>
         </div>
       ) : (
@@ -160,10 +166,10 @@ export default function EdrDashboard() {
             <thead className="bg-muted/50 text-xs uppercase tracking-wider text-muted-foreground">
               <tr>
                 <th className="text-left font-medium px-4 py-3">Finding</th>
-                <th className="text-left font-medium px-4 py-3">Source</th>
+                <th className="text-left font-medium px-4 py-3">Posture Check</th>
                 <th className="text-left font-medium px-4 py-3">Severity</th>
                 <th className="text-left font-medium px-4 py-3">Status</th>
-                <th className="text-left font-medium px-4 py-3">Asset</th>
+                <th className="text-left font-medium px-4 py-3">Resource</th>
                 <th className="text-left font-medium px-4 py-3">Detected</th>
               </tr>
             </thead>
@@ -174,12 +180,12 @@ export default function EdrDashboard() {
                     <p className="font-medium text-foreground">{f.title}</p>
                     {f.finding_id && <p className="text-xs text-muted-foreground">{f.finding_id}</p>}
                   </td>
-                  <td className="px-4 py-3 text-muted-foreground capitalize">{f.source}</td>
+                  <td className="px-4 py-3 text-muted-foreground">{f.posture_check || "—"}</td>
                   <td className="px-4 py-3"><span className={`text-xs font-semibold capitalize ${SEVERITY_COLOR[f.severity] || ""}`}>{f.severity}</span></td>
                   <td className="px-4 py-3">
                     <span className={`text-[10px] font-semibold uppercase px-1.5 py-0.5 rounded ${STATUS_COLOR[f.status] || ""}`}>{(f.status || "").replace(/_/g, " ")}</span>
                   </td>
-                  <td className="px-4 py-3 text-muted-foreground">{f.asset || "—"}</td>
+                  <td className="px-4 py-3 text-muted-foreground">{f.resource_id || f.asset || "—"}</td>
                   <td className="px-4 py-3 text-muted-foreground">{f.detected_date || "—"}</td>
                 </tr>
               ))}
