@@ -70,6 +70,17 @@ Deno.serve(async (req) => {
     const secretKey = Deno.env.get('AWS_SECRET_ACCESS_KEY');
     if (!accessKey || !secretKey) return Response.json({ error: 'AWS credentials not configured. Add AWS_ACCESS_KEY_ID and AWS_SECRET_ACCESS_KEY secrets.' }, { status: 400 });
 
+    // First verify credentials with STS GetCallerIdentity
+    const stsHost = `sts.${region}.amazonaws.com`;
+    const stsRes = await awsGet(stsHost, '/', { Action: 'GetCallerIdentity', Version: '2011-06-15' }, region, 'sts', accessKey, secretKey);
+    if (!stsRes.ok) {
+      const stsTxt = await stsRes.text();
+      await base44.entities.Connection.update(conn.id, { last_sync_at: new Date().toISOString(), last_status: 'error', last_error: 'Invalid AWS credentials' }).catch(() => {});
+      return Response.json({ error: 'AWS credentials are invalid or expired. Please update AWS_ACCESS_KEY_ID and AWS_SECRET_ACCESS_KEY in app secrets with valid IAM credentials that have Security Hub read permissions.' }, { status: 401 });
+    }
+    const stsData = await stsRes.text();
+    console.log('STS verification OK:', stsData.slice(0, 300));
+
     const host = `securityhub.${region}.amazonaws.com`;
     const res = await awsGet(host, '/findings', { MaxResults: '100' }, region, 'securityhub', accessKey, secretKey);
     if (!res.ok) {
