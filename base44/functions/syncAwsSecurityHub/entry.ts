@@ -15,16 +15,23 @@ async function sha256Hex(data) {
 }
 function hex(bytes) { return [...bytes].map((b) => b.toString(16).padStart(2, '0')).join(''); }
 
+// RFC 3986 URI-encode (AWS Sig V4 requires this, not encodeURIComponent)
+function uriEncode(str) {
+  return encodeURIComponent(String(str)).replace(/[!'()*]/g, (c) => '%' + c.charCodeAt(0).toString(16).toUpperCase());
+}
+
 async function awsGet(host, uri, query, region, service, accessKey, secretKey) {
   const t = new Date();
   const amzDate = t.toISOString().replace(/[:-]|\.\d{3}/g, '');
   const dateStamp = amzDate.slice(0, 8);
   const payloadHash = await sha256Hex('');
+  // Canonical headers: host must be lowercase, trimmed, sorted
   const hdrs = [['host', host], ['x-amz-content-sha256', payloadHash], ['x-amz-date', amzDate]];
   hdrs.sort((a, b) => a[0].localeCompare(b[0]));
   const canonicalHeaders = hdrs.map((h) => `${h[0]}:${h[1]}\n`).join('');
   const signedHeaders = hdrs.map((h) => h[0]).join(';');
-  const canonicalQuery = Object.keys(query).sort().map((k) => `${k}=${encodeURIComponent(query[k])}`).join('&');
+  // Canonical query string: keys and values URI-encoded, sorted by key
+  const canonicalQuery = Object.keys(query).sort().map((k) => `${uriEncode(k)}=${uriEncode(query[k])}`).join('&');
   const canonicalRequest = ['GET', uri, canonicalQuery, canonicalHeaders, signedHeaders, payloadHash].join('\n');
   const credentialScope = `${dateStamp}/${region}/${service}/aws4_request`;
   const stringToSign = ['AWS4-HMAC-SHA256', amzDate, credentialScope, await sha256Hex(canonicalRequest)].join('\n');
@@ -34,18 +41,19 @@ async function awsGet(host, uri, query, region, service, accessKey, secretKey) {
   const kSigning = await hmac(kService, 'aws4_request');
   const signature = hex(await hmac(kSigning, stringToSign));
   const auth = `AWS4-HMAC-SHA256 Credential=${accessKey}/${credentialScope}, SignedHeaders=${signedHeaders}, Signature=${signature}`;
-  const headers = { host, 'x-amz-content-sha256': payloadHash, 'x-amz-date': amzDate, Authorization: auth };
+  // Do NOT pass host header explicitly — Deno/fetch sets it from the URL automatically
+  const headers = { 'x-amz-content-sha256': payloadHash, 'x-amz-date': amzDate, Authorization: auth };
   return await fetch(`https://${host}${uri}?${canonicalQuery}`, { method: 'GET', headers });
 }
 
 Deno.serve(async (req) => {
+  let conn = null;
   try {
     const base44 = createClientFromRequest(req);
     const user = await base44.auth.me();
     if (!user) return Response.json({ error: 'Unauthorized' }, { status: 401 });
     if (user.role !== 'admin' && user.role !== 'compliance_officer') return Response.json({ error: 'Forbidden' }, { status: 403 });
     const body = await req.json().catch(() => ({}));
-    let conn = null;
     if (body?.connection_id) conn = await base44.entities.Connection.get(body.connection_id).catch(() => null);
     if (!conn) {
       const awsConns = await base44.entities.Connection.filter({ service: 'aws' });
@@ -67,7 +75,7 @@ Deno.serve(async (req) => {
     if (!res.ok) {
       const txt = await res.text();
       await base44.entities.Connection.update(conn.id, { last_sync_at: new Date().toISOString(), last_status: 'error', last_error: `Security Hub ${res.status}` }).catch(() => {});
-      return Response.json({ error: `Security Hub request failed (${res.status}): ${txt.slice(0, 300)}` }, { status: 502 });
+      return Response.json({ error: `Security Hub request failed (${res.status}): ${txt.slice(0, 500)}` }, { status: 502 });
     }
     const data = await res.json();
     const items = data.Findings || [];
@@ -144,6 +152,10 @@ Deno.serve(async (req) => {
     return Response.json({ ok: true, count: created.length, pulled: items.length, region });
   } catch (error) {
     console.error('syncAwsSecurityHub error', error?.message || error);
+    if (conn?.id) {
+      const base44 = createClientFromRequest(req);
+      await base44.entities.Connection.update(conn.id, { last_sync_at: new Date().toISOString(), last_status: 'error', last_error: error?.message || 'Unknown error' }).catch(() => {});
+    }
     return Response.json({ error: error.message || 'Unknown error' }, { status: 500 });
   }
 });
