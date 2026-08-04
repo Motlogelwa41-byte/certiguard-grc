@@ -97,6 +97,18 @@ Deno.serve(async (req) => {
       }
       return { ids: picked.map((c) => c.id), names: picked.map((c) => c.title).filter(Boolean) };
     };
+    const POSTURE_MAP = [
+      ['IAM', ['iam', 'mfa', 'password', 'access', 'root', 'credential', 'principal', 'permission', 'role', 'policy']],
+      ['Encryption', ['encryption', 'encrypt', 'kms', 'tls', 'certificate', 'secret']],
+      ['Network', ['security group', 'vpc', 'subnet', 'port', 'firewall', 'nat', 'load balancer', 'ssh']],
+      ['Logging', ['cloudtrail', 'logging', 'log', 'cloudwatch', 'audit']],
+      ['Configuration', ['config', 'backup', 'snapshot', 'versioning', 'tag', 'inventory']],
+      ['Compliance', ['cis', 'compliance', 'benchmark', 'standard', 'regulatory']],
+    ];
+    const postureCheck = (haystack) => {
+      for (const [cat, kws] of POSTURE_MAP) { if (kws.some((k) => haystack.includes(k))) return cat; }
+      return 'Configuration';
+    };
     const now = new Date();
     const records = [];
     for (const f of items) {
@@ -112,7 +124,8 @@ Deno.serve(async (req) => {
       records.push({
         tenant_id: user.data?.tenant_id || '',
         finding_id: fid || `SF-${now.getFullYear()}-${records.length}`,
-        source: 'security_hub', title: f.Title || f.Description || 'AWS Security Hub finding',
+        source: 'security_hub', cloud_provider: 'aws', posture_check: postureCheck(haystack),
+        title: f.Title || f.Description || 'AWS Security Hub finding',
         description: f.Description || '', severity: sev,
         status: WF_MAP[(f.Workflow && f.Workflow.Status) || 'NEW'] || 'open',
         cve: (f.Vulnerabilities && f.Vulnerabilities[0] && f.Vulnerabilities[0].Cves && f.Vulnerabilities[0].Cves[0] && f.Vulnerabilities[0].Cves[0].Id) || '',
