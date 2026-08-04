@@ -22,9 +22,25 @@
         "rapid7",
         "tenable",
         "snipe",
+        "gcp_scc",
         "other"
       ],
       "default": "other"
+    },
+    "cloud_provider": {
+      "type": "string",
+      "enum": [
+        "aws",
+        "azure",
+        "gcp",
+        "other"
+      ],
+      "default": "other",
+      "description": "Cloud provider this finding originates from (CSPM)"
+    },
+    "posture_check": {
+      "type": "string",
+      "description": "CSPM category e.g. IAM, Encryption, Network, Logging, Configuration, Compliance"
     },
     "title": {
       "type": "string"
@@ -140,7 +156,7 @@
     "update": {
       "$or": [
         {
-          "data.tenant_id": "{{user.data.tenant_id}}",
+          "data.tenant_id": "{{user.data.tenant_id}",
           "created_by_id": "{{user.id}}"
         },
         {
