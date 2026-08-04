@@ -39,6 +39,29 @@
       "type": "string",
       "description": "Optional linked framework"
     },
+    "retention_policy": {
+      "type": "string",
+      "enum": [
+        "7_years",
+        "6_years",
+        "5_years",
+        "3_years",
+        "permanent",
+        "custom"
+      ],
+      "default": "7_years",
+      "description": "Retention schedule governing this evidence record (e.g. GDPR/POPIA 7-year, SOX 7-year)"
+    },
+    "retention_date": {
+      "type": "string",
+      "format": "date",
+      "description": "Computed date after which this ledger entry may be purged per the retention policy"
+    },
+    "purge_eligible": {
+      "type": "boolean",
+      "default": false,
+      "description": "Flagged true once retention_date has passed and the record is eligible for deletion"
+    },
     "notes": {
       "type": "string"
     }

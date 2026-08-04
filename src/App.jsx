@@ -126,6 +126,8 @@ import ExecutiveReport from '@/pages/ExecutiveReport';
 import ApiDocs from '@/pages/ApiDocs';
 import ControlTestLibrary from '@/pages/ControlTestLibrary';
 import CloudPosture from '@/pages/CloudPosture';
+import SiemWebhooks from '@/pages/SiemWebhooks';
+import EsgReporting from '@/pages/EsgReporting';
 import Landing from '@/pages/Landing';
 import { LanguageProvider } from '@/contexts/LanguageContext';
 
@@ -276,6 +278,8 @@ const AuthenticatedApp = () => {
           <Route path="/api-docs" element={<ApiDocs />} />
           <Route path="/control-test-library" element={<ControlTestLibrary />} />
           <Route path="/cloud-posture" element={<CloudPosture />} />
+          <Route path="/siem-webhooks" element={<SiemWebhooks />} />
+          <Route path="/esg-reporting" element={<EsgReporting />} />
         </Route>
       </Route>
       <Route path="*" element={<PageNotFound />} />

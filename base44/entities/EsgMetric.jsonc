@@ -1,0 +1,132 @@
+{
+  "name": "EsgMetric",
+  "type": "object",
+  "properties": {
+    "tenant_id": {
+      "type": "string",
+      "description": "Tenant isolation key"
+    },
+    "framework": {
+      "type": "string",
+      "enum": [
+        "GRI",
+        "SASB",
+        "TCFD",
+        "CSRD",
+        "SDG",
+        "custom"
+      ],
+      "default": "GRI",
+      "description": "ESG reporting framework"
+    },
+    "category": {
+      "type": "string",
+      "enum": [
+        "environmental",
+        "social",
+        "governance"
+      ],
+      "default": "environmental"
+    },
+    "metric_id": {
+      "type": "string",
+      "description": "Framework disclosure code e.g. GRI 305-1, SASB EM-EP-140a.1, TCFD a. Metrics & Targets"
+    },
+    "metric_name": {
+      "type": "string"
+    },
+    "description": {
+      "type": "string"
+    },
+    "value": {
+      "type": "number",
+      "description": "Current measured value"
+    },
+    "unit": {
+      "type": "string",
+      "description": "Unit of measure e.g. tCO2e, %, count, ZAR"
+    },
+    "period": {
+      "type": "string",
+      "description": "Reporting period e.g. 2025, Q1 2026, FY2025"
+    },
+    "target": {
+      "type": "number",
+      "description": "Target value for the period"
+    },
+    "target_unit": {
+      "type": "string"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "on_track",
+        "at_risk",
+        "off_track",
+        "exceeded",
+        "not_started"
+      ],
+      "default": "not_started"
+    },
+    "evidence_url": {
+      "type": "string",
+      "description": "Supporting evidence file for the metric"
+    },
+    "owner_name": {
+      "type": "string"
+    },
+    "owner_id": {
+      "type": "string"
+    },
+    "notes": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "metric_name",
+    "category"
+  ],
+  "rls": {
+    "create": {
+      "data.tenant_id": "{{user.data.tenant_id}}"
+    },
+    "read": {
+      "$or": [
+        {
+          "data.tenant_id": "{{user.data.tenant_id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "update": {
+      "$or": [
+        {
+          "data.tenant_id": "{{user.data.tenant_id}}",
+          "created_by_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "delete": {
+      "$or": [
+        {
+          "data.tenant_id": "{{user.data.tenant_id}}",
+          "created_by_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    }
+  }
+}

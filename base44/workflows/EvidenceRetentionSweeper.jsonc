@@ -1,0 +1,48 @@
+{
+  "description": "Daily evidence retention sweeper \u2014 flags ledger entries past their retention date as purge-eligible and purges entries past the grace window, enforcing GDPR/POPIA/SOX retention schedules",
+  "name": "Evidence Retention Sweeper",
+  "trigger": {
+    "condition": null,
+    "config": {
+      "trigger_type": "scheduled",
+      "events": [],
+      "schedule_mode": "recurring",
+      "cron_expression": "15 2 * * *",
+      "one_time_date": null,
+      "timezone": "Africa/Johannesburg",
+      "interval_value": null,
+      "interval_unit": null,
+      "interval_anchor": null,
+      "ends_type": "never",
+      "ends_on_date": null,
+      "ends_after_count": null
+    }
+  },
+  "definition": {
+    "document": {
+      "dsl": "1.0.0",
+      "name": "evidence_retention_sweeper",
+      "version": "1.0",
+      "namespace": "base44"
+    },
+    "do": [
+      {
+        "enforce_retention": {
+          "call": "invoke_backend_function",
+          "with": {
+            "function_name": "enforceEvidenceRetention",
+            "args": {
+              "dry_run": false,
+              "grace_days": 30
+            }
+          },
+          "then": "end",
+          "x-base44": {
+            "title": "Enforce evidence retention schedules",
+            "description": "Flag purge-eligible ledger entries and delete those past the 30-day grace window per the configured retention policy"
+          }
+        }
+      }
+    ]
+  }
+}

@@ -94,6 +94,10 @@ export default function RegulatoryChanges() {
   const [form, setForm] = useState(emptyForm);
   const [saving, setSaving] = useState(false);
   const [genLoading, setGenLoading] = useState(null);
+  const [aiScanning, setAiScanning] = useState(false);
+  const [aiResults, setAiResults] = useState([]);
+  const [aiDialogOpen, setAiDialogOpen] = useState(false);
+  const [importing, setImporting] = useState(null);
   const { toast } = useToast();
 
   const load = () => {
@@ -209,6 +213,54 @@ export default function RegulatoryChanges() {
     }
   };
 
+  const runAiScan = async () => {
+    setAiScanning(true);
+    try {
+      const res = await base44.functions.invoke("fetchRegulatoryIntelligence", { region: "SADC and South Africa" });
+      const data = res.data || res || {};
+      if (data.error) throw new Error(data.error);
+      const found = data.changes || [];
+      setAiResults(found);
+      setAiDialogOpen(true);
+      toast({ title: "AI scan complete", description: `${found.length} regulatory developments found` });
+    } catch (e) {
+      toast({ title: "AI scan failed", description: e.message, variant: "destructive" });
+    } finally {
+      setAiScanning(false);
+    }
+  };
+
+  const importAiChange = async (c) => {
+    setImporting(c.title);
+    try {
+      await base44.entities.RegulatoryChange.create({
+        title: c.title,
+        regulator: c.regulator || "Unknown",
+        region: "sadc",
+        regulation_name: c.regulation_name || "",
+        change_type: c.change_type || "amendment",
+        change_summary: c.change_summary || "",
+        priority: c.priority || "medium",
+        status: "identified",
+        impact_level: c.priority === "critical" || c.priority === "high" ? "high" : "medium",
+        impact_summary: c.impact_summary || "",
+        affected_areas: c.affected_areas || [],
+        effective_date: c.effective_date || "",
+        compliance_deadline: c.compliance_deadline || "",
+        source_url: c.source_url || "",
+        change_id: `RC-${new Date().getFullYear()}-${String(changes.length + 1).padStart(3, "0")}`,
+        identified_date: new Date().toISOString().slice(0, 10),
+      });
+      toast({ title: "Imported", description: c.title });
+      setAiResults((prev) => prev.filter((r) => r.title !== c.title));
+      load();
+    } catch (e) {
+      toast({ title: "Import failed", description: e.message, variant: "destructive" });
+    } finally {
+      setImporting(null);
+    }
+  };
+
   const toggleArea = (area) => {
     setForm((f) => ({
       ...f,
@@ -226,11 +278,62 @@ export default function RegulatoryChanges() {
         title="Regulatory Change Management"
         subtitle="Track regulatory developments, assess organizational impact, and manage compliance triage"
         actions={
-          <Button onClick={openCreate} size="sm">
-            <Plus className="w-4 h-4 mr-1" /> Log Change
-          </Button>
+          <div className="flex items-center gap-2">
+            <Button onClick={runAiScan} variant="outline" size="sm" disabled={aiScanning}>
+              {aiScanning ? <Loader2 className="w-4 h-4 mr-1 animate-spin" /> : <Sparkles className="w-4 h-4 mr-1" />}
+              {aiScanning ? "Scanning…" : "AI Scan"}
+            </Button>
+            <Button onClick={openCreate} size="sm">
+              <Plus className="w-4 h-4 mr-1" /> Log Change
+            </Button>
+          </div>
         }
       />
+
+      {/* AI scan results dialog */}
+      <Dialog open={aiDialogOpen} onOpenChange={setAiDialogOpen}>
+        <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2"><Sparkles className="w-4 h-4 text-primary" /> AI Regulatory Intelligence</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-3 py-2">
+            <p className="text-xs text-muted-foreground">
+              {aiResults.length} recent regulatory developments identified via web search. Review and import the ones that affect your organisation.
+            </p>
+            {aiResults.length === 0 ? (
+              <p className="text-sm text-muted-foreground py-6 text-center">No developments found. Try again later.</p>
+            ) : (
+              aiResults.map((c, i) => (
+                <div key={i} className="rounded-lg border border-border p-3">
+                  <div className="flex items-start justify-between gap-3">
+                    <div className="min-w-0">
+                      <p className="font-medium text-foreground text-sm">{c.title}</p>
+                      <p className="text-xs text-muted-foreground mt-0.5">{c.regulator} · {c.regulation_name}</p>
+                    </div>
+                    <span className={`text-[10px] font-semibold uppercase px-1.5 py-0.5 rounded shrink-0 ${PRIORITY_META[c.priority]?.bg || ""} ${PRIORITY_META[c.priority]?.color || ""}`}>{c.priority}</span>
+                  </div>
+                  <p className="text-xs text-muted-foreground mt-2">{c.change_summary}</p>
+                  {c.impact_summary && <p className="text-xs text-foreground mt-1.5"><span className="font-medium">Impact:</span> {c.impact_summary}</p>}
+                  <div className="flex items-center justify-between mt-2">
+                    {c.source_url ? (
+                      <a href={c.source_url} target="_blank" rel="noreferrer" className="text-xs text-primary hover:underline inline-flex items-center gap-1">
+                        <ExternalLink className="w-3 h-3" /> Source
+                      </a>
+                    ) : <span />}
+                    <Button onClick={() => importAiChange(c)} size="sm" disabled={importing === c.title}>
+                      {importing === c.title ? <Loader2 className="w-3.5 h-3.5 mr-1 animate-spin" /> : <Plus className="w-3.5 h-3.5 mr-1" />}
+                      Import
+                    </Button>
+                  </div>
+                </div>
+              ))
+            )}
+          </div>
+          <DialogFooter>
+            <DialogClose asChild><Button variant="outline">Close</Button></DialogClose>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
 
       {/* KPI hero */}
       <div className="bg-gradient-to-r from-slate-900 via-blue-950 to-slate-900 rounded-2xl p-6 text-white mb-6">
