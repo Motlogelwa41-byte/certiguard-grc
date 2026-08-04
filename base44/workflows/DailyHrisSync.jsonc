@@ -1,0 +1,45 @@
+{
+  "description": "Daily HRIS sync \u2014 pulls the employee directory from BambooHR or a generic HRIS API into DirectoryUser records for access reviews and people compliance",
+  "name": "Daily HRIS Sync",
+  "trigger": {
+    "condition": null,
+    "config": {
+      "trigger_type": "scheduled",
+      "events": [],
+      "schedule_mode": "recurring",
+      "cron_expression": "40 6 * * *",
+      "one_time_date": null,
+      "timezone": "Africa/Johannesburg",
+      "interval_value": null,
+      "interval_unit": null,
+      "interval_anchor": null,
+      "ends_type": "never",
+      "ends_on_date": null,
+      "ends_after_count": null
+    }
+  },
+  "definition": {
+    "document": {
+      "dsl": "1.0.0",
+      "name": "daily_hris_sync",
+      "version": "1.0",
+      "namespace": "base44"
+    },
+    "do": [
+      {
+        "sync_hris": {
+          "call": "invoke_backend_function",
+          "with": {
+            "function_name": "syncHrisDirectory",
+            "args": {}
+          },
+          "then": "end",
+          "x-base44": {
+            "title": "Sync HRIS directory",
+            "description": "Pull employee directory from HRIS into DirectoryUser for access reviews and people compliance"
+          }
+        }
+      }
+    ]
+  }
+}

@@ -98,6 +98,7 @@ export const navSections = [
       { label: "Security Findings", path: "/vulnerabilities", icon: Bug, roles: ["admin", "compliance_officer", "risk_manager", "auditor"] },
       { label: "Cloud Posture (CSPM)", path: "/cloud-posture", icon: Cloud, roles: ["admin", "compliance_officer", "risk_manager", "auditor"] },
       { label: "SIEM Webhooks", path: "/siem-webhooks", icon: Webhook, roles: ["admin", "compliance_officer", "risk_manager"] },
+      { label: "EDR / XDR", path: "/edr-dashboard", icon: Radar, roles: ["admin", "compliance_officer", "risk_manager", "auditor"] },
       { label: "Access Recertification", path: "/access-recertification", icon: UserCheck, roles: ["admin"] },
       { label: "Training", path: "/training", icon: GraduationCap, roles: ["admin", "compliance_officer", "risk_manager", "auditor", "user"] },
       { label: "Calendar Sync", path: "/calendar-sync", icon: CalendarCheck, roles: ["admin", "compliance_officer", "risk_manager", "auditor", "user"] },
@@ -122,6 +123,7 @@ export const navSections = [
       { label: "Audit Trail", path: "/audit-trail", icon: History, roles: ["admin", "compliance_officer", "auditor"] },
       { label: "Activity Log", path: "/activity-log", icon: Activity, roles: ["admin", "compliance_officer", "risk_manager", "auditor"] },
       { label: "People Compliance", path: "/people", icon: Users2, roles: ["admin", "compliance_officer", "auditor"] },
+      { label: "HRIS Directory", path: "/hris-directory", icon: Users, roles: ["admin", "compliance_officer", "auditor"] },
     ]
   },
   {

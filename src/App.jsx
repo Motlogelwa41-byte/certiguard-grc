@@ -130,6 +130,8 @@ import SiemWebhooks from '@/pages/SiemWebhooks';
 import EsgReporting from '@/pages/EsgReporting';
 import ComplianceBenchmarking from '@/pages/ComplianceBenchmarking';
 import Contracts from '@/pages/Contracts';
+import EdrDashboard from '@/pages/EdrDashboard';
+import HrisDirectory from '@/pages/HrisDirectory';
 import Landing from '@/pages/Landing';
 import { LanguageProvider } from '@/contexts/LanguageContext';
 
@@ -284,6 +286,8 @@ const AuthenticatedApp = () => {
           <Route path="/esg-reporting" element={<EsgReporting />} />
           <Route path="/compliance-benchmarking" element={<ComplianceBenchmarking />} />
           <Route path="/contracts" element={<Contracts />} />
+          <Route path="/edr-dashboard" element={<EdrDashboard />} />
+          <Route path="/hris-directory" element={<HrisDirectory />} />
         </Route>
       </Route>
       <Route path="*" element={<PageNotFound />} />

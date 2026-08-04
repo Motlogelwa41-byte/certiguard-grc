@@ -1,0 +1,45 @@
+{
+  "description": "Daily EDR/XDR sync \u2014 pulls endpoint detection findings from CrowdStrike Falcon and/or Microsoft Defender for Endpoint into SecurityFinding records",
+  "name": "Daily EDR Sync",
+  "trigger": {
+    "condition": null,
+    "config": {
+      "trigger_type": "scheduled",
+      "events": [],
+      "schedule_mode": "recurring",
+      "cron_expression": "30 6 * * *",
+      "one_time_date": null,
+      "timezone": "Africa/Johannesburg",
+      "interval_value": null,
+      "interval_unit": null,
+      "interval_anchor": null,
+      "ends_type": "never",
+      "ends_on_date": null,
+      "ends_after_count": null
+    }
+  },
+  "definition": {
+    "document": {
+      "dsl": "1.0.0",
+      "name": "daily_edr_sync",
+      "version": "1.0",
+      "namespace": "base44"
+    },
+    "do": [
+      {
+        "sync_edr": {
+          "call": "invoke_backend_function",
+          "with": {
+            "function_name": "syncEdrFindings",
+            "args": {}
+          },
+          "then": "end",
+          "x-base44": {
+            "title": "Sync EDR/XDR findings",
+            "description": "Pull endpoint detections from CrowdStrike and/or Defender into SecurityFinding"
+          }
+        }
+      }
+    ]
+  }
+}
