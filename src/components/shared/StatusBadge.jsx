@@ -13,6 +13,7 @@ const statusStyles = {
   draft: "bg-slate-100 text-slate-600",
   in_review: "bg-amber-100 text-amber-700",
   approved: "bg-emerald-100 text-emerald-700",
+  published: "bg-teal-100 text-teal-700",
   archived: "bg-slate-100 text-slate-500",
   pending_review: "bg-amber-100 text-amber-700",
   rejected: "bg-red-100 text-red-700",

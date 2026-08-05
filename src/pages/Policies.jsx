@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
-import { FileText, Plus, Pencil, Trash2, Search, Eye, CheckSquare, Download, Upload, PenLine, History, Send, AlertCircle } from "lucide-react";
+import { FileText, Plus, Pencil, Trash2, Search, Eye, CheckSquare, Download, Upload, PenLine, History, Send, AlertCircle, CheckCircle2, Globe } from "lucide-react";
 import { exportToCsv } from "@/lib/exportCsv";
 import BulkImportModal from "@/components/shared/BulkImportModal";
 import BulkActionBar from "@/components/shared/BulkActionBar";
@@ -122,6 +122,34 @@ export default function Policies() {
 
   const handleDelete = async (id) => { await base44.entities.Policy.delete(id); load(); toast({ title: "Policy deleted" }); };
 
+  const handlePublish = async (policy) => {
+    try {
+      await base44.entities.Policy.update(policy.id, { status: "published", published_at: new Date().toISOString() });
+      load();
+      toast({ title: "Policy published", description: `"${policy.title}" is now live for acknowledgment.` });
+    } catch (e) { toast({ title: "Failed to publish", description: e.message, variant: "destructive" }); }
+  };
+
+  const handleSendAckRequests = async (policy) => {
+    if (!window.confirm(`Send acknowledgment requests to all users for "${policy.title}" (v${policy.version})?`)) return;
+    try {
+      const users = await base44.entities.User.list();
+      let sent = 0;
+      for (const u of users) {
+        try {
+          await base44.integrations.Core.SendEmail({
+            to: u.email,
+            subject: `Policy Acknowledgment Required: ${policy.title} (v${policy.version})`,
+            body: `Hello ${u.full_name || u.email},\n\nAn updated policy requires your acknowledgment:\n\nTitle: ${policy.title}\nVersion: v${policy.version}\nCategory: ${(policy.category || "").replace(/_/g, " ")}\n\nPlease log in to CertiGuard and acknowledge this policy by visiting the Policy Acknowledgments page.\n\nThank you,\nCertiGuard GRC Platform`,
+          });
+          sent++;
+        } catch (e) { console.error(`Failed to send to ${u.email}:`, e); }
+      }
+      await base44.entities.Policy.update(policy.id, { ack_requests_sent_at: new Date().toISOString() });
+      toast({ title: "Acknowledgment requests sent", description: `${sent} of ${users.length} users notified.` });
+    } catch (e) { toast({ title: "Failed to send requests", description: e.message, variant: "destructive" }); }
+  };
+
   const getApprovalProgress = (policy) => {
     try {
       const steps = JSON.parse(policy.approval_workflow || "[]");
@@ -167,6 +195,7 @@ export default function Policies() {
             <SelectItem value="in_review">In Review</SelectItem>
             <SelectItem value="pending_approval">Pending Approval</SelectItem>
             <SelectItem value="approved">Approved</SelectItem>
+            <SelectItem value="published">Published</SelectItem>
             <SelectItem value="archived">Archived</SelectItem>
           </SelectContent>
         </Select>
@@ -233,6 +262,12 @@ export default function Policies() {
                 <div className="flex items-center justify-between text-xs pt-2 border-t border-border">
                   <span className="text-muted-foreground">{p.acknowledgment_required ? "Ack required" : "No ack needed"}</span>
                   <div className="flex items-center gap-1">
+                    {p.status === "approved" && (
+                      <Can permission="policies:approve"><button onClick={() => handlePublish(p)} className="p-1 rounded hover:bg-muted" title="Publish for acknowledgment"><Globe className="w-3.5 h-3.5 text-teal-600" /></button></Can>
+                    )}
+                    {p.status === "published" && p.acknowledgment_required && (
+                      <Can permission="notifications:send"><button onClick={() => handleSendAckRequests(p)} className="p-1 rounded hover:bg-muted" title="Send Acknowledgment Requests"><Send className="w-3.5 h-3.5 text-blue-500" /></button></Can>
+                    )}
                     <button onClick={() => { setViewPolicy(p); setViewOpen(true); }} className="p-1 rounded hover:bg-muted" title="View"><Eye className="w-3.5 h-3.5 text-muted-foreground" /></button>
                     <button onClick={() => { setHistoryPolicy(p); }} className="p-1 rounded hover:bg-muted" title="Version History"><History className="w-3.5 h-3.5 text-muted-foreground" /></button>
                     <Can permission="policies:approve"><button onClick={() => { setApprovalPolicy(p); }} className="p-1 rounded hover:bg-muted" title="Approval Workflow"><PenLine className="w-3.5 h-3.5 text-blue-500" /></button></Can>
@@ -288,6 +323,7 @@ export default function Policies() {
                     <SelectItem value="in_review">In Review</SelectItem>
                     <SelectItem value="pending_approval">Pending Approval</SelectItem>
                     <SelectItem value="approved">Approved</SelectItem>
+                    <SelectItem value="published">Published</SelectItem>
                     <SelectItem value="rejected">Rejected</SelectItem>
                     <SelectItem value="archived">Archived</SelectItem>
                   </SelectContent>
