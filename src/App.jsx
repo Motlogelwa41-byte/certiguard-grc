@@ -133,6 +133,7 @@ import ComplianceBenchmarking from '@/pages/ComplianceBenchmarking';
 import Contracts from '@/pages/Contracts';
 import EdrDashboard from '@/pages/EdrDashboard';
 import HrisDirectory from '@/pages/HrisDirectory';
+import TestingAgent from '@/pages/TestingAgent';
 import Landing from '@/pages/Landing';
 import { LanguageProvider } from '@/contexts/LanguageContext';
 
@@ -290,6 +291,7 @@ const AuthenticatedApp = () => {
           <Route path="/contracts" element={<Contracts />} />
           <Route path="/edr-dashboard" element={<EdrDashboard />} />
           <Route path="/hris-directory" element={<HrisDirectory />} />
+          <Route path="/testing-agent" element={<TestingAgent />} />
         </Route>
       </Route>
       <Route path="*" element={<PageNotFound />} />
