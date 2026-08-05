@@ -8,8 +8,9 @@ Deno.serve(async (req) => {
   try {
     const base44 = createClientFromRequest(req);
     const user = await base44.auth.me();
-    if (!user || user.role !== 'admin') {
-      return Response.json({ error: 'Admin access required' }, { status: 403 });
+    const allowedRoles = ['admin', 'compliance_officer', 'risk_manager'];
+    if (!user || !allowedRoles.includes(user.role)) {
+      return Response.json({ error: 'Access recertification requires a governance role (admin, compliance_officer, or risk_manager)' }, { status: 403 });
     }
     const sr = base44.asServiceRole;
     const body = await req.json().catch(() => ({}));

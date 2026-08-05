@@ -70,7 +70,12 @@ export default function AccessRecertification() {
       const data = res?.data || res;
       if (data?.ok) {
         toast({ title: "Review items generated", description: `${data.generated} new · ${data.total} total` });
-        load();
+        await load();
+        if (selected) {
+          const refreshed = await base44.entities.AccessReviewCampaign.get(selected.id);
+          setSelected(refreshed);
+          await loadItems(selected.id);
+        }
       } else toast({ title: "Failed", description: data?.error, variant: "destructive" });
     } catch (e) { toast({ title: "Failed", description: e.message, variant: "destructive" }); }
     setBusy(false);
@@ -84,7 +89,12 @@ export default function AccessRecertification() {
       const data = res?.data || res;
       if (data?.ok) {
         toast({ title: "Campaign finalized", description: `${data.certified} certified · ${data.revoked} revoked · ${data.modified} modified` });
-        load(); if (selected?.id === c.id) loadItems(c.id);
+        await load();
+        if (selected?.id === c.id) {
+          const refreshed = await base44.entities.AccessReviewCampaign.get(c.id);
+          setSelected(refreshed);
+          await loadItems(c.id);
+        }
       } else toast({ title: "Failed", description: data?.error, variant: "destructive" });
     } catch (e) { toast({ title: "Failed", description: e.message, variant: "destructive" }); }
     setBusy(false);
