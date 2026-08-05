@@ -1,0 +1,115 @@
+{
+  "name": "AccessAttestation",
+  "type": "object",
+  "properties": {
+    "tenant_id": {
+      "type": "string",
+      "description": "Tenant isolation key"
+    },
+    "user_id": {
+      "type": "string"
+    },
+    "user_email": {
+      "type": "string"
+    },
+    "user_name": {
+      "type": "string"
+    },
+    "module_accessed": {
+      "type": "string",
+      "description": "GRC module/page accessed"
+    },
+    "ip_address": {
+      "type": "string"
+    },
+    "geo_location": {
+      "type": "string",
+      "description": "Country/city derived from IP"
+    },
+    "mfa_verified": {
+      "type": "boolean",
+      "default": false
+    },
+    "mfa_method": {
+      "type": "string",
+      "description": "totp, sms, push, hardware_key"
+    },
+    "device_fingerprint": {
+      "type": "string"
+    },
+    "login_timestamp": {
+      "type": "string"
+    },
+    "session_duration_min": {
+      "type": "number",
+      "default": 0
+    },
+    "anomaly_flags": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "Flags: unusual_ip, off_hours, no_mfa, new_device, geo_mismatch"
+    },
+    "risk_score": {
+      "type": "number",
+      "default": 0,
+      "description": "0-100 anomaly risk score"
+    },
+    "flagged": {
+      "type": "boolean",
+      "default": false
+    },
+    "action_taken": {
+      "type": "string",
+      "enum": [
+        "none",
+        "investigated",
+        "blocked",
+        "resolved"
+      ],
+      "default": "none"
+    },
+    "notes": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "user_email",
+    "module_accessed"
+  ],
+  "rls": {
+    "create": {
+      "data.tenant_id": "{{user.data.tenant_id}}"
+    },
+    "read": {
+      "$or": [
+        {
+          "data.tenant_id": "{{user.data.tenant_id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "update": {
+      "$or": [
+        {
+          "data.tenant_id": "{{user.data.tenant_id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "delete": {
+      "user_condition": {
+        "role": "admin"
+      }
+    }
+  }
+}

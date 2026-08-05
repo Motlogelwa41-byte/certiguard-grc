@@ -1,0 +1,138 @@
+{
+  "name": "StatutoryLicense",
+  "type": "object",
+  "properties": {
+    "tenant_id": {
+      "type": "string",
+      "description": "Tenant isolation key"
+    },
+    "license_name": {
+      "type": "string"
+    },
+    "license_type": {
+      "type": "string",
+      "enum": [
+        "tax_clearance",
+        "annual_return",
+        "environmental_permit",
+        "operating_license",
+        "industry_certification",
+        "data_protection_registration",
+        "import_export_permit",
+        "health_safety",
+        "other"
+      ],
+      "default": "operating_license"
+    },
+    "issuing_authority": {
+      "type": "string",
+      "description": "Government body or regulator issuing the license"
+    },
+    "license_number": {
+      "type": "string"
+    },
+    "jurisdiction": {
+      "type": "string",
+      "description": "Country/region of jurisdiction"
+    },
+    "issue_date": {
+      "type": "string",
+      "format": "date"
+    },
+    "expiry_date": {
+      "type": "string",
+      "format": "date"
+    },
+    "renewal_notice_days": {
+      "type": "number",
+      "default": 90,
+      "description": "Days before expiry to trigger renewal alert"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "active",
+        "expiring_soon",
+        "expired",
+        "pending_renewal",
+        "renewed"
+      ],
+      "default": "active"
+    },
+    "owner_name": {
+      "type": "string"
+    },
+    "owner_id": {
+      "type": "string"
+    },
+    "renewal_checklist": {
+      "type": "string",
+      "description": "JSON array: [{item, completed}]"
+    },
+    "document_url": {
+      "type": "string"
+    },
+    "notes": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "license_name",
+    "license_type"
+  ],
+  "rls": {
+    "create": {
+      "data.tenant_id": "{{user.data.tenant_id}}"
+    },
+    "read": {
+      "$or": [
+        {
+          "data.tenant_id": "{{user.data.tenant_id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "update": {
+      "$or": [
+        {
+          "data.tenant_id": "{{user.data.tenant_id}}",
+          "created_by_id": "{{user.id}}"
+        },
+        {
+          "$and": [
+            {
+              "data.tenant_id": "{{user.data.tenant_id}}"
+            },
+            {
+              "user_condition": {
+                "role": "compliance_officer"
+              }
+            }
+          ]
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "delete": {
+      "$or": [
+        {
+          "data.tenant_id": "{{user.data.tenant_id}}",
+          "created_by_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    }
+  }
+}

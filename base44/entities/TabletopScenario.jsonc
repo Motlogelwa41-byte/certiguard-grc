@@ -1,0 +1,147 @@
+{
+  "name": "TabletopScenario",
+  "type": "object",
+  "properties": {
+    "tenant_id": {
+      "type": "string",
+      "description": "Tenant isolation key"
+    },
+    "scenario_name": {
+      "type": "string"
+    },
+    "description": {
+      "type": "string"
+    },
+    "scenario_type": {
+      "type": "string",
+      "enum": [
+        "ransomware",
+        "data_center_outage",
+        "supply_chain",
+        "phishing",
+        "insider_breach",
+        "natural_disaster",
+        "regulatory_enforcement",
+        "other"
+      ],
+      "default": "ransomware"
+    },
+    "severity": {
+      "type": "number",
+      "default": 3,
+      "description": "1-5 severity rating"
+    },
+    "participants": {
+      "type": "string",
+      "description": "JSON array of participants: [{name, role}]"
+    },
+    "milestones": {
+      "type": "string",
+      "description": "JSON array of timed milestones: [{time_offset_min, description, expected_action, actual_action, status}]"
+    },
+    "start_time": {
+      "type": "string"
+    },
+    "end_time": {
+      "type": "string"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "draft",
+        "scheduled",
+        "in_progress",
+        "completed",
+        "cancelled"
+      ],
+      "default": "draft"
+    },
+    "facilitator_name": {
+      "type": "string"
+    },
+    "after_action_report": {
+      "type": "string",
+      "description": "AI-generated or manual post-action compliance improvement report"
+    },
+    "improvement_actions": {
+      "type": "string",
+      "description": "JSON array of improvement actions: [{action, owner, due_date, status}]"
+    },
+    "linked_bcdr_plan_id": {
+      "type": "string"
+    },
+    "notes": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "scenario_name"
+  ],
+  "rls": {
+    "create": {
+      "data.tenant_id": "{{user.data.tenant_id}}"
+    },
+    "read": {
+      "$or": [
+        {
+          "data.tenant_id": "{{user.data.tenant_id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "update": {
+      "$or": [
+        {
+          "data.tenant_id": "{{user.data.tenant_id}}",
+          "created_by_id": "{{user.id}}"
+        },
+        {
+          "$and": [
+            {
+              "data.tenant_id": "{{user.data.tenant_id}}"
+            },
+            {
+              "user_condition": {
+                "role": "compliance_officer"
+              }
+            }
+          ]
+        },
+        {
+          "$and": [
+            {
+              "data.tenant_id": "{{user.data.tenant_id}}"
+            },
+            {
+              "user_condition": {
+                "role": "risk_manager"
+              }
+            }
+          ]
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "delete": {
+      "$or": [
+        {
+          "data.tenant_id": "{{user.data.tenant_id}}",
+          "created_by_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    }
+  }
+}

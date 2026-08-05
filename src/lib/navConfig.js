@@ -4,7 +4,7 @@ import {
   ShieldCheck, FileSearch, Brain, Play, FileSpreadsheet, FileDown, BarChart3, LineChart,
   History, ShieldAlert, GraduationCap, Calendar, Bell, Users, Copy, SlidersHorizontal,
   Target, Upload, Send, Globe, Users2, MapPin, Zap, ListChecks, BellRing,
-  PieChart,   Radar, Landmark, BarChart2, Network, GitCompare, Sparkles, CreditCard, Gauge, Info, ScrollText, Activity, Factory, Plug, UserCheck, Wand2, KeyRound, Bug, Library, Presentation, TrendingDown, CalendarCheck, Rocket, ClipboardCheck,   FlaskRound, Award, FileQuestion, FlaskConical, Lock, Calculator, Server, BookOpen, Settings, Code, Cloud, Webhook, Leaf, Trophy, TestTube
+  PieChart,   Radar, Landmark, BarChart2, Network, GitCompare, Sparkles, CreditCard, Gauge, Info, ScrollText, Activity, Factory, Plug, UserCheck, Wand2, KeyRound, Bug, Library, Presentation, TrendingDown, CalendarCheck, Rocket, ClipboardCheck,   FlaskRound, Award, FileQuestion, FlaskConical, Lock, Calculator, Server, BookOpen, Settings, Code, Cloud, Webhook, Leaf, Trophy, TestTube, FileBadge, Gavel, Fingerprint, Languages, FileArchive, DollarSign
 } from "lucide-react";
 // NOTE: ClipboardList imported above is reused for the UAT checklist item below.
 
@@ -67,6 +67,7 @@ export const navSections = [
       { label: "KPI / KRI Tracker", path: "/kpi-kri", icon: Target, roles: ["admin", "compliance_officer", "risk_manager", "auditor"] },
       { label: "Monte Carlo Forecast", path: "/monte-carlo-forecast", icon: Activity, roles: ["admin", "compliance_officer", "risk_manager", "auditor"] },
       { label: "Cross-Border Matrix", path: "/cross-border-matrix", icon: Globe, roles: ["admin", "compliance_officer", "risk_manager", "auditor"] },
+      { label: "Cost of Compliance", path: "/cost-of-compliance", icon: DollarSign, roles: ["admin", "compliance_officer", "risk_manager", "auditor"] },
     ]
   },
   {
@@ -89,6 +90,7 @@ export const navSections = [
       { label: "Testing Agent", path: "/testing-agent", icon: TestTube, roles: ["admin", "compliance_officer", "auditor"] },
       { label: "AI Control Mapper", path: "/ai-control-mapper", icon: Zap, roles: ["admin", "compliance_officer"] },
       { label: "Compliance Runs", path: "/compliance-runs", icon: Play, roles: ["admin", "compliance_officer", "auditor"] },
+      { label: "Regulatory Localization", path: "/regulatory-localization", icon: Languages, roles: ["admin", "compliance_officer", "risk_manager", "auditor"] },
     ]
   },
   {
@@ -115,6 +117,7 @@ export const navSections = [
       { label: "Contracts (CLM)", path: "/contracts", icon: FileText, roles: ["admin", "compliance_officer", "risk_manager", "auditor"] },
       { label: "Vendor Assessments", path: "/vendor-assessments", icon: ClipboardList, roles: ["admin", "compliance_officer", "risk_manager", "auditor"] },
       { label: "Vendor Scorecard", path: "/vendor-scorecard", icon: Gauge, roles: ["admin", "compliance_officer", "risk_manager", "auditor"] },
+      { label: "AI Contract Scanner", path: "/ai-contract-scanner", icon: FileSearch, roles: ["admin", "compliance_officer", "risk_manager"] },
     ]
   },
   {
@@ -128,6 +131,8 @@ export const navSections = [
       { label: "Activity Log", path: "/activity-log", icon: Activity, roles: ["admin", "compliance_officer", "risk_manager", "auditor"] },
       { label: "People Compliance", path: "/people", icon: Users2, roles: ["admin", "compliance_officer", "auditor"] },
       { label: "HRIS Directory", path: "/hris-directory", icon: Users, roles: ["admin", "compliance_officer", "auditor"] },
+      { label: "Board Resolutions", path: "/board-resolutions", icon: Gavel, roles: ["admin", "compliance_officer"] },
+      { label: "Zero-Trust Ledger", path: "/zero-trust-ledger", icon: Fingerprint, roles: ["admin", "compliance_officer", "risk_manager"] },
     ]
   },
   {
@@ -151,6 +156,7 @@ export const navSections = [
       { label: "Exec Readiness Dashboard", path: "/executive-readiness-dashboard", icon: LineChart, roles: ["admin", "compliance_officer", "risk_manager", "auditor"] },
       { label: "One-Click Report", path: "/one-click-report", icon: FileText, roles: ["admin", "compliance_officer", "risk_manager", "auditor"] },
       { label: "AI Board Pack", path: "/board-pack-generator", icon: Presentation, roles: ["admin", "compliance_officer", "risk_manager", "auditor"] },
+      { label: "Certification Dossier", path: "/certification-dossier", icon: FileArchive, roles: ["admin", "compliance_officer", "auditor"] },
       { label: "Auditor Export", path: "/auditor-export", icon: FileDown, roles: ["admin", "compliance_officer", "risk_manager", "auditor"] },
       { label: "Executive Report", path: "/executive-report", icon: FileText, roles: ["admin", "compliance_officer", "risk_manager", "auditor"] },
     ]
@@ -169,7 +175,10 @@ export const navSections = [
       { label: "API Docs", path: "/api-docs", icon: Code, roles: ["admin", "compliance_officer"] },
       { label: "Business Units", path: "/business-units", icon: Building2, roles: ["admin", "compliance_officer", "risk_manager"] },
       { label: "BCDR Tracker", path: "/bcdr-tracker", icon: Shield, roles: ["admin", "compliance_officer", "risk_manager"] },
+      { label: "Tabletop Simulator", path: "/tabletop-simulator", icon: AlertTriangle, roles: ["admin", "compliance_officer", "risk_manager"] },
+      { label: "Statutory Calendar", path: "/statutory-calendar", icon: FileBadge, roles: ["admin", "compliance_officer", "risk_manager"] },
       { label: "Whistleblower Cases", path: "/whistleblower-cases", icon: Shield, roles: ["admin", "compliance_officer"] },
+      { label: "COI & Insider Threat", path: "/coi-portal", icon: ShieldAlert, roles: ["admin", "compliance_officer", "risk_manager", "user"] },
       { label: "Tenant Settings", path: "/tenant-settings", icon: Settings, roles: ["admin"] },
       { label: "Tenants", path: "/tenant-admin", icon: PieChart, roles: ["admin"] },
       { label: "Billing", path: "/billing", icon: CreditCard, roles: ["admin"] },

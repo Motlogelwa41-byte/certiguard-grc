@@ -143,6 +143,15 @@ import CrossBorderMatrix from '@/pages/CrossBorderMatrix';
 import BoardPackGenerator from '@/pages/BoardPackGenerator';
 import WhistleblowerPortal from '@/pages/WhistleblowerPortal';
 import WhistleblowerCases from '@/pages/WhistleblowerCases';
+import TabletopSimulator from '@/pages/TabletopSimulator';
+import BoardResolutionRegister from '@/pages/BoardResolutionRegister';
+import CoiPortal from '@/pages/CoiPortal';
+import StatutoryCalendar from '@/pages/StatutoryCalendar';
+import ZeroTrustLedger from '@/pages/ZeroTrustLedger';
+import AIContractScanner from '@/pages/AIContractScanner';
+import RegulatoryLocalization from '@/pages/RegulatoryLocalization';
+import CostOfComplianceModeler from '@/pages/CostOfComplianceModeler';
+import CertificationDossier from '@/pages/CertificationDossier';
 import Landing from '@/pages/Landing';
 import { LanguageProvider } from '@/contexts/LanguageContext';
 
@@ -310,6 +319,15 @@ const AuthenticatedApp = () => {
           <Route path="/cross-border-matrix" element={<CrossBorderMatrix />} />
           <Route path="/board-pack-generator" element={<BoardPackGenerator />} />
           <Route path="/whistleblower-cases" element={<WhistleblowerCases />} />
+          <Route path="/tabletop-simulator" element={<TabletopSimulator />} />
+          <Route path="/board-resolutions" element={<BoardResolutionRegister />} />
+          <Route path="/coi-portal" element={<CoiPortal />} />
+          <Route path="/statutory-calendar" element={<StatutoryCalendar />} />
+          <Route path="/zero-trust-ledger" element={<ZeroTrustLedger />} />
+          <Route path="/ai-contract-scanner" element={<AIContractScanner />} />
+          <Route path="/regulatory-localization" element={<RegulatoryLocalization />} />
+          <Route path="/cost-of-compliance" element={<CostOfComplianceModeler />} />
+          <Route path="/certification-dossier" element={<CertificationDossier />} />
         </Route>
       </Route>
       <Route path="*" element={<PageNotFound />} />
