@@ -29,7 +29,9 @@ const TENANT_SCOPED_ENTITIES = new Set([
   'SecurityQuestionnaire', 'QuestionnaireItem', 'PenTest', 'PenTestFinding',
   'RegulatoryChange', 'SecurityFinding', 'AccessReviewCampaign', 'AccessReviewItem',
   'DirectoryUser', 'DPIA', 'RiskQuantification', 'PrivacyRequest', 'PrivacyRequestTask',
-  'IdentityProvider', 'Connection', 'TaskFeedback', 'AuditorScope', 'AuditorRequest', 'AuditorLink'
+  'IdentityProvider', 'Connection', 'TaskFeedback', 'AuditorScope', 'AuditorRequest', 'AuditorLink',
+  // Added 2026-08-05: tenant-scoped entities missing from the auto-stamp set, causing create RLS rejections.
+  'ComplianceBenchmark', 'Contract', 'EsgMetric', 'WebhookEndpoint'
 ]);
 
 // AuditTrail is created server-side via the logAudit function; skip client logging for it.
