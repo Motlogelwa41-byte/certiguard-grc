@@ -1,0 +1,134 @@
+{
+  "name": "WhistleblowerReport",
+  "type": "object",
+  "properties": {
+    "case_number": {
+      "type": "string",
+      "description": "Auto-generated case number e.g. WB-2026-0001"
+    },
+    "category": {
+      "type": "string",
+      "enum": [
+        "fraud",
+        "harassment",
+        "safety",
+        "ethics",
+        "financial_misconduct",
+        "data_privacy",
+        "corruption",
+        "discrimination",
+        "other"
+      ],
+      "default": "other"
+    },
+    "subject": {
+      "type": "string",
+      "description": "Brief title of the report"
+    },
+    "description": {
+      "type": "string",
+      "description": "Detailed report text \u2014 encrypted at rest"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "submitted",
+        "under_review",
+        "investigating",
+        "resolved",
+        "dismissed"
+      ],
+      "default": "submitted"
+    },
+    "priority": {
+      "type": "string",
+      "enum": [
+        "low",
+        "medium",
+        "high",
+        "critical"
+      ],
+      "default": "medium"
+    },
+    "anonymous_token": {
+      "type": "string",
+      "description": "Unguessable UUID token for two-way anonymous communication"
+    },
+    "messages": {
+      "type": "string",
+      "description": "JSON array of encrypted messages: [{from, text, timestamp, is_admin}]"
+    },
+    "evidence_urls": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "evidence_hashes": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "SHA-256 hashes for tamper-evident evidence logs"
+    },
+    "assigned_to_name": {
+      "type": "string"
+    },
+    "assigned_to_id": {
+      "type": "string"
+    },
+    "resolution_notes": {
+      "type": "string"
+    },
+    "submitted_at": {
+      "type": "string"
+    },
+    "resolved_at": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "case_number",
+    "anonymous_token"
+  ],
+  "rls": {
+    "create": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "read": {
+      "$or": [
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        },
+        {
+          "user_condition": {
+            "role": "compliance_officer"
+          }
+        }
+      ]
+    },
+    "update": {
+      "$or": [
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        },
+        {
+          "user_condition": {
+            "role": "compliance_officer"
+          }
+        }
+      ]
+    },
+    "delete": {
+      "user_condition": {
+        "role": "admin"
+      }
+    }
+  }
+}

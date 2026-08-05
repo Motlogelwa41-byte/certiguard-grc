@@ -137,6 +137,12 @@ import TestingAgent from '@/pages/TestingAgent';
 import OneClickReport from '@/pages/OneClickReport';
 import BusinessUnits from '@/pages/BusinessUnits';
 import KpiKri from '@/pages/KpiKri';
+import BcdrTracker from '@/pages/BcdrTracker';
+import MonteCarloForecast from '@/pages/MonteCarloForecast';
+import CrossBorderMatrix from '@/pages/CrossBorderMatrix';
+import BoardPackGenerator from '@/pages/BoardPackGenerator';
+import WhistleblowerPortal from '@/pages/WhistleblowerPortal';
+import WhistleblowerCases from '@/pages/WhistleblowerCases';
 import Landing from '@/pages/Landing';
 import { LanguageProvider } from '@/contexts/LanguageContext';
 
@@ -176,6 +182,7 @@ const AuthenticatedApp = () => {
       <Route path="/pricing" element={<Pricing />} />
       <Route path="/vendor-questionnaire" element={<VendorQuestionnaire />} />
       <Route path="/vendor-portal" element={<VendorPortal />} />
+      <Route path="/whistleblower" element={<WhistleblowerPortal />} />
       <Route path="/trust-center" element={<TrustCenterPublic />} />
       <Route path="/privacy" element={<PrivacyPolicy />} />
       <Route path="/terms" element={<Terms />} />
@@ -298,6 +305,11 @@ const AuthenticatedApp = () => {
           <Route path="/one-click-report" element={<OneClickReport />} />
           <Route path="/business-units" element={<BusinessUnits />} />
           <Route path="/kpi-kri" element={<KpiKri />} />
+          <Route path="/bcdr-tracker" element={<BcdrTracker />} />
+          <Route path="/monte-carlo-forecast" element={<MonteCarloForecast />} />
+          <Route path="/cross-border-matrix" element={<CrossBorderMatrix />} />
+          <Route path="/board-pack-generator" element={<BoardPackGenerator />} />
+          <Route path="/whistleblower-cases" element={<WhistleblowerCases />} />
         </Route>
       </Route>
       <Route path="*" element={<PageNotFound />} />

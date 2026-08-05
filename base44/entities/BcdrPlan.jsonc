@@ -1,0 +1,181 @@
+{
+  "name": "BcdrPlan",
+  "type": "object",
+  "properties": {
+    "tenant_id": {
+      "type": "string",
+      "description": "Tenant isolation key"
+    },
+    "process_name": {
+      "type": "string",
+      "description": "Critical business process name"
+    },
+    "description": {
+      "type": "string"
+    },
+    "bia_category": {
+      "type": "string",
+      "enum": [
+        "critical",
+        "important",
+        "normal"
+      ],
+      "default": "important",
+      "description": "Business Impact Analysis category"
+    },
+    "criticality_rating": {
+      "type": "number",
+      "default": 3,
+      "description": "1-5 criticality score"
+    },
+    "mtd_hours": {
+      "type": "number",
+      "description": "Maximum Tolerable Downtime (hours)"
+    },
+    "rto_hours": {
+      "type": "number",
+      "description": "Recovery Time Objective (hours)"
+    },
+    "rpo_hours": {
+      "type": "number",
+      "description": "Recovery Point Objective (hours)"
+    },
+    "dependencies": {
+      "type": "string",
+      "description": "Systems, vendors, personnel dependencies"
+    },
+    "recovery_strategy": {
+      "type": "string",
+      "description": "Active-active, active-passive, manual fallback, etc."
+    },
+    "alternate_site": {
+      "type": "string"
+    },
+    "owner_name": {
+      "type": "string"
+    },
+    "owner_id": {
+      "type": "string"
+    },
+    "business_unit_id": {
+      "type": "string"
+    },
+    "business_unit_name": {
+      "type": "string"
+    },
+    "last_test_date": {
+      "type": "string",
+      "format": "date"
+    },
+    "next_test_date": {
+      "type": "string",
+      "format": "date"
+    },
+    "test_type": {
+      "type": "string",
+      "enum": [
+        "tabletop",
+        "simulation",
+        "full_failover",
+        "parallel"
+      ],
+      "default": "tabletop"
+    },
+    "test_status": {
+      "type": "string",
+      "enum": [
+        "passed",
+        "failed",
+        "partial",
+        "not_tested"
+      ],
+      "default": "not_tested"
+    },
+    "after_action_notes": {
+      "type": "string",
+      "description": "Post-exercise after-action report notes"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "active",
+        "draft",
+        "archived"
+      ],
+      "default": "draft"
+    },
+    "notes": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "process_name"
+  ],
+  "rls": {
+    "create": {
+      "data.tenant_id": "{{user.data.tenant_id}}"
+    },
+    "read": {
+      "$or": [
+        {
+          "data.tenant_id": "{{user.data.tenant_id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "update": {
+      "$or": [
+        {
+          "data.tenant_id": "{{user.data.tenant_id}}",
+          "created_by_id": "{{user.id}}"
+        },
+        {
+          "$and": [
+            {
+              "data.tenant_id": "{{user.data.tenant_id}}"
+            },
+            {
+              "user_condition": {
+                "role": "compliance_officer"
+              }
+            }
+          ]
+        },
+        {
+          "$and": [
+            {
+              "data.tenant_id": "{{user.data.tenant_id}}"
+            },
+            {
+              "user_condition": {
+                "role": "risk_manager"
+              }
+            }
+          ]
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "delete": {
+      "$or": [
+        {
+          "data.tenant_id": "{{user.data.tenant_id}}",
+          "created_by_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    }
+  }
+}

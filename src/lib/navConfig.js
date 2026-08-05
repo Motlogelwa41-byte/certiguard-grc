@@ -65,6 +65,8 @@ export const navSections = [
       { label: "Exec Risk Summary", path: "/executive-risk-summary", icon: TrendingDown, roles: ["admin", "compliance_officer", "risk_manager", "auditor"] },
       { label: "Framework Cross-Map", path: "/risk-framework-crossmap", icon: GitCompare, roles: ["admin", "compliance_officer", "risk_manager", "auditor"] },
       { label: "KPI / KRI Tracker", path: "/kpi-kri", icon: Target, roles: ["admin", "compliance_officer", "risk_manager", "auditor"] },
+      { label: "Monte Carlo Forecast", path: "/monte-carlo-forecast", icon: Activity, roles: ["admin", "compliance_officer", "risk_manager", "auditor"] },
+      { label: "Cross-Border Matrix", path: "/cross-border-matrix", icon: Globe, roles: ["admin", "compliance_officer", "risk_manager", "auditor"] },
     ]
   },
   {
@@ -148,6 +150,7 @@ export const navSections = [
       { label: "Scheduled Reports", path: "/scheduled-reports", icon: Send, roles: ["admin", "compliance_officer", "auditor"] },
       { label: "Exec Readiness Dashboard", path: "/executive-readiness-dashboard", icon: LineChart, roles: ["admin", "compliance_officer", "risk_manager", "auditor"] },
       { label: "One-Click Report", path: "/one-click-report", icon: FileText, roles: ["admin", "compliance_officer", "risk_manager", "auditor"] },
+      { label: "AI Board Pack", path: "/board-pack-generator", icon: Presentation, roles: ["admin", "compliance_officer", "risk_manager", "auditor"] },
       { label: "Auditor Export", path: "/auditor-export", icon: FileDown, roles: ["admin", "compliance_officer", "risk_manager", "auditor"] },
       { label: "Executive Report", path: "/executive-report", icon: FileText, roles: ["admin", "compliance_officer", "risk_manager", "auditor"] },
     ]
@@ -165,6 +168,8 @@ export const navSections = [
       { label: "Data Privacy", path: "/data-privacy", icon: Lock, roles: ["admin", "compliance_officer"] },
       { label: "API Docs", path: "/api-docs", icon: Code, roles: ["admin", "compliance_officer"] },
       { label: "Business Units", path: "/business-units", icon: Building2, roles: ["admin", "compliance_officer", "risk_manager"] },
+      { label: "BCDR Tracker", path: "/bcdr-tracker", icon: Shield, roles: ["admin", "compliance_officer", "risk_manager"] },
+      { label: "Whistleblower Cases", path: "/whistleblower-cases", icon: Shield, roles: ["admin", "compliance_officer"] },
       { label: "Tenant Settings", path: "/tenant-settings", icon: Settings, roles: ["admin"] },
       { label: "Tenants", path: "/tenant-admin", icon: PieChart, roles: ["admin"] },
       { label: "Billing", path: "/billing", icon: CreditCard, roles: ["admin"] },
