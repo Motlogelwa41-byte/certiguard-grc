@@ -39,6 +39,7 @@
         "in_review",
         "pending_approval",
         "approved",
+        "published",
         "rejected",
         "archived"
       ],
@@ -61,6 +62,10 @@
       "type": "string",
       "format": "date"
     },
+    "published_at": {
+      "type": "string",
+      "description": "ISO timestamp when the policy was published for acknowledgment"
+    },
     "next_review_date": {
       "type": "string",
       "format": "date"
@@ -78,6 +83,14 @@
     "acknowledgment_count": {
       "type": "number",
       "default": 0
+    },
+    "acknowledged_by": {
+      "type": "string",
+      "description": "JSON array of acknowledgment records: [{user_id, user_name, acknowledged_at, version}]"
+    },
+    "ack_requests_sent_at": {
+      "type": "string",
+      "description": "ISO timestamp of the last batch of acknowledgment request emails sent"
     },
     "approval_workflow": {
       "type": "string",
@@ -121,6 +134,30 @@
         {
           "data.tenant_id": "{{user.data.tenant_id}}",
           "created_by_id": "{{user.id}}"
+        },
+        {
+          "$and": [
+            {
+              "data.tenant_id": "{{user.data.tenant_id}}"
+            },
+            {
+              "user_condition": {
+                "role": "compliance_officer"
+              }
+            }
+          ]
+        },
+        {
+          "$and": [
+            {
+              "data.tenant_id": "{{user.data.tenant_id}}"
+            },
+            {
+              "user_condition": {
+                "role": "risk_manager"
+              }
+            }
+          ]
         },
         {
           "user_condition": {
