@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import { base44 } from "@/api/base44Client";
-import { Shield, Plus, Pencil, Trash2 } from "lucide-react";
+import { Shield, Plus, Pencil, Trash2, ArrowRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
@@ -16,6 +17,7 @@ import { useTenant } from "@/lib/TenantContext";
 const defaultForm = { name: "", version: "", description: "", status: "not_started", readiness_score: 0, total_controls: 0, passing_controls: 0 };
 
 export default function Frameworks() {
+  const navigate = useNavigate();
   const [items, setItems] = useState([]);
   const [loading, setLoading] = useState(true);
   const [open, setOpen] = useState(false);
@@ -24,7 +26,6 @@ export default function Frameworks() {
   const { toast } = useToast();
   const { canAddFramework, tenant } = useTenant();
   const fwLimit = tenant?.limits?.maxFrameworks ?? tenant?.max_frameworks ?? null;
-  const atLimit = !canAddFramework(items.length);
 
   const load = () => base44.entities.Framework.list().then((d) => { setItems(d); setLoading(false); });
   useEffect(() => { load(); }, []);
@@ -70,7 +71,7 @@ export default function Frameworks() {
       <PageHeader title="Frameworks" subtitle="Manage compliance frameworks and track readiness" actions={
         <div className="flex items-center gap-3">
           {fwLimit && <span className="text-xs text-muted-foreground">{items.length} / {fwLimit} frameworks</span>}
-          <Button size="sm" disabled={atLimit} title={atLimit ? "Framework limit reached — upgrade to add more" : ""} onClick={() => { setForm(defaultForm); setEditId(null); setOpen(true); }}><Plus className="w-4 h-4 mr-1" /> Add Framework</Button>
+          <Button size="sm" onClick={() => { setForm(defaultForm); setEditId(null); setOpen(true); }}><Plus className="w-4 h-4 mr-1" /> Add Framework</Button>
         </div>
       } />
       {items.length === 0 ? (
@@ -80,14 +81,14 @@ export default function Frameworks() {
           {items.map((fw) => {
             const pct = fw.total_controls > 0 ? Math.round((fw.passing_controls / fw.total_controls) * 100) : fw.readiness_score || 0;
             return (
-              <div key={fw.id} className="bg-card rounded-xl border border-border p-5 flex flex-col gap-3">
+              <div key={fw.id} className="bg-card rounded-xl border border-border p-5 flex flex-col gap-3 cursor-pointer hover:border-primary/40 hover:shadow-md transition-all" onClick={() => navigate(`/controls?framework=${fw.id}&name=${encodeURIComponent(fw.name)}`)}>
                 <div className="flex items-start justify-between">
                   <div className="flex items-center gap-3">
                     <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center">
                       <Shield className="w-5 h-5 text-primary" />
                     </div>
                     <div>
-                      <h3 className="font-heading font-semibold text-foreground">{fw.name}</h3>
+                      <h3 className="font-heading font-semibold text-foreground hover:text-primary transition-colors">{fw.name}</h3>
                       {fw.version && <p className="text-xs text-muted-foreground">v{fw.version}</p>}
                     </div>
                   </div>
@@ -104,8 +105,8 @@ export default function Frameworks() {
                   </div>
                 </div>
                 <div className="flex items-center justify-between text-xs text-muted-foreground pt-1 border-t border-border">
-                  <span>{fw.total_controls || 0} controls · {fw.passing_controls || 0} passing</span>
-                  <div className="flex items-center gap-1">
+                  <span className="flex items-center gap-1">{fw.total_controls || 0} controls · {fw.passing_controls || 0} passing <ArrowRight className="w-3 h-3 text-primary" /></span>
+                  <div className="flex items-center gap-1" onClick={(e) => e.stopPropagation()}>
                     <button onClick={() => handleEdit(fw)} className="p-1 rounded hover:bg-muted"><Pencil className="w-3.5 h-3.5" /></button>
                     <button onClick={() => handleDelete(fw.id)} className="p-1 rounded hover:bg-muted text-destructive"><Trash2 className="w-3.5 h-3.5" /></button>
                   </div>

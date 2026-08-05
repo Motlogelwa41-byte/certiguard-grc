@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
-import { Link } from "react-router-dom";
+import { Link, useSearchParams } from "react-router-dom";
 import { base44 } from "@/api/base44Client";
-import { FileCheck, Plus, Pencil, Trash2, Search, Download, Upload, Zap } from "lucide-react";
+import { FileCheck, Plus, Pencil, Trash2, Search, Download, Upload, Zap, X, Filter } from "lucide-react";
 import RemediationDialog from "@/components/controls/RemediationDialog";
 import BulkActionBar from "@/components/shared/BulkActionBar";
 import { exportToCsv } from "@/lib/exportCsv";
@@ -25,6 +25,9 @@ const defaultForm = { control_id: "", title: "", description: "", category: "acc
 
 export default function Controls() {
   const { user } = useAuth();
+  const [searchParams, setSearchParams] = useSearchParams();
+  const frameworkFilter = searchParams.get("framework");
+  const frameworkFilterName = searchParams.get("name");
   const [items, setItems] = useState([]);
   const [frameworks, setFrameworks] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -112,8 +115,11 @@ export default function Controls() {
     const matchSearch = !search || c.title?.toLowerCase().includes(search.toLowerCase()) || c.control_id?.toLowerCase().includes(search.toLowerCase());
     const matchStatus = filterStatus === "all" || c.status === filterStatus;
     const matchCategory = filterCategory === "all" || c.category === filterCategory;
-    return matchSearch && matchStatus && matchCategory;
+    const matchFramework = !frameworkFilter || (c.framework_ids || []).includes(frameworkFilter);
+    return matchSearch && matchStatus && matchCategory && matchFramework;
   });
+
+  const clearFrameworkFilter = () => setSearchParams({});
 
   const filteredIds = filtered.map(c => c.id);
   const allFilteredSelected = filteredIds.length > 0 && filteredIds.every(id => selected.has(id));
@@ -165,7 +171,19 @@ export default function Controls() {
           <Can permission="controls:write"><Button size="sm" onClick={() => { setForm(defaultForm); setEditId(null); setOpen(true); }}><Plus className="w-4 h-4 mr-1" /> Add Control</Button></Can>
         </div>
       } />
-      
+
+      {frameworkFilter && (
+        <div className="flex items-center justify-between gap-3 mb-4 px-4 py-2.5 rounded-lg bg-primary/10 border border-primary/20">
+          <div className="flex items-center gap-2 text-sm">
+            <Filter className="w-4 h-4 text-primary" />
+            <span className="text-muted-foreground">Filtered by framework:</span>
+            <span className="font-semibold text-foreground">{frameworkFilterName || "Selected framework"}</span>
+            <span className="text-xs text-muted-foreground">({filtered.length} controls)</span>
+          </div>
+          <Button variant="ghost" size="sm" onClick={clearFrameworkFilter}><X className="w-4 h-4 mr-1" /> Clear filter</Button>
+        </div>
+      )}
+
       {/* Filters */}
       <div className="flex flex-wrap items-center gap-3 mb-6">
         <div className="relative flex-1 min-w-[200px] max-w-sm">
