@@ -5,16 +5,17 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useToast } from "@/components/ui/use-toast";
 import MessageBubble from "@/components/agents/MessageBubble";
-import { FlaskRound, Send, Loader2, Plus, MessageSquare, Trash2 } from "lucide-react";
+import VerificationSummary from "@/components/agents/VerificationSummary";
+import { FlaskRound, Send, Loader2, Plus, MessageSquare, Trash2, ShieldCheck, Calculator, Clock, FileQuestion, Building2, ShieldAlert } from "lucide-react";
 
 const AGENT_NAME = "testing_agent";
 const SUGGESTIONS = [
-  "Are all critical controls passing?",
-  "Verify risk scores are calculated correctly (likelihood × impact)",
-  "Check for overdue compliance tasks",
-  "Are there unmapped framework requirements?",
-  "Do all active vendors have a recent assessment?",
-  "Are there open high-severity security findings?",
+  { icon: ShieldCheck, text: "Are all critical controls passing?" },
+  { icon: Calculator, text: "Verify risk scores are calculated correctly (likelihood × impact)" },
+  { icon: Clock, text: "Check for overdue compliance tasks" },
+  { icon: FileQuestion, text: "Are there unmapped framework requirements?" },
+  { icon: Building2, text: "Do all active vendors have a recent assessment?" },
+  { icon: ShieldAlert, text: "Are there open high-severity security findings?" },
 ];
 
 export default function TestingAgent() {
@@ -128,7 +129,9 @@ export default function TestingAgent() {
         }
       />
 
-      <div className="grid grid-cols-1 lg:grid-cols-[280px_1fr] gap-4 h-[calc(100vh-220px)] min-h-[500px]">
+      <VerificationSummary />
+
+      <div className="grid grid-cols-1 lg:grid-cols-[280px_1fr] gap-4 h-[calc(100vh-320px)] min-h-[460px]">
         {/* Conversation list */}
         <div className="rounded-xl border border-border bg-card overflow-hidden flex flex-col">
           <div className="px-3 py-2.5 border-b border-border bg-muted/40">
@@ -169,24 +172,28 @@ export default function TestingAgent() {
         {/* Chat panel */}
         <div className="rounded-xl border border-border bg-card overflow-hidden flex flex-col">
           {!activeId ? (
-            <div className="flex-1 flex flex-col items-center justify-center p-8 text-center">
-              <div className="w-14 h-14 rounded-2xl bg-primary/10 flex items-center justify-center mb-4">
-                <FlaskRound className="w-7 h-7 text-primary" />
+            <div className="flex-1 flex flex-col items-center justify-center p-8 text-center bg-gradient-to-b from-muted/20 to-transparent">
+              <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-primary/20 to-primary/5 flex items-center justify-center mb-4 ring-1 ring-primary/20">
+                <FlaskRound className="w-8 h-8 text-primary" />
               </div>
-              <h3 className="font-heading font-semibold text-foreground">CertiGuard Testing Agent</h3>
+              <h3 className="font-heading font-semibold text-foreground text-lg">CertiGuard Testing Agent</h3>
               <p className="text-sm text-muted-foreground mt-1 max-w-md">
                 Start a new test session, then ask the agent to verify your compliance data, check workflow integrity, or run a structured QA scenario.
               </p>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 mt-6 max-w-lg w-full">
-                {SUGGESTIONS.map((s) => (
-                  <button
-                    key={s}
-                    onClick={() => createConversation()}
-                    className="text-left text-xs rounded-lg border border-border bg-muted/30 px-3 py-2.5 hover:bg-muted/60 hover:border-primary/30 transition-colors text-muted-foreground hover:text-foreground"
-                  >
-                    {s}
-                  </button>
-                ))}
+                {SUGGESTIONS.map((s) => {
+                  const Icon = s.icon;
+                  return (
+                    <button
+                      key={s.text}
+                      onClick={() => createConversation()}
+                      className="group flex items-start gap-2.5 text-left text-xs rounded-xl border border-border bg-card px-3 py-3 hover:border-primary/40 hover:bg-primary/5 hover:shadow-sm transition-all text-muted-foreground hover:text-foreground"
+                    >
+                      <Icon className="w-4 h-4 shrink-0 mt-0.5 text-muted-foreground group-hover:text-primary transition-colors" />
+                      <span>{s.text}</span>
+                    </button>
+                  );
+                })}
               </div>
             </div>
           ) : (
