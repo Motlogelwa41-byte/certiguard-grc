@@ -1,0 +1,210 @@
+{
+  "name": "KpiKri",
+  "type": "object",
+  "properties": {
+    "tenant_id": {
+      "type": "string",
+      "description": "Tenant isolation key"
+    },
+    "name": {
+      "type": "string",
+      "description": "Indicator name (e.g. 'Mean Time to Remediate', 'Control Pass Rate')"
+    },
+    "description": {
+      "type": "string"
+    },
+    "indicator_type": {
+      "type": "string",
+      "enum": [
+        "kpi",
+        "kri"
+      ],
+      "default": "kpi",
+      "description": "KPI = Key Performance Indicator, KRI = Key Risk Indicator"
+    },
+    "category": {
+      "type": "string",
+      "enum": [
+        "operational",
+        "financial",
+        "compliance",
+        "security",
+        "strategic",
+        "vendor",
+        "incident"
+      ],
+      "default": "operational"
+    },
+    "target_value": {
+      "type": "number",
+      "description": "Target / threshold value for this indicator"
+    },
+    "actual_value": {
+      "type": "number",
+      "description": "Current measured value"
+    },
+    "unit": {
+      "type": "string",
+      "description": "Unit of measure (%, days, count, $, ratio)"
+    },
+    "threshold_warning": {
+      "type": "number",
+      "description": "Value at which status becomes 'warning'"
+    },
+    "threshold_critical": {
+      "type": "number",
+      "description": "Value at which status becomes 'critical'"
+    },
+    "better_direction": {
+      "type": "string",
+      "enum": [
+        "higher",
+        "lower"
+      ],
+      "default": "higher",
+      "description": "Whether a higher or lower actual value is better"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "on_track",
+        "warning",
+        "critical",
+        "exceeded"
+      ],
+      "default": "on_track",
+      "description": "Auto-classified based on actual vs thresholds"
+    },
+    "trend": {
+      "type": "string",
+      "enum": [
+        "improving",
+        "stable",
+        "declining"
+      ],
+      "default": "stable"
+    },
+    "trend_history": {
+      "type": "string",
+      "description": "JSON array of historical measurements: [{date, value}]"
+    },
+    "business_unit_id": {
+      "type": "string",
+      "description": "Linked BusinessUnit for unit-level filtering"
+    },
+    "business_unit_name": {
+      "type": "string"
+    },
+    "owner_name": {
+      "type": "string"
+    },
+    "owner_id": {
+      "type": "string"
+    },
+    "measurement_frequency": {
+      "type": "string",
+      "enum": [
+        "daily",
+        "weekly",
+        "monthly",
+        "quarterly",
+        "annually"
+      ],
+      "default": "monthly"
+    },
+    "last_measured_date": {
+      "type": "string",
+      "format": "date"
+    },
+    "next_review_date": {
+      "type": "string",
+      "format": "date"
+    },
+    "linked_risk_ids": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "linked_control_ids": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "notes": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "name",
+    "indicator_type"
+  ],
+  "rls": {
+    "create": {
+      "data.tenant_id": "{{user.data.tenant_id}}"
+    },
+    "read": {
+      "$or": [
+        {
+          "data.tenant_id": "{{user.data.tenant_id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "update": {
+      "$or": [
+        {
+          "data.tenant_id": "{{user.data.tenant_id}}",
+          "created_by_id": "{{user.id}}"
+        },
+        {
+          "$and": [
+            {
+              "data.tenant_id": "{{user.data.tenant_id}}"
+            },
+            {
+              "user_condition": {
+                "role": "compliance_officer"
+              }
+            }
+          ]
+        },
+        {
+          "$and": [
+            {
+              "data.tenant_id": "{{user.data.tenant_id}}"
+            },
+            {
+              "user_condition": {
+                "role": "risk_manager"
+              }
+            }
+          ]
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "delete": {
+      "$or": [
+        {
+          "data.tenant_id": "{{user.data.tenant_id}}",
+          "created_by_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    }
+  }
+}

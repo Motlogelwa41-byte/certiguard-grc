@@ -14,7 +14,7 @@ export const navSections = [
   {
     label: "Overview",
     items: [
-      { label: "Dashboard", path: "/", icon: LayoutDashboard, roles: ["admin", "compliance_officer", "risk_manager", "auditor", "user"] },
+      { label: "Dashboard", path: "/", icon: LayoutDashboard, roles: ["admin", "compliance_officer", "risk_manager", "auditor", "external_auditor", "regulator", "user"] },
       { label: "About CertiGuard", path: "/about", icon: Info, roles: ["admin", "compliance_officer", "risk_manager", "auditor", "user"] },
       { label: "Architecture", path: "/architecture", icon: Server, roles: ["admin", "compliance_officer", "risk_manager", "auditor"] },
       { label: "Posture Dashboard", path: "/posture", icon: BarChart3, roles: ["admin", "compliance_officer", "risk_manager", "auditor"] },
@@ -34,8 +34,8 @@ export const navSections = [
   {
     label: "Compliance",
     items: [
-      { label: "Frameworks", path: "/frameworks", icon: Shield, roles: ["admin", "compliance_officer", "risk_manager", "auditor"] },
-      { label: "Controls", path: "/controls", icon: FileCheck, roles: ["admin", "compliance_officer", "risk_manager", "auditor"] },
+      { label: "Frameworks", path: "/frameworks", icon: Shield, roles: ["admin", "compliance_officer", "risk_manager", "auditor", "external_auditor", "regulator"] },
+      { label: "Controls", path: "/controls", icon: FileCheck, roles: ["admin", "compliance_officer", "risk_manager", "auditor", "external_auditor", "regulator"] },
       { label: "Gap Analysis", path: "/gap-analysis", icon: FileSearch, roles: ["admin", "compliance_officer", "risk_manager", "auditor"] },
       { label: "Framework Map", path: "/framework-map", icon: Network, roles: ["admin", "compliance_officer", "risk_manager", "auditor"] },
       { label: "Framework Progress", path: "/framework-progress", icon: BarChart2, roles: ["admin", "compliance_officer", "risk_manager", "auditor"] },
@@ -59,11 +59,12 @@ export const navSections = [
   {
     label: "Risk",
     items: [
-      { label: "Risk Register", path: "/risks", icon: AlertTriangle, roles: ["admin", "compliance_officer", "risk_manager", "auditor"] },
+      { label: "Risk Register", path: "/risks", icon: AlertTriangle, roles: ["admin", "compliance_officer", "risk_manager", "auditor", "external_auditor", "regulator"] },
       { label: "Risk Heatmap", path: "/risk-heatmap", icon: Target, roles: ["admin", "compliance_officer", "risk_manager", "auditor"] },
       { label: "Appetite Heatmap", path: "/risk-appetite-heatmap", icon: Target, roles: ["admin", "compliance_officer", "risk_manager"] },
       { label: "Exec Risk Summary", path: "/executive-risk-summary", icon: TrendingDown, roles: ["admin", "compliance_officer", "risk_manager", "auditor"] },
       { label: "Framework Cross-Map", path: "/risk-framework-crossmap", icon: GitCompare, roles: ["admin", "compliance_officer", "risk_manager", "auditor"] },
+      { label: "KPI / KRI Tracker", path: "/kpi-kri", icon: Target, roles: ["admin", "compliance_officer", "risk_manager", "auditor"] },
     ]
   },
   {
@@ -121,7 +122,7 @@ export const navSections = [
       { label: "DPIA", path: "/dpia", icon: ShieldAlert, roles: ["admin", "compliance_officer", "auditor"] },
       { label: "Audits", path: "/audits", icon: Landmark, roles: ["admin", "compliance_officer", "auditor"] },
       { label: "Audit Findings", path: "/audit-findings", icon: AlertTriangle, roles: ["admin", "compliance_officer", "risk_manager", "auditor"] },
-      { label: "Audit Trail", path: "/audit-trail", icon: History, roles: ["admin", "compliance_officer", "auditor"] },
+      { label: "Audit Trail", path: "/audit-trail", icon: History, roles: ["admin", "compliance_officer", "auditor", "external_auditor", "regulator"] },
       { label: "Activity Log", path: "/activity-log", icon: Activity, roles: ["admin", "compliance_officer", "risk_manager", "auditor"] },
       { label: "People Compliance", path: "/people", icon: Users2, roles: ["admin", "compliance_officer", "auditor"] },
       { label: "HRIS Directory", path: "/hris-directory", icon: Users, roles: ["admin", "compliance_officer", "auditor"] },
@@ -142,7 +143,7 @@ export const navSections = [
       { label: "Financial Dashboard", path: "/financial-dashboard", icon: Landmark, roles: ["admin", "compliance_officer", "risk_manager", "auditor"] },
       { label: "Compliance Benchmarking", path: "/compliance-benchmarking", icon: Trophy, roles: ["admin", "compliance_officer", "risk_manager", "auditor"] },
       { label: "Security Posture", path: "/security-posture", icon: Radar, roles: ["admin", "compliance_officer", "risk_manager", "auditor"] },
-      { label: "Reports", path: "/reports", icon: FileDown, roles: ["admin", "compliance_officer", "risk_manager", "auditor"] },
+      { label: "Reports", path: "/reports", icon: FileDown, roles: ["admin", "compliance_officer", "risk_manager", "auditor", "external_auditor", "regulator"] },
       { label: "Mgmt Reports", path: "/management-reports", icon: BarChart2, roles: ["admin", "compliance_officer", "risk_manager", "auditor"] },
       { label: "Scheduled Reports", path: "/scheduled-reports", icon: Send, roles: ["admin", "compliance_officer", "auditor"] },
       { label: "Exec Readiness Dashboard", path: "/executive-readiness-dashboard", icon: LineChart, roles: ["admin", "compliance_officer", "risk_manager", "auditor"] },
@@ -163,6 +164,7 @@ export const navSections = [
       { label: "SSO & Directory", path: "/sso", icon: KeyRound, roles: ["admin"] },
       { label: "Data Privacy", path: "/data-privacy", icon: Lock, roles: ["admin", "compliance_officer"] },
       { label: "API Docs", path: "/api-docs", icon: Code, roles: ["admin", "compliance_officer"] },
+      { label: "Business Units", path: "/business-units", icon: Building2, roles: ["admin", "compliance_officer", "risk_manager"] },
       { label: "Tenant Settings", path: "/tenant-settings", icon: Settings, roles: ["admin"] },
       { label: "Tenants", path: "/tenant-admin", icon: PieChart, roles: ["admin"] },
       { label: "Billing", path: "/billing", icon: CreditCard, roles: ["admin"] },
@@ -173,7 +175,7 @@ export const navSections = [
   },
 ];
 
-export const ALL_ROLES = ["admin", "compliance_officer", "risk_manager", "auditor", "user"];
+export const ALL_ROLES = ["admin", "compliance_officer", "risk_manager", "auditor", "external_auditor", "regulator", "hr", "department_head", "user"];
 
 function routeMatches(pathname, route) {
   if (route === "/") return pathname === "/";

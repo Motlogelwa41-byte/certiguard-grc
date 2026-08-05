@@ -135,6 +135,8 @@ import EdrDashboard from '@/pages/EdrDashboard';
 import HrisDirectory from '@/pages/HrisDirectory';
 import TestingAgent from '@/pages/TestingAgent';
 import OneClickReport from '@/pages/OneClickReport';
+import BusinessUnits from '@/pages/BusinessUnits';
+import KpiKri from '@/pages/KpiKri';
 import Landing from '@/pages/Landing';
 import { LanguageProvider } from '@/contexts/LanguageContext';
 
@@ -294,6 +296,8 @@ const AuthenticatedApp = () => {
           <Route path="/hris-directory" element={<HrisDirectory />} />
           <Route path="/testing-agent" element={<TestingAgent />} />
           <Route path="/one-click-report" element={<OneClickReport />} />
+          <Route path="/business-units" element={<BusinessUnits />} />
+          <Route path="/kpi-kri" element={<KpiKri />} />
         </Route>
       </Route>
       <Route path="*" element={<PageNotFound />} />

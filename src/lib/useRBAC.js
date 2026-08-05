@@ -2,27 +2,27 @@ import { useCallback, useMemo } from "react";
 import { useAuth } from "@/lib/AuthContext";
 
 // Role hierarchy (higher index = more privileges)
-const ROLE_HIERARCHY = ["user", "viewer", "auditor", "external_auditor", "hr", "department_head", "risk_manager", "compliance_officer", "admin"];
+const ROLE_HIERARCHY = ["user", "viewer", "auditor", "external_auditor", "regulator", "hr", "department_head", "risk_manager", "compliance_officer", "admin"];
 
 // Permissions required for each operation
 const PERMISSIONS = {
-  "dashboard:view": ["user", "viewer", "auditor", "hr", "department_head", "risk_manager", "compliance_officer", "admin"],
+  "dashboard:view": ["user", "viewer", "auditor", "external_auditor", "regulator", "hr", "department_head", "risk_manager", "compliance_officer", "admin"],
 
-  "frameworks:read": ["user", "viewer", "auditor", "hr", "department_head", "risk_manager", "compliance_officer", "admin"],
+  "frameworks:read": ["user", "viewer", "auditor", "external_auditor", "regulator", "hr", "department_head", "risk_manager", "compliance_officer", "admin"],
   "frameworks:write": ["compliance_officer", "admin"],
   "frameworks:delete": ["admin"],
 
-  "controls:read": ["user", "viewer", "auditor", "hr", "department_head", "risk_manager", "compliance_officer", "admin"],
+  "controls:read": ["user", "viewer", "auditor", "external_auditor", "regulator", "hr", "department_head", "risk_manager", "compliance_officer", "admin"],
   "controls:write": ["compliance_officer", "admin"],
   "controls:delete": ["admin"],
   "controls:approve": ["auditor", "external_auditor", "admin"],
 
-  "risks:read": ["user", "viewer", "auditor", "hr", "department_head", "risk_manager", "compliance_officer", "admin"],
+  "risks:read": ["user", "viewer", "auditor", "external_auditor", "regulator", "hr", "department_head", "risk_manager", "compliance_officer", "admin"],
   "risks:write": ["risk_manager", "compliance_officer", "admin"],
   "risks:delete": ["risk_manager", "admin"],
   "risks:approve": ["risk_manager", "auditor", "admin"],
 
-  "policies:read": ["user", "viewer", "auditor", "hr", "department_head", "risk_manager", "compliance_officer", "admin"],
+  "policies:read": ["user", "viewer", "auditor", "external_auditor", "regulator", "hr", "department_head", "risk_manager", "compliance_officer", "admin"],
   "policies:write": ["compliance_officer", "admin"],
   "policies:delete": ["admin"],
   "policies:approve": ["compliance_officer", "admin"],
@@ -49,10 +49,10 @@ const PERMISSIONS = {
   "admin:tenants": ["admin"],
   "admin:settings": ["admin"],
 
-  "reports:view": ["user", "viewer", "auditor", "hr", "department_head", "risk_manager", "compliance_officer", "admin"],
+  "reports:view": ["user", "viewer", "auditor", "external_auditor", "regulator", "hr", "department_head", "risk_manager", "compliance_officer", "admin"],
   "reports:export": ["auditor", "external_auditor", "risk_manager", "compliance_officer", "admin"],
 
-  "audit_trail:view": ["auditor", "compliance_officer", "admin"],
+  "audit_trail:view": ["auditor", "external_auditor", "regulator", "compliance_officer", "admin"],
 
   "incidents:read": ["user", "viewer", "auditor", "hr", "department_head", "risk_manager", "compliance_officer", "admin"],
   "incidents:write": ["risk_manager", "compliance_officer", "admin"],
