@@ -1,0 +1,40 @@
+{
+  "name": "Slack Task Status Change",
+  "description": "Posts a Slack alert to #compliance whenever a compliance task's status changes (e.g. todo \u2192 completed, or \u2192 overdue), so the team is notified in real time without checking the dashboard.",
+  "trigger": {
+    "config": {
+      "trigger_type": "entity",
+      "entity_name": "ComplianceTask",
+      "events": [
+        "update"
+      ]
+    },
+    "condition": "${ .trigger.data.status != .trigger.old_data.status }"
+  },
+  "definition": {
+    "document": {
+      "dsl": "1.0.0",
+      "name": "slack_task_status_change",
+      "version": "1.0",
+      "namespace": "base44"
+    },
+    "do": [
+      {
+        "post_alert": {
+          "call": "invoke_backend_function",
+          "with": {
+            "function_name": "sendSlackAlert",
+            "args": {
+              "text": ":clipboard: Compliance task status changed\n*${ .trigger.data.title // \"Untitled task\" }*\n${ .trigger.old_data.status // \"unknown\" } \u2192 ${ .trigger.data.status }\nPriority: ${ .trigger.data.priority // \"\u2014\" } \u2022 Assignee: ${ .trigger.data.assignee_name // \"Unassigned\" } \u2022 Due: ${ .trigger.data.due_date // \"\u2014\" }"
+            }
+          },
+          "then": "end",
+          "x-base44": {
+            "title": "Post Slack alert",
+            "description": "Task status changed \u2192 #compliance"
+          }
+        }
+      }
+    ]
+  }
+}

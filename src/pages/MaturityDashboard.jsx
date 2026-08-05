@@ -21,10 +21,11 @@ const parseArr = (s) => {
 const lvlMeta = (n) => MATURITY_LEVELS[(Math.round(n || 1)) - 1] || MATURITY_LEVELS[0];
 
 export default function MaturityDashboard() {
-  const [assessments, setAssessments] = useState([]);
+  const [allAssessments, setAllAssessments] = useState([]);
   const [frameworks, setFrameworks] = useState([]);
   const [controls, setControls] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [showAllTime, setShowAllTime] = useState(false);
 
   useEffect(() => {
     Promise.all([
@@ -36,12 +37,23 @@ export default function MaturityDashboard() {
         const sorted = [...(list || [])].sort((a, b) =>
           (a.assessment_date || a.created_date || "").localeCompare(b.assessment_date || b.created_date || "")
         );
-        setAssessments(sorted);
+        setAllAssessments(sorted);
         setFrameworks(fw || []);
         setControls(ctl || []);
       })
       .finally(() => setLoading(false));
   }, []);
+
+  // Filter to last 12 months unless "show all time" is toggled
+  const assessments = useMemo(() => {
+    if (showAllTime || allAssessments.length === 0) return allAssessments;
+    const cutoff = new Date();
+    cutoff.setFullYear(cutoff.getFullYear() - 1);
+    return allAssessments.filter((a) => {
+      const d = a.assessment_date || a.created_date;
+      return d && new Date(d) >= cutoff;
+    });
+  }, [allAssessments, showAllTime]);
 
   const latest = assessments.length ? assessments[assessments.length - 1] : null;
   const first = assessments.length ? assessments[0] : null;
@@ -82,11 +94,23 @@ export default function MaturityDashboard() {
   if (!latest) {
     return (
       <div>
-        <PageHeader title="Maturity Model Dashboard" subtitle="Track how your compliance posture evolves across security maturity stages over time." />
+        <PageHeader
+          title="Maturity Model Dashboard"
+          subtitle="Track your security progress over the last 12 months and compare current levels against long-term goals."
+          actions={
+            allAssessments.length > 0 ? (
+              <Button variant="outline" size="sm" onClick={() => setShowAllTime(true)}>
+                Show all time ({allAssessments.length})
+              </Button>
+            ) : undefined
+          }
+        />
         <EmptyState
           icon={GraduationCap}
-          title="No maturity assessments yet"
-          description="Run your first GRC maturity assessment to start tracking your evolution across the five maturity stages."
+          title={allAssessments.length > 0 ? "No assessments in the last 12 months" : "No maturity assessments yet"}
+          description={allAssessments.length > 0
+            ? `You have ${allAssessments.length} assessment(s) older than 12 months. Toggle "Show all time" to view your full history, or run a new assessment to refresh your 12-month tracking.`
+            : "Run your first GRC maturity assessment to start tracking your evolution across the five maturity stages."}
           actionLabel="Go to GRC Education"
           onAction={() => { window.location.href = "/grc-education"; }}
         />
@@ -103,8 +127,19 @@ export default function MaturityDashboard() {
     <div>
       <PageHeader
         title="Maturity Model Dashboard"
-        subtitle="Track compliance evolution across the five security maturity stages over time."
-        actions={<Button asChild><Link to="/grc-education">Run new assessment</Link></Button>}
+        subtitle="Track your security progress over the last 12 months and compare current levels against long-term goals."
+        actions={
+          <div className="flex items-center gap-2">
+            <Button
+              variant={showAllTime ? "outline" : "default"}
+              size="sm"
+              onClick={() => setShowAllTime((v) => !v)}
+            >
+              {showAllTime ? "Showing all time" : "Last 12 months"}
+            </Button>
+            <Button asChild size="sm"><Link to="/grc-education">Run new assessment</Link></Button>
+          </div>
+        }
       />
 
       {/* Stage progression summary */}
@@ -134,11 +169,13 @@ export default function MaturityDashboard() {
         </Card>
         <Card>
           <CardContent className="py-4 text-center">
-            <div className="text-xs text-muted-foreground">Trajectory</div>
+            <div className="text-xs text-muted-foreground">{showAllTime ? "Trajectory" : "12-Month Improvement"}</div>
             <div className={`text-4xl font-bold mt-1 ${delta > 0 ? "text-emerald-600" : delta < 0 ? "text-red-600" : "text-muted-foreground"}`}>
               {delta > 0 ? `+${delta.toFixed(1)}` : delta.toFixed(1)}
             </div>
-            <div className="text-xs text-muted-foreground mt-1">since first assessment</div>
+            <div className="text-xs text-muted-foreground mt-1">
+              {targetLevel > currentLevel ? `${(targetLevel - currentLevel).toFixed(1)} levels to long-term goal` : "At long-term goal 🎯"}
+            </div>
           </CardContent>
         </Card>
       </div>
@@ -221,7 +258,7 @@ export default function MaturityDashboard() {
         <Card className="lg:col-span-2">
           <CardHeader>
             <CardTitle className="text-sm flex items-center gap-2">
-              <TrendingUp className="w-4 h-4" /> Maturity Evolution Over Time
+              <TrendingUp className="w-4 h-4" /> {showAllTime ? "Maturity Evolution (All Time)" : "Maturity Evolution (Last 12 Months)"}
             </CardTitle>
           </CardHeader>
           <CardContent>

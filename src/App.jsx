@@ -134,6 +134,7 @@ import Contracts from '@/pages/Contracts';
 import EdrDashboard from '@/pages/EdrDashboard';
 import HrisDirectory from '@/pages/HrisDirectory';
 import TestingAgent from '@/pages/TestingAgent';
+import OneClickReport from '@/pages/OneClickReport';
 import Landing from '@/pages/Landing';
 import { LanguageProvider } from '@/contexts/LanguageContext';
 
@@ -292,6 +293,7 @@ const AuthenticatedApp = () => {
           <Route path="/edr-dashboard" element={<EdrDashboard />} />
           <Route path="/hris-directory" element={<HrisDirectory />} />
           <Route path="/testing-agent" element={<TestingAgent />} />
+          <Route path="/one-click-report" element={<OneClickReport />} />
         </Route>
       </Route>
       <Route path="*" element={<PageNotFound />} />
