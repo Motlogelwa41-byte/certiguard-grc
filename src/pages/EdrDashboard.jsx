@@ -3,7 +3,8 @@ import { base44 } from "@/api/base44Client";
 import PageHeader from "@/components/shared/PageHeader";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/components/ui/use-toast";
-import { Radar, Loader2, RefreshCw, ShieldAlert, CheckCircle2, XCircle, Cloud } from "lucide-react";
+import { Radar, Loader2, RefreshCw, ShieldAlert, CheckCircle2, XCircle, Cloud, Plus, Trash2 } from "lucide-react";
+import ManualFindingDialog from "@/components/edr/ManualFindingDialog";
 
 const SEVERITY_COLOR = {
   critical: "text-red-600 dark:text-red-400",
@@ -25,6 +26,7 @@ export default function EdrDashboard() {
   const [loading, setLoading] = useState(true);
   const [syncing, setSyncing] = useState(false);
   const [syncResult, setSyncResult] = useState(null);
+  const [showManual, setShowManual] = useState(false);
   const { toast } = useToast();
 
   const load = useCallback(() => {
@@ -61,6 +63,17 @@ export default function EdrDashboard() {
     }
   };
 
+  const removeFinding = async (id) => {
+    if (!window.confirm("Delete this finding?")) return;
+    try {
+      await base44.entities.SecurityFinding.delete(id);
+      setFindings((p) => p.filter((f) => f.id !== id));
+      toast({ title: "Finding deleted" });
+    } catch (e) {
+      toast({ title: "Delete failed", description: e.message, variant: "destructive" });
+    }
+  };
+
   const open = findings.filter((f) => f.status === "open");
   const critical = findings.filter((f) => f.severity === "critical" || f.severity === "high");
   const remediated = findings.filter((f) => f.status === "remediated");
@@ -84,10 +97,15 @@ export default function EdrDashboard() {
         title="EDR / XDR Integration"
         subtitle="Endpoint and cloud security findings from AWS Security Hub (CSPM + EDR coverage)"
         actions={
-          <Button onClick={runSync} disabled={syncing} size="sm">
-            {syncing ? <Loader2 className="w-4 h-4 mr-1 animate-spin" /> : <RefreshCw className="w-4 h-4 mr-1" />}
-            {syncing ? "Syncing…" : "Sync Now"}
-          </Button>
+          <div className="flex items-center gap-2">
+            <Button onClick={() => setShowManual(true)} variant="default" size="sm">
+              <Plus className="w-4 h-4 mr-1" /> Log Finding
+            </Button>
+            <Button onClick={runSync} disabled={syncing} variant="outline" size="sm">
+              {syncing ? <Loader2 className="w-4 h-4 mr-1 animate-spin" /> : <RefreshCw className="w-4 h-4 mr-1" />}
+              {syncing ? "Syncing…" : "Sync AWS"}
+            </Button>
+          </div>
         }
       />
 
@@ -155,9 +173,9 @@ export default function EdrDashboard() {
       {findings.length === 0 ? (
         <div className="rounded-xl border border-dashed border-border bg-muted/30 p-12 text-center">
           <Cloud className="w-10 h-10 text-muted-foreground mx-auto mb-3" />
-          <h3 className="font-heading font-semibold text-foreground">No Security Hub findings yet</h3>
+          <h3 className="font-heading font-semibold text-foreground">No security findings yet</h3>
           <p className="text-sm text-muted-foreground mt-1 max-w-md mx-auto">
-            Click <strong>Sync Now</strong> to pull findings from AWS Security Hub, or wait for the daily automated sync. Ensure your AWS connection is enabled in the Connections page.
+            Click <strong>Log Finding</strong> to manually record a security finding, or <strong>Sync AWS</strong> to pull from AWS Security Hub once your credentials are configured.
           </p>
         </div>
       ) : (
@@ -171,7 +189,8 @@ export default function EdrDashboard() {
                 <th className="text-left font-medium px-4 py-3">Status</th>
                 <th className="text-left font-medium px-4 py-3">Resource</th>
                 <th className="text-left font-medium px-4 py-3">Detected</th>
-              </tr>
+                <th className="text-right font-medium px-4 py-3">Actions</th>
+                </tr>
             </thead>
             <tbody className="divide-y divide-border">
               {findings.slice(0, 50).map((f) => (
@@ -187,12 +206,19 @@ export default function EdrDashboard() {
                   </td>
                   <td className="px-4 py-3 text-muted-foreground">{f.resource_id || f.asset || "—"}</td>
                   <td className="px-4 py-3 text-muted-foreground">{f.detected_date || "—"}</td>
+                  <td className="px-4 py-3 text-right">
+                    <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => removeFinding(f.id)}>
+                      <Trash2 className="w-3.5 h-3.5 text-muted-foreground" />
+                    </Button>
+                  </td>
                 </tr>
               ))}
             </tbody>
           </table>
         </div>
       )}
+
+      <ManualFindingDialog open={showManual} onOpenChange={setShowManual} onCreated={load} />
     </div>
   );
 }
