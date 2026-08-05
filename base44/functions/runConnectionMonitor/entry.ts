@@ -105,7 +105,8 @@ async function createEvidenceForConnection(sr, conn, snapshot, collectedAt) {
 }
 
 async function collectGoogleDrive(sr) {
-  const token = await sr.connectors.getConnection('googledrive');
+  const c = await sr.connectors.getConnection('googledrive');
+  const token = typeof c === "string" ? c : c?.accessToken;
   if (!token) throw new Error("Google Drive connector not authorized");
   const res = await fetch("https://www.googleapis.com/drive/v3/files?pageSize=100&fields=files(id,name,owners,modifiedTime,shared)", {
     headers: { Authorization: `Bearer ${token}` },
@@ -117,7 +118,8 @@ async function collectGoogleDrive(sr) {
 }
 
 async function collectSlack(sr) {
-  const token = await sr.connectors.getConnection('slackbot');
+  const c = await sr.connectors.getConnection('slackbot');
+  const token = typeof c === "string" ? c : c?.accessToken;
   if (!token) throw new Error("Slack connector not authorized");
   const res = await fetch("https://slack.com/api/conversations.list?limit=200", {
     headers: { Authorization: `Bearer ${token}` },
@@ -129,7 +131,8 @@ async function collectSlack(sr) {
 }
 
 async function collectGithub(sr) {
-  const token = await sr.connectors.getConnection('github');
+  const c = await sr.connectors.getConnection('github');
+  const token = typeof c === "string" ? c : c?.accessToken;
   if (!token) throw new Error("GitHub connector not authorized");
   const res = await fetch("https://api.github.com/user/repos?per_page=100", {
     headers: { Authorization: `Bearer ${token}`, Accept: "application/vnd.github+json" },
@@ -140,7 +143,8 @@ async function collectGithub(sr) {
 }
 
 async function collectBambooHR(sr, conn) {
-  const token = await sr.connectors.getConnection('bamboohr');
+  const c = await sr.connectors.getConnection('bamboohr');
+  const token = typeof c === "string" ? c : c?.accessToken;
   if (!token) throw new Error("BambooHR connector not authorized");
   return { source: "bamboohr", count: 0, note: "BambooHR connection verified; employee directory available for collection." };
 }

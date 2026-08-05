@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { useToast } from "@/components/ui/use-toast";
 import { Radar, Loader2, RefreshCw, ShieldAlert, CheckCircle2, XCircle, Cloud, Plus, Trash2 } from "lucide-react";
 import ManualFindingDialog from "@/components/edr/ManualFindingDialog";
+import { Github } from "lucide-react";
 
 const SEVERITY_COLOR = {
   critical: "text-red-600 dark:text-red-400",
@@ -27,13 +28,14 @@ export default function EdrDashboard() {
   const [syncing, setSyncing] = useState(false);
   const [syncResult, setSyncResult] = useState(null);
   const [showManual, setShowManual] = useState(false);
+  const [syncingGithub, setSyncingGithub] = useState(false);
   const { toast } = useToast();
 
   const load = useCallback(() => {
     setLoading(true);
-    base44.entities.SecurityFinding.filter({ source: "security_hub" }, "-detected_date")
+    base44.entities.SecurityFinding.filter({ source: { $in: ["security_hub", "other"] } }, "-detected_date")
       .then((d) => setFindings(d || []))
-      .catch(() => toast({ title: "Failed to load Security Hub findings", variant: "destructive" }))
+      .catch(() => toast({ title: "Failed to load security findings", variant: "destructive" }))
       .finally(() => setLoading(false));
   }, [toast]);
 
@@ -60,6 +62,24 @@ export default function EdrDashboard() {
       toast({ title: "Sync request failed", description: e.message, variant: "destructive" });
     } finally {
       setSyncing(false);
+    }
+  };
+
+  const runGithubSync = async () => {
+    setSyncingGithub(true);
+    try {
+      const res = await base44.functions.invoke("syncGithubSecurity", {});
+      const data = res?.data || res;
+      if (data?.ok) {
+        toast({ title: `GitHub sync complete — ${data.findings_created || 0} new findings`, description: `${data.repos_checked || 0} repos checked, ${data.repos_protected || 0} with branch protection` });
+        load();
+      } else {
+        toast({ title: "GitHub sync failed", description: data?.error, variant: "destructive" });
+      }
+    } catch (e) {
+      toast({ title: "Sync request failed", description: e.message, variant: "destructive" });
+    } finally {
+      setSyncingGithub(false);
     }
   };
 
@@ -95,11 +115,15 @@ export default function EdrDashboard() {
     <div>
       <PageHeader
         title="EDR / XDR Integration"
-        subtitle="Endpoint and cloud security findings from AWS Security Hub (CSPM + EDR coverage)"
+        subtitle="Endpoint, cloud, and code security findings from AWS Security Hub and GitHub repository posture checks"
         actions={
           <div className="flex items-center gap-2">
             <Button onClick={() => setShowManual(true)} variant="default" size="sm">
               <Plus className="w-4 h-4 mr-1" /> Log Finding
+            </Button>
+            <Button onClick={runGithubSync} disabled={syncingGithub} variant="outline" size="sm">
+              {syncingGithub ? <Loader2 className="w-4 h-4 mr-1 animate-spin" /> : <Github className="w-4 h-4 mr-1" />}
+              {syncingGithub ? "Syncing…" : "Sync GitHub"}
             </Button>
             <Button onClick={runSync} disabled={syncing} variant="outline" size="sm">
               {syncing ? <Loader2 className="w-4 h-4 mr-1 animate-spin" /> : <RefreshCw className="w-4 h-4 mr-1" />}
@@ -114,9 +138,9 @@ export default function EdrDashboard() {
         <div className="flex items-start gap-3">
           <Cloud className="w-5 h-5 text-primary mt-0.5" />
           <div className="flex-1">
-            <h3 className="font-heading font-semibold text-foreground text-sm">AWS Security Hub — Active Provider</h3>
+            <h3 className="font-heading font-semibold text-foreground text-sm">AWS Security Hub + GitHub — Active Providers</h3>
             <p className="text-xs text-muted-foreground mt-1">
-              Findings are pulled from AWS Security Hub using your configured AWS credentials (<code className="text-xs bg-muted px-1 rounded">AWS_ACCESS_KEY_ID</code>, <code className="text-xs bg-muted px-1 rounded">AWS_SECRET_ACCESS_KEY</code>). The daily automated sync keeps findings fresh. No paid EDR license required.
+              Cloud findings are pulled from AWS Security Hub using your configured AWS credentials. GitHub repository posture (branch protection, PR review enforcement, org 2FA) is checked via the live OAuth connector. Both run on daily automated syncs — no paid EDR license required.
             </p>
           </div>
         </div>
@@ -175,7 +199,7 @@ export default function EdrDashboard() {
           <Cloud className="w-10 h-10 text-muted-foreground mx-auto mb-3" />
           <h3 className="font-heading font-semibold text-foreground">No security findings yet</h3>
           <p className="text-sm text-muted-foreground mt-1 max-w-md mx-auto">
-            Click <strong>Log Finding</strong> to manually record a security finding, or <strong>Sync AWS</strong> to pull from AWS Security Hub once your credentials are configured.
+            Click <strong>Log Finding</strong> to manually record a security finding, <strong>Sync GitHub</strong> to check repository posture, or <strong>Sync AWS</strong> to pull from AWS Security Hub.
           </p>
         </div>
       ) : (

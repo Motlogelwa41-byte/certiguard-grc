@@ -1,0 +1,44 @@
+{
+  "trigger": {
+    "condition": null,
+    "config": {
+      "trigger_type": "scheduled",
+      "events": [],
+      "schedule_mode": "recurring",
+      "cron_expression": "0 4 * * *",
+      "one_time_date": null,
+      "timezone": "Africa/Johannesburg",
+      "interval_value": null,
+      "interval_unit": null,
+      "interval_anchor": null,
+      "ends_type": "never",
+      "ends_on_date": null,
+      "ends_after_count": null
+    }
+  },
+  "name": "Daily GitHub Security Sync",
+  "definition": {
+    "document": {
+      "dsl": "1.0.0",
+      "name": "daily_github_security_sync",
+      "version": "1.0",
+      "namespace": "base44"
+    },
+    "do": [
+      {
+        "sync_github": {
+          "call": "invoke_backend_function",
+          "with": {
+            "function_name": "syncGithubSecurity"
+          },
+          "then": "end",
+          "x-base44": {
+            "title": "Sync GitHub repository security posture",
+            "description": "Checks branch protection, PR review enforcement, and org 2FA \u2014 creates findings for gaps"
+          }
+        }
+      }
+    ]
+  },
+  "description": "Daily sync of GitHub repository security posture \u2014 branch protection, required PR reviews, force-push rules, and org-level 2FA enforcement. Creates SecurityFindings for gaps to support SOC 2 / ISO 27001 code change controls."
+}
