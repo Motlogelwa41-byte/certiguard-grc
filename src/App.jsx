@@ -180,6 +180,7 @@ import PrivacyDataMapping from '@/pages/PrivacyDataMapping';
 import EsgBenchmarking from '@/pages/EsgBenchmarking';
 import SecureEvidencePack from '@/pages/SecureEvidencePack';
 import CrossTenantExecutiveDashboard from '@/pages/CrossTenantExecutiveDashboard';
+import FrameworkMaturityComparison from '@/pages/FrameworkMaturityComparison';
 import Landing from '@/pages/Landing';
 import { LanguageProvider } from '@/contexts/LanguageContext';
 
@@ -384,6 +385,7 @@ const AuthenticatedApp = () => {
           <Route path="/esg-benchmarking" element={<EsgBenchmarking />} />
           <Route path="/secure-evidence-pack" element={<SecureEvidencePack />} />
           <Route path="/cross-tenant-executive-dashboard" element={<CrossTenantExecutiveDashboard />} />
+          <Route path="/framework-maturity-comparison" element={<FrameworkMaturityComparison />} />
         </Route>
       </Route>
       <Route path="*" element={<PageNotFound />} />
