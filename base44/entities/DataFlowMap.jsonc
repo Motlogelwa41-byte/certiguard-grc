@@ -1,0 +1,156 @@
+{
+  "name": "DataFlowMap",
+  "type": "object",
+  "properties": {
+    "tenant_id": {
+      "type": "string",
+      "description": "Tenant isolation key"
+    },
+    "flow_name": {
+      "type": "string",
+      "description": "Name of the data flow / processing activity"
+    },
+    "source_system": {
+      "type": "string",
+      "description": "System or entity where data originates (e.g. CRM, HR system, web form)"
+    },
+    "destination_system": {
+      "type": "string",
+      "description": "System or entity receiving the data (e.g. cloud storage, third-party API, analytics)"
+    },
+    "data_categories": {
+      "type": "string",
+      "description": "JSON array of data categories: [pii, financial, health, biometric, children, credentials, behavioral, special_category]"
+    },
+    "data_subjects": {
+      "type": "string",
+      "description": "JSON array of data subject types: [customers, employees, prospects, patients, minors, website_visitors]"
+    },
+    "processing_purpose": {
+      "type": "string",
+      "description": "Purpose of processing this data flow"
+    },
+    "legal_basis": {
+      "type": "string",
+      "enum": [
+        "consent",
+        "contract",
+        "legal_obligation",
+        "vital_interest",
+        "public_task",
+        "legitimate_interest"
+      ],
+      "description": "GDPR/POPIA legal basis for processing"
+    },
+    "retention_period_days": {
+      "type": "number",
+      "description": "Data retention period in days"
+    },
+    "cross_border_transfer": {
+      "type": "boolean",
+      "default": false,
+      "description": "True if data flows across national borders"
+    },
+    "transfer_destination_country": {
+      "type": "string",
+      "description": "Destination country for cross-border transfers"
+    },
+    "safeguards": {
+      "type": "string",
+      "description": "Safeguards for cross-border transfer: SCCs, BCRs, adequacy_decision, explicit_consent"
+    },
+    "encryption_in_transit": {
+      "type": "boolean",
+      "default": true
+    },
+    "encryption_at_rest": {
+      "type": "boolean",
+      "default": true
+    },
+    "dpia_required": {
+      "type": "boolean",
+      "default": false,
+      "description": "True if this flow processes special category data requiring DPIA"
+    },
+    "dpia_completed": {
+      "type": "boolean",
+      "default": false
+    },
+    "owner_name": {
+      "type": "string"
+    },
+    "owner_id": {
+      "type": "string"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "active",
+        "review_needed",
+        "deprecated",
+        "blocked"
+      ],
+      "default": "active"
+    },
+    "last_reviewed_date": {
+      "type": "string",
+      "format": "date"
+    },
+    "notes": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "flow_name",
+    "source_system",
+    "destination_system"
+  ],
+  "rls": {
+    "create": {
+      "data.tenant_id": "{{user.data.tenant_id}}"
+    },
+    "read": {
+      "$or": [
+        {
+          "data.tenant_id": "{{user.data.tenant_id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "update": {
+      "$or": [
+        {
+          "data.tenant_id": "{{user.data.tenant_id}}",
+          "created_by_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        },
+        {
+          "user_condition": {
+            "role": "compliance_officer"
+          }
+        }
+      ]
+    },
+    "delete": {
+      "$or": [
+        {
+          "data.tenant_id": "{{user.data.tenant_id}}",
+          "created_by_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    }
+  }
+}

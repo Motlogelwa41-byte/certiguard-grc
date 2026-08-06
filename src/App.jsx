@@ -173,6 +173,11 @@ import PqcReadiness from '@/pages/PqcReadiness';
 import PerformanceMonitoring from '@/pages/PerformanceMonitoring';
 import HadrDocumentation from '@/pages/HadrDocumentation';
 import ApiSecurity from '@/pages/ApiSecurity';
+import AiCrossMapping from '@/pages/AiCrossMapping';
+import VendorRiskExchange from '@/pages/VendorRiskExchange';
+import FairBenchmarks from '@/pages/FairBenchmarks';
+import PrivacyDataMapping from '@/pages/PrivacyDataMapping';
+import EsgBenchmarking from '@/pages/EsgBenchmarking';
 import Landing from '@/pages/Landing';
 import { LanguageProvider } from '@/contexts/LanguageContext';
 
@@ -370,6 +375,11 @@ const AuthenticatedApp = () => {
           <Route path="/performance-monitoring" element={<PerformanceMonitoring />} />
           <Route path="/hadr-documentation" element={<HadrDocumentation />} />
           <Route path="/api-security" element={<ApiSecurity />} />
+          <Route path="/ai-cross-mapping" element={<AiCrossMapping />} />
+          <Route path="/vendor-risk-exchange" element={<VendorRiskExchange />} />
+          <Route path="/fair-benchmarks" element={<FairBenchmarks />} />
+          <Route path="/privacy-data-mapping" element={<PrivacyDataMapping />} />
+          <Route path="/esg-benchmarking" element={<EsgBenchmarking />} />
         </Route>
       </Route>
       <Route path="*" element={<PageNotFound />} />

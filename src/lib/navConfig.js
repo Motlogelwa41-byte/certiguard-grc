@@ -4,7 +4,7 @@ import {
   ShieldCheck, FileSearch, Brain, Play, FileSpreadsheet, FileDown, BarChart3, LineChart,
   History, ShieldAlert, GraduationCap, Calendar, Bell, Users, Copy, SlidersHorizontal,
   Target, Upload, Send, Globe, Users2, MapPin, Zap, ListChecks, BellRing,
-  PieChart,   Radar, Landmark, BarChart2, Network, GitCompare, Sparkles, CreditCard, Gauge, Info, ScrollText, Activity, Factory, Plug, UserCheck, Wand2, KeyRound, Bug, Library, Presentation, TrendingDown, CalendarCheck, Rocket, ClipboardCheck,   FlaskRound, Award, FileQuestion, FlaskConical, Lock, Calculator, Server, BookOpen, Settings, Code, Cloud, Webhook, Leaf, Trophy, TestTube, FileBadge, Gavel, Fingerprint, Languages, FileArchive, DollarSign, Palette,   ShieldX, Siren, ScanLine, Laptop, Eye, Atom, Smartphone
+  PieChart,   Radar, Landmark, BarChart2, Network, GitCompare, Sparkles, CreditCard, Gauge, Info, ScrollText, Activity, Factory, Plug, UserCheck, Wand2, KeyRound, Bug, Library, Presentation, TrendingDown, CalendarCheck, Rocket, ClipboardCheck,   FlaskRound, Award, FileQuestion, FlaskConical, Lock, Calculator, Server, BookOpen, Settings, Code, Cloud, Webhook, Leaf, Trophy, TestTube, FileBadge, Gavel, Fingerprint, Languages, FileArchive, DollarSign, Palette,   ShieldX, Siren, ScanLine, Laptop, Eye, Atom, Smartphone, Star
 } from "lucide-react";
 // NOTE: ClipboardList imported above is reused for the UAT checklist item below.
 
@@ -56,7 +56,9 @@ export const navSections = [
       { label: "Penetration Tests", path: "/pen-tests", icon: FlaskConical, roles: ["admin", "compliance_officer", "auditor", "external_auditor"] },
       { label: "Privacy Requests", path: "/privacy-requests", icon: Lock, roles: ["admin", "compliance_officer"] },
       { label: "Risk Quantification", path: "/risk-quantification", icon: Calculator, roles: ["admin", "compliance_officer", "risk_manager"] },
+      { label: "FAIR Benchmarks", path: "/fair-benchmarks", icon: DollarSign, roles: ["admin", "compliance_officer", "risk_manager", "executive"] },
       { label: "ESG Reporting", path: "/esg-reporting", icon: Leaf, roles: ["admin", "compliance_officer", "risk_manager", "auditor"] },
+      { label: "ESG Benchmarking", path: "/esg-benchmarking", icon: Leaf, roles: ["admin", "compliance_officer", "executive"] },
     ]
   },
   {
@@ -94,6 +96,7 @@ export const navSections = [
       { label: "AI Auditor", path: "/ai-auditor", icon: Brain, roles: ["admin", "compliance_officer", "auditor"] },
       { label: "Testing Agent", path: "/testing-agent", icon: TestTube, roles: ["admin", "compliance_officer", "auditor"] },
       { label: "AI Control Mapper", path: "/ai-control-mapper", icon: Zap, roles: ["admin", "compliance_officer"] },
+      { label: "AI Cross-Framework Mapping", path: "/ai-cross-mapping", icon: Sparkles, roles: ["admin", "compliance_officer", "risk_manager"] },
       { label: "AI Gap Analysis", path: "/ai-gap-analysis", icon: Brain, roles: ["admin", "compliance_officer", "risk_manager"] },
       { label: "Compliance Runs", path: "/compliance-runs", icon: Play, roles: ["admin", "compliance_officer", "auditor"] },
       { label: "Regulatory Localization", path: "/regulatory-localization", icon: Languages, roles: ["admin", "compliance_officer", "risk_manager", "auditor"] },
@@ -132,6 +135,7 @@ export const navSections = [
       { label: "Contracts (CLM)", path: "/contracts", icon: FileText, roles: ["admin", "compliance_officer", "risk_manager", "auditor"] },
       { label: "Vendor Assessments", path: "/vendor-assessments", icon: ClipboardList, roles: ["admin", "compliance_officer", "risk_manager", "auditor"] },
       { label: "Vendor Scorecard", path: "/vendor-scorecard", icon: Gauge, roles: ["admin", "compliance_officer", "risk_manager", "auditor"] },
+      { label: "Vendor Risk Exchange", path: "/vendor-risk-exchange", icon: Star, roles: ["admin", "compliance_officer", "risk_manager"] },
       { label: "AI Contract Scanner", path: "/ai-contract-scanner", icon: FileSearch, roles: ["admin", "compliance_officer", "risk_manager"] },
     ]
   },
@@ -140,6 +144,7 @@ export const navSections = [
     items: [
       { label: "ROPA", path: "/ropa", icon: FileSpreadsheet, roles: ["admin", "compliance_officer", "auditor"] },
       { label: "DPIA", path: "/dpia", icon: ShieldAlert, roles: ["admin", "compliance_officer", "auditor"] },
+      { label: "Data Flow Mapping", path: "/privacy-data-mapping", icon: Network, roles: ["admin", "compliance_officer", "risk_manager"] },
       { label: "Audits", path: "/audits", icon: Landmark, roles: ["admin", "compliance_officer", "auditor"] },
       { label: "Audit Findings", path: "/audit-findings", icon: AlertTriangle, roles: ["admin", "compliance_officer", "risk_manager", "auditor"] },
       { label: "Audit Trail", path: "/audit-trail", icon: History, roles: ["admin", "compliance_officer", "auditor", "external_auditor", "regulator"] },
