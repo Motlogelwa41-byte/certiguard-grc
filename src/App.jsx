@@ -163,6 +163,16 @@ import ProtectionCommandCenter from '@/pages/ProtectionCommandCenter';
 import AutomatedTestLibrary from '@/pages/AutomatedTestLibrary';
 import RealTimeCspm from '@/pages/RealTimeCspm';
 import IrPlaybooks from '@/pages/IrPlaybooks';
+import ContinuousScore from '@/pages/ContinuousScore';
+import SoarPlaybooks from '@/pages/SoarPlaybooks';
+import DevSecOps from '@/pages/DevSecOps';
+import ItamDashboard from '@/pages/ItamDashboard';
+import TrainingGates from '@/pages/TrainingGates';
+import DlpMonitor from '@/pages/DlpMonitor';
+import PqcReadiness from '@/pages/PqcReadiness';
+import PerformanceMonitoring from '@/pages/PerformanceMonitoring';
+import HadrDocumentation from '@/pages/HadrDocumentation';
+import ApiSecurity from '@/pages/ApiSecurity';
 import Landing from '@/pages/Landing';
 import { LanguageProvider } from '@/contexts/LanguageContext';
 
@@ -350,6 +360,16 @@ const AuthenticatedApp = () => {
           <Route path="/automated-tests" element={<AutomatedTestLibrary />} />
           <Route path="/realtime-cspm" element={<RealTimeCspm />} />
           <Route path="/ir-playbooks" element={<IrPlaybooks />} />
+          <Route path="/continuous-score" element={<ContinuousScore />} />
+          <Route path="/soar-playbooks" element={<SoarPlaybooks />} />
+          <Route path="/devsecops" element={<DevSecOps />} />
+          <Route path="/itam" element={<ItamDashboard />} />
+          <Route path="/training-gates" element={<TrainingGates />} />
+          <Route path="/dlp-monitor" element={<DlpMonitor />} />
+          <Route path="/pqc-readiness" element={<PqcReadiness />} />
+          <Route path="/performance-monitoring" element={<PerformanceMonitoring />} />
+          <Route path="/hadr-documentation" element={<HadrDocumentation />} />
+          <Route path="/api-security" element={<ApiSecurity />} />
         </Route>
       </Route>
       <Route path="*" element={<PageNotFound />} />

@@ -1,0 +1,229 @@
+{
+  "name": "ITAsset",
+  "type": "object",
+  "properties": {
+    "tenant_id": {
+      "type": "string",
+      "description": "Tenant isolation key"
+    },
+    "asset_tag": {
+      "type": "string",
+      "description": "Unique asset tag / identifier"
+    },
+    "asset_name": {
+      "type": "string"
+    },
+    "asset_type": {
+      "type": "string",
+      "enum": [
+        "hardware",
+        "software",
+        "virtual",
+        "cloud",
+        "network",
+        "mobile"
+      ],
+      "default": "hardware"
+    },
+    "category": {
+      "type": "string",
+      "enum": [
+        "laptop",
+        "desktop",
+        "server",
+        "router",
+        "switch",
+        "firewall",
+        "load_balancer",
+        "saas_application",
+        "database",
+        "container",
+        "vm",
+        "mobile_device",
+        "iot_device",
+        "other"
+      ],
+      "default": "other"
+    },
+    "manufacturer": {
+      "type": "string"
+    },
+    "model": {
+      "type": "string"
+    },
+    "serial_number": {
+      "type": "string"
+    },
+    "mac_address": {
+      "type": "string"
+    },
+    "ip_address": {
+      "type": "string"
+    },
+    "hostname": {
+      "type": "string"
+    },
+    "os_type": {
+      "type": "string"
+    },
+    "os_version": {
+      "type": "string"
+    },
+    "location": {
+      "type": "string"
+    },
+    "data_residency": {
+      "type": "string",
+      "description": "Country/region where asset data resides"
+    },
+    "assigned_to_name": {
+      "type": "string"
+    },
+    "assigned_to_id": {
+      "type": "string"
+    },
+    "department": {
+      "type": "string"
+    },
+    "purchase_date": {
+      "type": "string",
+      "format": "date"
+    },
+    "purchase_cost": {
+      "type": "number"
+    },
+    "currency": {
+      "type": "string",
+      "default": "ZAR"
+    },
+    "current_value": {
+      "type": "number",
+      "description": "Depreciated current value"
+    },
+    "warranty_expiry": {
+      "type": "string",
+      "format": "date"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "in_service",
+        "in_storage",
+        "repair",
+        "retired",
+        "lost",
+        "stolen",
+        "pending_deploy"
+      ],
+      "default": "pending_deploy"
+    },
+    "classification": {
+      "type": "string",
+      "enum": [
+        "public",
+        "internal",
+        "confidential",
+        "restricted"
+      ],
+      "default": "internal"
+    },
+    "encryption_status": {
+      "type": "string",
+      "enum": [
+        "encrypted",
+        "not_encrypted",
+        "partial",
+        "unknown"
+      ],
+      "default": "unknown"
+    },
+    "agent_installed": {
+      "type": "boolean",
+      "default": false
+    },
+    "agent_type": {
+      "type": "string",
+      "description": "MDM/EDR agent type e.g. Jamf, Kandji, Defender, CrowdStrike"
+    },
+    "patch_level": {
+      "type": "string",
+      "enum": [
+        "current",
+        "outdated",
+        "critical",
+        "unknown"
+      ],
+      "default": "unknown"
+    },
+    "last_seen": {
+      "type": "string",
+      "format": "date"
+    },
+    "last_audit_date": {
+      "type": "string",
+      "format": "date"
+    },
+    "disposal_method": {
+      "type": "string",
+      "description": "How the asset was disposed of (wipe, destroy, resale, donate)"
+    },
+    "disposal_date": {
+      "type": "string",
+      "format": "date"
+    },
+    "disposal_certificate": {
+      "type": "string",
+      "description": "Certificate of destruction URL"
+    },
+    "notes": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "asset_name",
+    "asset_type"
+  ],
+  "rls": {
+    "create": {
+      "data.tenant_id": "{{user.data.tenant_id}}"
+    },
+    "read": {
+      "$or": [
+        {
+          "data.tenant_id": "{{user.data.tenant_id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "update": {
+      "$or": [
+        {
+          "data.tenant_id": "{{user.data.tenant_id}}",
+          "created_by_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "delete": {
+      "$or": [
+        {
+          "data.tenant_id": "{{user.data.tenant_id}}",
+          "created_by_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    }
+  }
+}

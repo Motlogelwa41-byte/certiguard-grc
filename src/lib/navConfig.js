@@ -4,7 +4,7 @@ import {
   ShieldCheck, FileSearch, Brain, Play, FileSpreadsheet, FileDown, BarChart3, LineChart,
   History, ShieldAlert, GraduationCap, Calendar, Bell, Users, Copy, SlidersHorizontal,
   Target, Upload, Send, Globe, Users2, MapPin, Zap, ListChecks, BellRing,
-  PieChart,   Radar, Landmark, BarChart2, Network, GitCompare, Sparkles, CreditCard, Gauge, Info, ScrollText, Activity, Factory, Plug, UserCheck, Wand2, KeyRound, Bug, Library, Presentation, TrendingDown, CalendarCheck, Rocket, ClipboardCheck,   FlaskRound, Award, FileQuestion, FlaskConical, Lock, Calculator, Server, BookOpen, Settings, Code, Cloud, Webhook, Leaf, Trophy, TestTube, FileBadge, Gavel, Fingerprint, Languages, FileArchive, DollarSign, Palette, ShieldX, Siren, ScanLine
+  PieChart,   Radar, Landmark, BarChart2, Network, GitCompare, Sparkles, CreditCard, Gauge, Info, ScrollText, Activity, Factory, Plug, UserCheck, Wand2, KeyRound, Bug, Library, Presentation, TrendingDown, CalendarCheck, Rocket, ClipboardCheck,   FlaskRound, Award, FileQuestion, FlaskConical, Lock, Calculator, Server, BookOpen, Settings, Code, Cloud, Webhook, Leaf, Trophy, TestTube, FileBadge, Gavel, Fingerprint, Languages, FileArchive, DollarSign, Palette,   ShieldX, Siren, ScanLine, Laptop, Eye, Atom, Smartphone
 } from "lucide-react";
 // NOTE: ClipboardList imported above is reused for the UAT checklist item below.
 
@@ -108,13 +108,20 @@ export const navSections = [
       { label: "Incidents", path: "/incidents", icon: ShieldAlert, roles: ["admin", "compliance_officer", "risk_manager", "auditor", "user"] },
       { label: "Incident Command", path: "/incident-command", icon: AlertTriangle, roles: ["admin", "compliance_officer", "risk_manager"] },
       { label: "IR Playbooks", path: "/ir-playbooks", icon: Siren, roles: ["admin", "compliance_officer", "risk_manager"] },
+      { label: "SOAR Playbooks", path: "/soar-playbooks", icon: Zap, roles: ["admin", "compliance_officer", "risk_manager"] },
       { label: "Security Findings", path: "/vulnerabilities", icon: Bug, roles: ["admin", "compliance_officer", "risk_manager", "auditor"] },
       { label: "Cloud Posture (CSPM)", path: "/cloud-posture", icon: Cloud, roles: ["admin", "compliance_officer", "risk_manager", "auditor"] },
       { label: "Real-Time CSPM Scan", path: "/realtime-cspm", icon: ScanLine, roles: ["admin", "compliance_officer", "risk_manager", "auditor"] },
+      { label: "DevSecOps Scanner", path: "/devsecops", icon: ScanLine, roles: ["admin", "compliance_officer", "risk_manager", "auditor"] },
       { label: "SIEM Webhooks", path: "/siem-webhooks", icon: Webhook, roles: ["admin", "compliance_officer", "risk_manager"] },
+      { label: "DLP Monitor", path: "/dlp-monitor", icon: Eye, roles: ["admin", "compliance_officer", "risk_manager", "auditor"] },
       { label: "EDR / XDR", path: "/edr-dashboard", icon: Radar, roles: ["admin", "compliance_officer", "risk_manager", "auditor"] },
+      { label: "IT Asset Management", path: "/itam", icon: Laptop, roles: ["admin", "compliance_officer", "risk_manager", "auditor"] },
+      { label: "PQC Readiness", path: "/pqc-readiness", icon: Atom, roles: ["admin", "compliance_officer", "risk_manager"] },
+      { label: "API & Mobile Security", path: "/api-security", icon: Smartphone, roles: ["admin", "compliance_officer", "risk_manager"] },
       { label: "Access Recertification", path: "/access-recertification", icon: UserCheck, roles: ["admin"] },
       { label: "Training", path: "/training", icon: GraduationCap, roles: ["admin", "compliance_officer", "risk_manager", "auditor", "user"] },
+      { label: "Training Gates", path: "/training-gates", icon: Lock, roles: ["admin", "compliance_officer", "risk_manager"] },
       { label: "Calendar Sync", path: "/calendar-sync", icon: CalendarCheck, roles: ["admin", "compliance_officer", "risk_manager", "auditor", "user"] },
     ]
   },
@@ -157,6 +164,7 @@ export const navSections = [
       { label: "Industry Dashboard", path: "/industry-dashboard", icon: Factory, roles: ["admin", "compliance_officer", "risk_manager", "auditor"] },
       { label: "Financial Dashboard", path: "/financial-dashboard", icon: Landmark, roles: ["admin", "compliance_officer", "risk_manager", "auditor"] },
       { label: "Compliance Benchmarking", path: "/compliance-benchmarking", icon: Trophy, roles: ["admin", "compliance_officer", "risk_manager", "auditor"] },
+      { label: "Continuous Compliance Score", path: "/continuous-score", icon: Gauge, roles: ["admin", "compliance_officer", "risk_manager", "auditor"] },
       { label: "Security Posture", path: "/security-posture", icon: Radar, roles: ["admin", "compliance_officer", "risk_manager", "auditor"] },
       { label: "Reports", path: "/reports", icon: FileDown, roles: ["admin", "compliance_officer", "risk_manager", "auditor", "external_auditor", "regulator"] },
       { label: "Mgmt Reports", path: "/management-reports", icon: BarChart2, roles: ["admin", "compliance_officer", "risk_manager", "auditor"] },
@@ -176,6 +184,8 @@ export const navSections = [
       { label: "Security", path: "/security", icon: ShieldCheck, roles: ["admin"] },
       { label: "Platform Governance", path: "/platform-governance", icon: ShieldCheck, roles: ["admin"] },
       { label: "Users", path: "/users", icon: Users, roles: ["admin"] },
+      { label: "Performance Monitoring", path: "/performance-monitoring", icon: Activity, roles: ["admin", "compliance_officer"] },
+      { label: "HA/DR Documentation", path: "/hadr-documentation", icon: Server, roles: ["admin", "compliance_officer", "risk_manager", "auditor"] },
       { label: "Security Command Center", path: "/security-command-center", icon: Shield, roles: ["admin", "compliance_officer", "risk_manager", "auditor"] },
       { label: "Tenant Isolation Monitor", path: "/tenant-isolation", icon: ShieldCheck, roles: ["admin"] },
       { label: "UAT Checklist", path: "/testing-checklist", icon: ClipboardList, roles: ["admin", "compliance_officer", "risk_manager", "auditor"] },

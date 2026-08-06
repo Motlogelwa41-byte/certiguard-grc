@@ -1,0 +1,148 @@
+{
+  "name": "PqcAsset",
+  "type": "object",
+  "properties": {
+    "tenant_id": {
+      "type": "string",
+      "description": "Tenant isolation key"
+    },
+    "asset_name": {
+      "type": "string",
+      "description": "Name of the system, service, or component using cryptography"
+    },
+    "crypto_algorithm": {
+      "type": "string",
+      "description": "Current algorithm e.g. RSA-2048, ECC-P256, AES-256, SHA-256, DH, ECDH"
+    },
+    "crypto_type": {
+      "type": "string",
+      "enum": [
+        "asymmetric",
+        "symmetric",
+        "hash",
+        "key_exchange",
+        "digital_signature",
+        "tls_certificate",
+        "code_signing",
+        "ssh_key"
+      ],
+      "default": "asymmetric"
+    },
+    "usage_location": {
+      "type": "string",
+      "description": "Where the crypto is used: TLS, VPN, data_at_rest, code_signing, ssh, api_auth, blockchain"
+    },
+    "pqc_status": {
+      "type": "string",
+      "enum": [
+        "quantum_safe",
+        "migration_planned",
+        "migration_needed",
+        "critical",
+        "unknown"
+      ],
+      "default": "unknown",
+      "description": "Post-quantum readiness status"
+    },
+    "pqc_replacement": {
+      "type": "string",
+      "description": "Recommended NIST PQC replacement: CRYSTALS-Kyber, CRYSTALS-Dilithium, SPHINCS+, FALCON, AES-256 (already safe)"
+    },
+    "nist_standard": {
+      "type": "string",
+      "description": "NIST PQC standard reference e.g. FIPS 203 (ML-KEM), FIPS 204 (ML-DSA), FIPS 205 (SLH-DSA)"
+    },
+    "priority": {
+      "type": "string",
+      "enum": [
+        "critical",
+        "high",
+        "medium",
+        "low"
+      ],
+      "default": "medium"
+    },
+    "owner_name": {
+      "type": "string"
+    },
+    "owner_id": {
+      "type": "string"
+    },
+    "migration_plan": {
+      "type": "string",
+      "description": "Planned migration approach (hybrid, replace, sunset)"
+    },
+    "target_migration_date": {
+      "type": "string",
+      "format": "date"
+    },
+    "last_assessed_date": {
+      "type": "string",
+      "format": "date"
+    },
+    "key_length_bits": {
+      "type": "number",
+      "description": "Current key length in bits"
+    },
+    "quantum_vulnerable": {
+      "type": "boolean",
+      "default": false,
+      "description": "True if algorithm is vulnerable to Shor's algorithm (RSA, ECC, DH)"
+    },
+    "harvest_now_decrypt_later_risk": {
+      "type": "boolean",
+      "default": false,
+      "description": "True if data encrypted with this algo is at risk of HNDL (Harvest Now, Decrypt Later) attacks"
+    },
+    "notes": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "asset_name",
+    "crypto_algorithm"
+  ],
+  "rls": {
+    "create": {
+      "data.tenant_id": "{{user.data.tenant_id}}"
+    },
+    "read": {
+      "$or": [
+        {
+          "data.tenant_id": "{{user.data.tenant_id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "update": {
+      "$or": [
+        {
+          "data.tenant_id": "{{user.data.tenant_id}}",
+          "created_by_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "delete": {
+      "$or": [
+        {
+          "data.tenant_id": "{{user.data.tenant_id}}",
+          "created_by_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    }
+  }
+}
