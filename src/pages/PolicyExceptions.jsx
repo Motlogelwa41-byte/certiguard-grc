@@ -74,6 +74,7 @@ export default function PolicyExceptions() {
       const controlName = controls.find((c) => c.id === formData.linked_control_id)?.title || "";
       const payload = {
         ...formData,
+        tenant_id: editing?.tenant_id || user?.data?.tenant_id || "",
         linked_policy_title: policyName,
         linked_control_title: controlName,
         exception_id: editing?.exception_id || `EX-${new Date().getFullYear()}-${String(items.length + 1).padStart(3, "0")}`,
