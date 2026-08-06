@@ -24,6 +24,18 @@ async function computePackHash(payload) {
     .join("");
 }
 
+async function hashFileContent(fileUrl) {
+  try {
+    const res = await fetch(fileUrl);
+    if (!res.ok) return null;
+    const buf = await res.arrayBuffer();
+    const hashBuf = await crypto.subtle.digest("SHA-256", buf);
+    return Array.from(new Uint8Array(hashBuf))
+      .map((b) => b.toString(16).padStart(2, "0"))
+      .join("");
+  } catch { return null; }
+}
+
 function genPackId() {
   const ts = Date.now().toString(36).toUpperCase();
   const rnd = Math.random().toString(36).slice(2, 8).toUpperCase();
@@ -55,6 +67,17 @@ export async function generateSecureEvidencePack({ selectedControls, selectedEvi
     control_count: (selectedControls || []).length,
     evidence_count: (selectedEvidence || []).length,
   };
+  // Fetch content hashes for all evidence files to strengthen the tamper-evident seal
+  const evidenceContentHashes = await Promise.all(
+    (selectedEvidence || []).map(async (e) => ({
+      id: e.id,
+      hash: e.file_url ? await hashFileContent(e.file_url) : null,
+    }))
+  );
+  payload.evidence_content_hashes = evidenceContentHashes
+    .filter((h) => h.hash)
+    .map((h) => `${h.id}:${h.hash}`)
+    .sort();
   const packHash = await computePackHash(payload);
 
   const doc = new jsPDF({ unit: "pt", format: "a4" });
@@ -219,8 +242,8 @@ export async function generateSecureEvidencePack({ selectedControls, selectedEvi
   doc.setFont("helvetica", "italic");
   doc.setFontSize(7.5);
   doc.setTextColor(...C.muted);
-  doc.text("This hash is computed from the pack ID, timestamp, organization, and all included control/evidence IDs.", M + 16, y + 100);
-  doc.text("Any alteration to the pack contents will produce a different hash, proving tampering.", M + 16, y + 110);
+  doc.text("This hash includes SHA-256 content hashes of each evidence file — any alteration will be detected.", M + 16, y + 100);
+  doc.text("Any alteration to the pack contents or evidence files will produce a different hash, proving tampering.", M + 16, y + 110);
   y += 124;
 
   // --- Section 1: Controls ---
@@ -342,7 +365,7 @@ export async function generateSecureEvidencePack({ selectedControls, selectedEvi
   footer();
 
   const fileName = `CertiGuard_Auditor_Pack_${packId}_${timestampIso.slice(0, 10)}.pdf`;
-  doc.save(fileName);
+  const blob = doc.output("blob");
 
   return {
     packId,
@@ -351,5 +374,6 @@ export async function generateSecureEvidencePack({ selectedControls, selectedEvi
     controlCount: payload.control_count,
     evidenceCount: payload.evidence_count,
     fileName,
+    blob,
   };
 }

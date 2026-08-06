@@ -89,7 +89,44 @@ export default function SecureEvidencePack() {
         notes,
       });
       setLastPack(result);
-      toast({ title: "Evidence pack generated", description: `Pack ${result.packId} downloaded with ${result.controlCount} controls and ${result.evidenceCount} evidence items.` });
+
+      // Upload the PDF to app storage for audit trail
+      let pdfUrl = null;
+      try {
+        const file = new File([result.blob], result.fileName, { type: "application/pdf" });
+        const up = await base44.integrations.Core.UploadFile({ file });
+        pdfUrl = up?.file_url || null;
+      } catch (uploadErr) {
+        console.error("Evidence pack upload failed:", uploadErr);
+      }
+
+      // Log to the append-only AuditEvidenceLedger for tamper-evident audit trail
+      if (pdfUrl) {
+        try {
+          await base44.entities.AuditEvidenceLedger.create({
+            tenant_id: user?.data?.tenant_id || "",
+            user_id: user?.id || "",
+            user_name: user?.full_name || user?.email || "Unknown",
+            timestamp: result.timestamp,
+            file_url: pdfUrl,
+            file_name: result.fileName,
+            sha256_hash: result.hash,
+            notes: `Secure Evidence Pack ${result.packId}: ${result.controlCount} controls, ${result.evidenceCount} evidence items. Org: ${orgName || "—"}. Prepared by: ${preparedBy || "—"}.`,
+          });
+        } catch (ledgerErr) {
+          console.error("Ledger logging failed:", ledgerErr);
+        }
+      }
+
+      // Trigger browser download
+      const url = URL.createObjectURL(result.blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = result.fileName;
+      a.click();
+      URL.revokeObjectURL(url);
+
+      toast({ title: "Evidence pack generated", description: `Pack ${result.packId} — ${result.controlCount} controls, ${result.evidenceCount} evidence items.${pdfUrl ? " Logged to audit ledger." : ""}` });
     } catch (err) {
       toast({ title: "Generation failed", description: err.message || "Could not generate the pack.", variant: "destructive" });
     } finally {

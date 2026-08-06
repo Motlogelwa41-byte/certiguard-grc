@@ -37,6 +37,25 @@ export default async function(req) {
       controlsByTenant[tid].push(c);
     }
 
+    // Scope to the caller's holding-company hierarchy (prevent cross-tenant data leakage)
+    const callerTenantId = user.data?.tenant_id || user.tenant_id;
+    const tenantById = new Map(tenants.map(t => [t.id, t]));
+    let rootHoldingId = callerTenantId;
+    let walker = tenantById.get(callerTenantId);
+    while (walker && walker.parent_tenant_id && tenantById.has(walker.parent_tenant_id)) {
+      rootHoldingId = walker.parent_tenant_id;
+      walker = tenantById.get(walker.parent_tenant_id);
+    }
+    const scopedTenantIds = new Set([rootHoldingId]);
+    const collectDescendants = (tid) => {
+      for (const child of (subsidiaryMap[tid] || [])) {
+        scopedTenantIds.add(child.id);
+        collectDescendants(child.id);
+      }
+    };
+    collectDescendants(rootHoldingId);
+    const scopedTenants = tenants.filter(t => scopedTenantIds.has(t.id));
+
     const computeTenantMetrics = (tenantId) => {
       const tRisks = risksByTenant[tenantId] || [];
       const tControls = controlsByTenant[tenantId] || [];
@@ -92,8 +111,8 @@ export default async function(req) {
       return aggregated;
     };
 
-    // Find top-level holding companies: have children, or explicitly typed as holding_company
-    const holdingCompanies = tenants.filter(t =>
+    // Find top-level holding companies within the scoped hierarchy
+    const holdingCompanies = scopedTenants.filter(t =>
       t.entity_type === 'holding_company' ||
       (!t.parent_tenant_id && (subsidiaryMap[t.id] || []).length > 0)
     );
@@ -105,16 +124,18 @@ export default async function(req) {
       ...rollupSubtree(hc.id),
     }));
 
-    // Global rollup across all entities
+    // Global rollup scoped to the caller's hierarchy only
+    const scopedRisks = risks.filter(r => scopedTenantIds.has(r.tenant_id || ''));
+    const scopedControls = controls.filter(c => scopedTenantIds.has(c.tenant_id || ''));
     const globalRollup = {
-      totalEntities: tenants.length,
-      totalRisks: risks.length,
-      openRisks: risks.filter(r => r.status === 'open' || r.status === 'mitigating').length,
-      criticalRisks: risks.filter(r => (r.risk_score || 0) >= 16).length,
-      totalALE: risks.reduce((s, r) => s + (r.annualized_loss_expectancy || 0), 0),
-      totalResidualALE: risks.reduce((s, r) => s + (r.residual_annualized_loss_expectancy || 0), 0),
-      totalControls: controls.length,
-      compliantControls: controls.filter(c => c.status === 'passing').length,
+      totalEntities: scopedTenants.length,
+      totalRisks: scopedRisks.length,
+      openRisks: scopedRisks.filter(r => r.status === 'open' || r.status === 'mitigating').length,
+      criticalRisks: scopedRisks.filter(r => (r.risk_score || 0) >= 16).length,
+      totalALE: scopedRisks.reduce((s, r) => s + (r.annualized_loss_expectancy || 0), 0),
+      totalResidualALE: scopedRisks.reduce((s, r) => s + (r.residual_annualized_loss_expectancy || 0), 0),
+      totalControls: scopedControls.length,
+      compliantControls: scopedControls.filter(c => c.status === 'passing').length,
     };
     globalRollup.compliancePct = globalRollup.totalControls > 0
       ? Math.round((globalRollup.compliantControls / globalRollup.totalControls) * 100)

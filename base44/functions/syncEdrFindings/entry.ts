@@ -41,7 +41,37 @@ function mapDefenderSeverity(s) {
   return 'medium';
 }
 
-async function syncCrowdStrike(base44) {
+function slaForSeverity(severity) {
+  switch (severity) {
+    case 'critical': return 24;
+    case 'high': return 48;
+    case 'medium': return 168;
+    case 'low': return 720;
+    default: return 1440;
+  }
+}
+
+function computeDueDate(detectedDate, slaHours) {
+  if (!detectedDate || !slaHours) return undefined;
+  try {
+    const d = new Date(detectedDate);
+    d.setHours(d.getHours() + slaHours);
+    return d.toISOString().slice(0, 10);
+  } catch { return undefined; }
+}
+
+async function fetchEdrControls(base44) {
+  const controls = await base44.asServiceRole.entities.Control.list('-updated_date', 500).catch(() => []);
+  return (controls || []).filter(c => {
+    const t = (c.title || '').toLowerCase();
+    const cat = (c.category || '').toLowerCase();
+    return t.includes('edr') || t.includes('endpoint') || t.includes('malware') ||
+           t.includes('antivirus') || t.includes('threat detection') || t.includes('xdr') ||
+           cat === 'technical';
+  }).slice(0, 10);
+}
+
+async function syncCrowdStrike(base44, edrControls) {
   const clientId = Deno.env.get('CROWDSTRIKE_CLIENT_ID');
   const clientSecret = Deno.env.get('CROWDSTRIKE_CLIENT_SECRET');
   if (!clientId || !clientSecret) {
@@ -127,6 +157,9 @@ async function syncCrowdStrike(base44) {
       if (!tenantId) { detectionsSkipped++; continue; }
 
       try {
+        const csSev = mapCrowdStrikeSeverity(d.max_severity || d.severity);
+        const csSla = slaForSeverity(csSev);
+        const csDetected = new Date().toISOString().slice(0, 10);
         await base44.asServiceRole.entities.SecurityFinding.create({
           tenant_id: tenantId,
           finding_id: `CS-${fid}`,
@@ -134,14 +167,19 @@ async function syncCrowdStrike(base44) {
           cloud_provider: 'other',
           title: d.display_name || d.friendly_name || `CrowdStrike detection ${fid}`,
           description: d.description || d.friendly_name || '',
-          severity: mapCrowdStrikeSeverity(d.max_severity || d.severity),
+          severity: csSev,
           status: 'open',
           asset: d.device?.device_name || undefined,
           resource_id: d.device?.device_id || undefined,
           service: 'falcon-endpoint',
           first_seen: d.first_behavior || undefined,
           last_seen: d.last_behavior || undefined,
-          detected_date: new Date().toISOString().slice(0, 10),
+          detected_date: csDetected,
+          sla_hours: csSla,
+          due_date: computeDueDate(csDetected, csSla),
+          sla_breached: false,
+          linked_control_ids: edrControls.map(c => c.id),
+          linked_control_names: edrControls.map(c => c.title),
           notes: d.friendly_name || undefined,
         });
         detectionsSynced++;
@@ -190,6 +228,9 @@ async function syncCrowdStrike(base44) {
           const cvss = v.cve?.cvss_score || v.app?.product?.risk_score || 0;
 
           try {
+            const vSev = mapCvssSeverity(cvss);
+            const vSla = slaForSeverity(vSev);
+            const vDetected = new Date().toISOString().slice(0, 10);
             await base44.asServiceRole.entities.SecurityFinding.create({
               tenant_id: tenantId,
               finding_id: `CS-SPOT-${fid}`,
@@ -197,7 +238,7 @@ async function syncCrowdStrike(base44) {
               cloud_provider: 'other',
               title: cveId ? `${cveId} on ${hostname}` : `Vulnerability on ${hostname}`,
               description: v.cve?.description || v.app?.product?.name || '',
-              severity: mapCvssSeverity(cvss),
+              severity: vSev,
               status: v.status === 'closed' ? 'remediated' : 'open',
               cve: cveId || undefined,
               asset: hostname,
@@ -205,7 +246,12 @@ async function syncCrowdStrike(base44) {
               service: 'falcon-spotlight',
               first_seen: v.created_timestamp ? v.created_timestamp.slice(0, 10) : undefined,
               last_seen: v.last_seen ? v.last_seen.slice(0, 10) : undefined,
-              detected_date: new Date().toISOString().slice(0, 10),
+              detected_date: vDetected,
+              sla_hours: vSla,
+              due_date: computeDueDate(vDetected, vSla),
+              sla_breached: false,
+              linked_control_ids: edrControls.map(c => c.id),
+              linked_control_names: edrControls.map(c => c.title),
               notes: v.app?.product?.name || undefined,
             });
             vulnsSynced++;
@@ -227,7 +273,7 @@ async function syncCrowdStrike(base44) {
   };
 }
 
-async function syncDefender(base44) {
+async function syncDefender(base44, edrControls) {
   const appId = Deno.env.get('DEFENDER_APP_ID');
   const tenantId = Deno.env.get('DEFENDER_TENANT_ID');
   const clientSecret = Deno.env.get('DEFENDER_CLIENT_SECRET');
@@ -283,6 +329,9 @@ async function syncDefender(base44) {
     if (!fid || existingIds.has(`MD-${fid}`)) continue;
     if (!fallbackTenantId) { skipped++; continue; }
     try {
+      const dSev = mapDefenderSeverity(a.severity);
+      const dSla = slaForSeverity(dSev);
+      const dDetected = (a.firstActivity || new Date().toISOString()).slice(0, 10);
       await base44.asServiceRole.entities.SecurityFinding.create({
         tenant_id: fallbackTenantId,
         finding_id: `MD-${fid}`,
@@ -290,14 +339,19 @@ async function syncDefender(base44) {
         cloud_provider: 'other',
         title: a.title || `Defender alert ${fid}`,
         description: a.description || '',
-        severity: mapDefenderSeverity(a.severity),
+        severity: dSev,
         status: a.status === 'Resolved' ? 'remediated' : 'open',
         asset: a.devices?.[0]?.deviceName || undefined,
         resource_id: a.devices?.[0]?.deviceId || undefined,
         service: 'defender-endpoint',
         first_seen: a.firstActivity || undefined,
         last_seen: a.lastActivity || undefined,
-        detected_date: (a.firstActivity || new Date().toISOString()).slice(0, 10),
+        detected_date: dDetected,
+        sla_hours: dSla,
+        due_date: computeDueDate(dDetected, dSla),
+        sla_breached: false,
+        linked_control_ids: edrControls.map(c => c.id),
+        linked_control_names: edrControls.map(c => c.title),
         notes: a.category || undefined,
       });
       created++;
@@ -332,13 +386,14 @@ Deno.serve(async (req) => {
       }
     }
     const results = [];
+    const edrControls = await fetchEdrControls(base44);
 
     if (provider === 'crowdstrike' || provider === 'all') {
-      try { results.push(await syncCrowdStrike(base44)); }
+      try { results.push(await syncCrowdStrike(base44, edrControls)); }
       catch (e) { results.push({ provider: 'crowdstrike', error: e.message }); }
     }
     if (provider === 'defender' || provider === 'all') {
-      try { results.push(await syncDefender(base44)); }
+      try { results.push(await syncDefender(base44, edrControls)); }
       catch (e) { results.push({ provider: 'defender', error: e.message }); }
     }
     if (results.length === 0) {
