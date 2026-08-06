@@ -26,8 +26,8 @@ Deno.serve(async (req) => {
       );
     }
 
-    // Project key: Connection (service=jira) config.project_key > JIRA_PROJECT_KEY env > "SEC"
-    let projectKey = Deno.env.get("JIRA_PROJECT_KEY");
+    // Project key: Connection (service=jira) config.project_key, default "SEC"
+    let projectKey = "SEC";
     try {
       const conns = await base44.asServiceRole.entities.Connection.filter({ service: "jira" });
       if (conns && conns.length > 0 && conns[0].config) {
@@ -35,7 +35,6 @@ Deno.serve(async (req) => {
         if (cfg.project_key) projectKey = cfg.project_key;
       }
     } catch (_e) { /* ignore */ }
-    if (!projectKey) projectKey = "SEC";
 
     const lines = [
       "A new high-priority security finding was detected by CertiGuard GRC.",
