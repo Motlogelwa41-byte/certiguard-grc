@@ -130,6 +130,10 @@
     "mttc_hours": {
       "type": "number",
       "description": "Mean time to contain in hours (auto-calculated)"
+    },
+    "war_room_messages": {
+      "type": "string",
+      "description": "JSON array of war-room collaboration messages and evidence artifacts: [{id, from, from_id, text, timestamp, type, file_name, file_url}]"
     }
   },
   "required": [

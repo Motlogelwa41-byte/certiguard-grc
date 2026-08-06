@@ -155,6 +155,9 @@ import CertificationDossier from '@/pages/CertificationDossier';
 import CrossOrgRiskAggregation from '@/pages/CrossOrgRiskAggregation';
 import WhiteLabelSettings from '@/pages/WhiteLabelSettings';
 import PolicyExceptions from '@/pages/PolicyExceptions';
+import AIGapAnalysis from '@/pages/AIGapAnalysis';
+import ExecutiveBriefing from '@/pages/ExecutiveBriefing';
+import IncidentWarRoom from '@/pages/IncidentWarRoom';
 import Landing from '@/pages/Landing';
 import { LanguageProvider } from '@/contexts/LanguageContext';
 
@@ -334,6 +337,9 @@ const AuthenticatedApp = () => {
           <Route path="/cross-org-risk" element={<CrossOrgRiskAggregation />} />
           <Route path="/white-label" element={<WhiteLabelSettings />} />
           <Route path="/policy-exceptions" element={<PolicyExceptions />} />
+          <Route path="/ai-gap-analysis" element={<AIGapAnalysis />} />
+          <Route path="/executive-briefing" element={<ExecutiveBriefing />} />
+          <Route path="/incident-war-room/:id" element={<IncidentWarRoom />} />
         </Route>
       </Route>
       <Route path="*" element={<PageNotFound />} />

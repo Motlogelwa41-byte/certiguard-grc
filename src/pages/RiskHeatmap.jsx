@@ -7,9 +7,11 @@ import PageHeader from "@/components/shared/PageHeader";
 import StatusBadge from "@/components/shared/StatusBadge";
 import EmptyState from "@/components/shared/EmptyState";
 import RiskDetailPanel from "@/components/risks/RiskDetailPanel";
+import RiskScenarioSimulator from "@/components/risks/RiskScenarioSimulator";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/components/ui/use-toast";
 import { exportElementToPDF } from "@/lib/boardReportExport";
+import { Play } from "lucide-react";
 
 const ZONE_COLOR = (likelihood, impact) => {
   const score = likelihood * impact;
@@ -46,6 +48,7 @@ export default function RiskHeatmap() {
   const [controls, setControls] = useState([]);
   const exportRef = useRef(null);
   const [exporting, setExporting] = useState(false);
+  const [simulatorOpen, setSimulatorOpen] = useState(false);
   const { toast } = useToast();
 
   const handleExportPDF = async () => {
@@ -204,9 +207,13 @@ export default function RiskHeatmap() {
             <Button variant="outline" size="sm" onClick={handleExportPDF} disabled={exporting}>
               <Download className="w-4 h-4 mr-1" />{exporting ? "Exporting…" : "Export PDF"}
             </Button>
+            <Button size="sm" onClick={() => setSimulatorOpen(true)}>
+              <Play className="w-4 h-4 mr-1" /> Simulate
+            </Button>
           </div>
         }
       />
+      <RiskScenarioSimulator open={simulatorOpen} onOpenChange={setSimulatorOpen} />
       <div className="space-y-6" ref={exportRef}>
 
       {/* Summary cards */}

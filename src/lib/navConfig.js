@@ -21,6 +21,7 @@ export const navSections = [
       { label: "GRC Education", path: "/grc-education", icon: Gauge, roles: ["admin", "compliance_officer", "risk_manager", "auditor", "user"] },
       { label: "User Guide", path: "/user-guide", icon: BookOpen, roles: ["admin", "compliance_officer", "risk_manager", "auditor", "user"] },
       { label: "Maturity Dashboard", path: "/maturity-dashboard", icon: LineChart, roles: ["admin", "compliance_officer", "risk_manager", "auditor"] },
+      { label: "Executive Briefing", path: "/executive-briefing", icon: Presentation, roles: ["admin", "compliance_officer", "risk_manager", "auditor", "external_auditor"] },
     ]
   },
   {
@@ -91,6 +92,7 @@ export const navSections = [
       { label: "AI Auditor", path: "/ai-auditor", icon: Brain, roles: ["admin", "compliance_officer", "auditor"] },
       { label: "Testing Agent", path: "/testing-agent", icon: TestTube, roles: ["admin", "compliance_officer", "auditor"] },
       { label: "AI Control Mapper", path: "/ai-control-mapper", icon: Zap, roles: ["admin", "compliance_officer"] },
+      { label: "AI Gap Analysis", path: "/ai-gap-analysis", icon: Brain, roles: ["admin", "compliance_officer", "risk_manager"] },
       { label: "Compliance Runs", path: "/compliance-runs", icon: Play, roles: ["admin", "compliance_officer", "auditor"] },
       { label: "Regulatory Localization", path: "/regulatory-localization", icon: Languages, roles: ["admin", "compliance_officer", "risk_manager", "auditor"] },
     ]

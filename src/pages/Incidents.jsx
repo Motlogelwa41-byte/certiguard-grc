@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
+import { Link } from "react-router-dom";
 import { base44 } from "@/api/base44Client";
-import { ShieldAlert, Plus, Pencil, Trash2, Search, Clock, ChevronDown, ChevronUp, ArrowUp } from "lucide-react";
+import { ShieldAlert, Plus, Pencil, Trash2, Search, Clock, ChevronDown, ChevronUp, ArrowUp, MessageSquare } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
@@ -59,6 +60,7 @@ function IncidentCard({ incident, onEdit, onDelete, onUpdated }) {
             <p className="text-xs text-muted-foreground mt-0.5">{incident.type?.replace(/_/g, " ").replace(/\b\w/g, c => c.toUpperCase())}</p>
           </div>
           <div className="flex items-center gap-1 shrink-0">
+            <Link to={`/incident-war-room/${incident.id}`} title="War Room" className="p-1.5 rounded hover:bg-muted"><MessageSquare className="w-3.5 h-3.5 text-primary" /></Link>
             {onEdit && <button onClick={() => onEdit(incident)} className="p-1.5 rounded hover:bg-muted"><Pencil className="w-3.5 h-3.5 text-muted-foreground" /></button>}
             {onDelete && <button onClick={() => onDelete(incident.id)} className="p-1.5 rounded hover:bg-muted"><Trash2 className="w-3.5 h-3.5 text-destructive" /></button>}
           </div>
