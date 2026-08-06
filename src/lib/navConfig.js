@@ -173,6 +173,7 @@ export const navSections = [
       { label: "Platform Governance", path: "/platform-governance", icon: ShieldCheck, roles: ["admin"] },
       { label: "Users", path: "/users", icon: Users, roles: ["admin"] },
       { label: "Security Command Center", path: "/security-command-center", icon: Shield, roles: ["admin", "compliance_officer", "risk_manager", "auditor"] },
+      { label: "Tenant Isolation Monitor", path: "/tenant-isolation", icon: ShieldCheck, roles: ["admin"] },
       { label: "UAT Checklist", path: "/testing-checklist", icon: ClipboardList, roles: ["admin", "compliance_officer", "risk_manager", "auditor"] },
       { label: "SSO & Directory", path: "/sso", icon: KeyRound, roles: ["admin"] },
       { label: "Data Privacy", path: "/data-privacy", icon: Lock, roles: ["admin", "compliance_officer"] },

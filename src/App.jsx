@@ -158,6 +158,7 @@ import PolicyExceptions from '@/pages/PolicyExceptions';
 import AIGapAnalysis from '@/pages/AIGapAnalysis';
 import ExecutiveBriefing from '@/pages/ExecutiveBriefing';
 import IncidentWarRoom from '@/pages/IncidentWarRoom';
+import TenantIsolationDashboard from '@/pages/TenantIsolationDashboard';
 import Landing from '@/pages/Landing';
 import { LanguageProvider } from '@/contexts/LanguageContext';
 
@@ -340,6 +341,7 @@ const AuthenticatedApp = () => {
           <Route path="/ai-gap-analysis" element={<AIGapAnalysis />} />
           <Route path="/executive-briefing" element={<ExecutiveBriefing />} />
           <Route path="/incident-war-room/:id" element={<IncidentWarRoom />} />
+          <Route path="/tenant-isolation" element={<TenantIsolationDashboard />} />
         </Route>
       </Route>
       <Route path="*" element={<PageNotFound />} />
