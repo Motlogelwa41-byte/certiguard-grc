@@ -152,6 +152,9 @@ import AIContractScanner from '@/pages/AIContractScanner';
 import RegulatoryLocalization from '@/pages/RegulatoryLocalization';
 import CostOfComplianceModeler from '@/pages/CostOfComplianceModeler';
 import CertificationDossier from '@/pages/CertificationDossier';
+import CrossOrgRiskAggregation from '@/pages/CrossOrgRiskAggregation';
+import WhiteLabelSettings from '@/pages/WhiteLabelSettings';
+import PolicyExceptions from '@/pages/PolicyExceptions';
 import Landing from '@/pages/Landing';
 import { LanguageProvider } from '@/contexts/LanguageContext';
 
@@ -328,6 +331,9 @@ const AuthenticatedApp = () => {
           <Route path="/regulatory-localization" element={<RegulatoryLocalization />} />
           <Route path="/cost-of-compliance" element={<CostOfComplianceModeler />} />
           <Route path="/certification-dossier" element={<CertificationDossier />} />
+          <Route path="/cross-org-risk" element={<CrossOrgRiskAggregation />} />
+          <Route path="/white-label" element={<WhiteLabelSettings />} />
+          <Route path="/policy-exceptions" element={<PolicyExceptions />} />
         </Route>
       </Route>
       <Route path="*" element={<PageNotFound />} />

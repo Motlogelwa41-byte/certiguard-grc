@@ -57,9 +57,14 @@
       "default": 0,
       "description": "Auto-calculated: likelihood \u00d7 impact"
     },
+    "currency": {
+      "type": "string",
+      "default": "ZAR",
+      "description": "ISO 4217 currency code for financial quantification (ZAR, USD, BWP, EUR, GBP, NGN, KES, GHS, ZMW, MZN, AOA, TZS)"
+    },
     "quantitative_single_loss": {
       "type": "number",
-      "description": "Inherent Impact ($) \u2014 single loss expectancy (SLE)"
+      "description": "Inherent Impact ($) \u2014 single loss expectancy (SLE) in the risk's currency"
     },
     "quantitative_annual_rate": {
       "type": "number",
@@ -68,11 +73,11 @@
     "annualized_loss_expectancy": {
       "type": "number",
       "default": 0,
-      "description": "Auto-calculated inherent ALE: single_loss \u00d7 annual_rate"
+      "description": "Auto-calculated inherent ALE: single_loss \u00d7 annual_rate (in risk currency)"
     },
     "residual_financial_impact": {
       "type": "number",
-      "description": "Residual Impact ($) \u2014 financial impact after mitigations (COSO ERM)"
+      "description": "Residual Impact ($) \u2014 financial impact after mitigations (COSO ERM), in risk currency"
     },
     "residual_likelihood_pct": {
       "type": "number",

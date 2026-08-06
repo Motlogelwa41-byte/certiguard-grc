@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import FairAnalysisForm from "@/components/privacy/FairAnalysisForm";
 import { computeFair, formatZAR, EXPOSURE_STYLE } from "@/lib/fairModel";
+import { convertCurrency, formatCurrency, CURRENCIES } from "@/lib/currencyRates";
 
 export default function RiskQuantification() {
   const [items, setItems] = useState([]);
@@ -16,7 +17,13 @@ export default function RiskQuantification() {
   const [search, setSearch] = useState("");
   const [formOpen, setFormOpen] = useState(false);
   const [editing, setEditing] = useState(null);
+  const [displayCurrency, setDisplayCurrency] = useState("ZAR");
   const { toast } = useToast();
+
+  const fmtMoney = (zarAmount) => {
+    const converted = convertCurrency(zarAmount, "ZAR", displayCurrency);
+    return formatCurrency(converted, displayCurrency);
+  };
 
   const load = () => {
     setLoading(true);
@@ -43,11 +50,16 @@ export default function RiskQuantification() {
 
   return (
     <div>
-      <PageHeader title="Risk Quantification (FAIR)" subtitle="Monetary loss quantification using the FAIR model — beyond the 5×5 heatmap"
-        actions={<Button onClick={() => { setEditing(null); setFormOpen(true); }}><Plus className="w-4 h-4" /> New analysis</Button>} />
+      <PageHeader title="Risk Quantification (FAIR)" subtitle="Monetary loss quantification using the FAIR model — multi-currency support"
+        actions={<div className="flex items-center gap-2">
+          <select value={displayCurrency} onChange={(e) => setDisplayCurrency(e.target.value)} className="h-9 rounded-md border border-input bg-transparent px-3 text-sm">
+            {CURRENCIES.map((c) => <option key={c.code} value={c.code}>{c.code} ({c.symbol})</option>)}
+          </select>
+          <Button onClick={() => { setEditing(null); setFormOpen(true); }}><Plus className="w-4 h-4" /> New analysis</Button>
+        </div>} />
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
         <StatCard label="Analyses" value={items.length} icon={Calculator} color="blue" />
-        <StatCard label="Aggregate ALE" value={formatZAR(totalALE)} icon={Calculator} color="slate" />
+        <StatCard label={`Aggregate ALE (${displayCurrency})`} value={fmtMoney(totalALE)} icon={Calculator} color="slate" />
         <StatCard label="High exposure" value={highCount} icon={Calculator} color={highCount ? "amber" : "slate"} />
         <StatCard label="Critical exposure" value={criticalCount} icon={Calculator} color={criticalCount ? "red" : "slate"} />
       </div>
@@ -86,8 +98,8 @@ export default function RiskQuantification() {
                     <td className="px-4 py-3 text-muted-foreground">{a.risk_title}</td>
                     <td className="px-4 py-3 capitalize">{a.tef_level} <span className="text-xs text-muted-foreground">({a.tef_value})</span></td>
                     <td className="px-4 py-3">{(a.lef || 0).toFixed(2)}/yr</td>
-                    <td className="px-4 py-3">{formatZAR(a.loss_magnitude_avg)}</td>
-                    <td className="px-4 py-3 font-semibold">{formatZAR(a.ale_avg)}<div className="text-xs text-muted-foreground font-normal">{formatZAR(a.ale_min)}–{formatZAR(a.ale_max)}</div></td>
+                    <td className="px-4 py-3">{fmtMoney(a.loss_magnitude_avg)}</td>
+                    <td className="px-4 py-3 font-semibold">{fmtMoney(a.ale_avg)}<div className="text-xs text-muted-foreground font-normal">{fmtMoney(a.ale_min)}–{fmtMoney(a.ale_max)}</div></td>
                     <td className="px-4 py-3"><span className={`text-xs px-2 py-0.5 rounded-full font-semibold capitalize ${EXPOSURE_STYLE[a.exposure_rating] || EXPOSURE_STYLE.low}`}>{a.exposure_rating}</span></td>
                     <td className="px-4 py-3">
                       <div className="flex justify-end gap-1">

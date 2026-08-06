@@ -4,7 +4,7 @@ import {
   ShieldCheck, FileSearch, Brain, Play, FileSpreadsheet, FileDown, BarChart3, LineChart,
   History, ShieldAlert, GraduationCap, Calendar, Bell, Users, Copy, SlidersHorizontal,
   Target, Upload, Send, Globe, Users2, MapPin, Zap, ListChecks, BellRing,
-  PieChart,   Radar, Landmark, BarChart2, Network, GitCompare, Sparkles, CreditCard, Gauge, Info, ScrollText, Activity, Factory, Plug, UserCheck, Wand2, KeyRound, Bug, Library, Presentation, TrendingDown, CalendarCheck, Rocket, ClipboardCheck,   FlaskRound, Award, FileQuestion, FlaskConical, Lock, Calculator, Server, BookOpen, Settings, Code, Cloud, Webhook, Leaf, Trophy, TestTube, FileBadge, Gavel, Fingerprint, Languages, FileArchive, DollarSign
+  PieChart,   Radar, Landmark, BarChart2, Network, GitCompare, Sparkles, CreditCard, Gauge, Info, ScrollText, Activity, Factory, Plug, UserCheck, Wand2, KeyRound, Bug, Library, Presentation, TrendingDown, CalendarCheck, Rocket, ClipboardCheck,   FlaskRound, Award, FileQuestion, FlaskConical, Lock, Calculator, Server, BookOpen, Settings, Code, Cloud, Webhook, Leaf, Trophy, TestTube, FileBadge, Gavel, Fingerprint, Languages, FileArchive, DollarSign, Palette, ShieldX
 } from "lucide-react";
 // NOTE: ClipboardList imported above is reused for the UAT checklist item below.
 
@@ -68,6 +68,7 @@ export const navSections = [
       { label: "Monte Carlo Forecast", path: "/monte-carlo-forecast", icon: Activity, roles: ["admin", "compliance_officer", "risk_manager", "auditor"] },
       { label: "Cross-Border Matrix", path: "/cross-border-matrix", icon: Globe, roles: ["admin", "compliance_officer", "risk_manager", "auditor"] },
       { label: "Cost of Compliance", path: "/cost-of-compliance", icon: DollarSign, roles: ["admin", "compliance_officer", "risk_manager", "auditor"] },
+      { label: "Cross-Org Rollup", path: "/cross-org-risk", icon: Building2, roles: ["admin", "risk_manager"] },
     ]
   },
   {
@@ -76,6 +77,7 @@ export const navSections = [
       { label: "Policies", path: "/policies", icon: FileText, roles: ["admin", "compliance_officer", "risk_manager", "auditor", "user"] },
       { label: "My Policies", path: "/my-policies", icon: FileText, roles: ["user", "hr", "department_head"] },
       { label: "Policy Templates", path: "/policy-templates", icon: Copy, roles: ["admin", "compliance_officer"] },
+      { label: "Policy Exceptions", path: "/policy-exceptions", icon: ShieldX, roles: ["admin", "compliance_officer", "risk_manager"] },
       { label: "Evidence", path: "/evidence", icon: Paperclip, roles: ["admin", "compliance_officer", "risk_manager", "auditor"] },
       { label: "Bulk Evidence", path: "/bulk-evidence", icon: Upload, roles: ["admin", "compliance_officer", "auditor"] },
       { label: "Evidence Reminders", path: "/evidence-reminders", icon: BellRing, roles: ["admin", "compliance_officer", "auditor"] },
@@ -179,6 +181,7 @@ export const navSections = [
       { label: "Statutory Calendar", path: "/statutory-calendar", icon: FileBadge, roles: ["admin", "compliance_officer", "risk_manager"] },
       { label: "Whistleblower Cases", path: "/whistleblower-cases", icon: Shield, roles: ["admin", "compliance_officer"] },
       { label: "COI & Insider Threat", path: "/coi-portal", icon: ShieldAlert, roles: ["admin", "compliance_officer", "risk_manager", "user"] },
+      { label: "White-Label Branding", path: "/white-label", icon: Palette, roles: ["admin"] },
       { label: "Tenant Settings", path: "/tenant-settings", icon: Settings, roles: ["admin"] },
       { label: "Tenants", path: "/tenant-admin", icon: PieChart, roles: ["admin"] },
       { label: "Billing", path: "/billing", icon: CreditCard, roles: ["admin"] },

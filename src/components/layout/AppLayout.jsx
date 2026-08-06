@@ -11,10 +11,49 @@ import MfaEnforcementGate from "@/components/shared/MfaEnforcementGate";
 import SecurityPolicyBanner from "@/components/shared/SecurityPolicyBanner";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { Globe } from "lucide-react";
+import { base44 } from "@/api/base44Client";
+
+function hexToHsl(hex) {
+  if (!hex || !hex.startsWith("#")) return null;
+  const r = parseInt(hex.slice(1, 3), 16) / 255;
+  const g = parseInt(hex.slice(3, 5), 16) / 255;
+  const b = parseInt(hex.slice(5, 7), 16) / 255;
+  const max = Math.max(r, g, b), min = Math.min(r, g, b);
+  let h, s, l = (max + min) / 2;
+  if (max === min) { h = s = 0; }
+  else {
+    const d = max - min;
+    s = l > 0.5 ? d / (2 - max - min) : d / (max + min);
+    switch (max) {
+      case r: h = (g - b) / d + (g < b ? 6 : 0); break;
+      case g: h = (b - r) / d + 2; break;
+      case b: h = (r - g) / d + 4; break;
+    }
+    h /= 6;
+  }
+  return `${Math.round(h * 360)} ${Math.round(s * 100)}% ${Math.round(l * 100)}%`;
+}
 
 export default function AppLayout() {
   const [searchOpen, setSearchOpen] = useState(false);
   const locked = useIdleLock();
+
+  useEffect(() => {
+    base44.entities.TenantSettings.list("-created_date", 5)
+      .then((items) => {
+        if (items && items.length > 0) {
+          const s = items[0];
+          const root = document.documentElement;
+          const primary = hexToHsl(s.brand_primary_color);
+          const secondary = hexToHsl(s.brand_secondary_color);
+          const accent = hexToHsl(s.brand_accent_color);
+          if (primary) root.style.setProperty("--primary", primary);
+          if (secondary) root.style.setProperty("--sidebar-primary", secondary);
+          if (accent) root.style.setProperty("--ring", accent);
+        }
+      })
+      .catch(() => {});
+  }, []);
 
   useEffect(() => {
     const handler = (e) => {
