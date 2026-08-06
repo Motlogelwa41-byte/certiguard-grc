@@ -837,6 +837,50 @@ const categoryColors = {
   "Food Safety & Standards": "bg-green-100 text-green-700",
 };
 
+// Maps library categories → valid FrameworkRequirement categories (supports governance & privacy)
+const REQ_CATEGORY_MAP = {
+  "Data Privacy": "privacy",
+  "Cybersecurity": "security_operations",
+  "Financial Services": "risk_management",
+  "Telecommunications & ICT": "security_operations",
+  "Healthcare & Pharma": "compliance",
+  "Energy & Utilities": "compliance",
+  "Procurement & Public Finance": "governance",
+  "Corporate Registry & IP": "governance",
+  "Professional Services & Audit": "compliance",
+  "Real Estate & Property": "compliance",
+  "Competition & Antitrust": "compliance",
+  "Trade & Industry": "compliance",
+  "Public Finance & Governance": "governance",
+  "Business & Industry": "governance",
+  "Tax & Revenue": "compliance",
+  "Food Safety & Standards": "compliance",
+  "Mining & ESG": "compliance",
+  "ESG Reporting": "compliance",
+};
+
+// Maps library categories → valid Control categories (no governance/privacy — use compliance/data_protection)
+const CONTROL_CATEGORY_MAP = {
+  "Data Privacy": "data_protection",
+  "Cybersecurity": "security_operations",
+  "Financial Services": "risk_management",
+  "Telecommunications & ICT": "security_operations",
+  "Healthcare & Pharma": "compliance",
+  "Energy & Utilities": "compliance",
+  "Procurement & Public Finance": "compliance",
+  "Corporate Registry & IP": "compliance",
+  "Professional Services & Audit": "compliance",
+  "Real Estate & Property": "compliance",
+  "Competition & Antitrust": "compliance",
+  "Trade & Industry": "compliance",
+  "Public Finance & Governance": "compliance",
+  "Business & Industry": "compliance",
+  "Tax & Revenue": "compliance",
+  "Food Safety & Standards": "compliance",
+  "Mining & ESG": "compliance",
+  "ESG Reporting": "compliance",
+};
+
 export default function SADCFrameworks() {
   const [frameworks, setFrameworks] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -856,18 +900,78 @@ export default function SADCFrameworks() {
   const handleImport = async (lib) => {
     setImporting(lib.id);
     try {
-      await base44.entities.Framework.create({
+      // 1. Create the Framework record
+      const framework = await base44.entities.Framework.create({
         name: lib.name,
         version: lib.version,
         description: `${lib.full_name}. ${lib.description}`,
         status: "not_started",
         readiness_score: 0,
-        total_controls: lib.controls_count,
+        total_controls: lib.key_requirements.length,
         passing_controls: 0,
       });
+
+      const reqCategory = REQ_CATEGORY_MAP[lib.category] || "compliance";
+      const ctrlCategory = CONTROL_CATEGORY_MAP[lib.category] || "compliance";
+      const codePrefix = lib.id.split("_")[0].toUpperCase();
+
+      // 2. Create FrameworkRequirement records (one per key requirement)
+      const requirements = await base44.entities.FrameworkRequirement.bulkCreate(
+        lib.key_requirements.map((req, i) => ({
+          framework_id: framework.id,
+          framework_name: lib.name,
+          framework_code: codePrefix,
+          requirement_id: `${codePrefix}-${String(i + 1).padStart(2, "0")}`,
+          title: req,
+          description: `${req} — as mandated under ${lib.full_name}.`,
+          section: lib.category,
+          category: reqCategory,
+          is_mandatory: lib.mandatory,
+          guidance: lib.description,
+          order_index: i,
+          mapped_control_count: 1,
+        }))
+      );
+
+      // 3. Create Control records (one per requirement)
+      const controls = await base44.entities.Control.bulkCreate(
+        lib.key_requirements.map((req, i) => ({
+          control_id: `${codePrefix}-${String(i + 1).padStart(2, "0")}`,
+          title: req,
+          description: `Implementation control for ${req} under ${lib.name}.`,
+          category: ctrlCategory,
+          status: "not_tested",
+          severity: lib.mandatory ? "high" : "medium",
+          framework_ids: [framework.id],
+          framework_names: [lib.name],
+          automation_status: "manual",
+        }))
+      );
+
+      // 4. Wire requirements ↔ controls via RequirementControlMapping
+      await base44.entities.RequirementControlMapping.bulkCreate(
+        requirements.map((req, i) => ({
+          requirement_id: req.id,
+          requirement_title: req.title,
+          requirement_ref: req.requirement_id,
+          framework_id: framework.id,
+          framework_name: lib.name,
+          framework_code: codePrefix,
+          control_id: controls[i].id,
+          control_title: controls[i].title,
+          control_ref: controls[i].control_id,
+          mapping_confidence: "full",
+          mapping_notes: "Auto-generated on framework import.",
+          status: "active",
+        }))
+      );
+
       const updated = await base44.entities.Framework.list();
       setFrameworks(updated);
-      toast({ title: `${lib.name} imported`, description: `Added to your Frameworks with ${lib.controls_count} controls pre-configured.` });
+      toast({
+        title: `${lib.name} imported & wired`,
+        description: `${lib.key_requirements.length} requirements, controls, and mappings created. Ready for evidence collection, gap analysis, and audit.`,
+      });
     } catch (e) {
       toast({ title: "Import failed", description: e.message, variant: "destructive" });
     }
