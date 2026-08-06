@@ -1,90 +1,30 @@
-import React, { useState, useEffect, useMemo } from "react";
+import React, { useState, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
 import { useToast } from "@/components/ui/use-toast";
-import { Loader2, Building2, AlertTriangle, Shield, TrendingDown, ChevronDown, ChevronRight } from "lucide-react";
+import { Loader2, Building2, AlertTriangle, Shield, ChevronDown, ChevronRight } from "lucide-react";
 import PageHeader from "@/components/shared/PageHeader";
 import StatCard from "@/components/shared/StatCard";
 import StatusBadge from "@/components/shared/StatusBadge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { formatCurrency, formatCurrencyCompact, convertCurrency, CURRENCIES } from "@/lib/currencyRates";
+import { formatCurrency, formatCurrencyCompact } from "@/lib/currencyRates";
 
 export default function CrossOrgRiskAggregation() {
-  const [tenants, setTenants] = useState([]);
-  const [risks, setRisks] = useState([]);
-  const [controls, setControls] = useState([]);
+  const [data, setData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [expanded, setExpanded] = useState(null);
   const { toast } = useToast();
 
   useEffect(() => {
-    Promise.all([
-      base44.entities.Tenant.list("-created_date", 200),
-      base44.entities.Risk.list("-created_date", 500),
-      base44.entities.Control.list("-created_date", 500),
-    ]).then(([t, r, c]) => {
-      setTenants(t || []);
-      setRisks(r || []);
-      setControls(c || []);
-    }).catch(() => toast({ title: "Failed to load aggregation data", variant: "destructive" }))
+    base44.functions.invoke("aggregateCrossOrgRisk", {})
+      .then((res) => { setData(res.data || res); })
+      .catch(() => toast({ title: "Failed to load aggregation data", variant: "destructive" }))
       .finally(() => setLoading(false));
   }, []);
 
-  // Build hierarchy: find holding companies (parent_tenant_id is empty but has children)
-  const holdingCompanies = useMemo(() => {
-    return tenants.filter((t) => t.entity_type === "holding_company" || (!t.parent_tenant_id && tenants.some((c) => c.parent_tenant_id === t.id)));
-  }, [tenants]);
-
-  const getSubsidiaries = (parentId) => tenants.filter((t) => t.parent_tenant_id === parentId);
-
-  const getTenantRisks = (tenantId) => {
-    // Risks are tenant-scoped via RLS, but admin can see all. Match by tenant_id field.
-    return risks.filter((r) => r.tenant_id === tenantId);
+  const rollupMetrics = data?.globalRollup || {
+    totalEntities: 0, totalRisks: 0, criticalRisks: 0, totalALE: 0, totalResidualALE: 0, compliancePct: 0,
   };
-
-  const getTenantControls = (tenantId) => controls.filter((c) => c.tenant_id === tenantId);
-
-  const computeMetrics = (tenantId) => {
-    const tRisks = getTenantRisks(tenantId);
-    const tControls = getTenantControls(tenantId);
-    const openRisks = tRisks.filter((r) => r.status === "open" || r.status === "mitigating");
-    const totalALE = tRisks.reduce((s, r) => s + (r.annualized_loss_expectancy || 0), 0);
-    const totalResidualALE = tRisks.reduce((s, r) => s + (r.residual_annualized_loss_expectancy || 0), 0);
-    const criticalRisks = tRisks.filter((r) => (r.risk_score || 0) >= 16);
-    const highRisks = tRisks.filter((r) => (r.risk_score || 0) >= 12 && (r.risk_score || 0) < 16);
-    const compliantControls = tControls.filter((c) => c.status === "compliant" || c.status === "effective");
-    const compliancePct = tControls.length > 0 ? (compliantControls.length / tControls.length) * 100 : 0;
-    const avgRiskScore = tRisks.length > 0 ? tRisks.reduce((s, r) => s + (r.risk_score || 0), 0) / tRisks.length : 0;
-    return {
-      totalRisks: tRisks.length,
-      openRisks: openRisks.length,
-      criticalRisks: criticalRisks.length,
-      highRisks: highRisks.length,
-      totalALE,
-      totalResidualALE,
-      compliancePct: Math.round(compliancePct),
-      avgRiskScore: avgRiskScore.toFixed(1),
-      totalControls: tControls.length,
-      compliantControls: compliantControls.length,
-    };
-  };
-
-  const rollupMetrics = useMemo(() => {
-    const allRisks = risks;
-    const allControls = controls;
-    const totalALE = allRisks.reduce((s, r) => s + (r.annualized_loss_expectancy || 0), 0);
-    const totalResidualALE = allRisks.reduce((s, r) => s + (r.residual_annualized_loss_expectancy || 0), 0);
-    const criticalCount = allRisks.filter((r) => (r.risk_score || 0) >= 16).length;
-    const compliantControls = allControls.filter((c) => c.status === "compliant" || c.status === "effective");
-    const compliancePct = allControls.length > 0 ? (compliantControls.length / allControls.length) * 100 : 0;
-    return {
-      totalEntities: tenants.length,
-      totalRisks: allRisks.length,
-      criticalRisks: criticalCount,
-      totalALE,
-      totalResidualALE,
-      compliancePct: Math.round(compliancePct),
-    };
-  }, [tenants, risks, controls]);
+  const holdingCompanies = data?.groups || [];
 
   if (loading) {
     return <div className="flex justify-center py-16"><Loader2 className="w-8 h-8 animate-spin text-muted-foreground" /></div>;
@@ -124,8 +64,7 @@ export default function CrossOrgRiskAggregation() {
       ) : (
         <div className="space-y-4">
           {holdingCompanies.map((hc) => {
-            const subs = getSubsidiaries(hc.id);
-            const hcMetrics = computeMetrics(hc.id);
+            const subs = hc.subsidiaries || [];
             const isExpanded = expanded === hc.id;
             return (
               <Card key={hc.id} className="overflow-hidden">
@@ -136,13 +75,13 @@ export default function CrossOrgRiskAggregation() {
                       <Building2 className="w-5 h-5 text-primary" />
                       <div>
                         <CardTitle className="text-base">{hc.name}</CardTitle>
-                        <p className="text-xs text-muted-foreground">{subs.length} subsidiary{subs.length !== 1 ? "ies" : ""} · {hcMetrics.totalRisks} risks · {hcMetrics.compliancePct}% compliant</p>
+                        <p className="text-xs text-muted-foreground">{hc.subsidiaryCount || 0} subsidiary{(hc.subsidiaryCount || 0) !== 1 ? "ies" : ""} · {hc.totalRisks} risks · {hc.compliancePct}% compliant</p>
                       </div>
                     </div>
                     <div className="flex items-center gap-6 text-sm">
-                      <div className="text-right"><span className="text-xs text-muted-foreground block">Inherent ALE</span><span className="font-semibold">{formatCurrencyCompact(hcMetrics.totalALE, "ZAR")}</span></div>
-                      <div className="text-right"><span className="text-xs text-muted-foreground block">Residual ALE</span><span className="font-semibold text-emerald-600">{formatCurrencyCompact(hcMetrics.totalResidualALE, "ZAR")}</span></div>
-                      <div className="text-right"><span className="text-xs text-muted-foreground block">Critical</span><span className={`font-semibold ${hcMetrics.criticalRisks ? "text-red-600" : ""}`}>{hcMetrics.criticalRisks}</span></div>
+                      <div className="text-right"><span className="text-xs text-muted-foreground block">Inherent ALE</span><span className="font-semibold">{formatCurrencyCompact(hc.totalALE, "ZAR")}</span></div>
+                      <div className="text-right"><span className="text-xs text-muted-foreground block">Residual ALE</span><span className="font-semibold text-emerald-600">{formatCurrencyCompact(hc.totalResidualALE, "ZAR")}</span></div>
+                      <div className="text-right"><span className="text-xs text-muted-foreground block">Critical</span><span className={`font-semibold ${hc.criticalRisks ? "text-red-600" : ""}`}>{hc.criticalRisks}</span></div>
                     </div>
                   </div>
                 </CardHeader>
@@ -156,7 +95,6 @@ export default function CrossOrgRiskAggregation() {
                             <th className="text-left px-4 py-2">Entity Type</th>
                             <th className="text-center px-4 py-2">Risks</th>
                             <th className="text-center px-4 py-2">Critical</th>
-                            <th className="text-center px-4 py-2">Avg Score</th>
                             <th className="text-right px-4 py-2">Inherent ALE</th>
                             <th className="text-right px-4 py-2">Residual ALE</th>
                             <th className="text-center px-4 py-2">Compliance</th>
@@ -167,37 +105,31 @@ export default function CrossOrgRiskAggregation() {
                           <tr className="border-t border-border bg-primary/5">
                             <td className="px-4 py-2 font-medium">{hc.name} (Direct)</td>
                             <td className="px-4 py-2"><StatusBadge status={hc.entity_type || "standalone"} /></td>
-                            <td className="text-center px-4 py-2">{hcMetrics.totalRisks}</td>
-                            <td className="text-center px-4 py-2">{hcMetrics.criticalRisks}</td>
-                            <td className="text-center px-4 py-2">{hcMetrics.avgRiskScore}</td>
-                            <td className="text-right px-4 py-2 font-semibold">{formatCurrencyCompact(hcMetrics.totalALE, "ZAR")}</td>
-                            <td className="text-right px-4 py-2 font-semibold text-emerald-600">{formatCurrencyCompact(hcMetrics.totalResidualALE, "ZAR")}</td>
-                            <td className="text-center px-4 py-2">{hcMetrics.compliancePct}%</td>
+                            <td className="text-center px-4 py-2">{hc.totalRisks - subs.reduce((s, sub) => s + sub.totalRisks, 0)}</td>
+                            <td className="text-center px-4 py-2">{hc.criticalRisks - subs.reduce((s, sub) => s + sub.criticalRisks, 0)}</td>
+                            <td className="text-right px-4 py-2 font-semibold">{formatCurrencyCompact(hc.totalALE - subs.reduce((s, sub) => s + sub.totalALE, 0), "ZAR")}</td>
+                            <td className="text-right px-4 py-2 font-semibold text-emerald-600">{formatCurrencyCompact(hc.totalResidualALE - subs.reduce((s, sub) => s + sub.totalResidualALE, 0), "ZAR")}</td>
+                            <td className="text-center px-4 py-2">{hc.compliancePct}%</td>
                           </tr>
-                          {subs.map((sub) => {
-                            const m = computeMetrics(sub.id);
-                            return (
-                              <tr key={sub.id} className="border-t border-border hover:bg-accent/30">
-                                <td className="px-4 py-2 pl-8">↳ {sub.name}</td>
-                                <td className="px-4 py-2"><StatusBadge status={sub.entity_type || "subsidiary"} /></td>
-                                <td className="text-center px-4 py-2">{m.totalRisks}</td>
-                                <td className="text-center px-4 py-2">{m.criticalRisks}</td>
-                                <td className="text-center px-4 py-2">{m.avgRiskScore}</td>
-                                <td className="text-right px-4 py-2 font-semibold">{formatCurrencyCompact(m.totalALE, "ZAR")}</td>
-                                <td className="text-right px-4 py-2 font-semibold text-emerald-600">{formatCurrencyCompact(m.totalResidualALE, "ZAR")}</td>
-                                <td className="text-center px-4 py-2">{m.compliancePct}%</td>
-                              </tr>
-                            );
-                          })}
+                          {subs.map((sub) => (
+                            <tr key={sub.id} className="border-t border-border hover:bg-accent/30">
+                              <td className="px-4 py-2 pl-8">↳ {sub.name}</td>
+                              <td className="px-4 py-2"><StatusBadge status={sub.entity_type || "subsidiary"} /></td>
+                              <td className="text-center px-4 py-2">{sub.totalRisks}</td>
+                              <td className="text-center px-4 py-2">{sub.criticalRisks}</td>
+                              <td className="text-right px-4 py-2 font-semibold">{formatCurrencyCompact(sub.totalALE, "ZAR")}</td>
+                              <td className="text-right px-4 py-2 font-semibold text-emerald-600">{formatCurrencyCompact(sub.totalResidualALE, "ZAR")}</td>
+                              <td className="text-center px-4 py-2">{sub.compliancePct}%</td>
+                            </tr>
+                          ))}
                           {/* Rollup total */}
                           <tr className="border-t-2 border-border bg-muted/30 font-bold">
                             <td className="px-4 py-2" colSpan={2}>Group Total ({hc.name})</td>
-                            <td className="text-center px-4 py-2">{hcMetrics.totalRisks + subs.reduce((s, sub) => s + computeMetrics(sub.id).totalRisks, 0)}</td>
-                            <td className="text-center px-4 py-2">{hcMetrics.criticalRisks + subs.reduce((s, sub) => s + computeMetrics(sub.id).criticalRisks, 0)}</td>
-                            <td className="text-center px-4 py-2">—</td>
-                            <td className="text-right px-4 py-2">{formatCurrencyCompact(hcMetrics.totalALE + subs.reduce((s, sub) => s + computeMetrics(sub.id).totalALE, 0), "ZAR")}</td>
-                            <td className="text-right px-4 py-2 text-emerald-600">{formatCurrencyCompact(hcMetrics.totalResidualALE + subs.reduce((s, sub) => s + computeMetrics(sub.id).totalResidualALE, 0), "ZAR")}</td>
-                            <td className="text-center px-4 py-2">{Math.round((hcMetrics.compliancePct + subs.reduce((s, sub) => s + computeMetrics(sub.id).compliancePct, 0)) / (1 + subs.length))}%</td>
+                            <td className="text-center px-4 py-2">{hc.totalRisks}</td>
+                            <td className="text-center px-4 py-2">{hc.criticalRisks}</td>
+                            <td className="text-right px-4 py-2">{formatCurrencyCompact(hc.totalALE, "ZAR")}</td>
+                            <td className="text-right px-4 py-2 text-emerald-600">{formatCurrencyCompact(hc.totalResidualALE, "ZAR")}</td>
+                            <td className="text-center px-4 py-2">{hc.compliancePct}%</td>
                           </tr>
                         </tbody>
                       </table>

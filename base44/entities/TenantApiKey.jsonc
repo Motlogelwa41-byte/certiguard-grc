@@ -18,6 +18,21 @@
       "type": "boolean",
       "default": true
     },
+    "rate_limit_per_hour": {
+      "type": "number",
+      "default": 1000,
+      "description": "Token-bucket rate limit \u2014 max API requests per hour for this key"
+    },
+    "requests_this_hour": {
+      "type": "number",
+      "default": 0,
+      "description": "Counter of requests made in the current hour window"
+    },
+    "hour_window_start": {
+      "type": "string",
+      "format": "date-time",
+      "description": "ISO timestamp when the current rate-limit hour window started"
+    },
     "created_by_name": {
       "type": "string"
     },
