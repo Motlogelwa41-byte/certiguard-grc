@@ -262,7 +262,7 @@ export default function Policies() {
                 <div className="flex items-center justify-between text-xs pt-2 border-t border-border">
                   <span className="text-muted-foreground">{p.acknowledgment_required ? "Ack required" : "No ack needed"}</span>
                   <div className="flex items-center gap-1">
-                    {p.status === "approved" && (
+                    {(p.status === "draft" || p.status === "in_review" || p.status === "pending_approval" || p.status === "approved") && (
                       <Can permission="policies:approve"><button onClick={() => handlePublish(p)} className="p-1 rounded hover:bg-muted" title="Publish for acknowledgment"><Globe className="w-3.5 h-3.5 text-teal-600" /></button></Can>
                     )}
                     {p.status === "published" && p.acknowledgment_required && (

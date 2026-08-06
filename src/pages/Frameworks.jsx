@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { base44 } from "@/api/base44Client";
-import { Shield, Plus, Pencil, Trash2, ArrowRight } from "lucide-react";
+import { Shield, Plus, Pencil, Trash2, ArrowRight, Library } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
@@ -71,6 +71,7 @@ export default function Frameworks() {
       <PageHeader title="Frameworks" subtitle="Manage compliance frameworks and track readiness" actions={
         <div className="flex items-center gap-3">
           {fwLimit && <span className="text-xs text-muted-foreground">{items.length} / {fwLimit} frameworks</span>}
+          <Button size="sm" variant="outline" onClick={() => navigate('/control-libraries')}><Library className="w-4 h-4 mr-1" /> Import Library</Button>
           <Button size="sm" onClick={() => { setForm(defaultForm); setEditId(null); setOpen(true); }}><Plus className="w-4 h-4 mr-1" /> Add Framework</Button>
         </div>
       } />

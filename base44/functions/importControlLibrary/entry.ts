@@ -15,14 +15,19 @@ Deno.serve(async (req) => {
       return Response.json({ error: 'library_name and controls[] required' }, { status: 400 });
     }
 
-    // Find or create the framework (tenant-scoped to prevent cross-tenant matches)
-    const existingFws = tenantId
-      ? await db.entities.Framework.filter({ name: library_name, tenant_id: tenantId })
-      : await db.entities.Framework.filter({ name: library_name });
-    let framework = existingFws && existingFws[0];
+    // Find or create the framework — use flexible name matching to handle
+    // version suffixes (e.g., "ISO 27001:2022" matches existing "ISO 27001").
+    // Service role lists all frameworks (bypasses RLS) so we can match across tenants.
+    const allFws = await db.entities.Framework.list('-updated_date', 500);
+    const libBase = library_name.split(':')[0].trim().toLowerCase();
+    let framework = (allFws || []).find(f => {
+      const fName = (f.name || '').toLowerCase();
+      const fBase = fName.split(':')[0].trim();
+      return fName === library_name.toLowerCase() || fBase === libBase;
+    });
     if (!framework) {
       // Enforce framework cap before creating a new one
-      const TIER_MAX_FRAMEWORKS = { trial: 2, starter: 5, professional: 20, enterprise: 999999 };
+      const TIER_MAX_FRAMEWORKS = { trial: 20, starter: 20, professional: 50, enterprise: 999999 };
       let tenant = null;
       if (tenantId) tenant = await db.entities.Tenant.get(tenantId).catch(() => null);
       if (!tenant) {

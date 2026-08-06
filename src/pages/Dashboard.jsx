@@ -44,21 +44,21 @@ export default function Dashboard() {
   useEffect(() => {
     if (["risk_manager", "auditor", "viewer", "user", "hr", "department_head", "external_auditor"].includes(role)) return;
     Promise.all([
-      base44.entities.Framework.list(),
-      base44.entities.Control.list(),
-      base44.entities.Risk.list(),
-      base44.entities.ComplianceTask.list(),
-      base44.entities.Vendor.list(),
-      base44.entities.VendorAssessment.list(),
+      base44.entities.Framework.list().catch(() => []),
+      base44.entities.Control.list().catch(() => []),
+      base44.entities.Risk.list().catch(() => []),
+      base44.entities.ComplianceTask.list().catch(() => []),
+      base44.entities.Vendor.list().catch(() => []),
+      base44.entities.VendorAssessment.list().catch(() => []),
     ]).then(([f, c, r, t, v, a]) => {
-      setFrameworks(f);
-      setControls(c);
-      setRisks(r);
-      setTasks(t);
-      setVendors(v);
-      setAssessments(a);
+      setFrameworks(f || []);
+      setControls(c || []);
+      setRisks(r || []);
+      setTasks(t || []);
+      setVendors(v || []);
+      setAssessments(a || []);
       setLoading(false);
-    });
+    }).catch(() => setLoading(false));
   }, [role]);
 
   if (role === "external_auditor") return <Navigate to="/auditor-portal" replace />;

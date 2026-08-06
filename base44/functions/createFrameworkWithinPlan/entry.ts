@@ -10,7 +10,7 @@ import { createClientFromRequest } from 'npm:@base44/sdk@0.8.40';
 // a stamped tenant_id the record is created the same way the UI does and then
 // tenant_id is stamped via a service-role update so future cap counts are accurate.
 
-const TIER_MAX_FRAMEWORKS = { trial: 2, starter: 5, professional: 20, enterprise: 999999 };
+const TIER_MAX_FRAMEWORKS = { trial: 20, starter: 20, professional: 50, enterprise: 999999 };
 
 Deno.serve(async (req) => {
   try {
