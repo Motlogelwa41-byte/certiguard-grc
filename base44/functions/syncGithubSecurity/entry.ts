@@ -54,9 +54,10 @@ export default async function(req) {
       throw new Error('Failed to list repositories');
     }
 
-    // Load existing findings to avoid duplicates
+    // Load existing findings to avoid duplicates — filter to GitHub-prefixed IDs only
+    // so non-GitHub 'other'-source findings don't pollute the dedupe set.
     const existing = await sr.entities.SecurityFinding.filter({ source: 'other' }, '-created_date', 500);
-    const existingKeys = new Set((existing || []).map((f) => f.finding_id).filter(Boolean));
+    const existingKeys = new Set((existing || []).map((f) => f.finding_id).filter((f) => f && f.startsWith('GH-')));
 
     // Load controls for linking
     const controls = await sr.entities.Control.list('-updated_date', 500);

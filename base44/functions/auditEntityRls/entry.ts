@@ -80,12 +80,21 @@ export default async function(req) {
           else if (!anyTenantSet) issues.push('Records have tenant_id field but all values are null');
         }
       } catch (e) {
-        // Access denied = RLS enforcement active
-        hasTenantId = true;
-        rlsWorking = true;
+        const msg = (e?.message || String(e || '')).toLowerCase();
+        if (!base44.entities[entityName]) {
+          issues.push(`Entity "${entityName}" not found in SDK — verify the entity exists and is correctly named`);
+          // Leave hasTenantId/rlsWorking false → status 'fail' so it gets investigated
+        } else if (msg.includes('forbidden') || msg.includes('unauthorized') || msg.includes('403') || msg.includes('401') || msg.includes('access denied') || msg.includes('permission')) {
+          // Access denied = RLS enforcement active (good sign)
+          hasTenantId = true;
+          rlsWorking = true;
+        } else {
+          issues.push(`Audit probe error: ${e?.message || e}`);
+          // Leave as false → status 'fail'/'warning' so it surfaces for investigation instead of a false pass
+        }
       }
 
-      const status: 'pass' | 'fail' | 'warning' = hasTenantId && rlsWorking ? 'pass' : (!hasTenantId ? 'fail' : 'warning');
+      const status: 'pass' | 'fail' | 'warning' = hasTenantId && rlsWorking && issues.length === 0 ? 'pass' : (!hasTenantId ? 'fail' : 'warning');
 
       audits.push({
         entity_name: entityName,
