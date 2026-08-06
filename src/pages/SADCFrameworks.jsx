@@ -94,16 +94,20 @@ export default function SADCFrameworks() {
   const handleImport = async (lib) => {
     setImporting(lib.id);
     try {
-      // 1. Create the Framework record
-      const framework = await base44.entities.Framework.create({
-        name: lib.name,
-        version: lib.version,
-        description: `${lib.full_name}. ${lib.description}`,
-        status: "not_started",
-        readiness_score: 0,
-        total_controls: lib.key_requirements.length,
-        passing_controls: 0,
+      // 1. Create the Framework record via plan-limited guard function
+      const planRes = await base44.functions.invoke('createFrameworkWithinPlan', {
+        framework: {
+          name: lib.name,
+          version: lib.version,
+          description: `${lib.full_name}. ${lib.description}`,
+          status: "not_started",
+          readiness_score: 0,
+          total_controls: lib.key_requirements.length,
+          passing_controls: 0,
+        }
       });
+      if (planRes.data?.error) throw new Error(planRes.data.error);
+      const framework = planRes.data.framework;
 
       const reqCategory = REQ_CATEGORY_MAP[lib.category] || "compliance";
       const ctrlCategory = CONTROL_CATEGORY_MAP[lib.category] || "compliance";
