@@ -186,7 +186,7 @@ export default function BulkUploadPanel({ controls = [], onComplete }) {
         <Upload className={`w-9 h-9 mx-auto mb-2 ${isDragging ? "text-primary" : "text-muted-foreground"}`} />
         <p className="font-semibold text-foreground">Drag & drop files here or click to browse</p>
         <p className="text-sm text-muted-foreground mt-1">Upload many files at once — PDFs, screenshots, logs, certificates</p>
-        <input id="bulk-file-input-mgr" type="file" multiple className="hidden" onChange={(e) => { addFiles(e.target.files); e.target.value = ""; }} />
+        <input id="bulk-file-input-mgr" type="file" multiple data-testid="bulk-file-input" aria-label="Upload evidence files" className="sr-only" onChange={(e) => { addFiles(e.target.files); e.target.value = ""; }} />
       </div>
 
       {files.length > 0 && (

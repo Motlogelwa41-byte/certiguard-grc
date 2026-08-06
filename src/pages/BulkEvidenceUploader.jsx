@@ -191,7 +191,7 @@ export default function BulkEvidenceUploader() {
         <Upload className="w-10 h-10 text-muted-foreground mx-auto mb-3" />
         <p className="font-semibold text-foreground">Drop files here or click to browse</p>
         <p className="text-sm text-muted-foreground mt-1">Supports any file type — PDFs, screenshots, logs, certificates</p>
-        <input id="bulk-file-input" type="file" multiple className="hidden" onChange={e => addFiles(e.target.files)} />
+        <input id="bulk-file-input" type="file" multiple data-testid="bulk-file-input" aria-label="Upload evidence files" className="sr-only" onChange={e => addFiles(e.target.files)} />
       </div>
 
       {files.length > 0 && (
