@@ -11,6 +11,7 @@ import { Button } from "@/components/ui/button";
 import EvidenceReviewDialog from "@/components/auditor/EvidenceReviewDialog";
 import AuditorFindingDialog from "@/components/auditor/AuditorFindingDialog";
 import AuditorRequestDialog from "@/components/auditor/AuditorRequestDialog";
+import EvidencePacksTab from "@/components/auditor/EvidencePacksTab";
 
 export default function AuditorPortal() {
   const { user } = useAuth();
@@ -101,6 +102,7 @@ export default function AuditorPortal() {
           <TabsTrigger value="findings">Findings</TabsTrigger>
           <TabsTrigger value="requests">Requests</TabsTrigger>
           <TabsTrigger value="mapping">Framework Mapping</TabsTrigger>
+          <TabsTrigger value="packs">Evidence Packs</TabsTrigger>
         </TabsList>
 
         <TabsContent value="evidence" className="mt-4">
@@ -303,6 +305,14 @@ export default function AuditorPortal() {
               );
             })}
           </div>
+        </TabsContent>
+
+        <TabsContent value="packs" className="mt-4">
+          <EvidencePacksTab
+            frameworks={allFw ? frameworks : frameworks.filter((f) => scopedFwIds.includes(f.id))}
+            controls={scopedControls}
+            evidence={scopedEvidence}
+          />
         </TabsContent>
       </Tabs>
 
