@@ -1,4 +1,5 @@
 import { createClientFromRequest } from 'npm:@base44/sdk@0.8.38';
+import { secrets } from 'base44:runtime';
 
 const SLA = { critical: 168, high: 336, medium: 720, low: 2160, info: 4320 };
 const SEV_MAP = { CRITICAL: 'critical', HIGH: 'high', MEDIUM: 'medium', LOW: 'low', INFORMATIONAL: 'info' };
@@ -50,13 +51,21 @@ Deno.serve(async (req) => {
   let conn = null;
   try {
     const base44 = createClientFromRequest(req);
-    const user = await base44.auth.me();
-    if (!user) return Response.json({ error: 'Unauthorized' }, { status: 401 });
-    if (user.role !== 'admin' && user.role !== 'compliance_officer') return Response.json({ error: 'Forbidden' }, { status: 403 });
     const body = await req.json().catch(() => ({}));
-    if (body?.connection_id) conn = await base44.entities.Connection.get(body.connection_id).catch(() => null);
+    let user = null;
+    try { user = await base44.auth.me(); } catch (_) { user = null; }
+    if (user) {
+      if (user.role !== 'admin' && user.role !== 'compliance_officer') return Response.json({ error: 'Forbidden' }, { status: 403 });
+    } else {
+      const expected = secrets.get('INTERNAL_INVOKE_TOKEN');
+      if (!expected || body._internal_token !== expected) {
+        return Response.json({ error: 'Unauthorized' }, { status: 401 });
+      }
+    }
+    const client = user ? base44 : base44.asServiceRole;
+    if (body?.connection_id) conn = await client.entities.Connection.get(body.connection_id).catch(() => null);
     if (!conn) {
-      const awsConns = await base44.entities.Connection.filter({ service: 'aws' });
+      const awsConns = await client.entities.Connection.filter({ service: 'aws' });
       conn = (awsConns && awsConns[0]) || null;
     }
     if (!conn) return Response.json({ error: 'No AWS connection found. Create an AWS connection in Connections first.' }, { status: 404 });
@@ -75,7 +84,7 @@ Deno.serve(async (req) => {
     const stsRes = await awsGet(stsHost, '/', { Action: 'GetCallerIdentity', Version: '2011-06-15' }, region, 'sts', accessKey, secretKey);
     if (!stsRes.ok) {
       const stsTxt = await stsRes.text();
-      await base44.entities.Connection.update(conn.id, { last_sync_at: new Date().toISOString(), last_status: 'error', last_error: 'Invalid AWS credentials' }).catch(() => {});
+      await client.entities.Connection.update(conn.id, { last_sync_at: new Date().toISOString(), last_status: 'error', last_error: 'Invalid AWS credentials' }).catch(() => {});
       return Response.json({ error: 'AWS credentials are invalid or expired. Please update AWS_ACCESS_KEY_ID and AWS_SECRET_ACCESS_KEY in app secrets with valid IAM credentials that have Security Hub read permissions.' }, { status: 401 });
     }
     const stsData = await stsRes.text();
@@ -85,14 +94,14 @@ Deno.serve(async (req) => {
     const res = await awsGet(host, '/findings', { MaxResults: '100' }, region, 'securityhub', accessKey, secretKey);
     if (!res.ok) {
       const txt = await res.text();
-      await base44.entities.Connection.update(conn.id, { last_sync_at: new Date().toISOString(), last_status: 'error', last_error: `Security Hub ${res.status}` }).catch(() => {});
+      await client.entities.Connection.update(conn.id, { last_sync_at: new Date().toISOString(), last_status: 'error', last_error: `Security Hub ${res.status}` }).catch(() => {});
       return Response.json({ error: `Security Hub request failed (${res.status}): ${txt.slice(0, 500)}` }, { status: 502 });
     }
     const data = await res.json();
     const items = data.Findings || [];
-    const existing = await base44.entities.SecurityFinding.list('-created_date', 500);
+    const existing = await client.entities.SecurityFinding.list('-created_date', 500);
     const existingIds = new Set((existing || []).map((f) => f.finding_id).filter(Boolean));
-    const controls = await base44.entities.Control.list('-updated_date', 500);
+    const controls = await client.entities.Control.list('-updated_date', 500);
     const byCat = {};
     (controls || []).forEach((c) => { (byCat[c.category] = byCat[c.category] || []).push(c); });
     const KW_CAT = [
@@ -141,7 +150,7 @@ Deno.serve(async (req) => {
       const haystack = [f.Title, f.Description, types, f.GeneratorId].filter(Boolean).join(' ').toLowerCase();
       const linked = linkControls(haystack);
       records.push({
-        tenant_id: user.data?.tenant_id || '',
+        tenant_id: user?.data?.tenant_id || conn?.tenant_id || '',
         finding_id: fid || `SF-${now.getFullYear()}-${records.length}`,
         source: 'security_hub', cloud_provider: 'aws', posture_check: postureCheck(haystack),
         title: f.Title || f.Description || 'AWS Security Hub finding',
@@ -158,14 +167,14 @@ Deno.serve(async (req) => {
       });
     }
     let created = [];
-    if (records.length) created = await base44.entities.SecurityFinding.bulkCreate(records);
-    await base44.entities.Connection.update(conn.id, { last_sync_at: new Date().toISOString(), last_status: 'ok', last_error: '', evidence_collected_count: (conn.evidence_collected_count || 0) + created.length }).catch(() => {});
+    if (records.length) created = await client.entities.SecurityFinding.bulkCreate(records);
+    await client.entities.Connection.update(conn.id, { last_sync_at: new Date().toISOString(), last_status: 'ok', last_error: '', evidence_collected_count: (conn.evidence_collected_count || 0) + created.length }).catch(() => {});
     return Response.json({ ok: true, count: created.length, pulled: items.length, region });
   } catch (error) {
     console.error('syncAwsSecurityHub error', error?.message || error);
     if (conn?.id) {
-      const base44 = createClientFromRequest(req);
-      await base44.entities.Connection.update(conn.id, { last_sync_at: new Date().toISOString(), last_status: 'error', last_error: error?.message || 'Unknown error' }).catch(() => {});
+      const errClient = createClientFromRequest(req).asServiceRole;
+      await errClient.entities.Connection.update(conn.id, { last_sync_at: new Date().toISOString(), last_status: 'error', last_error: error?.message || 'Unknown error' }).catch(() => {});
     }
     return Response.json({ error: error.message || 'Unknown error' }, { status: 500 });
   }

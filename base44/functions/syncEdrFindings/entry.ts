@@ -1,4 +1,5 @@
 import { createClientFromRequest } from 'npm:@base44/sdk@0.8.40';
+import { secrets } from 'base44:runtime';
 
 // Syncs endpoint detection findings from CrowdStrike Falcon or Microsoft Defender
 // for Endpoint into the SecurityFinding entity. Deduplicates by finding_id.
@@ -312,10 +313,24 @@ Deno.serve(async (req) => {
   try {
     const base44 = createClientFromRequest(req);
     let provider = (Deno.env.get('EDR_PROVIDER') || '').toLowerCase();
+    let body = {};
     try {
-      const body = await req.json();
+      body = await req.json();
       if (body && body.provider) provider = String(body.provider).toLowerCase();
     } catch (_) { /* no body — use env var */ }
+    // Auth gate: authenticated admin/compliance_officer, or internal workflow token
+    let user = null;
+    try { user = await base44.auth.me(); } catch (_) { user = null; }
+    if (user) {
+      if (user.role !== 'admin' && user.role !== 'compliance_officer') {
+        return Response.json({ error: 'Forbidden — admin or compliance_officer only' }, { status: 403 });
+      }
+    } else {
+      const expected = secrets.get('INTERNAL_INVOKE_TOKEN');
+      if (!expected || body._internal_token !== expected) {
+        return Response.json({ error: 'Unauthorized' }, { status: 401 });
+      }
+    }
     const results = [];
 
     if (provider === 'crowdstrike' || provider === 'all') {

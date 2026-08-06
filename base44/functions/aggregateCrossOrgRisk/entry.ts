@@ -45,7 +45,7 @@ export default async function(req) {
       const totalResidualALE = tRisks.reduce((s, r) => s + (r.residual_annualized_loss_expectancy || 0), 0);
       const criticalRisks = tRisks.filter(r => (r.risk_score || 0) >= 16);
       const highRisks = tRisks.filter(r => (r.risk_score || 0) >= 12 && (r.risk_score || 0) < 16);
-      const compliantControls = tControls.filter(c => c.status === 'compliant' || c.status === 'effective');
+      const compliantControls = tControls.filter(c => c.status === 'passing');
       const compliancePct = tControls.length > 0 ? Math.round((compliantControls.length / tControls.length) * 100) : 0;
       const avgRiskScore = tRisks.length > 0 ? +(tRisks.reduce((s, r) => s + (r.risk_score || 0), 0) / tRisks.length).toFixed(1) : 0;
       return {
@@ -114,7 +114,7 @@ export default async function(req) {
       totalALE: risks.reduce((s, r) => s + (r.annualized_loss_expectancy || 0), 0),
       totalResidualALE: risks.reduce((s, r) => s + (r.residual_annualized_loss_expectancy || 0), 0),
       totalControls: controls.length,
-      compliantControls: controls.filter(c => c.status === 'compliant' || c.status === 'effective').length,
+      compliantControls: controls.filter(c => c.status === 'passing').length,
     };
     globalRollup.compliancePct = globalRollup.totalControls > 0
       ? Math.round((globalRollup.compliantControls / globalRollup.totalControls) * 100)
