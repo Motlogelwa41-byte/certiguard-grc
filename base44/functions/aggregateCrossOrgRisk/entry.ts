@@ -38,22 +38,31 @@ export default async function(req) {
     }
 
     // Scope to the caller's holding-company hierarchy (prevent cross-tenant data leakage)
+    // Admins without a tenant_id see all holding companies (platform-wide oversight)
     const callerTenantId = user.data?.tenant_id || user.tenant_id;
     const tenantById = new Map(tenants.map(t => [t.id, t]));
-    let rootHoldingId = callerTenantId;
-    let walker = tenantById.get(callerTenantId);
-    while (walker && walker.parent_tenant_id && tenantById.has(walker.parent_tenant_id)) {
-      rootHoldingId = walker.parent_tenant_id;
-      walker = tenantById.get(walker.parent_tenant_id);
-    }
-    const scopedTenantIds = new Set([rootHoldingId]);
-    const collectDescendants = (tid) => {
-      for (const child of (subsidiaryMap[tid] || [])) {
-        scopedTenantIds.add(child.id);
-        collectDescendants(child.id);
+    const scopedTenantIds = new Set();
+
+    if (callerTenantId && tenantById.has(callerTenantId)) {
+      // Walk up to find the root holding company
+      let rootHoldingId = callerTenantId;
+      let walker = tenantById.get(callerTenantId);
+      while (walker && walker.parent_tenant_id && tenantById.has(walker.parent_tenant_id)) {
+        rootHoldingId = walker.parent_tenant_id;
+        walker = tenantById.get(walker.parent_tenant_id);
       }
-    };
-    collectDescendants(rootHoldingId);
+      scopedTenantIds.add(rootHoldingId);
+      const collectDescendants = (tid) => {
+        for (const child of (subsidiaryMap[tid] || [])) {
+          scopedTenantIds.add(child.id);
+          collectDescendants(child.id);
+        }
+      };
+      collectDescendants(rootHoldingId);
+    } else {
+      // No tenant_id — include all tenants (platform admin view)
+      for (const t of tenants) scopedTenantIds.add(t.id);
+    }
     const scopedTenants = tenants.filter(t => scopedTenantIds.has(t.id));
 
     const computeTenantMetrics = (tenantId) => {
