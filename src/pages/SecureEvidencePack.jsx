@@ -10,7 +10,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { FileArchive, Search, Shield, Lock, Hash, Loader2, FileDown } from "lucide-react";
+import { FileArchive, Search, Shield, Lock, Hash, Loader2, FileDown, History } from "lucide-react";
 import { generateSecureEvidencePack } from "@/lib/secureEvidencePack";
 
 export default function SecureEvidencePack() {
@@ -28,6 +28,16 @@ export default function SecureEvidencePack() {
   const [preparedBy, setPreparedBy] = useState(user?.full_name || user?.email || "");
   const [notes, setNotes] = useState("");
   const [lastPack, setLastPack] = useState(null);
+  const [ledgerEntries, setLedgerEntries] = useState([]);
+  const [loadingLedger, setLoadingLedger] = useState(false);
+
+  const refreshLedger = () => {
+    setLoadingLedger(true);
+    base44.entities.AuditEvidenceLedger.list("-timestamp", 10)
+      .then((entries) => setLedgerEntries(entries || []))
+      .catch(() => setLedgerEntries([]))
+      .finally(() => setLoadingLedger(false));
+  };
 
   useEffect(() => {
     Promise.all([
@@ -40,6 +50,7 @@ export default function SecureEvidencePack() {
       if (t && t[0]?.company_name) setOrgName(t[0].company_name);
       setLoading(false);
     }).catch(() => setLoading(false));
+    refreshLedger();
   }, []);
 
   const filteredControls = controls.filter((c) => {
@@ -127,6 +138,7 @@ export default function SecureEvidencePack() {
       URL.revokeObjectURL(url);
 
       toast({ title: "Evidence pack generated", description: `Pack ${result.packId} — ${result.controlCount} controls, ${result.evidenceCount} evidence items.${pdfUrl ? " Logged to audit ledger." : ""}` });
+      refreshLedger();
     } catch (err) {
       toast({ title: "Generation failed", description: err.message || "Could not generate the pack.", variant: "destructive" });
     } finally {
@@ -289,6 +301,64 @@ export default function SecureEvidencePack() {
           </CardContent>
         </Card>
       </div>
+
+      {/* Audit Evidence Ledger — tamper-evident log of all generated packs */}
+      <Card className="mt-6">
+        <CardHeader>
+          <CardTitle className="text-base flex items-center gap-2">
+            <History className="w-4 h-4" /> Audit Evidence Ledger
+            {loadingLedger && <Loader2 className="w-3.5 h-3.5 animate-spin text-muted-foreground" />}
+          </CardTitle>
+          <p className="text-sm text-muted-foreground">
+            Append-only, tamper-evident log of every generated evidence pack. Each entry is timestamped and sealed with a SHA-256 hash.
+          </p>
+        </CardHeader>
+        <CardContent>
+          {ledgerEntries.length === 0 ? (
+            <p className="text-sm text-muted-foreground text-center py-8">
+              {loadingLedger ? "Loading ledger entries…" : "No ledger entries yet. Generate a pack above to create the first entry."}
+            </p>
+          ) : (
+            <div className="overflow-x-auto">
+              <table className="w-full text-sm">
+                <thead>
+                  <tr className="border-b text-left text-xs text-muted-foreground">
+                    <th className="pb-2 pr-4 font-medium">Timestamp (UTC)</th>
+                    <th className="pb-2 pr-4 font-medium">Pack / File</th>
+                    <th className="pb-2 pr-4 font-medium">SHA-256 Hash</th>
+                    <th className="pb-2 pr-4 font-medium">User</th>
+                    <th className="pb-2 font-medium">Download</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {ledgerEntries.map((entry) => (
+                    <tr key={entry.id} className="border-b last:border-0">
+                      <td className="py-3 pr-4 align-top whitespace-nowrap text-xs font-mono">
+                        {entry.timestamp ? new Date(entry.timestamp).toLocaleString() : "—"}
+                      </td>
+                      <td className="py-3 pr-4 align-top">
+                        <div className="text-xs font-medium text-foreground truncate max-w-[200px]">{entry.file_name || "—"}</div>
+                        {entry.notes && <div className="text-[10px] text-muted-foreground truncate max-w-[200px] mt-0.5">{entry.notes}</div>}
+                      </td>
+                      <td className="py-3 pr-4 align-top">
+                        <code className="text-[10px] font-mono text-emerald-700 bg-emerald-500/5 px-1.5 py-0.5 rounded break-all">
+                          {entry.sha256_hash || "—"}
+                        </code>
+                      </td>
+                      <td className="py-3 pr-4 align-top text-xs whitespace-nowrap">{entry.user_name || "—"}</td>
+                      <td className="py-3 align-top">
+                        {entry.file_url ? (
+                          <a href={entry.file_url} target="_blank" rel="noopener noreferrer" className="text-xs text-primary hover:underline">View PDF</a>
+                        ) : "—"}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
+        </CardContent>
+      </Card>
     </div>
   );
 }
