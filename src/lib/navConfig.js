@@ -15,6 +15,7 @@ export const navSections = [
     label: "Overview",
     items: [
       { label: "Dashboard", path: "/", icon: LayoutDashboard, roles: ["admin", "compliance_officer", "risk_manager", "auditor", "external_auditor", "regulator", "user"] },
+      { label: "24/7 Protection", path: "/protection-center", icon: Shield, roles: ["admin", "compliance_officer", "risk_manager", "auditor", "external_auditor", "regulator", "user"] },
       { label: "About CertiGuard", path: "/about", icon: Info, roles: ["admin", "compliance_officer", "risk_manager", "auditor", "user"] },
       { label: "Architecture", path: "/architecture", icon: Server, roles: ["admin", "compliance_officer", "risk_manager", "auditor"] },
       { label: "Posture Dashboard", path: "/posture", icon: BarChart3, roles: ["admin", "compliance_officer", "risk_manager", "auditor"] },
