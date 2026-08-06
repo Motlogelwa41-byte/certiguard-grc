@@ -59,6 +59,27 @@ export default function BulkUploadPanel({ controls = [], onComplete }) {
     setFiles((prev) => [...prev, ...newEntries]);
   };
 
+  const addManualEntry = () => {
+    const id = `manual-${Date.now()}-${Math.random()}`;
+    setFiles((prev) => [...prev, {
+      id,
+      file: null,
+      name: "",
+      size: 0,
+      title: "",
+      type: "document",
+      control_id: "",
+      control_title: "",
+      framework_id: "",
+      framework_name: "",
+      requirement_id: "",
+      requirement_title: "",
+      uploadStatus: null,
+      error: null,
+      isManual: true,
+    }]);
+  };
+
   const handleDrop = (e) => {
     e.preventDefault();
     setIsDragging(false);
@@ -136,9 +157,13 @@ export default function BulkUploadPanel({ controls = [], onComplete }) {
     for (const f of pending) {
       updateFile(f.id, { uploadStatus: "uploading" });
       try {
-        const { file_url } = await base44.integrations.Core.UploadFile({ file: f.file });
+        let file_url = "";
+        if (f.file) {
+          const uploaded = await base44.integrations.Core.UploadFile({ file: f.file });
+          file_url = uploaded.file_url;
+        }
         await base44.entities.Evidence.create({
-          title: f.title || f.name,
+          title: f.title || f.name || "Untitled evidence",
           type: f.type,
           status: "pending_review",
           control_id: f.control_id || "",
@@ -148,7 +173,7 @@ export default function BulkUploadPanel({ controls = [], onComplete }) {
           requirement_id: f.requirement_id || "",
           requirement_title: f.requirement_title || "",
           file_url,
-          file_name: f.name,
+          file_name: f.name || "",
           collected_date: new Date().toISOString().split("T")[0],
         });
         updateFile(f.id, { uploadStatus: "done" });
@@ -187,6 +212,11 @@ export default function BulkUploadPanel({ controls = [], onComplete }) {
         <p className="font-semibold text-foreground">Drag & drop files here or click to browse</p>
         <p className="text-sm text-muted-foreground mt-1">Upload many files at once — PDFs, screenshots, logs, certificates</p>
         <input id="bulk-file-input-mgr" type="file" multiple data-testid="bulk-file-input" aria-label="Upload evidence files" className="sr-only" onChange={(e) => { addFiles(e.target.files); e.target.value = ""; }} />
+      </div>
+      <div className="flex justify-center">
+        <Button variant="outline" size="sm" onClick={addManualEntry} data-testid="add-manual-entry">
+          <FileText className="w-3.5 h-3.5 mr-1" /> Add entry without file
+        </Button>
       </div>
 
       {files.length > 0 && (
@@ -257,8 +287,8 @@ export default function BulkUploadPanel({ controls = [], onComplete }) {
                     <div className="flex items-center gap-2 min-w-0">
                       <FileText className="w-4 h-4 text-muted-foreground shrink-0" />
                       <div className="min-w-0">
-                        <p className="text-sm font-medium text-foreground truncate">{f.name}</p>
-                        <p className="text-[10px] text-muted-foreground">{(f.size / 1024).toFixed(1)} KB</p>
+                        <p className="text-sm font-medium text-foreground truncate">{f.name || (f.isManual ? "Manual entry (no file)" : "—")}</p>
+                        <p className="text-[10px] text-muted-foreground">{f.isManual ? "No file attached" : `${(f.size / 1024).toFixed(1)} KB`}</p>
                       </div>
                     </div>
                     <Input placeholder="Evidence title" value={f.title} onChange={(e) => updateFile(f.id, { title: e.target.value })} className="text-xs h-8" />

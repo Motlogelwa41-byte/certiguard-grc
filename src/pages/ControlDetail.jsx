@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useParams, useNavigate, Link } from "react-router-dom";
 import { base44 } from "@/api/base44Client";
-import { ArrowLeft, Play, Pencil, Trash2, FileCheck, AlertTriangle } from "lucide-react";
+import { ArrowLeft, Play, Pencil, Trash2, FileCheck, AlertTriangle, Paperclip } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import StatusBadge from "@/components/shared/StatusBadge";
@@ -36,11 +36,16 @@ export default function ControlDetail() {
   const [control, setControl] = useState(null);
   const [loading, setLoading] = useState(true);
   const [running, setRunning] = useState(false);
+  const [linkedEvidence, setLinkedEvidence] = useState([]);
 
   const load = async () => {
     try {
       const c = await base44.entities.Control.get(id);
       setControl(c);
+      try {
+        const all = await base44.entities.Evidence.list("-created_date", 200);
+        setLinkedEvidence((all || []).filter((e) => e.control_id === id));
+      } catch (_) { setLinkedEvidence([]); }
     } catch (e) {
       setControl(null);
     } finally {
@@ -186,6 +191,37 @@ export default function ControlDetail() {
           </CardContent>
         </Card>
       )}
+
+      <Card className="mt-4">
+        <CardHeader>
+          <CardTitle className="text-base flex items-center gap-2">
+            <Paperclip className="w-4 h-4" /> Linked Evidence
+            <span className="text-xs font-normal text-muted-foreground">({linkedEvidence.length})</span>
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          {linkedEvidence.length === 0 ? (
+            <p className="text-sm text-muted-foreground text-center py-6">No evidence linked to this control yet.</p>
+          ) : (
+            <div className="space-y-2">
+              {linkedEvidence.map((ev) => (
+                <div key={ev.id} className="flex items-center gap-3 p-3 bg-muted/20 rounded-lg border border-border">
+                  <FileCheck className="w-4 h-4 text-muted-foreground shrink-0" />
+                  <div className="min-w-0 flex-1">
+                    <p className="text-sm font-medium text-foreground truncate">{ev.title}</p>
+                    <p className="text-[10px] text-muted-foreground">
+                      {ev.type?.replace(/_/g, " ") || "document"} · {ev.status?.replace(/_/g, " ") || "pending"} · {ev.collected_date || "—"}
+                    </p>
+                  </div>
+                  {ev.file_url && (
+                    <a href={ev.file_url} target="_blank" rel="noopener noreferrer" className="text-xs text-primary hover:underline shrink-0">View</a>
+                  )}
+                </div>
+              ))}
+            </div>
+          )}
+        </CardContent>
+      </Card>
     </div>
   );
 }
