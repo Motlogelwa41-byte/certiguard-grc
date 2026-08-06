@@ -99,7 +99,7 @@ export default function Connections() {
         control_count: form.controls_monitored.length,
         auto_collect: form.auto_collect,
         collect_frequency: form.collect_frequency,
-        status: editing?.status || "needs_credentials",
+        status: editing?.status || (form.secret_env_var ? "connected" : "needs_credentials"),
         connected_by_name: editing?.connected_by_name || "",
       };
       if (editing) {

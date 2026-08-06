@@ -37,6 +37,16 @@ Deno.serve(async (req) => {
           snapshot = await collectGithub(sr);
         } else if (service === "bamboohr") {
           snapshot = await collectBambooHR(sr, conn);
+        } else if (service === "crowdstrike") {
+          // CrowdStrike findings are synced by syncEdrFindings (EDR Dashboard + DailyEdrSync workflow).
+          // Verify credentials and mark healthy — no placeholder evidence.
+          const envName = secretForService(service);
+          if (envName && !Deno.env.get(envName)) {
+            status = "needs_credentials";
+            errMsg = `Set the ${envName} secret to enable CrowdStrike collection.`;
+          } else {
+            snapshot = { source: "crowdstrike", skip_evidence: true, note: "Credentials configured. Findings synced via EDR sync.", count: 0 };
+          }
         } else {
           // API-key / service-account services: verify a secret is configured
           const envName = secretForService(service);
@@ -49,7 +59,7 @@ Deno.serve(async (req) => {
           }
         }
 
-        if (status === "ok" && snapshot) {
+        if (status === "ok" && snapshot && !snapshot.skip_evidence) {
           await createEvidenceForConnection(sr, conn, snapshot, startedAt);
         }
       } catch (e) {
@@ -80,7 +90,7 @@ function secretForService(service) {
   const map = {
     aws: "AWS_ACCESS_KEY_ID", gcp: "GCP_SERVICE_ACCOUNT_JSON", azure: "AZURE_TENANT_ID",
     datadog: "DATADOG_API_KEY", jamf: "JAMF_API_TOKEN",
-    kandji: "KANDJI_API_TOKEN", crowdstrike: "FALCON_CLIENT_ID", splunk: "SPLUNK_API_TOKEN",
+    kandji: "KANDJI_API_TOKEN", crowdstrike: "CROWDSTRIKE_CLIENT_ID", splunk: "SPLUNK_API_TOKEN",
     jira: "JIRA_API_TOKEN",
   };
   return map[service] || null;
