@@ -10,6 +10,7 @@ import { Textarea } from "@/components/ui/textarea";
 import PageHeader from "@/components/shared/PageHeader";
 import StatusBadge from "@/components/shared/StatusBadge";
 import EmptyState from "@/components/shared/EmptyState";
+import BulkActionBar from "@/components/shared/BulkActionBar";
 import { useToast } from "@/components/ui/use-toast";
 import Can from "@/components/shared/Can";
 import TaskFeedbackModal from "@/components/tasks/TaskFeedbackModal";
@@ -27,7 +28,48 @@ export default function Tasks() {
   const [filterStatus, setFilterStatus] = useState("all");
   const [filterPriority, setFilterPriority] = useState("all");
   const [feedbackTask, setFeedbackTask] = useState(null);
+  const [selected, setSelected] = useState(new Set());
+  const [bulkStatus, setBulkStatus] = useState("");
+  const [bulkAssignee, setBulkAssignee] = useState("");
   const { toast } = useToast();
+
+  const toggleSelect = (id) => {
+    const next = new Set(selected);
+    if (next.has(id)) next.delete(id); else next.add(id);
+    setSelected(next);
+  };
+  const toggleSelectAll = () => {
+    const filteredIds = filtered.map(t => t.id);
+    const next = new Set(selected);
+    if (filteredIds.length > 0 && filteredIds.every(id => selected.has(id))) {
+      filteredIds.forEach(id => next.delete(id));
+    } else {
+      filteredIds.forEach(id => next.add(id));
+    }
+    setSelected(next);
+  };
+  const applyBulkStatus = async () => {
+    if (!bulkStatus || selected.size === 0) return;
+    const updates = [...selected].map(id => ({ id, status: bulkStatus }));
+    await base44.entities.ComplianceTask.bulkUpdate(updates);
+    setSelected(new Set()); setBulkStatus(""); load();
+    toast({ title: `${updates.length} tasks updated` });
+  };
+  const applyBulkAssignee = async () => {
+    if (!bulkAssignee.trim() || selected.size === 0) return;
+    const updates = [...selected].map(id => ({ id, assignee_name: bulkAssignee.trim() }));
+    await base44.entities.ComplianceTask.bulkUpdate(updates);
+    setSelected(new Set()); setBulkAssignee(""); load();
+    toast({ title: `${updates.length} tasks reassigned` });
+  };
+  const bulkDelete = async () => {
+    if (selected.size === 0) return;
+    if (!window.confirm(`Delete ${selected.size} selected tasks? This cannot be undone.`)) return;
+    const count = selected.size;
+    await base44.entities.ComplianceTask.deleteMany({ id: { $in: [...selected] } });
+    setSelected(new Set()); load();
+    toast({ title: `${count} tasks deleted` });
+  };
 
   const load = () => base44.entities.ComplianceTask.list().then((d) => { setItems(d); setLoading(false); });
   useEffect(() => { load(); }, []);
@@ -123,7 +165,30 @@ export default function Tasks() {
             <SelectItem value="low">Low</SelectItem>
           </SelectContent>
         </Select>
+        {filtered.length > 0 && (
+          <label className="flex items-center gap-2 text-xs text-muted-foreground cursor-pointer ml-auto">
+            <input type="checkbox" checked={filtered.length > 0 && filtered.every(t => selected.has(t.id))} onChange={toggleSelectAll} className="w-4 h-4 rounded" />
+            Select all ({filtered.length})
+          </label>
+        )}
       </div>
+
+      <BulkActionBar selectedCount={selected.size} onClear={() => setSelected(new Set())}>
+        <Select value={bulkStatus} onValueChange={setBulkStatus}>
+          <SelectTrigger className="w-[150px] h-8"><SelectValue placeholder="Set status" /></SelectTrigger>
+          <SelectContent>
+            <SelectItem value="todo">To Do</SelectItem>
+            <SelectItem value="in_progress">In Progress</SelectItem>
+            <SelectItem value="in_review">In Review</SelectItem>
+            <SelectItem value="completed">Completed</SelectItem>
+            <SelectItem value="overdue">Overdue</SelectItem>
+          </SelectContent>
+        </Select>
+        <Button size="sm" variant="secondary" onClick={applyBulkStatus} disabled={!bulkStatus}>Apply Status</Button>
+        <Input value={bulkAssignee} onChange={(e) => setBulkAssignee(e.target.value)} placeholder="Assign to" className="w-[160px] h-8" />
+        <Button size="sm" variant="secondary" onClick={applyBulkAssignee} disabled={!bulkAssignee.trim()}>Assign Owner</Button>
+        <Can permission="tasks:delete"><Button size="sm" variant="destructive" onClick={bulkDelete}><Trash2 className="w-4 h-4 mr-1" />Delete</Button></Can>
+      </BulkActionBar>
 
       {items.length === 0 ? (
         <EmptyState icon={CheckSquare} title="No tasks yet" description="Create tasks to track compliance work." actionLabel="Add Task" onAction={() => setOpen(true)} />
@@ -139,9 +204,12 @@ export default function Tasks() {
                 </div>
                 <div className="space-y-2">
                   {colTasks.map((t) => (
-                    <div key={t.id} className="bg-card rounded-lg border border-border p-3 space-y-2">
+                    <div key={t.id} className={`bg-card rounded-lg border p-3 space-y-2 ${selected.has(t.id) ? "border-primary ring-1 ring-primary/40" : "border-border"}`}>
                       <div className="flex items-start justify-between gap-2">
-                        <h4 className="text-sm font-medium text-foreground leading-tight">{t.title}</h4>
+                        <div className="flex items-start gap-2 min-w-0">
+                          <input type="checkbox" checked={selected.has(t.id)} onChange={() => toggleSelect(t.id)} className="w-4 h-4 mt-0.5 rounded shrink-0" aria-label={`Select ${t.title}`} />
+                          <h4 className="text-sm font-medium text-foreground leading-tight">{t.title}</h4>
+                        </div>
                         <StatusBadge status={t.priority} />
                       </div>
                       <p className="text-xs text-muted-foreground capitalize">{(t.type || "").replace(/_/g, " ")}</p>

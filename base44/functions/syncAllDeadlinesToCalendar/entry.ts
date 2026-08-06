@@ -41,6 +41,10 @@ Deno.serve(async (req) => {
     const controls = await base44.asServiceRole.entities.Control.list('-next_review', 500);
     const controlReviews = (controls || []).filter((c) => c.next_review);
 
+    // Fetch all policies with next_review_date (policy review tasks)
+    const policies = await base44.asServiceRole.entities.Policy.list('-next_review_date', 500);
+    const policyReviews = (policies || []).filter((p) => p.next_review_date);
+
     // List existing events we previously synced (filtered by our private property)
     const existing = {};
     let pageToken = '';
@@ -127,7 +131,39 @@ Deno.serve(async (req) => {
       } catch (e) { failed++; }
     }
 
-    // Delete events whose tasks/controls no longer exist
+    // Sync policy review dates
+    for (const p of policyReviews) {
+      const eventId = `policy_${p.id}`;
+      seen.add(eventId);
+      const due = p.next_review_date;
+      const end = fmtDate(new Date(new Date(due).getTime() + 24 * 60 * 60 * 1000));
+      const event = {
+        summary: `📄 Policy Review: ${p.title || "Policy"}`,
+        description: [
+          `Category: ${(p.category || "").replace(/_/g, " ")}`,
+          `Status: ${p.status || "draft"}`,
+          `Version: v${p.version || "1.0"}`,
+          p.owner_name ? `Owner: ${p.owner_name}` : "",
+          p.description ? `\n${p.description}` : "",
+          "\n— Synced from CertiGuard GRC",
+        ].filter(Boolean).join("\n"),
+        start: { date: due, timeZone: "Africa/Johannesburg" },
+        end: { date: end, timeZone: "Africa/Johannesburg" },
+        reminders: { useDefault: false, overrides: [{ method: "popup", minutes: 24 * 60 }, { method: "popup", minutes: 60 }] },
+        extendedProperties: { private: { base44_source: "regtech_deadlines", base44_deadline_id: eventId } },
+      };
+      try {
+        if (existing[eventId]) {
+          const r = await fetch(`${CAL_API}/${encodeURIComponent(existing[eventId])}`, { method: "PUT", headers, body: JSON.stringify(event) });
+          if (r.ok) updated++; else failed++;
+        } else {
+          const r = await fetch(CAL_API, { method: "POST", headers, body: JSON.stringify(event) });
+          if (r.ok) created++; else failed++;
+        }
+      } catch (e) { failed++; }
+    }
+
+    // Delete events whose tasks/controls/policies no longer exist
     let removed = 0;
     for (const [eventId, evId] of Object.entries(existing)) {
       if (!seen.has(eventId)) {
@@ -142,6 +178,7 @@ Deno.serve(async (req) => {
       connected: true,
       taskDeadlines: taskDeadlines.length,
       controlReviews: controlReviews.length,
+      policyReviews: policyReviews.length,
       created, updated, removed, failed,
       lastSync: new Date().toISOString(),
     });
