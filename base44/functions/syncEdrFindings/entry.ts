@@ -234,6 +234,15 @@ async function syncDefender(base44) {
     return { provider: 'defender', synced: 0, skipped: true, reason: 'DEFENDER_APP_ID / DEFENDER_TENANT_ID / DEFENDER_CLIENT_SECRET not set' };
   }
 
+  // Build tenant mapping from active Defender connections
+  const connections = await base44.asServiceRole.entities.Connection.filter(
+    { service: 'defender', status: 'connected' }, '-created_date', 100
+  );
+  let fallbackTenantId = null;
+  if (connections && connections.length > 0) {
+    if (connections.length === 1) fallbackTenantId = connections[0].tenant_id;
+  }
+
   // OAuth2 client credentials token
   const tokenRes = await fetch(`${DEFENDER_TOKEN_URL}/${tenantId}/oauth2/v2.0/token`, {
     method: 'POST',
@@ -267,11 +276,14 @@ async function syncDefender(base44) {
   const existingIds = new Set((existing || []).map((f) => f.finding_id).filter(Boolean));
 
   let created = 0;
+  let skipped = 0;
   for (const a of alerts) {
     const fid = a.id;
-    if (!fid || existingIds.has(fid)) continue;
+    if (!fid || existingIds.has(`MD-${fid}`)) continue;
+    if (!fallbackTenantId) { skipped++; continue; }
     try {
       await base44.asServiceRole.entities.SecurityFinding.create({
+        tenant_id: fallbackTenantId,
         finding_id: `MD-${fid}`,
         source: 'defender',
         cloud_provider: 'other',
@@ -293,13 +305,17 @@ async function syncDefender(base44) {
     }
   }
 
-  return { provider: 'defender', fetched: alerts.length, synced: created };
+  return { provider: 'defender', fetched: alerts.length, synced: created, skipped_no_tenant: skipped };
 }
 
 Deno.serve(async (req) => {
   try {
     const base44 = createClientFromRequest(req);
-    const provider = (Deno.env.get('EDR_PROVIDER') || '').toLowerCase();
+    let provider = (Deno.env.get('EDR_PROVIDER') || '').toLowerCase();
+    try {
+      const body = await req.json();
+      if (body && body.provider) provider = String(body.provider).toLowerCase();
+    } catch (_) { /* no body — use env var */ }
     const results = [];
 
     if (provider === 'crowdstrike' || provider === 'all') {

@@ -3,7 +3,7 @@ import { base44 } from "@/api/base44Client";
 import PageHeader from "@/components/shared/PageHeader";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/components/ui/use-toast";
-import { Radar, Loader2, RefreshCw, ShieldAlert, CheckCircle2, XCircle, Cloud, Plus, Trash2 } from "lucide-react";
+import { Radar, Loader2, RefreshCw, ShieldAlert, CheckCircle2, XCircle, Cloud, Plus, Trash2, Shield } from "lucide-react";
 import ManualFindingDialog from "@/components/edr/ManualFindingDialog";
 import { Github } from "lucide-react";
 
@@ -30,6 +30,7 @@ export default function EdrDashboard() {
   const [showManual, setShowManual] = useState(false);
   const [syncingGithub, setSyncingGithub] = useState(false);
   const [syncingCrowd, setSyncingCrowd] = useState(false);
+  const [syncingDefender, setSyncingDefender] = useState(false);
   const { toast } = useToast();
 
   const load = useCallback(() => {
@@ -104,6 +105,26 @@ export default function EdrDashboard() {
     }
   };
 
+  const runDefenderSync = async () => {
+    setSyncingDefender(true);
+    try {
+      const res = await base44.functions.invoke("syncEdrFindings", { provider: "defender" });
+      const data = res?.data || res;
+      if (data?.ok) {
+        const synced = data.results?.[0]?.synced || 0;
+        const skipped = data.results?.[0]?.skipped_no_tenant || 0;
+        toast({ title: `Defender sync complete — ${synced} alerts${skipped ? `, ${skipped} skipped (no tenant)` : ""}` });
+        load();
+      } else {
+        toast({ title: "Defender sync failed", description: data?.error || data?.results?.[0]?.reason, variant: "destructive" });
+      }
+    } catch (e) {
+      toast({ title: "Sync request failed", description: e.message, variant: "destructive" });
+    } finally {
+      setSyncingDefender(false);
+    }
+  };
+
   const removeFinding = async (id) => {
     if (!window.confirm("Delete this finding?")) return;
     try {
@@ -136,13 +157,17 @@ export default function EdrDashboard() {
     <div>
       <PageHeader
         title="EDR / XDR Integration"
-        subtitle="Endpoint, cloud, and code security findings from AWS Security Hub and GitHub repository posture checks"
+        subtitle="Endpoint, cloud, and code security findings from Microsoft Defender, CrowdStrike, AWS Security Hub, and GitHub"
         actions={
           <div className="flex items-center gap-2">
             <Button onClick={() => setShowManual(true)} variant="default" size="sm">
               <Plus className="w-4 h-4 mr-1" /> Log Finding
             </Button>
-            <Button onClick={runCrowdSync} disabled={syncingCrowd} variant="default" size="sm">
+            <Button onClick={runDefenderSync} disabled={syncingDefender} variant="default" size="sm">
+              {syncingDefender ? <Loader2 className="w-4 h-4 mr-1 animate-spin" /> : <Shield className="w-4 h-4 mr-1" />}
+              {syncingDefender ? "Syncing…" : "Sync Defender"}
+            </Button>
+            <Button onClick={runCrowdSync} disabled={syncingCrowd} variant="outline" size="sm">
               {syncingCrowd ? <Loader2 className="w-4 h-4 mr-1 animate-spin" /> : <Radar className="w-4 h-4 mr-1" />}
               {syncingCrowd ? "Syncing…" : "Sync CrowdStrike"}
             </Button>
@@ -163,9 +188,9 @@ export default function EdrDashboard() {
         <div className="flex items-start gap-3">
           <Cloud className="w-5 h-5 text-primary mt-0.5" />
           <div className="flex-1">
-            <h3 className="font-heading font-semibold text-foreground text-sm">CrowdStrike + AWS Security Hub + GitHub — Active Providers</h3>
+            <h3 className="font-heading font-semibold text-foreground text-sm">Microsoft Defender + CrowdStrike + AWS Security Hub + GitHub — Active Providers</h3>
             <p className="text-xs text-muted-foreground mt-1">
-              CrowdStrike Falcon detections and Spotlight vulnerabilities are pulled via the Falcon API using your OAuth2 credentials. Cloud findings come from AWS Security Hub. GitHub repository posture (branch protection, PR review enforcement, org 2FA) is checked via the live OAuth connector. All three run on daily automated syncs.
+              <strong>Microsoft Defender for Endpoint</strong> (free with M365 E5) is the recommended cost-effective EDR default — alerts are pulled via the Microsoft Graph Security API. CrowdStrike Falcon detections and Spotlight vulnerabilities are pulled via the Falcon API (optional, for enterprise clients with existing licenses). Cloud findings come from AWS Security Hub. GitHub repository posture is checked via the live OAuth connector. All providers run on daily automated syncs.
             </p>
           </div>
         </div>
