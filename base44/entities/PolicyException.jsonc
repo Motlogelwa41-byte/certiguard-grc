@@ -1,0 +1,211 @@
+{
+  "name": "PolicyException",
+  "type": "object",
+  "properties": {
+    "tenant_id": {
+      "type": "string",
+      "description": "Tenant isolation key"
+    },
+    "exception_id": {
+      "type": "string",
+      "description": "Auto-generated exception reference e.g. EX-2026-001"
+    },
+    "title": {
+      "type": "string",
+      "description": "Short title for the exception request"
+    },
+    "description": {
+      "type": "string",
+      "description": "Detailed justification for the policy exception"
+    },
+    "linked_policy_id": {
+      "type": "string",
+      "description": "Policy this exception departs from"
+    },
+    "linked_policy_title": {
+      "type": "string"
+    },
+    "linked_control_id": {
+      "type": "string",
+      "description": "Control that cannot be met (optional)"
+    },
+    "linked_control_title": {
+      "type": "string"
+    },
+    "linked_risk_id": {
+      "type": "string",
+      "description": "Risk that this exception creates or exacerbates (optional)"
+    },
+    "exception_type": {
+      "type": "string",
+      "enum": [
+        "temporary_waiver",
+        "permanent_exception",
+        "compensating_control",
+        "risk_acceptance",
+        "deviation"
+      ],
+      "default": "temporary_waiver"
+    },
+    "justification": {
+      "type": "string",
+      "description": "Business justification for the departure"
+    },
+    "compensating_controls": {
+      "type": "string",
+      "description": "Description of compensating controls mitigating the gap"
+    },
+    "residual_risk_assessment": {
+      "type": "string",
+      "description": "Assessment of residual risk introduced by this exception"
+    },
+    "requested_by_name": {
+      "type": "string"
+    },
+    "requested_by_id": {
+      "type": "string"
+    },
+    "requested_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "effective_date": {
+      "type": "string",
+      "format": "date",
+      "description": "Date the exception becomes active (if approved)"
+    },
+    "expiration_date": {
+      "type": "string",
+      "format": "date",
+      "description": "Date the exception expires \u2014 mandatory for temporary waivers"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "pending",
+        "under_review",
+        "approved",
+        "rejected",
+        "expired",
+        "revoked"
+      ],
+      "default": "pending"
+    },
+    "approver_role": {
+      "type": "string",
+      "enum": [
+        "chief_risk_officer",
+        "managing_director",
+        "ciso",
+        "compliance_officer",
+        "board_risk_committee"
+      ],
+      "default": "chief_risk_officer",
+      "description": "Role required to sign off this exception"
+    },
+    "approver_name": {
+      "type": "string"
+    },
+    "approver_id": {
+      "type": "string"
+    },
+    "approved_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "approval_signature": {
+      "type": "string",
+      "description": "Typed full-name signature confirming sign-off authority"
+    },
+    "approval_comments": {
+      "type": "string"
+    },
+    "rejection_reason": {
+      "type": "string"
+    },
+    "review_reminder_sent_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "is_expired": {
+      "type": "boolean",
+      "default": false,
+      "description": "Auto-flagged true once expiration_date has passed"
+    },
+    "notes": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "title",
+    "justification",
+    "expiration_date"
+  ],
+  "rls": {
+    "create": {
+      "data.tenant_id": "{{user.data.tenant_id}}"
+    },
+    "read": {
+      "$or": [
+        {
+          "data.tenant_id": "{{user.data.tenant_id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "update": {
+      "$or": [
+        {
+          "data.tenant_id": "{{user.data.tenant_id}}",
+          "created_by_id": "{{user.id}}"
+        },
+        {
+          "$and": [
+            {
+              "data.tenant_id": "{{user.data.tenant_id}}"
+            },
+            {
+              "user_condition": {
+                "role": "compliance_officer"
+              }
+            }
+          ]
+        },
+        {
+          "$and": [
+            {
+              "data.tenant_id": "{{user.data.tenant_id}}"
+            },
+            {
+              "user_condition": {
+                "role": "risk_manager"
+              }
+            }
+          ]
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "delete": {
+      "$or": [
+        {
+          "data.tenant_id": "{{user.data.tenant_id}}",
+          "created_by_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    }
+  }
+}
