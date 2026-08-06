@@ -1,0 +1,41 @@
+{
+  "name": "Slack Pending Evidence Alert",
+  "description": "Posts a Slack alert to #compliance whenever an evidence item is marked as pending_review (newly submitted or re-submitted), so reviewers and control owners are notified to review and approve/reject promptly.",
+  "trigger": {
+    "condition": "${ .trigger.data.status == \"pending_review\" }",
+    "config": {
+      "trigger_type": "entity",
+      "entity_name": "Evidence",
+      "events": [
+        "create",
+        "update"
+      ]
+    }
+  },
+  "definition": {
+    "document": {
+      "dsl": "1.0.0",
+      "name": "slack_pending_evidence_alert",
+      "version": "1.0",
+      "namespace": "base44"
+    },
+    "do": [
+      {
+        "post_pending_alert": {
+          "call": "invoke_backend_function",
+          "with": {
+            "function_name": "sendSlackAlert",
+            "args": {
+              "text": ":clipboard: *Evidence Pending Review*\n*${ .trigger.data.title // \"Untitled evidence\" }*\nControl: ${ .trigger.data.control_title // .trigger.data.control_id // \"\u2014\" } \u2022 Framework: ${ .trigger.data.framework_name // \"\u2014\" }\nType: ${ .trigger.data.type // \"document\" } \u2022 Collected: ${ .trigger.data.collected_date // \"\u2014\" }\n> A reviewer needs to approve or reject this evidence item. Open the Evidence Manager to take action."
+            }
+          },
+          "then": "end",
+          "x-base44": {
+            "title": "Post pending evidence Slack alert",
+            "description": "Evidence status = pending_review \u2192 #compliance alert"
+          }
+        }
+      }
+    ]
+  }
+}

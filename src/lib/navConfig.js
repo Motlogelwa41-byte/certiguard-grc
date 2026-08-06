@@ -179,6 +179,7 @@ export const navSections = [
       { label: "AI Board Pack", path: "/board-pack-generator", icon: Presentation, roles: ["admin", "compliance_officer", "risk_manager", "auditor"] },
       { label: "Certification Dossier", path: "/certification-dossier", icon: FileArchive, roles: ["admin", "compliance_officer", "auditor"] },
       { label: "Secure Evidence Pack", path: "/secure-evidence-pack", icon: FileArchive, roles: ["admin", "compliance_officer", "auditor", "external_auditor"] },
+      { label: "Cross-Tenant Exec Dashboard", path: "/cross-tenant-executive-dashboard", icon: Globe, roles: ["admin", "compliance_officer", "risk_manager", "auditor"] },
       { label: "Auditor Export", path: "/auditor-export", icon: FileDown, roles: ["admin", "compliance_officer", "risk_manager", "auditor"] },
       { label: "Executive Report", path: "/executive-report", icon: FileText, roles: ["admin", "compliance_officer", "risk_manager", "auditor"] },
     ]
