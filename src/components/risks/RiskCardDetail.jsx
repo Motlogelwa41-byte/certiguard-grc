@@ -45,12 +45,19 @@ export default function RiskCardDetail({ r, allControls, onEdit, onDelete, onAcc
             <StatusBadge status={r.status} />
           </div>
           <h3 className="font-heading font-semibold text-foreground text-sm">{r.title}</h3>
-          {band && (
-            <span className={`mt-1 inline-flex items-center gap-1 text-xs px-2 py-0.5 rounded-full font-medium ${band.cls}`}>
-              {exceedsTolerance && <ShieldAlert className="w-3 h-3" />}
-              {band.label}
-            </span>
-          )}
+          <div className="flex flex-wrap items-center gap-1.5 mt-1">
+            {score >= 20 && (
+              <span className="inline-flex items-center gap-1 text-xs px-2 py-0.5 rounded-full font-bold bg-red-100 text-red-700 dark:bg-red-900/40 dark:text-red-300">
+                <ShieldAlert className="w-3 h-3" /> Critical
+              </span>
+            )}
+            {band && (
+              <span className={`inline-flex items-center gap-1 text-xs px-2 py-0.5 rounded-full font-medium ${band.cls}`}>
+                {exceedsTolerance && <ShieldAlert className="w-3 h-3" />}
+                {band.label}
+              </span>
+            )}
+          </div>
         </div>
         <div className={`w-10 h-10 rounded-lg flex items-center justify-center text-white font-bold text-sm ${getRiskColor(score)}`}>
           {score}

@@ -71,7 +71,9 @@ export default function AuditorPortal() {
     return <div className="flex justify-center py-20"><Loader2 className="w-8 h-8 animate-spin text-muted-foreground" /></div>;
   }
 
-  if (!scope) {
+  // Admins can view all data without a scope; other auditors need an active scope
+  const isAdmin = user?.role === "admin";
+  if (!scope && !isAdmin) {
     return (
       <div>
         <PageHeader title="Auditor Portal" subtitle="External auditor review workspace" />
@@ -83,10 +85,12 @@ export default function AuditorPortal() {
       </div>
     );
   }
+  // Admin without scope sees all frameworks/controls/evidence
+  const effectiveScope = scope || { framework_ids: [], framework_names: [], status: "active" };
 
   return (
     <div>
-      <PageHeader title="Auditor Portal" subtitle={`Scoped engagement — ${allFw ? "All frameworks" : scope.framework_names?.join(", ") || "Scoped frameworks"}${!canWrite ? " · Observation only" : ""}`} />
+      <PageHeader title="Auditor Portal" subtitle={`Scoped engagement — ${allFw ? "All frameworks" : effectiveScope.framework_names?.join(", ") || "Scoped frameworks"}${!canWrite ? " · Observation only" : ""}`} />
 
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
         <StatCard label="Scoped Frameworks" value={allFw ? frameworks.length : scopedFwIds.length} icon={ShieldCheck} color="blue" />

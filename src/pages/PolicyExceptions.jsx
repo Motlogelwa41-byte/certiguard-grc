@@ -181,7 +181,7 @@ export default function PolicyExceptions() {
                     <div className="flex items-center gap-1 shrink-0">
                       {item.status === "pending" && (
                         <Button size="sm" variant="outline" onClick={() => { setApproveOpen(item); setApproveData({ approval_comments: "", approval_signature: "" }); }}>
-                          <Check className="w-3.5 h-3.5" /> Review
+                          <Check className="w-3.5 h-3.5" /> Review & Approve
                         </Button>
                       )}
                       <Button size="icon" variant="ghost" onClick={() => openEdit(item)}><Pencil className="w-4 h-4" /></Button>
