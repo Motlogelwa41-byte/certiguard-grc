@@ -25,6 +25,13 @@ Deno.serve(async (req) => {
         { status: 400 }
       );
     }
+    // Validate the base URL looks like a Jira site (https://<site>.atlassian.net or self-hosted https URL).
+    if (!/^https:\/\/[a-z0-9-]+(\.atlassian\.net|\.jira\.io)(:\d+)?(\/|$)/i.test(baseUrl) && !/^https:\/\/[a-z0-9.-]+(:\d+)?(\/|$)/i.test(baseUrl)) {
+      return Response.json(
+        { error: `JIRA_BASE_URL looks invalid — expected your Atlassian site URL (e.g. https://yourcompany.atlassian.net) but got: ${baseUrl}` },
+        { status: 400 }
+      );
+    }
 
     // Project key: Connection (service=jira) config.project_key, default "SEC"
     let projectKey = "SEC";
