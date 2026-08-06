@@ -156,8 +156,32 @@
     "update": {
       "$or": [
         {
-          "data.tenant_id": "{{user.data.tenant_id}",
+          "data.tenant_id": "{{user.data.tenant_id}}",
           "created_by_id": "{{user.id}}"
+        },
+        {
+          "$and": [
+            {
+              "data.tenant_id": "{{user.data.tenant_id}}"
+            },
+            {
+              "user_condition": {
+                "role": "compliance_officer"
+              }
+            }
+          ]
+        },
+        {
+          "$and": [
+            {
+              "data.tenant_id": "{{user.data.tenant_id}}"
+            },
+            {
+              "user_condition": {
+                "role": "risk_manager"
+              }
+            }
+          ]
         },
         {
           "user_condition": {
@@ -171,6 +195,18 @@
         {
           "data.tenant_id": "{{user.data.tenant_id}}",
           "created_by_id": "{{user.id}}"
+        },
+        {
+          "$and": [
+            {
+              "data.tenant_id": "{{user.data.tenant_id}}"
+            },
+            {
+              "user_condition": {
+                "role": "compliance_officer"
+              }
+            }
+          ]
         },
         {
           "user_condition": {
