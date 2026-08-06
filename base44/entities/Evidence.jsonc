@@ -25,6 +25,20 @@
     "control_title": {
       "type": "string"
     },
+    "framework_id": {
+      "type": "string",
+      "description": "Linked framework for compliance requirement mapping"
+    },
+    "framework_name": {
+      "type": "string"
+    },
+    "requirement_id": {
+      "type": "string",
+      "description": "Specific FrameworkRequirement clause/reference this evidence satisfies"
+    },
+    "requirement_title": {
+      "type": "string"
+    },
     "type": {
       "type": "string",
       "enum": [

@@ -41,7 +41,7 @@ export default function PolicyAcknowledgments() {
       setAcknowledging(null);
       return;
     }
-    const newAcked = [...acked, { user_id: currentUser.id, user_name: currentUser.full_name || currentUser.email, acknowledged_at: new Date().toISOString() }];
+    const newAcked = [...acked, { user_id: currentUser.id, user_name: currentUser.full_name || currentUser.email, acknowledged_at: new Date().toISOString(), version: policy.version || "1.0" }];
     await base44.entities.Policy.update(policy.id, {
       acknowledged_by: JSON.stringify(newAcked),
       acknowledgment_count: newAcked.length,

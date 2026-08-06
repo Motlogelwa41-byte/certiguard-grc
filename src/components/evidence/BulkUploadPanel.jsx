@@ -1,4 +1,4 @@
-import React, { useState, useRef } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { base44 } from "@/api/base44Client";
 import { Upload, X, CheckCircle2, AlertCircle, FileText, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -14,8 +14,30 @@ export default function BulkUploadPanel({ controls = [], onComplete }) {
   const [uploading, setUploading] = useState(false);
   const [applyControlToAll, setApplyControlToAll] = useState("");
   const [applyTypeToAll, setApplyTypeToAll] = useState("");
+  const [applyFrameworkToAll, setApplyFrameworkToAll] = useState("");
+  const [applyRequirementToAll, setApplyRequirementToAll] = useState("");
+  const [frameworks, setFrameworks] = useState([]);
+  const [requirements, setRequirements] = useState([]);
   const [isDragging, setIsDragging] = useState(false);
   const { toast } = useToast();
+
+  useEffect(() => {
+    base44.entities.Framework.list().then(setFrameworks).catch(() => {});
+    base44.entities.FrameworkRequirement.list().then(setRequirements).catch(() => {});
+  }, []);
+
+  const reqsForFramework = (fwId) => (requirements || []).filter((r) => r.framework_id === fwId);
+
+  const autoFillFramework = (controlId, fileObj) => {
+    if (!controlId) return fileObj;
+    const ctl = controls.find((c) => c.id === controlId);
+    if (ctl?.framework_ids?.length) {
+      const fwId = ctl.framework_ids[0];
+      const fw = frameworks.find((f) => f.id === fwId);
+      if (fw) return { ...fileObj, framework_id: fw.id, framework_name: fw.name };
+    }
+    return fileObj;
+  };
 
   const addFiles = (rawFiles) => {
     const newEntries = Array.from(rawFiles).map((f) => ({
@@ -27,6 +49,10 @@ export default function BulkUploadPanel({ controls = [], onComplete }) {
       type: "document",
       control_id: "",
       control_title: "",
+      framework_id: "",
+      framework_name: "",
+      requirement_id: "",
+      requirement_title: "",
       uploadStatus: null,
       error: null,
     }));
@@ -44,16 +70,60 @@ export default function BulkUploadPanel({ controls = [], onComplete }) {
 
   const removeFile = (id) => setFiles((prev) => prev.filter((f) => f.id !== id));
 
+  const handleControlChange = (id, controlId) => {
+    setFiles((prev) => prev.map((f) => {
+      if (f.id !== id) return f;
+      const ctl = controls.find((c) => c.id === controlId);
+      const updated = { ...f, control_id: controlId === "__none__" ? "" : controlId, control_title: ctl?.title || "" };
+      return autoFillFramework(controlId, updated);
+    }));
+  };
+
+  const handleFrameworkChange = (id, fwId) => {
+    setFiles((prev) => prev.map((f) => {
+      if (f.id !== id) return f;
+      const fw = frameworks.find((x) => x.id === fwId);
+      return { ...f, framework_id: fwId === "__none__" ? "" : fwId, framework_name: fw?.name || "", requirement_id: "", requirement_title: "" };
+    }));
+  };
+
+  const handleRequirementChange = (id, reqId) => {
+    setFiles((prev) => prev.map((f) => {
+      if (f.id !== id) return f;
+      const req = requirements.find((r) => r.id === reqId);
+      return { ...f, requirement_id: reqId === "__none__" ? "" : reqId, requirement_title: req?.title || "" };
+    }));
+  };
+
   const applyToAll = () => {
-    setFiles((prev) =>
-      prev.map((f) => ({
-        ...f,
-        ...(applyControlToAll && applyControlToAll !== "__none__"
-          ? { control_id: applyControlToAll, control_title: controls.find((c) => c.id === applyControlToAll)?.title || "" }
-          : {}),
-        ...(applyTypeToAll ? { type: applyTypeToAll } : {}),
-      }))
-    );
+    setFiles((prev) => prev.map((f) => {
+      let updated = { ...f };
+      if (applyControlToAll && applyControlToAll !== "__none__") {
+        const ctl = controls.find((c) => c.id === applyControlToAll);
+        updated.control_id = applyControlToAll;
+        updated.control_title = ctl?.title || "";
+        updated = autoFillFramework(applyControlToAll, updated);
+      }
+      if (applyTypeToAll) updated.type = applyTypeToAll;
+      if (applyFrameworkToAll && applyFrameworkToAll !== "__none__") {
+        const fw = frameworks.find((x) => x.id === applyFrameworkToAll);
+        updated.framework_id = applyFrameworkToAll;
+        updated.framework_name = fw?.name || "";
+        updated.requirement_id = "";
+        updated.requirement_title = "";
+      }
+      if (applyRequirementToAll && applyRequirementToAll !== "__none__") {
+        const req = requirements.find((r) => r.id === applyRequirementToAll);
+        updated.requirement_id = applyRequirementToAll;
+        updated.requirement_title = req?.title || "";
+        if (req?.framework_id && !updated.framework_id) {
+          const fw = frameworks.find((x) => x.id === req.framework_id);
+          updated.framework_id = req.framework_id;
+          updated.framework_name = fw?.name || "";
+        }
+      }
+      return updated;
+    }));
   };
 
   const handleUploadAll = async () => {
@@ -73,6 +143,10 @@ export default function BulkUploadPanel({ controls = [], onComplete }) {
           status: "pending_review",
           control_id: f.control_id || "",
           control_title: f.control_title || "",
+          framework_id: f.framework_id || "",
+          framework_name: f.framework_name || "",
+          requirement_id: f.requirement_id || "",
+          requirement_title: f.requirement_title || "",
           file_url,
           file_name: f.name,
           collected_date: new Date().toISOString().split("T")[0],
@@ -122,7 +196,7 @@ export default function BulkUploadPanel({ controls = [], onComplete }) {
             <div>
               <Label className="text-xs mb-1 block">Apply control to all</Label>
               <Select value={applyControlToAll} onValueChange={setApplyControlToAll}>
-                <SelectTrigger className="w-52 h-8 text-xs"><SelectValue placeholder="Select control…" /></SelectTrigger>
+                <SelectTrigger className="w-48 h-8 text-xs"><SelectValue placeholder="Select control…" /></SelectTrigger>
                 <SelectContent>
                   <SelectItem value="__none__" className="text-xs">— Clear —</SelectItem>
                   {controls.map((c) => (
@@ -134,9 +208,35 @@ export default function BulkUploadPanel({ controls = [], onComplete }) {
               </Select>
             </div>
             <div>
+              <Label className="text-xs mb-1 block">Apply framework to all</Label>
+              <Select value={applyFrameworkToAll} onValueChange={(v) => { setApplyFrameworkToAll(v); setApplyRequirementToAll(""); }}>
+                <SelectTrigger className="w-44 h-8 text-xs"><SelectValue placeholder="Select framework…" /></SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="__none__" className="text-xs">— Clear —</SelectItem>
+                  {frameworks.map((f) => (
+                    <SelectItem key={f.id} value={f.id} className="text-xs">{f.name}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            <div>
+              <Label className="text-xs mb-1 block">Apply requirement to all</Label>
+              <Select value={applyRequirementToAll} onValueChange={setApplyRequirementToAll}>
+                <SelectTrigger className="w-48 h-8 text-xs"><SelectValue placeholder="Select requirement…" /></SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="__none__" className="text-xs">— Clear —</SelectItem>
+                  {(applyFrameworkToAll ? reqsForFramework(applyFrameworkToAll) : requirements).slice(0, 200).map((r) => (
+                    <SelectItem key={r.id} value={r.id} className="text-xs">
+                      {r.requirement_id ? `[${r.requirement_id}] ` : ""}{r.title}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            <div>
               <Label className="text-xs mb-1 block">Apply type to all</Label>
               <Select value={applyTypeToAll} onValueChange={setApplyTypeToAll}>
-                <SelectTrigger className="w-36 h-8 text-xs"><SelectValue placeholder="Select type…" /></SelectTrigger>
+                <SelectTrigger className="w-32 h-8 text-xs"><SelectValue placeholder="Select type…" /></SelectTrigger>
                 <SelectContent>
                   {evidenceTypes.map((t) => <SelectItem key={t} value={t} className="text-xs">{t.replace(/_/g, " ").replace(/\b\w/g, (l) => l.toUpperCase())}</SelectItem>)}
                 </SelectContent>
@@ -146,51 +246,70 @@ export default function BulkUploadPanel({ controls = [], onComplete }) {
             <span className="ml-auto text-xs text-muted-foreground self-center">{doneCount}/{files.length} uploaded</span>
           </div>
 
-          {/* Column headers */}
-          <div className="hidden sm:grid grid-cols-[2fr_1.4fr_1fr_2fr_auto] gap-3 px-1 text-[10px] font-semibold text-muted-foreground uppercase tracking-wide">
-            <span>File</span><span>Title</span><span>Type</span><span>Map to Control</span><span></span>
-          </div>
-
           {/* File rows */}
-          <div className="space-y-2 max-h-[40vh] overflow-y-auto pr-1">
-            {files.map((f) => (
-              <div key={f.id} className="grid grid-cols-1 sm:grid-cols-[2fr_1.4fr_1fr_2fr_auto] gap-3 items-center p-3 bg-muted/20 rounded-xl border border-border">
-                <div className="flex items-center gap-2 min-w-0">
-                  <FileText className="w-4 h-4 text-muted-foreground shrink-0" />
-                  <div className="min-w-0">
-                    <p className="text-sm font-medium text-foreground truncate">{f.name}</p>
-                    <p className="text-[10px] text-muted-foreground">{(f.size / 1024).toFixed(1)} KB</p>
+          <div className="space-y-2 max-h-[45vh] overflow-y-auto pr-1">
+            {files.map((f) => {
+              const availReqs = f.framework_id ? reqsForFramework(f.framework_id) : requirements;
+              return (
+                <div key={f.id} className="p-3 bg-muted/20 rounded-xl border border-border space-y-2">
+                  {/* Row 1: file info + title + type + status */}
+                  <div className="grid grid-cols-1 sm:grid-cols-[2fr_1.4fr_1fr_auto] gap-3 items-center">
+                    <div className="flex items-center gap-2 min-w-0">
+                      <FileText className="w-4 h-4 text-muted-foreground shrink-0" />
+                      <div className="min-w-0">
+                        <p className="text-sm font-medium text-foreground truncate">{f.name}</p>
+                        <p className="text-[10px] text-muted-foreground">{(f.size / 1024).toFixed(1)} KB</p>
+                      </div>
+                    </div>
+                    <Input placeholder="Evidence title" value={f.title} onChange={(e) => updateFile(f.id, { title: e.target.value })} className="text-xs h-8" />
+                    <Select value={f.type} onValueChange={(v) => updateFile(f.id, { type: v })}>
+                      <SelectTrigger className="h-8 text-xs"><SelectValue /></SelectTrigger>
+                      <SelectContent>
+                        {evidenceTypes.map((t) => <SelectItem key={t} value={t} className="text-xs">{t.replace(/_/g, " ").replace(/\b\w/g, (l) => l.toUpperCase())}</SelectItem>)}
+                      </SelectContent>
+                    </Select>
+                    <div className="flex items-center gap-2">
+                      {f.uploadStatus === "uploading" && <Loader2 className="w-4 h-4 animate-spin text-primary" />}
+                      {f.uploadStatus === "done" && <CheckCircle2 className="w-4 h-4 text-emerald-500" />}
+                      {f.uploadStatus === "error" && <AlertCircle className="w-4 h-4 text-destructive" title={f.error} />}
+                      {!f.uploadStatus && (
+                        <button onClick={() => removeFile(f.id)} className="text-muted-foreground hover:text-destructive transition-colors"><X className="w-4 h-4" /></button>
+                      )}
+                    </div>
+                  </div>
+                  {/* Row 2: control + framework + requirement */}
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
+                    <Select value={f.control_id || "__none__"} onValueChange={(v) => handleControlChange(f.id, v)}>
+                      <SelectTrigger className="h-8 text-xs"><SelectValue placeholder="Map to control…" /></SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="__none__" className="text-xs">— No control —</SelectItem>
+                        {controls.map((c) => (
+                          <SelectItem key={c.id} value={c.id} className="text-xs">{c.control_id ? `[${c.control_id}] ` : ""}{c.title}</SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                    <Select value={f.framework_id || "__none__"} onValueChange={(v) => handleFrameworkChange(f.id, v)}>
+                      <SelectTrigger className="h-8 text-xs"><SelectValue placeholder="Framework…" /></SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="__none__" className="text-xs">— No framework —</SelectItem>
+                        {frameworks.map((fw) => (
+                          <SelectItem key={fw.id} value={fw.id} className="text-xs">{fw.name}</SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                    <Select value={f.requirement_id || "__none__"} onValueChange={(v) => handleRequirementChange(f.id, v)}>
+                      <SelectTrigger className="h-8 text-xs"><SelectValue placeholder="Compliance requirement…" /></SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="__none__" className="text-xs">— No requirement —</SelectItem>
+                        {availReqs.slice(0, 200).map((r) => (
+                          <SelectItem key={r.id} value={r.id} className="text-xs">{r.requirement_id ? `[${r.requirement_id}] ` : ""}{r.title}</SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
                   </div>
                 </div>
-                <Input placeholder="Evidence title" value={f.title} onChange={(e) => updateFile(f.id, { title: e.target.value })} className="text-xs h-8" />
-                <Select value={f.type} onValueChange={(v) => updateFile(f.id, { type: v })}>
-                  <SelectTrigger className="h-8 text-xs"><SelectValue /></SelectTrigger>
-                  <SelectContent>
-                    {evidenceTypes.map((t) => <SelectItem key={t} value={t} className="text-xs">{t.replace(/_/g, " ").replace(/\b\w/g, (l) => l.toUpperCase())}</SelectItem>)}
-                  </SelectContent>
-                </Select>
-                <Select value={f.control_id || "__none__"} onValueChange={(v) => {
-                  const ctl = controls.find((c) => c.id === v);
-                  updateFile(f.id, { control_id: v === "__none__" ? "" : v, control_title: ctl?.title || "" });
-                }}>
-                  <SelectTrigger className="h-8 text-xs"><SelectValue placeholder="Map to control…" /></SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="__none__" className="text-xs">— No control —</SelectItem>
-                    {controls.map((c) => (
-                      <SelectItem key={c.id} value={c.id} className="text-xs">{c.control_id ? `[${c.control_id}] ` : ""}{c.title}</SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-                <div className="flex items-center gap-2">
-                  {f.uploadStatus === "uploading" && <Loader2 className="w-4 h-4 animate-spin text-primary" />}
-                  {f.uploadStatus === "done" && <CheckCircle2 className="w-4 h-4 text-emerald-500" />}
-                  {f.uploadStatus === "error" && <AlertCircle className="w-4 h-4 text-destructive" title={f.error} />}
-                  {!f.uploadStatus && (
-                    <button onClick={() => removeFile(f.id)} className="text-muted-foreground hover:text-destructive transition-colors"><X className="w-4 h-4" /></button>
-                  )}
-                </div>
-              </div>
-            ))}
+              );
+            })}
           </div>
 
           <div className="flex justify-end gap-3">
