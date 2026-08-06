@@ -62,19 +62,87 @@ Deno.serve(async (req) => {
       is_active: true,
     });
 
-    // Best-effort audit log
+    // --- #1: Create default TenantSettings (enables white-labeling, risk appetite, multi-currency) ---
+    const settings = await base44.asServiceRole.entities.TenantSettings.create({
+      tenant_id: tenant.id,
+      base_currency: 'ZAR',
+      active_framework_ids: [],
+      active_framework_names: [],
+      active_jurisdictions: ['South Africa'],
+      risk_appetite_limit: 5000000,
+      impact_1_min: 0,        impact_1_max: 50000,
+      impact_2_min: 50001,    impact_2_max: 250000,
+      impact_3_min: 250001,   impact_3_max: 1000000,
+      impact_4_min: 1000001,  impact_4_max: 5000000,
+      impact_5_min: 5000001,  impact_5_max: 50000000,
+    }).catch(() => null);
+
+    // --- #5: Seed default compliance framework baseline (ISO 27001, NIST CSF, King IV, POPIA) ---
+    const DEFAULT_FRAMEWORKS = [
+      { name: 'ISO 27001:2022', version: '2022', description: 'Information security management systems — international standard', icon: 'shield' },
+      { name: 'NIST CSF 2.0', version: '2.0', description: 'NIST Cybersecurity Framework — Identify, Protect, Detect, Respond, Recover', icon: 'shield' },
+      { name: 'King IV Report', version: '2016', description: 'King IV Report on Corporate Governance for South Africa', icon: 'crown' },
+      { name: 'POPIA', version: '2013 (Effective 2021)', description: 'Protection of Personal Information Act — South Africa data protection', icon: 'lock' },
+    ];
+    const seededFrameworks = [];
+    for (const fw of DEFAULT_FRAMEWORKS) {
+      const created = await base44.asServiceRole.entities.Framework.create({
+        tenant_id: tenant.id,
+        name: fw.name,
+        version: fw.version,
+        description: fw.description,
+        status: 'not_started',
+        readiness_score: 0,
+        total_controls: 0,
+        passing_controls: 0,
+        icon: fw.icon,
+      }).catch(() => null);
+      if (created) seededFrameworks.push(created.id);
+    }
+
+    // Link seeded frameworks to TenantSettings
+    if (settings && seededFrameworks.length > 0) {
+      await base44.asServiceRole.entities.TenantSettings.update(settings.id, {
+        active_framework_ids: seededFrameworks,
+        active_framework_names: DEFAULT_FRAMEWORKS.map(f => f.name),
+      }).catch(() => {});
+    }
+
+    // --- #7: Comprehensive audit trail for the full onboarding event ---
     await base44.asServiceRole.functions
       .invoke('logAudit', {
         action: 'create',
         entity_type: 'Tenant',
         entity_id: tenant.id,
         entity_name: tenant.name,
-        changes: JSON.stringify({ tier: 'trial', trial_days: TRIAL_DAYS }),
+        changes: JSON.stringify({ tier: 'trial', trial_days: TRIAL_DAYS, admin_email: me.email }),
         severity: 'info',
       })
       .catch(() => {});
 
-    return Response.json({ tenant_id: tenant.id, tenant, created: true });
+    await base44.asServiceRole.functions
+      .invoke('logAudit', {
+        action: 'create',
+        entity_type: 'TenantSettings',
+        entity_id: settings?.id || '',
+        entity_name: 'Default Tenant Settings',
+        changes: JSON.stringify({ base_currency: 'ZAR', risk_appetite_limit: 5000000, jurisdictions: ['South Africa'] }),
+        severity: 'info',
+      })
+      .catch(() => {});
+
+    await base44.asServiceRole.functions
+      .invoke('logAudit', {
+        action: 'create',
+        entity_type: 'Framework',
+        entity_id: tenant.id,
+        entity_name: 'Default Framework Baseline',
+        changes: JSON.stringify({ frameworks: DEFAULT_FRAMEWORKS.map(f => f.name), count: seededFrameworks.length }),
+        severity: 'info',
+      })
+      .catch(() => {});
+
+    return Response.json({ tenant_id: tenant.id, tenant, created: true, seeded_frameworks: seededFrameworks.length });
   } catch (error) {
     console.error('provisionTenant error:', error?.message || error);
     return Response.json({ error: error?.message || 'Provisioning failed' }, { status: 500 });
