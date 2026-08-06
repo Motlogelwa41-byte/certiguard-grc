@@ -160,6 +160,9 @@ import ExecutiveBriefing from '@/pages/ExecutiveBriefing';
 import IncidentWarRoom from '@/pages/IncidentWarRoom';
 import TenantIsolationDashboard from '@/pages/TenantIsolationDashboard';
 import ProtectionCommandCenter from '@/pages/ProtectionCommandCenter';
+import AutomatedTestLibrary from '@/pages/AutomatedTestLibrary';
+import RealTimeCspm from '@/pages/RealTimeCspm';
+import IrPlaybooks from '@/pages/IrPlaybooks';
 import Landing from '@/pages/Landing';
 import { LanguageProvider } from '@/contexts/LanguageContext';
 
@@ -344,6 +347,9 @@ const AuthenticatedApp = () => {
           <Route path="/incident-war-room/:id" element={<IncidentWarRoom />} />
           <Route path="/tenant-isolation" element={<TenantIsolationDashboard />} />
           <Route path="/protection-center" element={<ProtectionCommandCenter />} />
+          <Route path="/automated-tests" element={<AutomatedTestLibrary />} />
+          <Route path="/realtime-cspm" element={<RealTimeCspm />} />
+          <Route path="/ir-playbooks" element={<IrPlaybooks />} />
         </Route>
       </Route>
       <Route path="*" element={<PageNotFound />} />

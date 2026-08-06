@@ -4,7 +4,7 @@ import {
   ShieldCheck, FileSearch, Brain, Play, FileSpreadsheet, FileDown, BarChart3, LineChart,
   History, ShieldAlert, GraduationCap, Calendar, Bell, Users, Copy, SlidersHorizontal,
   Target, Upload, Send, Globe, Users2, MapPin, Zap, ListChecks, BellRing,
-  PieChart,   Radar, Landmark, BarChart2, Network, GitCompare, Sparkles, CreditCard, Gauge, Info, ScrollText, Activity, Factory, Plug, UserCheck, Wand2, KeyRound, Bug, Library, Presentation, TrendingDown, CalendarCheck, Rocket, ClipboardCheck,   FlaskRound, Award, FileQuestion, FlaskConical, Lock, Calculator, Server, BookOpen, Settings, Code, Cloud, Webhook, Leaf, Trophy, TestTube, FileBadge, Gavel, Fingerprint, Languages, FileArchive, DollarSign, Palette, ShieldX
+  PieChart,   Radar, Landmark, BarChart2, Network, GitCompare, Sparkles, CreditCard, Gauge, Info, ScrollText, Activity, Factory, Plug, UserCheck, Wand2, KeyRound, Bug, Library, Presentation, TrendingDown, CalendarCheck, Rocket, ClipboardCheck,   FlaskRound, Award, FileQuestion, FlaskConical, Lock, Calculator, Server, BookOpen, Settings, Code, Cloud, Webhook, Leaf, Trophy, TestTube, FileBadge, Gavel, Fingerprint, Languages, FileArchive, DollarSign, Palette, ShieldX, Siren, ScanLine
 } from "lucide-react";
 // NOTE: ClipboardList imported above is reused for the UAT checklist item below.
 
@@ -47,6 +47,7 @@ export const navSections = [
       { label: "Audit Checklists", path: "/audit-checklists", icon: ListChecks, roles: ["admin", "compliance_officer", "auditor"] },
       { label: "Control Monitoring", path: "/control-monitoring", icon: Activity, roles: ["admin", "compliance_officer", "auditor"] },
       { label: "Control Tests", path: "/control-tests", icon: FlaskRound, roles: ["admin", "compliance_officer", "auditor"] },
+      { label: "Automated Test Library", path: "/automated-tests", icon: Library, roles: ["admin", "compliance_officer", "risk_manager", "auditor"] },
       { label: "Test Library", path: "/control-test-library", icon: Library, roles: ["admin", "compliance_officer", "auditor"] },
       { label: "Auditor Portal", path: "/auditor-portal", icon: ShieldCheck, roles: ["admin", "compliance_officer", "external_auditor", "auditor"] },
       { label: "Auditor Scope", path: "/auditor-scope", icon: UserCheck, roles: ["admin", "compliance_officer"] },
@@ -106,8 +107,10 @@ export const navSections = [
       { label: "Calendar", path: "/calendar", icon: Calendar, roles: ["admin", "compliance_officer", "risk_manager", "auditor", "user"] },
       { label: "Incidents", path: "/incidents", icon: ShieldAlert, roles: ["admin", "compliance_officer", "risk_manager", "auditor", "user"] },
       { label: "Incident Command", path: "/incident-command", icon: AlertTriangle, roles: ["admin", "compliance_officer", "risk_manager"] },
+      { label: "IR Playbooks", path: "/ir-playbooks", icon: Siren, roles: ["admin", "compliance_officer", "risk_manager"] },
       { label: "Security Findings", path: "/vulnerabilities", icon: Bug, roles: ["admin", "compliance_officer", "risk_manager", "auditor"] },
       { label: "Cloud Posture (CSPM)", path: "/cloud-posture", icon: Cloud, roles: ["admin", "compliance_officer", "risk_manager", "auditor"] },
+      { label: "Real-Time CSPM Scan", path: "/realtime-cspm", icon: ScanLine, roles: ["admin", "compliance_officer", "risk_manager", "auditor"] },
       { label: "SIEM Webhooks", path: "/siem-webhooks", icon: Webhook, roles: ["admin", "compliance_officer", "risk_manager"] },
       { label: "EDR / XDR", path: "/edr-dashboard", icon: Radar, roles: ["admin", "compliance_officer", "risk_manager", "auditor"] },
       { label: "Access Recertification", path: "/access-recertification", icon: UserCheck, roles: ["admin"] },
