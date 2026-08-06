@@ -178,6 +178,7 @@ import VendorRiskExchange from '@/pages/VendorRiskExchange';
 import FairBenchmarks from '@/pages/FairBenchmarks';
 import PrivacyDataMapping from '@/pages/PrivacyDataMapping';
 import EsgBenchmarking from '@/pages/EsgBenchmarking';
+import SecureEvidencePack from '@/pages/SecureEvidencePack';
 import Landing from '@/pages/Landing';
 import { LanguageProvider } from '@/contexts/LanguageContext';
 
@@ -380,6 +381,7 @@ const AuthenticatedApp = () => {
           <Route path="/fair-benchmarks" element={<FairBenchmarks />} />
           <Route path="/privacy-data-mapping" element={<PrivacyDataMapping />} />
           <Route path="/esg-benchmarking" element={<EsgBenchmarking />} />
+          <Route path="/secure-evidence-pack" element={<SecureEvidencePack />} />
         </Route>
       </Route>
       <Route path="*" element={<PageNotFound />} />

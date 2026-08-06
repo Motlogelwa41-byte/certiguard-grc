@@ -1,0 +1,41 @@
+{
+  "name": "Slack Critical Risk Score Alert",
+  "description": "Posts an urgent Slack alert to #compliance whenever a risk's score crosses the critical threshold (>= 20, i.e. likelihood \u00d7 impact in the red zone), whether newly created or updated upward into critical territory.",
+  "trigger": {
+    "condition": "${ (.trigger.data.risk_score // 0) >= 20 }",
+    "config": {
+      "trigger_type": "entity",
+      "entity_name": "Risk",
+      "events": [
+        "create",
+        "update"
+      ]
+    }
+  },
+  "definition": {
+    "document": {
+      "dsl": "1.0.0",
+      "name": "slack_critical_risk_score",
+      "version": "1.0",
+      "namespace": "base44"
+    },
+    "do": [
+      {
+        "post_critical_alert": {
+          "call": "invoke_backend_function",
+          "with": {
+            "function_name": "sendSlackAlert",
+            "args": {
+              "text": ":rotating_light: *CRITICAL RISK THRESHOLD CROSSED*\n*${ .trigger.data.title // \"Untitled risk\" }*\n:fire: Risk Score: *${ .trigger.data.risk_score // \"\u2014\" }* (Likelihood ${ .trigger.data.likelihood // \"\u2014\" } \u00d7 Impact ${ .trigger.data.impact // \"\u2014\" })\nCategory: ${ .trigger.data.category // \"\u2014\" } \u2022 Treatment: ${ .trigger.data.treatment // \"mitigate\" } \u2022 Status: ${ .trigger.data.status // \"open\" }\nOwner: ${ .trigger.data.owner_name // \"Unassigned\" }\n> Immediate review and mitigation action required \u2014 this risk exceeds the critical tolerance threshold."
+            }
+          },
+          "then": "end",
+          "x-base44": {
+            "title": "Post critical risk Slack alert",
+            "description": "Risk score >= 20 \u2192 urgent #compliance alert"
+          }
+        }
+      }
+    ]
+  }
+}

@@ -20,6 +20,7 @@ import ComplianceTrendChart from "@/components/dashboard/ComplianceTrendChart";
 import FrameworkGlobalReadiness from "@/components/dashboard/FrameworkGlobalReadiness";
 import RegulatoryAlertBanner from "@/components/dashboard/RegulatoryAlertBanner";
 import GeoCoverageStrip from "@/components/dashboard/GeoCoverageStrip";
+import FrameworkMaturityHeatmap from "@/components/dashboard/FrameworkMaturityHeatmap";
 import { useAuth } from "@/lib/AuthContext";
 import RiskManagerDashboard from "@/components/dashboard/role/RiskManagerDashboard";
 import AuditorDashboard from "@/components/dashboard/role/AuditorDashboard";
@@ -269,6 +270,9 @@ export default function Dashboard() {
           <p className="text-sm text-muted-foreground py-4 text-center">Add frameworks to track compliance readiness</p>
         )}
       </div>
+
+      {/* Framework Maturity Heatmap */}
+      <FrameworkMaturityHeatmap />
 
       {/* Recent Items + Activity Row */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
