@@ -29,11 +29,12 @@ export default function EdrDashboard() {
   const [syncResult, setSyncResult] = useState(null);
   const [showManual, setShowManual] = useState(false);
   const [syncingGithub, setSyncingGithub] = useState(false);
+  const [syncingCrowd, setSyncingCrowd] = useState(false);
   const { toast } = useToast();
 
   const load = useCallback(() => {
     setLoading(true);
-    base44.entities.SecurityFinding.filter({ source: { $in: ["security_hub", "other"] } }, "-detected_date")
+    base44.entities.SecurityFinding.filter({ source: { $in: ["security_hub", "other", "crowdstrike", "defender"] } }, "-detected_date")
       .then((d) => setFindings(d || []))
       .catch(() => toast({ title: "Failed to load security findings", variant: "destructive" }))
       .finally(() => setLoading(false));
@@ -83,6 +84,26 @@ export default function EdrDashboard() {
     }
   };
 
+  const runCrowdSync = async () => {
+    setSyncingCrowd(true);
+    try {
+      const res = await base44.functions.invoke("syncEdrFindings", { provider: "crowdstrike" });
+      const data = res?.data || res;
+      if (data?.ok) {
+        const det = data.results?.[0]?.detections?.synced || 0;
+        const vuln = data.results?.[0]?.vulnerabilities?.synced || 0;
+        toast({ title: `CrowdStrike sync complete — ${det} detections, ${vuln} vulnerabilities` });
+        load();
+      } else {
+        toast({ title: "CrowdStrike sync failed", description: data?.error || data?.results?.[0]?.reason, variant: "destructive" });
+      }
+    } catch (e) {
+      toast({ title: "Sync request failed", description: e.message, variant: "destructive" });
+    } finally {
+      setSyncingCrowd(false);
+    }
+  };
+
   const removeFinding = async (id) => {
     if (!window.confirm("Delete this finding?")) return;
     try {
@@ -121,6 +142,10 @@ export default function EdrDashboard() {
             <Button onClick={() => setShowManual(true)} variant="default" size="sm">
               <Plus className="w-4 h-4 mr-1" /> Log Finding
             </Button>
+            <Button onClick={runCrowdSync} disabled={syncingCrowd} variant="default" size="sm">
+              {syncingCrowd ? <Loader2 className="w-4 h-4 mr-1 animate-spin" /> : <Radar className="w-4 h-4 mr-1" />}
+              {syncingCrowd ? "Syncing…" : "Sync CrowdStrike"}
+            </Button>
             <Button onClick={runGithubSync} disabled={syncingGithub} variant="outline" size="sm">
               {syncingGithub ? <Loader2 className="w-4 h-4 mr-1 animate-spin" /> : <Github className="w-4 h-4 mr-1" />}
               {syncingGithub ? "Syncing…" : "Sync GitHub"}
@@ -138,9 +163,9 @@ export default function EdrDashboard() {
         <div className="flex items-start gap-3">
           <Cloud className="w-5 h-5 text-primary mt-0.5" />
           <div className="flex-1">
-            <h3 className="font-heading font-semibold text-foreground text-sm">AWS Security Hub + GitHub — Active Providers</h3>
+            <h3 className="font-heading font-semibold text-foreground text-sm">CrowdStrike + AWS Security Hub + GitHub — Active Providers</h3>
             <p className="text-xs text-muted-foreground mt-1">
-              Cloud findings are pulled from AWS Security Hub using your configured AWS credentials. GitHub repository posture (branch protection, PR review enforcement, org 2FA) is checked via the live OAuth connector. Both run on daily automated syncs — no paid EDR license required.
+              CrowdStrike Falcon detections and Spotlight vulnerabilities are pulled via the Falcon API using your OAuth2 credentials. Cloud findings come from AWS Security Hub. GitHub repository posture (branch protection, PR review enforcement, org 2FA) is checked via the live OAuth connector. All three run on daily automated syncs.
             </p>
           </div>
         </div>
