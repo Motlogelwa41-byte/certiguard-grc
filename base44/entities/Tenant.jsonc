@@ -79,6 +79,25 @@
     "logo_url": {
       "type": "string"
     },
+    "parent_tenant_id": {
+      "type": "string",
+      "description": "Parent holding company tenant ID \u2014 enables cross-organizational risk rollup for multi-entity groups"
+    },
+    "parent_tenant_name": {
+      "type": "string",
+      "description": "Denormalized parent tenant name for display"
+    },
+    "entity_type": {
+      "type": "string",
+      "enum": [
+        "holding_company",
+        "subsidiary",
+        "standalone",
+        "client"
+      ],
+      "default": "standalone",
+      "description": "Entity role in the multi-tenant hierarchy: holding company rolls up subsidiaries; client is managed by a consulting advisory"
+    },
     "is_active": {
       "type": "boolean",
       "default": true
@@ -119,6 +138,9 @@
         },
         {
           "id": "{{user.data.tenant_id}}"
+        },
+        {
+          "data.parent_tenant_id": "{{user.data.tenant_id}}"
         },
         {
           "user_condition": {
