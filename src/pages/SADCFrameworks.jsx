@@ -8,7 +8,7 @@ import { useToast } from "@/components/ui/use-toast";
 import { SADC_LIBRARY } from "@/lib/sadcLibrary";
 
 const REGIONS = ["All Regions", "South Africa", "Botswana", "Zimbabwe", "Kenya", "Tanzania", "Uganda", "Malawi", "Zambia", "DRC", "Nigeria", "African Union", "SADC Region", "Global"];
-const CATEGORIES = ["All Categories", "Data Privacy", "Cybersecurity", "Financial Services", "ESG Reporting", "Mining & ESG", "Telecommunications & ICT", "Healthcare & Pharma", "Energy & Utilities", "Procurement & Public Finance", "Corporate Registry & IP", "Professional Services & Audit", "Real Estate & Property", "Competition & Antitrust", "Trade & Industry", "Public Finance & Governance", "Business & Industry", "Tax & Revenue", "Food Safety & Standards"];
+const CATEGORIES = ["All Categories", "Data Privacy", "Cybersecurity", "Financial Services", "ESG Reporting", "Mining & ESG", "Telecommunications & ICT", "Healthcare & Pharma", "Energy & Utilities", "Procurement & Public Finance", "Corporate Registry & IP", "Professional Services & Audit", "Real Estate & Property", "Competition & Antitrust", "Trade & Industry", "Public Finance & Governance", "Business & Industry", "Tax & Revenue", "Food Safety & Standards", "Education & Human Resource Development", "Education & Qualifications"];
 
 const categoryColors = {
   "Data Privacy": "bg-purple-100 text-purple-700",
@@ -29,6 +29,8 @@ const categoryColors = {
   "Business & Industry": "bg-fuchsia-100 text-fuchsia-700",
   "Tax & Revenue": "bg-yellow-100 text-yellow-700",
   "Food Safety & Standards": "bg-green-100 text-green-700",
+  "Education & Human Resource Development": "bg-pink-100 text-pink-700",
+  "Education & Qualifications": "bg-fuchsia-100 text-fuchsia-700",
 };
 
 // Maps library categories → valid FrameworkRequirement categories (supports governance & privacy)
@@ -51,6 +53,8 @@ const REQ_CATEGORY_MAP = {
   "Food Safety & Standards": "compliance",
   "Mining & ESG": "compliance",
   "ESG Reporting": "compliance",
+  "Education & Human Resource Development": "compliance",
+  "Education & Qualifications": "compliance",
 };
 
 // Maps library categories → valid Control categories (no governance/privacy — use compliance/data_protection)
@@ -73,6 +77,8 @@ const CONTROL_CATEGORY_MAP = {
   "Food Safety & Standards": "compliance",
   "Mining & ESG": "compliance",
   "ESG Reporting": "compliance",
+  "Education & Human Resource Development": "compliance",
+  "Education & Qualifications": "compliance",
 };
 
 export default function SADCFrameworks() {
