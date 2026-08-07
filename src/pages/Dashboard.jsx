@@ -22,6 +22,7 @@ import RegulatoryAlertBanner from "@/components/dashboard/RegulatoryAlertBanner"
 import GeoCoverageStrip from "@/components/dashboard/GeoCoverageStrip";
 import FrameworkMaturityHeatmap from "@/components/dashboard/FrameworkMaturityHeatmap";
 import MaturityProgressTracker from "@/components/dashboard/MaturityProgressTracker";
+import FrameworkControlProgressCard from "@/components/dashboard/FrameworkControlProgressCard";
 import { useAuth } from "@/lib/AuthContext";
 import RiskManagerDashboard from "@/components/dashboard/role/RiskManagerDashboard";
 import AuditorDashboard from "@/components/dashboard/role/AuditorDashboard";
@@ -165,6 +166,11 @@ export default function Dashboard() {
         <StatCard label="Controls" value={controls.length} icon={FileCheck} color="green" trendLabel={`${passingControls} passing`} trend={passingControls > failingControls ? "up" : "down"} />
         <StatCard label="Open Risks" value={openRisks} icon={AlertTriangle} color={openRisks > 0 ? "amber" : "green"} trendLabel={`${risks.length} total`} />
         <StatCard label="Pending Tasks" value={pendingTasks} icon={CheckSquare} color={overdueTasks > 0 ? "red" : "blue"} trendLabel={overdueTasks > 0 ? `${overdueTasks} overdue` : "On track"} trend={overdueTasks > 0 ? "down" : "up"} />
+      </div>
+
+      {/* Framework Control Progress — completed vs pending per framework */}
+      <div className="mb-8">
+        <FrameworkControlProgressCard frameworks={frameworks} controls={controls} />
       </div>
 
       {/* Global Readiness — real-time across active frameworks */}

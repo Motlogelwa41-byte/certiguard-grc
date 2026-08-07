@@ -1,0 +1,40 @@
+{
+  "name": "Slack Control Failure Alert",
+  "description": "Posts an instant Slack alert to #compliance whenever a control's status changes to 'failing' \u2014 a compliance check has failed and needs immediate attention.",
+  "trigger": {
+    "config": {
+      "trigger_type": "entity",
+      "entity_name": "Control",
+      "events": [
+        "update"
+      ]
+    },
+    "condition": "${ .trigger.data.status == \"failing\" and .trigger.old_data.status != \"failing\" }"
+  },
+  "definition": {
+    "document": {
+      "dsl": "1.0.0",
+      "name": "slack_control_failure",
+      "version": "1.0",
+      "namespace": "base44"
+    },
+    "do": [
+      {
+        "post_alert": {
+          "call": "invoke_backend_function",
+          "with": {
+            "function_name": "sendSlackAlert",
+            "args": {
+              "text": ":rotating_light: Compliance check FAILED\n*${ .trigger.data.title // \"Untitled control\" }* (${ .trigger.data.control_id // \"\u2014\" })\n${ .trigger.old_data.status // \"unknown\" } \u2192 failing\nOwner: ${ .trigger.data.owner_name // \"Unassigned\" } \u2022 Category: ${ .trigger.data.category // \"\u2014\" }${ if .trigger.data.framework_names != null then \"\\nFrameworks: \" + (.trigger.data.framework_names | join(\", \")) else \"\" }\nReview and remediate in CertiGuard."
+            }
+          },
+          "then": "end",
+          "x-base44": {
+            "title": "Post Slack alert",
+            "description": "Control failed \u2192 #compliance"
+          }
+        }
+      }
+    ]
+  }
+}

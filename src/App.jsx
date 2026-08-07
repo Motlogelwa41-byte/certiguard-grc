@@ -182,6 +182,7 @@ import EsgBenchmarking from '@/pages/EsgBenchmarking';
 import SecureEvidencePack from '@/pages/SecureEvidencePack';
 import CrossTenantExecutiveDashboard from '@/pages/CrossTenantExecutiveDashboard';
 import FrameworkMaturityComparison from '@/pages/FrameworkMaturityComparison';
+import HRDCBQAReport from '@/pages/HRDCBQAReport';
 import Landing from '@/pages/Landing';
 import { LanguageProvider } from '@/contexts/LanguageContext';
 
@@ -388,6 +389,7 @@ const AuthenticatedApp = () => {
           <Route path="/secure-evidence-pack" element={<SecureEvidencePack />} />
           <Route path="/cross-tenant-executive-dashboard" element={<CrossTenantExecutiveDashboard />} />
           <Route path="/framework-maturity-comparison" element={<FrameworkMaturityComparison />} />
+          <Route path="/hrdc-bqa-report" element={<HRDCBQAReport />} />
         </Route>
       </Route>
       <Route path="*" element={<PageNotFound />} />
