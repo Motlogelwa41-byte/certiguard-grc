@@ -1,0 +1,40 @@
+{
+  "definition": {
+    "document": {
+      "dsl": "1.0.0",
+      "name": "slack_evidence_pack_uploaded",
+      "version": "1.0",
+      "namespace": "base44"
+    },
+    "do": [
+      {
+        "post_alert": {
+          "call": "invoke_backend_function",
+          "with": {
+            "function_name": "sendSlackAlert",
+            "args": {
+              "text": ":file_folder: New evidence pack logged\n*${ .trigger.data.file_name // \"Untitled pack\" }*\nSubmitted by: ${ .trigger.data.user_name // \"\u2014\" } \u2022 ${ .trigger.data.timestamp // \"\u2014\" }\nSHA-256: `${ .trigger.data.sha256_hash // \"\u2014\" }`\nRetention: ${ .trigger.data.retention_policy // \"7_years\" }${ if .trigger.data.control_id != null then \" \u2022 Control: \" + .trigger.data.control_id else \"\" }"
+            }
+          },
+          "then": "end",
+          "x-base44": {
+            "title": "Post Slack alert",
+            "description": "New evidence pack \u2192 #compliance"
+          }
+        }
+      }
+    ]
+  },
+  "description": "Posts a Slack alert to #compliance whenever a new secure evidence pack is generated and logged to the Audit Evidence Ledger, so the team knows fresh audit-ready evidence is available without checking the dashboard.",
+  "name": "Slack Evidence Pack Uploaded",
+  "trigger": {
+    "condition": null,
+    "config": {
+      "trigger_type": "entity",
+      "events": [
+        "create"
+      ],
+      "entity_name": "AuditEvidenceLedger"
+    }
+  }
+}
