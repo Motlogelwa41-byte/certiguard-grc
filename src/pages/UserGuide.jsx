@@ -6,7 +6,7 @@ import { Badge } from "@/components/ui/badge";
 import {
   Rocket, ShieldCheck, FileCheck, Paperclip, Award, AlertTriangle, Building2,
   Lock, BarChart3, Zap, CreditCard, Users, ListChecks, BookOpen, ChevronRight,
-  Workflow, Mail, Plug, Bell, ScrollText, Target, PlayCircle
+  Workflow, Mail, Plug, Bell, ScrollText, Target, PlayCircle, ClipboardList
 } from "lucide-react";
 import SampleWalkthrough from "@/components/user-guide/SampleWalkthrough";
 import VideoTutorials from "@/components/user-guide/VideoTutorials";
@@ -64,7 +64,14 @@ export default function UserGuide() {
       <PageHeader
         title="CertiGuard GRC — User Guide"
         subtitle="Everything you need to set up, run, and get value from your compliance program."
-        actions={<Badge variant="secondary" className="gap-1"><BookOpen className="w-3.5 h-3.5" /> v1.0</Badge>}
+        actions={
+          <div className="flex items-center gap-2">
+            <Badge variant="secondary" className="gap-1"><BookOpen className="w-3.5 h-3.5" /> v1.0</Badge>
+            <Link to="/testing-guide" className="inline-flex items-center gap-1.5 rounded-md bg-primary px-3 py-1.5 text-xs font-medium text-primary-foreground hover:bg-primary/90 transition-colors">
+              <ClipboardList className="w-3.5 h-3.5" /> Practical Testing Guide
+            </Link>
+          </div>
+        }
       />
 
       <div className="grid grid-cols-1 lg:grid-cols-[240px_1fr] gap-8">

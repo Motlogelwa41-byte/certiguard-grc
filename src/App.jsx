@@ -111,6 +111,7 @@ import TestingChecklist from '@/pages/TestingChecklist';
 import StakeholderSummary from '@/pages/StakeholderSummary';
 import AuditorLinkAccess from '@/pages/AuditorLinkAccess';
 import UserGuide from '@/pages/UserGuide';
+import PracticalTestingGuide from '@/pages/PracticalTestingGuide';
 import PrivacyPolicy from '@/pages/PrivacyPolicy';
 import Terms from '@/pages/Terms';
 import DataPrivacy from '@/pages/DataPrivacy';
@@ -324,6 +325,7 @@ const AuthenticatedApp = () => {
           <Route path="/testing-checklist" element={<TestingChecklist />} />
           <Route path="/stakeholder-summary" element={<StakeholderSummary />} />
           <Route path="/user-guide" element={<UserGuide />} />
+          <Route path="/testing-guide" element={<PracticalTestingGuide />} />
           <Route path="/data-privacy" element={<DataPrivacy />} />
           <Route path="/executive-readiness-dashboard" element={<ExecutiveReadinessDashboard />} />
           <Route path="/auditor-export" element={<AuditorExport />} />
