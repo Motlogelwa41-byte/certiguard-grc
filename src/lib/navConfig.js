@@ -219,6 +219,7 @@ export const navSections = [
       { label: "Policy Acknowledgments", path: "/policy-acknowledgments", icon: FileCheck, roles: ["admin", "compliance_officer"] },
       { label: "Notifications", path: "/notifications", icon: Bell, roles: ["admin", "compliance_officer", "risk_manager", "auditor", "user"] },
       { label: "Notif. Preferences", path: "/notification-preferences", icon: SlidersHorizontal, roles: ["admin", "compliance_officer", "risk_manager"] },
+      { label: "Connect AI Assistants", path: "/connect", icon: Plug, roles: ["admin", "compliance_officer", "risk_manager", "auditor", "user"] },
     ]
   },
 ];

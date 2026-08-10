@@ -187,6 +187,7 @@ import WebhookManagement from '@/pages/WebhookManagement';
 import RiskScenarioLibrary from '@/pages/RiskScenarioLibrary';
 import CustomReportBuilder from '@/pages/CustomReportBuilder';
 import AnomalyDetection from '@/pages/AnomalyDetection';
+import Connect from '@/pages/Connect';
 import Landing from '@/pages/Landing';
 import { LanguageProvider } from '@/contexts/LanguageContext';
 
@@ -398,6 +399,7 @@ const AuthenticatedApp = () => {
           <Route path="/risk-scenario-library" element={<RiskScenarioLibrary />} />
           <Route path="/custom-reports" element={<CustomReportBuilder />} />
           <Route path="/anomaly-detection" element={<AnomalyDetection />} />
+          <Route path="/connect" element={<Connect />} />
         </Route>
       </Route>
       <Route path="*" element={<PageNotFound />} />
