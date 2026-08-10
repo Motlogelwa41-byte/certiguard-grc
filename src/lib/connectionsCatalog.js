@@ -16,7 +16,6 @@ export const CATEGORIES = [
 ];
 
 export const CATALOG = [
-  { service: "aws", label: "Amazon Web Services", category: "cloud", authMethod: "api_key", icon: Cloud, connectorType: null, secretHint: "AWS_ACCESS_KEY_ID + AWS_SECRET_ACCESS_KEY", description: "IAM access reviews, S3 bucket policies, CloudTrail logs, security hub findings.", frameworks: ["SOC 2","ISO 27001","PCI DSS"] },
   { service: "gcp", label: "Google Cloud Platform", category: "cloud", authMethod: "service_account", icon: Cloud, connectorType: null, secretHint: "GCP_SERVICE_ACCOUNT_JSON", description: "IAM bindings, project inventory, GKE posture, logging configuration.", frameworks: ["SOC 2","ISO 27001"] },
   { service: "azure", label: "Microsoft Azure", category: "cloud", authMethod: "api_key", icon: Cloud, connectorType: null, secretHint: "AZURE_TENANT_ID + AZURE_CLIENT_*", description: "Entra ID users, subscription posture, Defender findings, activity logs.", frameworks: ["SOC 2","ISO 27001"] },
   { service: "github", label: "GitHub", category: "code", authMethod: "oauth", icon: Github, connectorType: "github", description: "Repository inventory, branch protection, code review enforcement, MFA status.", frameworks: ["SOC 2","ISO 27001"] },

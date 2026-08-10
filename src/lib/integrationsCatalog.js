@@ -12,18 +12,6 @@ export const integrationCategories = {
 
 export const integrations = [
   {
-    id: "aws",
-    name: "Amazon Web Services",
-    category: "cloud",
-    icon: "Cloud",
-    description: "Automated evidence from AWS Security Hub, IAM, S3, CloudTrail, and Config.",
-    evidenceTypes: ["IAM access reviews", "S3 bucket encryption", "CloudTrail logs", "Security Hub findings", "Config rules"],
-    connectionMethod: "IAM Role (ARN + External ID)",
-    status: "available",
-    controlsCovered: 15,
-    frameworks: ["SOC 2", "ISO 27001", "NIST CSF", "PCI DSS"],
-  },
-  {
     id: "gcp",
     name: "Google Cloud Platform",
     category: "cloud",
