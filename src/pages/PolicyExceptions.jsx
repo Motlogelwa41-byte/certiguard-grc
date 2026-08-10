@@ -83,6 +83,9 @@ export default function PolicyExceptions() {
         requested_at: editing?.requested_at || new Date().toISOString(),
         status: editing?.status || "pending",
       };
+      // Strip empty date strings — they fail schema format validation
+      if (!payload.effective_date) delete payload.effective_date;
+      if (!payload.expiration_date) delete payload.expiration_date;
       if (editing?.id) {
         await base44.entities.PolicyException.update(editing.id, payload);
       } else {
@@ -92,7 +95,7 @@ export default function PolicyExceptions() {
       load();
       toast({ title: "Exception request saved" });
     } catch (e) {
-      toast({ title: "Failed to save", variant: "destructive" });
+      toast({ title: "Failed to save", description: e?.message || "Unknown error", variant: "destructive" });
     }
   };
 

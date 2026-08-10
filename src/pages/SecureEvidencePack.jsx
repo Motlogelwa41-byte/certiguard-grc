@@ -126,6 +126,7 @@ export default function SecureEvidencePack() {
           });
         } catch (ledgerErr) {
           console.error("Ledger logging failed:", ledgerErr);
+          toast({ title: "Ledger entry failed", description: ledgerErr?.message || "Could not log to audit ledger", variant: "destructive" });
         }
       }
 
@@ -140,7 +141,8 @@ export default function SecureEvidencePack() {
       toast({ title: "Evidence pack generated", description: `Pack ${result.packId} — ${result.controlCount} controls, ${result.evidenceCount} evidence items.${pdfUrl ? " Logged to audit ledger." : ""}` });
       refreshLedger();
     } catch (err) {
-      toast({ title: "Generation failed", description: err.message || "Could not generate the pack.", variant: "destructive" });
+      console.error("Evidence pack generation failed:", err);
+      toast({ title: "Generation failed", description: err?.message || "Could not generate the pack.", variant: "destructive" });
     } finally {
       setGenerating(false);
     }

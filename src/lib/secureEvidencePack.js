@@ -26,7 +26,10 @@ async function computePackHash(payload) {
 
 async function hashFileContent(fileUrl) {
   try {
-    const res = await fetch(fileUrl);
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), 5000);
+    const res = await fetch(fileUrl, { signal: controller.signal });
+    clearTimeout(timeout);
     if (!res.ok) return null;
     const buf = await res.arrayBuffer();
     const hashBuf = await crypto.subtle.digest("SHA-256", buf);
