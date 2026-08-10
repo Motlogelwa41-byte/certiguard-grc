@@ -1,0 +1,45 @@
+{
+  "name": "Risk Acceptance Expiry Scanner",
+  "trigger": {
+    "condition": null,
+    "config": {
+      "trigger_type": "scheduled",
+      "events": [],
+      "schedule_mode": "recurring",
+      "cron_expression": "0 8 * * *",
+      "one_time_date": null,
+      "timezone": "Africa/Johannesburg",
+      "interval_value": null,
+      "interval_unit": null,
+      "interval_anchor": null,
+      "ends_type": "never",
+      "ends_on_date": null,
+      "ends_after_count": null
+    }
+  },
+  "definition": {
+    "document": {
+      "dsl": "1.0.0",
+      "name": "risk_acceptance_expiry_scanner",
+      "version": "1.0",
+      "namespace": "base44"
+    },
+    "do": [
+      {
+        "expire_acceptances": {
+          "call": "invoke_backend_function",
+          "with": {
+            "function_name": "expireRiskAcceptances",
+            "args": {}
+          },
+          "then": "end",
+          "x-base44": {
+            "title": "Expire risk acceptances",
+            "description": "Revert accepted risks whose acceptance_expires_at has passed back to open and alert the CRO"
+          }
+        }
+      }
+    ]
+  },
+  "description": "Daily scan that reverts formally accepted risks to OPEN once their acceptance_expires_at date has passed, forcing re-sign-off by the Chief Risk Officer."
+}
