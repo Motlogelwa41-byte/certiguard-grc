@@ -3,7 +3,7 @@ import { base44 } from "@/api/base44Client";
 import { useAuth } from "@/lib/AuthContext";
 import {
   Paperclip, Plus, Pencil, Trash2, Search, Upload, ExternalLink, Link2, Layers,
-  CheckSquare, Clock, XCircle, CheckCircle2, ClipboardCheck
+  CheckSquare, Clock, XCircle, CheckCircle2, ClipboardCheck, History, GitCommit
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
@@ -44,6 +44,7 @@ export default function EvidenceManager() {
   const [reviewDecision, setReviewDecision] = useState("approved");
   const [reviewNotes, setReviewNotes] = useState("");
   const [submitting, setSubmitting] = useState(false);
+  const [versionHistoryOpen, setVersionHistoryOpen] = useState(null);
   const { toast } = useToast();
 
   const load = async () => {
@@ -69,8 +70,29 @@ export default function EvidenceManager() {
 
   const handleSave = async () => {
     try {
-      if (editId) await base44.entities.Evidence.update(editId, form);
-      else await base44.entities.Evidence.create({ ...form, status: "pending_review" });
+      if (editId) {
+        // Evidence versioning: if editing and a new file was uploaded, archive the previous version
+        const existing = items.find((i) => i.id === editId);
+        let updateData = { ...form };
+        if (existing && form.file_url && existing.file_url && form.file_url !== existing.file_url) {
+          const prevVersions = existing.previous_versions
+            ? (typeof existing.previous_versions === "string" ? JSON.parse(existing.previous_versions) : existing.previous_versions)
+            : [];
+          prevVersions.push({
+            version: existing.version || 1,
+            file_url: existing.file_url,
+            file_name: existing.file_name,
+            uploaded_at: existing.created_date || new Date().toISOString(),
+            uploaded_by_name: existing.created_by_name || user?.full_name || user?.email || "—",
+          });
+          updateData.version = (existing.version || 1) + 1;
+          updateData.previous_versions = JSON.stringify(prevVersions);
+          updateData.status = "pending_review"; // New version requires re-review
+        }
+        await base44.entities.Evidence.update(editId, updateData);
+      } else {
+        await base44.entities.Evidence.create({ ...form, version: 1, status: "pending_review" });
+      }
 
       // Hash the uploaded file and write to the append-only audit ledger (SHA-256 integrity proof)
       if (form.file_url) {
@@ -202,7 +224,14 @@ export default function EvidenceManager() {
                 {filtered.map((e) => (
                   <tr key={e.id} className="border-b border-border last:border-0 hover:bg-muted/30 transition-colors">
                     <td className="px-4 py-3 font-medium text-foreground">
-                      {e.title}
+                      <div className="flex items-center gap-1.5">
+                        {e.title}
+                        {(e.version || 1) > 1 && (
+                          <span className="text-[9px] font-semibold px-1.5 py-0.5 rounded bg-primary/10 text-primary" title={`Version ${e.version}`}>
+                            v{e.version}
+                          </span>
+                        )}
+                      </div>
                       {e.review_notes && <div className="text-xs text-muted-foreground mt-0.5 line-clamp-1">“{e.review_notes}”</div>}
                     </td>
                     <td className="px-4 py-3 text-muted-foreground capitalize">{(e.type || "").replace(/_/g, " ")}</td>
@@ -225,6 +254,9 @@ export default function EvidenceManager() {
                       <div className="flex items-center justify-end gap-1">
                         {e.status === "pending_review" && (
                           <button onClick={() => openReview(e)} title="Review" className="p-1.5 rounded hover:bg-muted text-primary"><CheckSquare className="w-3.5 h-3.5" /></button>
+                        )}
+                        {(e.version || 1) > 1 && (
+                          <button onClick={() => setVersionHistoryOpen(e)} title="Version history" className="p-1.5 rounded hover:bg-muted text-primary"><History className="w-3.5 h-3.5" /></button>
                         )}
                         <button onClick={() => handleEdit(e)} className="p-1.5 rounded hover:bg-muted"><Pencil className="w-3.5 h-3.5 text-muted-foreground" /></button>
                         <button onClick={() => handleDelete(e.id)} className="p-1.5 rounded hover:bg-muted"><Trash2 className="w-3.5 h-3.5 text-destructive" /></button>
@@ -364,6 +396,61 @@ export default function EvidenceManager() {
           <DialogHeader><DialogTitle>Bulk Upload Evidence</DialogTitle></DialogHeader>
           <p className="text-sm text-muted-foreground -mt-2">Drag and drop multiple files, map each to a control, then upload all at once. All uploads enter pending review.</p>
           <BulkUploadPanel controls={controls} onComplete={load} />
+        </DialogContent>
+      </Dialog>
+
+      {/* Version history dialog */}
+      <Dialog open={!!versionHistoryOpen} onOpenChange={(v) => !v && setVersionHistoryOpen(null)}>
+        <DialogContent className="max-w-lg">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <History className="w-5 h-5 text-primary" /> Version History
+            </DialogTitle>
+          </DialogHeader>
+          {versionHistoryOpen && (
+            <div className="space-y-3 max-h-[60vh] overflow-y-auto">
+              <div className="rounded-lg bg-emerald-500/10 border border-emerald-500/20 p-3">
+                <div className="flex items-center gap-2 mb-1">
+                  <GitCommit className="w-4 h-4 text-emerald-600" />
+                  <span className="font-medium text-sm text-foreground">Current — v{versionHistoryOpen.version || 1}</span>
+                </div>
+                <div className="text-xs text-muted-foreground">
+                  {versionHistoryOpen.file_name || "No file"} · Uploaded {versionHistoryOpen.created_date ? new Date(versionHistoryOpen.created_date).toLocaleDateString() : "—"}
+                </div>
+                {versionHistoryOpen.file_url && (
+                  <a href={versionHistoryOpen.file_url} target="_blank" rel="noopener noreferrer" className="text-xs text-primary hover:underline flex items-center gap-1 mt-1">
+                    <ExternalLink className="w-3 h-3" /> View current file
+                  </a>
+                )}
+              </div>
+              {(() => {
+                const prev = versionHistoryOpen.previous_versions
+                  ? (typeof versionHistoryOpen.previous_versions === "string"
+                    ? JSON.parse(versionHistoryOpen.previous_versions)
+                    : versionHistoryOpen.previous_versions)
+                  : [];
+                if (prev.length === 0) {
+                  return <p className="text-xs text-muted-foreground text-center py-4">No previous versions archived.</p>;
+                }
+                return [...prev].reverse().map((v, i) => (
+                  <div key={i} className="rounded-lg bg-muted/40 border border-border p-3">
+                    <div className="flex items-center gap-2 mb-1">
+                      <span className="text-[10px] font-semibold px-1.5 py-0.5 rounded bg-muted text-muted-foreground">v{v.version}</span>
+                      <span className="text-xs text-muted-foreground">{v.file_name || "No filename"}</span>
+                    </div>
+                    <div className="text-xs text-muted-foreground">
+                      Uploaded {v.uploaded_at ? new Date(v.uploaded_at).toLocaleDateString() : "—"} by {v.uploaded_by_name || "—"}
+                    </div>
+                    {v.file_url && (
+                      <a href={v.file_url} target="_blank" rel="noopener noreferrer" className="text-xs text-primary hover:underline flex items-center gap-1 mt-1">
+                        <ExternalLink className="w-3 h-3" /> View archived file
+                      </a>
+                    )}
+                  </div>
+                ));
+              })()}
+            </div>
+          )}
         </DialogContent>
       </Dialog>
     </div>

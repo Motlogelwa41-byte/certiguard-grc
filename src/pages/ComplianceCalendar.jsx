@@ -2,7 +2,7 @@ import React, { useState, useEffect, useMemo } from "react";
 import { base44 } from "@/api/base44Client";
 import {
   Calendar, Plus, ChevronLeft, ChevronRight, Pencil, Trash2,
-  Clock, AlertTriangle, CheckCircle, LayoutGrid, List, X
+  Clock, AlertTriangle, CheckCircle, LayoutGrid, List, X, Download
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
@@ -13,6 +13,7 @@ import PageHeader from "@/components/shared/PageHeader";
 import StatusBadge from "@/components/shared/StatusBadge";
 import { useToast } from "@/components/ui/use-toast";
 import moment from "moment";
+import { downloadICS } from "@/lib/icsExport";
 
 const defaultForm = {
   title: "", type: "review", status: "upcoming", start_date: "", end_date: "",
@@ -218,6 +219,9 @@ export default function ComplianceCalendar() {
                 <List className="w-3.5 h-3.5" /> Agenda
               </button>
             </div>
+            <Button size="sm" variant="outline" onClick={() => downloadICS(filteredItems)}>
+              <Download className="w-4 h-4 mr-1" /> Export ICS
+            </Button>
             <Button size="sm" onClick={() => { setForm(defaultForm); setEditId(null); setOpen(true); }}>
               <Plus className="w-4 h-4 mr-1" /> Add Event
             </Button>

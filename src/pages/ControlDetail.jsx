@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useParams, useNavigate, Link } from "react-router-dom";
 import { base44 } from "@/api/base44Client";
-import { ArrowLeft, Play, Pencil, Trash2, FileCheck, AlertTriangle, Paperclip } from "lucide-react";
+import { ArrowLeft, Play, Pencil, Trash2, FileCheck, AlertTriangle, Paperclip, UserCog } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import StatusBadge from "@/components/shared/StatusBadge";
@@ -9,6 +9,7 @@ import { useToast } from "@/components/ui/use-toast";
 import { logAuditTrail } from "@/lib/auditLogger";
 import { useAuth } from "@/lib/AuthContext";
 import Can from "@/components/shared/Can";
+import TransferOwnershipDialog from "@/components/controls/TransferOwnershipDialog";
 
 function hashStr(s) {
   let h = 0;
@@ -37,6 +38,7 @@ export default function ControlDetail() {
   const [loading, setLoading] = useState(true);
   const [running, setRunning] = useState(false);
   const [linkedEvidence, setLinkedEvidence] = useState([]);
+  const [transferOpen, setTransferOpen] = useState(false);
 
   const load = async () => {
     try {
@@ -136,6 +138,11 @@ export default function ControlDetail() {
             </Button>
           </Can>
           <Can permission="controls:write">
+            <Button variant="outline" onClick={() => setTransferOpen(true)}>
+              <UserCog className="w-4 h-4 mr-1" /> Transfer
+            </Button>
+          </Can>
+          <Can permission="controls:write">
             <Button variant="outline" onClick={() => navigate("/controls", { state: { editId: control.id } })}>
               <Pencil className="w-4 h-4 mr-1" /> Edit
             </Button>
@@ -222,6 +229,13 @@ export default function ControlDetail() {
           )}
         </CardContent>
       </Card>
+
+      <TransferOwnershipDialog
+        open={transferOpen}
+        onOpenChange={setTransferOpen}
+        control={control}
+        onTransferred={load}
+      />
     </div>
   );
 }

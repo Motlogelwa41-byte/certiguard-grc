@@ -75,6 +75,7 @@ export const navSections = [
       { label: "Monte Carlo Forecast", path: "/monte-carlo-forecast", icon: Activity, roles: ["admin", "compliance_officer", "risk_manager", "auditor"] },
       { label: "Cross-Border Matrix", path: "/cross-border-matrix", icon: Globe, roles: ["admin", "compliance_officer", "risk_manager", "auditor"] },
       { label: "Cost of Compliance", path: "/cost-of-compliance", icon: DollarSign, roles: ["admin", "compliance_officer", "risk_manager", "auditor"] },
+      { label: "Risk Scenario Library", path: "/risk-scenario-library", icon: Library, roles: ["admin", "compliance_officer", "risk_manager", "auditor"] },
       { label: "Cross-Org Rollup", path: "/cross-org-risk", icon: Building2, roles: ["admin", "risk_manager"] },
     ]
   },
@@ -119,6 +120,7 @@ export const navSections = [
       { label: "Real-Time CSPM Scan", path: "/realtime-cspm", icon: ScanLine, roles: ["admin", "compliance_officer", "risk_manager", "auditor"] },
       { label: "DevSecOps Scanner", path: "/devsecops", icon: ScanLine, roles: ["admin", "compliance_officer", "risk_manager", "auditor"] },
       { label: "SIEM Webhooks", path: "/siem-webhooks", icon: Webhook, roles: ["admin", "compliance_officer", "risk_manager"] },
+      { label: "Webhook Management", path: "/webhooks", icon: Webhook, roles: ["admin", "compliance_officer", "risk_manager"] },
       { label: "DLP Monitor", path: "/dlp-monitor", icon: Eye, roles: ["admin", "compliance_officer", "risk_manager", "auditor"] },
       { label: "EDR / XDR", path: "/edr-dashboard", icon: Radar, roles: ["admin", "compliance_officer", "risk_manager", "auditor"] },
       { label: "IT Asset Management", path: "/itam", icon: Laptop, roles: ["admin", "compliance_officer", "risk_manager", "auditor"] },

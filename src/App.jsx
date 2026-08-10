@@ -183,6 +183,8 @@ import SecureEvidencePack from '@/pages/SecureEvidencePack';
 import CrossTenantExecutiveDashboard from '@/pages/CrossTenantExecutiveDashboard';
 import FrameworkMaturityComparison from '@/pages/FrameworkMaturityComparison';
 import HRDCBQAReport from '@/pages/HRDCBQAReport';
+import WebhookManagement from '@/pages/WebhookManagement';
+import RiskScenarioLibrary from '@/pages/RiskScenarioLibrary';
 import Landing from '@/pages/Landing';
 import { LanguageProvider } from '@/contexts/LanguageContext';
 
@@ -390,6 +392,8 @@ const AuthenticatedApp = () => {
           <Route path="/cross-tenant-executive-dashboard" element={<CrossTenantExecutiveDashboard />} />
           <Route path="/framework-maturity-comparison" element={<FrameworkMaturityComparison />} />
           <Route path="/hrdc-bqa-report" element={<HRDCBQAReport />} />
+          <Route path="/webhooks" element={<WebhookManagement />} />
+          <Route path="/risk-scenario-library" element={<RiskScenarioLibrary />} />
         </Route>
       </Route>
       <Route path="*" element={<PageNotFound />} />

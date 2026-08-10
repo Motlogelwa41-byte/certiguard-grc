@@ -14,10 +14,19 @@
     },
     "file_url": {
       "type": "string",
-      "description": "Uploaded evidence file"
+      "description": "Uploaded evidence file (current version)"
     },
     "file_name": {
       "type": "string"
+    },
+    "version": {
+      "type": "number",
+      "default": 1,
+      "description": "Current version number \u2014 increments each time a new file replaces the previous one"
+    },
+    "previous_versions": {
+      "type": "string",
+      "description": "JSON array of prior versions: [{version, file_url, file_name, uploaded_at, uploaded_by_name, uploaded_by_id}]"
     },
     "control_id": {
       "type": "string"
