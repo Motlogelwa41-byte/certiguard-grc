@@ -111,19 +111,31 @@ export default function SecureEvidencePack() {
         console.error("Evidence pack upload failed:", uploadErr);
       }
 
-      // Log to the append-only AuditEvidenceLedger for tamper-evident audit trail
+      // Log to the append-only AuditEvidenceLedger for tamper-evident audit trail.
+      // Store the SHA-256 of the actual PDF file bytes (not the payload seal hash)
+      // so the daily integrity scanner can re-download and verify the file content.
       if (pdfUrl) {
         try {
-          await base44.entities.AuditEvidenceLedger.create({
-            tenant_id: user?.data?.tenant_id || "",
-            user_id: user?.id || "",
-            user_name: user?.full_name || user?.email || "Unknown",
-            timestamp: result.timestamp,
-            file_url: pdfUrl,
-            file_name: result.fileName,
-            sha256_hash: result.hash,
-            notes: `Secure Evidence Pack ${result.packId}: ${result.controlCount} controls, ${result.evidenceCount} evidence items. Org: ${orgName || "—"}. Prepared by: ${preparedBy || "—"}.`,
-          });
+          const fileBytes = await result.blob.arrayBuffer();
+          const fileHashBuf = await crypto.subtle.digest("SHA-256", fileBytes);
+          const fileSha256 = Array.from(new Uint8Array(fileHashBuf))
+            .map((b) => b.toString(16).padStart(2, "0"))
+            .join("");
+          const tenantId = user?.data?.tenant_id;
+          if (!tenantId) {
+            toast({ title: "Ledger entry skipped", description: "Your account has no tenant context — pack was generated but not logged to the audit ledger.", variant: "warning" });
+          } else {
+            await base44.entities.AuditEvidenceLedger.create({
+              tenant_id: tenantId,
+              user_id: user?.id || "",
+              user_name: user?.full_name || user?.email || "Unknown",
+              timestamp: result.timestamp,
+              file_url: pdfUrl,
+              file_name: result.fileName,
+              sha256_hash: fileSha256,
+              notes: `Secure Evidence Pack ${result.packId} (seal ${result.hash.slice(0, 16)}…): ${result.controlCount} controls, ${result.evidenceCount} evidence items. Org: ${orgName || "—"}. Prepared by: ${preparedBy || "—"}.`,
+            });
+          }
         } catch (ledgerErr) {
           console.error("Ledger logging failed:", ledgerErr);
           toast({ title: "Ledger entry failed", description: ledgerErr?.message || "Could not log to audit ledger", variant: "destructive" });
