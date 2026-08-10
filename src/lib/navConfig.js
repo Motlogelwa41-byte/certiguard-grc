@@ -101,6 +101,7 @@ export const navSections = [
       { label: "AI Control Mapper", path: "/ai-control-mapper", icon: Zap, roles: ["admin", "compliance_officer"] },
       { label: "AI Cross-Framework Mapping", path: "/ai-cross-mapping", icon: Sparkles, roles: ["admin", "compliance_officer", "risk_manager"] },
       { label: "AI Gap Analysis", path: "/ai-gap-analysis", icon: Brain, roles: ["admin", "compliance_officer", "risk_manager"] },
+      { label: "Anomaly Detection", path: "/anomaly-detection", icon: Activity, roles: ["admin", "compliance_officer", "risk_manager", "auditor"] },
       { label: "Compliance Runs", path: "/compliance-runs", icon: Play, roles: ["admin", "compliance_officer", "auditor"] },
       { label: "Regulatory Localization", path: "/regulatory-localization", icon: Languages, roles: ["admin", "compliance_officer", "risk_manager", "auditor"] },
     ]
@@ -176,6 +177,7 @@ export const navSections = [
       { label: "Continuous Compliance Score", path: "/continuous-score", icon: Gauge, roles: ["admin", "compliance_officer", "risk_manager", "auditor"] },
       { label: "Security Posture", path: "/security-posture", icon: Radar, roles: ["admin", "compliance_officer", "risk_manager", "auditor"] },
       { label: "Reports", path: "/reports", icon: FileDown, roles: ["admin", "compliance_officer", "risk_manager", "auditor", "external_auditor", "regulator"] },
+      { label: "Custom Report Builder", path: "/custom-reports", icon: LayoutDashboard, roles: ["admin", "compliance_officer", "risk_manager", "auditor"] },
       { label: "Mgmt Reports", path: "/management-reports", icon: BarChart2, roles: ["admin", "compliance_officer", "risk_manager", "auditor"] },
       { label: "Scheduled Reports", path: "/scheduled-reports", icon: Send, roles: ["admin", "compliance_officer", "auditor"] },
       { label: "Exec Readiness Dashboard", path: "/executive-readiness-dashboard", icon: LineChart, roles: ["admin", "compliance_officer", "risk_manager", "auditor"] },

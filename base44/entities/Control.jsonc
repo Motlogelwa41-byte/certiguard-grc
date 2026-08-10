@@ -94,6 +94,32 @@
       ],
       "default": "manual"
     },
+    "effectiveness_score": {
+      "type": "number",
+      "default": 0,
+      "description": "Auto-calculated effectiveness 0-100 based on test pass rate, evidence freshness, failure frequency, and time-to-remediate"
+    },
+    "effectiveness_grade": {
+      "type": "string",
+      "enum": [
+        "excellent",
+        "good",
+        "fair",
+        "poor",
+        "critical",
+        "untested"
+      ],
+      "default": "untested",
+      "description": "Letter grade derived from effectiveness_score"
+    },
+    "effectiveness_factors": {
+      "type": "string",
+      "description": "JSON breakdown of effectiveness scoring: {test_pass_rate, evidence_freshness, failure_frequency, remediation_speed}"
+    },
+    "effectiveness_calculated_at": {
+      "type": "string",
+      "format": "date-time"
+    },
     "notes": {
       "type": "string"
     }

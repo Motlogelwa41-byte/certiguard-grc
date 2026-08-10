@@ -3,6 +3,7 @@ import { Link, useSearchParams } from "react-router-dom";
 import { base44 } from "@/api/base44Client";
 import { FileCheck, Plus, Pencil, Trash2, Search, Download, Upload, Zap, X, Filter } from "lucide-react";
 import RemediationDialog from "@/components/controls/RemediationDialog";
+import ControlEffectivenessWidget, { EffectivenessBadge } from "@/components/controls/ControlEffectivenessWidget";
 import BulkActionBar from "@/components/shared/BulkActionBar";
 import { exportToCsv } from "@/lib/exportCsv";
 import BulkImportModal from "@/components/shared/BulkImportModal";
@@ -184,6 +185,11 @@ export default function Controls() {
         </div>
       )}
 
+      {/* Effectiveness Scoring Widget */}
+      <div className="mb-6">
+        <ControlEffectivenessWidget controls={items} onRecalculate={load} />
+      </div>
+
       {/* Filters */}
       <div className="flex flex-wrap items-center gap-3 mb-6">
         <div className="relative flex-1 min-w-[200px] max-w-sm">
@@ -240,6 +246,7 @@ export default function Controls() {
                   <th className="text-left px-4 py-3 font-semibold text-muted-foreground">Title</th>
                   <th className="text-left px-4 py-3 font-semibold text-muted-foreground">Category</th>
                   <th className="text-left px-4 py-3 font-semibold text-muted-foreground">Status</th>
+                  <th className="text-left px-4 py-3 font-semibold text-muted-foreground">Effectiveness</th>
                   <th className="text-left px-4 py-3 font-semibold text-muted-foreground">Severity</th>
                   <th className="text-left px-4 py-3 font-semibold text-muted-foreground">Automation</th>
                   <th className="text-left px-4 py-3 font-semibold text-muted-foreground">Owner</th>
@@ -254,6 +261,7 @@ export default function Controls() {
                     <td className="px-4 py-3 font-medium text-foreground max-w-xs truncate"><Link to={`/controls/${c.id}`} className="hover:text-primary hover:underline">{c.title}</Link></td>
                     <td className="px-4 py-3 text-muted-foreground capitalize">{(c.category || "").replace(/_/g, " ")}</td>
                     <td className="px-4 py-3"><StatusBadge status={c.status} /></td>
+                    <td className="px-4 py-3"><EffectivenessBadge score={c.effectiveness_score} grade={c.effectiveness_grade} /></td>
                     <td className="px-4 py-3"><StatusBadge status={c.severity} /></td>
                     <td className="px-4 py-3"><StatusBadge status={c.automation_status} /></td>
                     <td className="px-4 py-3 text-muted-foreground">{c.owner_name || "—"}</td>

@@ -1,0 +1,158 @@
+{
+  "name": "AnomalyAlert",
+  "type": "object",
+  "properties": {
+    "tenant_id": {
+      "type": "string",
+      "description": "Tenant isolation key"
+    },
+    "anomaly_id": {
+      "type": "string",
+      "description": "Unique anomaly reference e.g. AN-2026-001"
+    },
+    "title": {
+      "type": "string"
+    },
+    "description": {
+      "type": "string",
+      "description": "AI-generated explanation of the anomaly"
+    },
+    "anomaly_type": {
+      "type": "string",
+      "enum": [
+        "control_failure_spike",
+        "risk_score_drift",
+        "evidence_gap",
+        "access_anomaly",
+        "compliance_regression",
+        "test_failure_burst",
+        "vendor_risk_shift"
+      ],
+      "default": "control_failure_spike"
+    },
+    "severity": {
+      "type": "string",
+      "enum": [
+        "critical",
+        "high",
+        "medium",
+        "low"
+      ],
+      "default": "medium"
+    },
+    "entity_type": {
+      "type": "string",
+      "description": "Type of entity affected: control, risk, evidence, vendor, framework"
+    },
+    "entity_id": {
+      "type": "string"
+    },
+    "entity_name": {
+      "type": "string"
+    },
+    "detected_value": {
+      "type": "string",
+      "description": "JSON of the anomalous values detected: {current, expected, delta}"
+    },
+    "baseline_value": {
+      "type": "number"
+    },
+    "current_value": {
+      "type": "number"
+    },
+    "confidence_score": {
+      "type": "number",
+      "default": 0,
+      "description": "AI confidence 0-100 that this is a genuine anomaly"
+    },
+    "recommended_action": {
+      "type": "string",
+      "description": "AI-suggested remediation action"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "open",
+        "acknowledged",
+        "investigating",
+        "resolved",
+        "false_positive"
+      ],
+      "default": "open"
+    },
+    "acknowledged_by_name": {
+      "type": "string"
+    },
+    "acknowledged_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "detected_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "resolved_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "notes": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "title",
+    "anomaly_type"
+  ],
+  "rls": {
+    "create": {
+      "data.tenant_id": "{{user.data.tenant_id}}"
+    },
+    "read": {
+      "$or": [
+        {
+          "data.tenant_id": "{{user.data.tenant_id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "update": {
+      "$or": [
+        {
+          "data.tenant_id": "{{user.data.tenant_id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        },
+        {
+          "user_condition": {
+            "role": "compliance_officer"
+          }
+        },
+        {
+          "user_condition": {
+            "role": "risk_manager"
+          }
+        }
+      ]
+    },
+    "delete": {
+      "$or": [
+        {
+          "data.tenant_id": "{{user.data.tenant_id}}",
+          "created_by_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    }
+  }
+}

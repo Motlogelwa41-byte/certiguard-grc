@@ -1,0 +1,114 @@
+{
+  "name": "ReportTemplate",
+  "type": "object",
+  "properties": {
+    "tenant_id": {
+      "type": "string",
+      "description": "Tenant isolation key"
+    },
+    "name": {
+      "type": "string",
+      "description": "Report template name"
+    },
+    "description": {
+      "type": "string"
+    },
+    "sections": {
+      "type": "string",
+      "description": "JSON array of section configs: [{id, type, title, config}] where type is one of: executive_summary, framework_readiness, control_status, risk_overview, evidence_summary, kpi_dashboard, audit_summary, incident_summary, vendor_summary, custom_table"
+    },
+    "filters": {
+      "type": "string",
+      "description": "JSON of filter criteria: {framework_ids, control_categories, risk_categories, date_range}"
+    },
+    "format": {
+      "type": "string",
+      "enum": [
+        "pdf",
+        "excel",
+        "both"
+      ],
+      "default": "pdf"
+    },
+    "schedule_frequency": {
+      "type": "string",
+      "enum": [
+        "on_demand",
+        "weekly",
+        "monthly",
+        "quarterly"
+      ],
+      "default": "on_demand"
+    },
+    "schedule_recipients": {
+      "type": "string",
+      "description": "JSON array of recipient email addresses for scheduled reports"
+    },
+    "last_generated_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "active",
+        "archived"
+      ],
+      "default": "active"
+    },
+    "created_by_name": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "name"
+  ],
+  "rls": {
+    "create": {
+      "data.tenant_id": "{{user.data.tenant_id}}"
+    },
+    "read": {
+      "$or": [
+        {
+          "data.tenant_id": "{{user.data.tenant_id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "update": {
+      "$or": [
+        {
+          "data.tenant_id": "{{user.data.tenant_id}}",
+          "created_by_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        },
+        {
+          "user_condition": {
+            "role": "compliance_officer"
+          }
+        }
+      ]
+    },
+    "delete": {
+      "$or": [
+        {
+          "data.tenant_id": "{{user.data.tenant_id}}",
+          "created_by_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    }
+  }
+}
