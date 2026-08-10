@@ -11,6 +11,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
 import { useToast } from "@/components/ui/use-toast";
 import { useRBAC } from "@/lib/useRBAC";
+import PlanUsage from "@/components/shared/PlanUsage";
 
 const IMPACT_LABELS = [
   { level: 1, name: "Negligible" },
@@ -138,6 +139,9 @@ export default function TenantSettings() {
       />
 
       <div className="space-y-6 max-w-4xl">
+        {/* Plan Usage */}
+        <PlanUsage />
+
         {/* Active Frameworks */}
         <Card>
           <CardHeader>

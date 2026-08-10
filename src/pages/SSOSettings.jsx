@@ -8,8 +8,9 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useToast } from "@/components/ui/use-toast";
 import StatusBadge from "@/components/shared/StatusBadge";
-import { Plus, RefreshCw, Trash2, KeyRound, Users, ShieldCheck, AlertCircle, Loader2, Wifi } from "lucide-react";
+import { Plus, RefreshCw, Trash2, KeyRound, Users, ShieldCheck, AlertCircle, Loader2, Wifi, Lock, ShieldX } from "lucide-react";
 import ProviderSetupGuide from "@/components/sso/ProviderSetupGuide";
+import { Switch } from "@/components/ui/switch";
 
 const TYPES = [
   { value: "azure_ad", label: "Microsoft Entra ID" },
@@ -30,6 +31,8 @@ export default function SSOSettings() {
   const [form, setForm] = useState(emptyForm);
   const [syncing, setSyncing] = useState(null);
   const [testing, setTesting] = useState(null);
+  const [tenantSettings, setTenantSettings] = useState(null);
+  const [savingSecurity, setSavingSecurity] = useState(false);
   const { toast } = useToast();
 
   const testConnection = async (idp) => {
@@ -48,12 +51,14 @@ export default function SSOSettings() {
 
   const load = async () => {
     setLoading(true);
-    const [i, u] = await Promise.all([
+    const [i, u, ts] = await Promise.all([
       base44.entities.IdentityProvider.list("-updated_date", 50),
       base44.entities.DirectoryUser.list("-last_synced_at", 300),
+      base44.entities.TenantSettings.list("-created_date", 5).catch(() => []),
     ]);
     setIdps(i || []);
     setDirUsers(u || []);
+    if (ts && ts.length > 0) setTenantSettings(ts[0]);
     setLoading(false);
   };
   useEffect(() => { load(); }, []);
@@ -97,11 +102,69 @@ export default function SSOSettings() {
     setSyncing(null);
   };
 
+  const toggleSecurity = async (field, value) => {
+    setSavingSecurity(true);
+    try {
+      const payload = { [field]: value, updated_by_name: "admin" };
+      if (tenantSettings?.id) {
+        await base44.entities.TenantSettings.update(tenantSettings.id, payload);
+      } else {
+        const me = await base44.auth.me();
+        const tenantId = me?.tenant_id || me?.data?.tenant_id;
+        const created = await base44.entities.TenantSettings.create({ tenant_id: tenantId, ...payload });
+        setTenantSettings(created);
+      }
+      setTenantSettings((prev) => ({ ...prev, [field]: value }));
+      toast({ title: `${field === "require_sso" ? "SSO enforcement" : "MFA enforcement"} ${value ? "enabled" : "disabled"}` });
+    } catch (e) {
+      toast({ title: "Error", description: e.message, variant: "destructive" });
+    }
+    setSavingSecurity(false);
+  };
+
   if (loading) return <div className="flex items-center justify-center h-64"><div className="w-8 h-8 border-4 border-primary/20 border-t-primary rounded-full animate-spin" /></div>;
 
   return (
     <div>
       <PageHeader title="SSO & Directory" subtitle="Configure OIDC identity providers and SCIM directory sync" actions={<Button size="sm" onClick={openNew}><Plus className="w-4 h-4 mr-1" /> Add Provider</Button>} />
+
+      {/* Security Enforcement Toggles */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-6">
+        <div className="bg-card rounded-xl border border-border p-5">
+          <div className="flex items-start justify-between mb-3">
+            <div className="flex items-center gap-2">
+              <ShieldX className="w-5 h-5 text-primary" />
+              <div>
+                <h3 className="font-heading font-semibold text-foreground">Require SSO</h3>
+                <p className="text-xs text-muted-foreground">Disable password login — force SSO authentication</p>
+              </div>
+            </div>
+            <Switch
+              checked={tenantSettings?.require_sso === true}
+              onCheckedChange={(v) => toggleSecurity("require_sso", v)}
+              disabled={savingSecurity}
+            />
+          </div>
+          <p className="text-xs text-muted-foreground">When enabled, users must sign in via Google, Microsoft, or your enterprise IdP. Password-based login is hidden from the login page.</p>
+        </div>
+        <div className="bg-card rounded-xl border border-border p-5">
+          <div className="flex items-start justify-between mb-3">
+            <div className="flex items-center gap-2">
+              <Lock className="w-5 h-5 text-primary" />
+              <div>
+                <h3 className="font-heading font-semibold text-foreground">Require MFA</h3>
+                <p className="text-xs text-muted-foreground">Block access until MFA is enrolled</p>
+              </div>
+            </div>
+            <Switch
+              checked={tenantSettings?.require_mfa !== false}
+              onCheckedChange={(v) => toggleSecurity("require_mfa", v)}
+              disabled={savingSecurity}
+            />
+          </div>
+          <p className="text-xs text-muted-foreground">When enabled, all users must confirm MFA enrollment before accessing the platform. Enforce MFA at your identity provider for full protection.</p>
+        </div>
+      </div>
 
       <div className="bg-sky-50 dark:bg-sky-950/30 border border-sky-200 dark:border-sky-800 rounded-xl p-4 mb-6 flex items-start gap-3">
         <ShieldCheck className="w-5 h-5 text-sky-600 dark:text-sky-400 flex-shrink-0 mt-0.5" />

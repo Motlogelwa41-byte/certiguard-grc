@@ -9,10 +9,12 @@ import { Button } from "@/components/ui/button";
 // user who has not recorded MFA enrollment on their user record. The /sso
 // page is allowed through so the user can configure MFA. True enrollment
 // happens at the identity provider; this gate enforces it at app-access level.
+// Respects the tenant-level require_mfa setting (defaults to true when unset).
 export default function MfaEnforcementGate({ children }) {
   const { user, isAuthenticated } = useAuth();
   const location = useLocation();
   const [enrolled, setEnrolled] = useState(null);
+  const [requireMfa, setRequireMfa] = useState(true);
   const [confirming, setConfirming] = useState(false);
 
   useEffect(() => {
@@ -22,9 +24,22 @@ export default function MfaEnforcementGate({ children }) {
     }
     const flag = user?.mfa_enrolled ?? user?.data?.mfa_enrolled;
     setEnrolled(!!flag);
+
+    // Check tenant-level MFA requirement
+    base44.entities.TenantSettings.list("-created_date", 5)
+      .then((items) => {
+        if (items && items.length > 0) {
+          const s = items[0];
+          setRequireMfa(s.require_mfa !== false); // default true
+        }
+      })
+      .catch(() => {});
   }, [user, isAuthenticated]);
 
   if (!isAuthenticated || !user || enrolled === null) return children;
+
+  // If tenant has disabled MFA requirement, skip the gate entirely
+  if (!requireMfa) return children;
 
   // Allow the MFA configuration page through so users can enroll.
   if (enrolled || location.pathname === "/sso") return children;

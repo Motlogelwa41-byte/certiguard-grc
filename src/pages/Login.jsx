@@ -1,11 +1,11 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { base44 } from "@/api/base44Client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import {
-  ShieldCheck, Mail, Lock, Loader2, ArrowRight, Building2
+  ShieldCheck, Mail, Lock, Loader2, ArrowRight, Building2, KeyRound
 } from "lucide-react";
 import AuthBrandPanel from "@/components/auth/AuthBrandPanel";
 import GoogleIcon from "@/components/GoogleIcon";
@@ -18,6 +18,44 @@ export default function Login() {
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
+  const [ssoHint, setSsoHint] = useState(null);
+  const [ssoChecking, setSsoChecking] = useState(false);
+
+  // Debounced SSO domain check — detects enterprise SSO when user types their email
+  useEffect(() => {
+    if (!email || !email.includes("@") || email.length < 5) {
+      setSsoHint(null);
+      return;
+    }
+    setSsoChecking(true);
+    const t = setTimeout(async () => {
+      try {
+        const res = await base44.functions.invoke("checkSsoDomain", { email });
+        const d = res?.data || res;
+        if (d?.sso_configured) {
+          setSsoHint(d);
+        } else {
+          setSsoHint(null);
+        }
+      } catch (_) {
+        setSsoHint(null);
+      }
+      setSsoChecking(false);
+    }, 600);
+    return () => clearTimeout(t);
+  }, [email]);
+
+  const ssoRequired = ssoHint?.require_sso === true;
+
+  const handleSsoLogin = () => {
+    if (!ssoHint) return;
+    if (ssoHint.login_method === "google") {
+      base44.auth.loginWithProvider("google", safeReturnTo());
+    } else if (ssoHint.login_method === "microsoft") {
+      base44.auth.loginWithProvider("microsoft", safeReturnTo());
+    }
+    // For "enterprise_sso" (Okta/OneLogin/custom), the admin configures OIDC at the platform level
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -89,6 +127,31 @@ export default function Login() {
               </Button>
             </div>
 
+            {/* Enterprise SSO hint — appears when the typed email domain matches a configured IdP */}
+            {ssoHint && (
+              <div className="mb-5 p-3 rounded-lg bg-sky-50 dark:bg-sky-950/30 border border-sky-200 dark:border-sky-800 text-sm">
+                <div className="flex items-center gap-2 text-sky-700 dark:text-sky-300 font-medium">
+                  <KeyRound className="w-4 h-4" />
+                  SSO detected: {ssoHint.provider_name}
+                </div>
+                <p className="text-xs text-sky-600 dark:text-sky-400 mt-1 mb-2">
+                  Your organization uses single sign-on. Continue with your {ssoHint.login_method === "google" ? "Google" : ssoHint.login_method === "microsoft" ? "Microsoft" : "enterprise"} account.
+                </p>
+                {ssoHint.login_method !== "enterprise_sso" && (
+                  <Button size="sm" className="w-full h-9" onClick={handleSsoLogin}>
+                    Continue with SSO <ArrowRight className="w-3.5 h-3.5 ml-1" />
+                  </Button>
+                )}
+              </div>
+            )}
+            {ssoChecking && (
+              <div className="mb-3 flex items-center gap-1.5 text-xs text-muted-foreground">
+                <Loader2 className="w-3 h-3 animate-spin" />
+                Checking for SSO...
+              </div>
+            )}
+
+            {!ssoRequired && (
             <div className="relative mb-5">
               <div className="absolute inset-0 flex items-center">
                 <div className="w-full border-t border-border" />
@@ -97,6 +160,7 @@ export default function Login() {
                 <span className="bg-background px-3 text-muted-foreground">or sign in with email</span>
               </div>
             </div>
+            )}
 
             {error && (
               <div className="mb-4 p-3 rounded-lg bg-destructive/10 text-destructive text-sm flex items-start gap-2">
@@ -105,6 +169,7 @@ export default function Login() {
               </div>
             )}
 
+            {!ssoRequired && (
             <form onSubmit={handleSubmit} className="space-y-4">
               <div className="space-y-2">
                 <Label htmlFor="email">Work email</Label>
@@ -158,6 +223,13 @@ export default function Login() {
                 )}
               </Button>
             </form>
+            )}
+
+            {ssoRequired && (
+              <div className="p-4 rounded-lg bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-800 text-sm text-amber-700 dark:text-amber-300 text-center">
+                Your organization requires SSO. Password login is disabled. Use the {ssoHint?.login_method === "google" ? "Google" : ssoHint?.login_method === "microsoft" ? "Microsoft" : "enterprise SSO"} button above.
+              </div>
+            )}
 
             <p className="text-center text-sm text-muted-foreground mt-6">
               New to CertiGuard?{" "}

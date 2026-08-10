@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { base44 } from "@/api/base44Client";
-import { Shield, Plus, Pencil, Trash2, ArrowRight, Library } from "lucide-react";
+import { Shield, Plus, Pencil, Trash2, ArrowRight, Library, Wand2 } from "lucide-react";
+import FrameworkBuilder from "@/components/frameworks/FrameworkBuilder";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
@@ -23,6 +24,7 @@ export default function Frameworks() {
   const [open, setOpen] = useState(false);
   const [form, setForm] = useState(defaultForm);
   const [editId, setEditId] = useState(null);
+  const [builderOpen, setBuilderOpen] = useState(false);
   const { toast } = useToast();
   const { canAddFramework, tenant } = useTenant();
   const fwLimit = tenant?.limits?.maxFrameworks ?? tenant?.max_frameworks ?? null;
@@ -72,6 +74,7 @@ export default function Frameworks() {
         <div className="flex items-center gap-3">
           {fwLimit && <span className="text-xs text-muted-foreground">{items.length} / {fwLimit} frameworks</span>}
           <Button size="sm" variant="outline" onClick={() => navigate('/control-libraries')}><Library className="w-4 h-4 mr-1" /> Import Library</Button>
+          <Button size="sm" variant="outline" onClick={() => setBuilderOpen(true)}><Wand2 className="w-4 h-4 mr-1" /> Build Custom</Button>
           <Button size="sm" onClick={() => { setForm(defaultForm); setEditId(null); setOpen(true); }}><Plus className="w-4 h-4 mr-1" /> Add Framework</Button>
         </div>
       } />
@@ -143,6 +146,7 @@ export default function Frameworks() {
           </div>
         </DialogContent>
       </Dialog>
+      <FrameworkBuilder open={builderOpen} onOpenChange={setBuilderOpen} onCreated={load} />
     </div>
   );
 }

@@ -104,6 +104,16 @@
       "type": "string",
       "description": "Custom welcome message on the login page"
     },
+    "require_sso": {
+      "type": "boolean",
+      "default": false,
+      "description": "When true, password login is disabled \u2014 users must authenticate via SSO (Google/Microsoft/enterprise IdP)"
+    },
+    "require_mfa": {
+      "type": "boolean",
+      "default": true,
+      "description": "When true, all users must enroll MFA before accessing the platform (enforced by MfaEnforcementGate)"
+    },
     "updated_by_name": {
       "type": "string"
     }
