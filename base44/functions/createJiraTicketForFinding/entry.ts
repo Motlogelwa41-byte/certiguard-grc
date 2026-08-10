@@ -65,6 +65,24 @@ Deno.serve(async (req) => {
     ].filter((l) => l !== null);
     const descText = lines.join("\n");
 
+    const authHeader = "Basic " + btoa(`${email}:${token}`);
+
+    // Dynamically resolve a valid issue type for the target project (business projects use "Task", software projects use "Bug"/"Story" etc.)
+    let issueTypeName = "Task";
+    try {
+      const ptRes = await fetch(`${baseUrl}/rest/api/3/project/${projectKey}`, {
+        headers: { Authorization: authHeader, Accept: "application/json" },
+      });
+      if (ptRes.ok) {
+        const ptData = await ptRes.json();
+        const types = (ptData.issueTypes || []).filter((t) => !t.subtask).map((t) => t.name);
+        const preferred = ["Bug", "Story", "Task", "Issue"];
+        const found = preferred.find((p) => types.includes(p));
+        if (found) issueTypeName = found;
+        else if (types.length > 0) issueTypeName = types[0];
+      }
+    } catch (_e) { /* fall back to Task */ }
+
     const baseFields = {
       project: { key: projectKey },
       summary: `[${severity.toUpperCase()}] ${title}`,
@@ -73,10 +91,9 @@ Deno.serve(async (req) => {
         version: 1,
         content: [{ type: "paragraph", content: [{ type: "text", text: descText }] }],
       },
-      issuetype: { name: "Bug" },
+      issuetype: { name: issueTypeName },
     };
 
-    const authHeader = "Basic " + btoa(`${email}:${token}`);
     const endpoint = `${baseUrl}/rest/api/3/issue`;
     const create = async (fields) => {
       return await fetch(endpoint, {
