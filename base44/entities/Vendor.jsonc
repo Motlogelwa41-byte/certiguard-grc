@@ -25,6 +25,17 @@
       ],
       "default": "saas"
     },
+    "criticality": {
+      "type": "string",
+      "enum": [
+        "critical",
+        "high",
+        "medium",
+        "low"
+      ],
+      "default": "medium",
+      "description": "Business criticality tier of this vendor"
+    },
     "risk_level": {
       "type": "string",
       "enum": [
@@ -34,6 +45,68 @@
         "low"
       ],
       "default": "medium"
+    },
+    "risk_score": {
+      "type": "number",
+      "default": 0,
+      "description": "Auto-calculated internal risk score 0-100 from scoreVendorRisk"
+    },
+    "risk_grade": {
+      "type": "string",
+      "enum": [
+        "A",
+        "B",
+        "C",
+        "D",
+        "F"
+      ],
+      "default": "F"
+    },
+    "risk_tier": {
+      "type": "string",
+      "enum": [
+        "low",
+        "medium",
+        "high",
+        "critical"
+      ],
+      "default": "medium"
+    },
+    "last_risk_assessment": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "external_rating_score": {
+      "type": "number",
+      "default": 0,
+      "description": "External security rating 0-100 fetched from threat intelligence (e.g. BitSight/SecurityScorecard-style estimate via web search)"
+    },
+    "external_rating_grade": {
+      "type": "string",
+      "enum": [
+        "A",
+        "B",
+        "C",
+        "D",
+        "F"
+      ],
+      "default": "F"
+    },
+    "external_rating_source": {
+      "type": "string",
+      "description": "Source of the external rating e.g. 'AI Threat Intel (web)'"
+    },
+    "external_rating_fetched_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "external_rating_factors": {
+      "type": "string",
+      "description": "JSON array of rating factors: [{factor, score, detail}]"
+    },
+    "external_rating_summary": {
+      "type": "string",
+      "description": "Short human-readable summary of the external security posture"
     },
     "status": {
       "type": "string",
@@ -178,12 +251,21 @@
     "update": {
       "$or": [
         {
-          "data.tenant_id": "{{user.data.tenant_id}}",
-          "created_by_id": "{{user.id}}"
+          "data.tenant_id": "{{user.data.tenant_id}}"
         },
         {
           "user_condition": {
             "role": "admin"
+          }
+        },
+        {
+          "user_condition": {
+            "role": "compliance_officer"
+          }
+        },
+        {
+          "user_condition": {
+            "role": "risk_manager"
           }
         }
       ]
