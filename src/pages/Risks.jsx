@@ -17,6 +17,7 @@ import { logAuditTrail } from "@/lib/auditLogger";
 import { useAuth } from "@/lib/AuthContext";
 import RiskCardDetail from "@/components/risks/RiskCardDetail";
 import RiskHeatmapGrid from "@/components/risks/RiskHeatmapGrid";
+import RiskScoreTrendChart from "@/components/risks/RiskScoreTrendChart";
 import RiskAcceptanceDialog from "@/components/risks/RiskAcceptanceDialog";
 import BulkActionBar from "@/components/shared/BulkActionBar";
 import Can from "@/components/shared/Can";
@@ -180,6 +181,9 @@ export default function Risks() {
 
       {/* Risk Appetite Thresholds */}
       {items.length > 0 && <RiskAppetitePanel risks={items} />}
+
+      {/* Risk Score Trend */}
+      {items.length > 0 && <RiskScoreTrendChart />}
 
       {/* Risk Heatmap */}
       {items.length > 0 && (
