@@ -1,9 +1,10 @@
 import React, { useState, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
-import { Search, ShieldCheck, ShieldAlert, ShieldX, Clock, AlertTriangle, CheckCircle2, Building2, Loader2 } from "lucide-react";
+import { Search, ShieldCheck, ShieldAlert, ShieldX, Clock, AlertTriangle, CheckCircle2, Building2, Loader2, RefreshCw, Globe } from "lucide-react";
 import PageHeader from "@/components/shared/PageHeader";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
+import { useToast } from "@/components/ui/use-toast";
 
 const RISK_WEIGHT = { critical: 0, high: 15, medium: 28, low: 40 };
 const STATUS_WEIGHT = { approved: 30, under_review: 18, pending_review: 12, inactive: 8, rejected: 0 };
@@ -37,10 +38,12 @@ const STATUS_BADGE = {
 };
 
 export default function VendorScorecard() {
+  const { toast } = useToast();
   const [vendors, setVendors] = useState([]);
   const [loading, setLoading] = useState(true);
   const [query, setQuery] = useState("");
   const [filter, setFilter] = useState("all");
+  const [refreshingId, setRefreshingId] = useState(null);
 
   useEffect(() => {
     (async () => {
@@ -51,6 +54,28 @@ export default function VendorScorecard() {
       setLoading(false);
     })();
   }, []);
+
+  const handleRefreshRating = async (vendorId) => {
+    setRefreshingId(vendorId);
+    try {
+      const res = await base44.functions.invoke("fetchVendorSecurityRating", { vendor_id: vendorId });
+      const data = res.data || res;
+      toast({
+        title: `External rating: ${data.score}/100 (Grade ${data.grade})`,
+        description: data.summary || "Security rating refreshed from threat intelligence.",
+      });
+      setVendors((prev) => prev.map((v) => v.id === vendorId ? {
+        ...v,
+        external_rating_score: data.score,
+        external_rating_grade: data.grade,
+        external_rating_fetched_at: new Date().toISOString(),
+        external_rating_summary: data.summary,
+      } : v));
+    } catch (e) {
+      toast({ title: "Rating fetch failed", description: e.message, variant: "destructive" });
+    }
+    setRefreshingId(null);
+  };
 
   const scored = vendors.map(v => ({ ...v, _score: scoreVendor(v), _overdue: isOverdue(v) }));
   const needsAttention = scored.filter(v => v._score < 50 || v.status !== "approved" || v._overdue);
@@ -121,6 +146,7 @@ export default function VendorScorecard() {
                   <th className="px-4 py-3 font-semibold">Status</th>
                   <th className="px-4 py-3 font-semibold">Compliance</th>
                   <th className="px-4 py-3 font-semibold">Assessment</th>
+                  <th className="px-4 py-3 font-semibold">Ext. Rating</th>
                   <th className="px-4 py-3 font-semibold">Scorecard</th>
                 </tr>
               </thead>
@@ -153,6 +179,38 @@ export default function VendorScorecard() {
                           <span className="text-muted-foreground">{v.next_assessment_date}</span>
                         ) : (
                           <span className="text-muted-foreground">Not scheduled</span>
+                        )}
+                      </td>
+                      <td className="px-4 py-3 min-w-[150px]">
+                        {v.external_rating_score > 0 ? (
+                          <div className="space-y-1">
+                            <div className="flex items-center gap-1.5">
+                              <Globe className="w-3 h-3 text-muted-foreground" />
+                              <span className="text-xs font-semibold text-foreground">{v.external_rating_score}/100</span>
+                              <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded ${
+                                v.external_rating_grade === "A" || v.external_rating_grade === "B" ? "bg-emerald-100 text-emerald-700" :
+                                v.external_rating_grade === "C" ? "bg-amber-100 text-amber-700" :
+                                "bg-red-100 text-red-700"
+                              }`}>{v.external_rating_grade}</span>
+                            </div>
+                            <button
+                              onClick={() => handleRefreshRating(v.id)}
+                              disabled={refreshingId === v.id}
+                              className="text-[10px] text-primary hover:underline flex items-center gap-0.5 disabled:opacity-50"
+                            >
+                              {refreshingId === v.id ? <Loader2 className="w-2.5 h-2.5 animate-spin" /> : <RefreshCw className="w-2.5 h-2.5" />}
+                              Refresh
+                            </button>
+                          </div>
+                        ) : (
+                          <button
+                            onClick={() => handleRefreshRating(v.id)}
+                            disabled={refreshingId === v.id}
+                            className="text-xs text-primary hover:underline flex items-center gap-1 disabled:opacity-50"
+                          >
+                            {refreshingId === v.id ? <Loader2 className="w-3 h-3 animate-spin" /> : <Globe className="w-3 h-3" />}
+                            Fetch rating
+                          </button>
                         )}
                       </td>
                       <td className="px-4 py-3 min-w-[160px]">

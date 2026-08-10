@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { base44 } from "@/api/base44Client";
-import { ShieldAlert, Plus, Pencil, Trash2, Search, Clock, ChevronDown, ChevronUp, ArrowUp, MessageSquare } from "lucide-react";
+import { ShieldAlert, Plus, Pencil, Trash2, Search, Clock, ChevronDown, ChevronUp, ArrowUp, MessageSquare, FileText, Loader2, Send } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
@@ -35,8 +35,29 @@ const SEV_DOT = { critical: "bg-red-500", high: "bg-orange-500", medium: "bg-amb
 
 function IncidentCard({ incident, onEdit, onDelete, onUpdated }) {
   const [expanded, setExpanded] = useState(false);
+  const [drafting, setDrafting] = useState(false);
+  const [showDraft, setShowDraft] = useState(false);
+  const { toast } = useToast();
   const escalationLevel = incident.escalation_level || 0;
   const isOverdue = incident.status !== "closed" && incident.status !== "remediated" && incident.status !== "false_positive";
+
+  const handleDraftNotification = async () => {
+    setDrafting(true);
+    try {
+      const res = await base44.functions.invoke("draftRegulatorNotification", { incident_id: incident.id });
+      const data = res.data || res;
+      if (!data.notifiable) {
+        toast({ title: "Not notifiable", description: data.message || "Incident does not meet the regulator notification threshold." });
+      } else {
+        toast({ title: "Regulator notification drafted", description: `72-hour deadline: ${new Date(data.deadline).toLocaleString()}` });
+        setShowDraft(true);
+      }
+      onUpdated?.();
+    } catch (e) {
+      toast({ title: "Draft failed", description: e.message, variant: "destructive" });
+    }
+    setDrafting(false);
+  };
 
   return (
     <div className={`bg-card rounded-xl border-l-4 border border-border p-0 overflow-hidden ${SEV_BORDER[incident.severity] || "border-l-border"}`}>
@@ -85,6 +106,7 @@ function IncidentCard({ incident, onEdit, onDelete, onUpdated }) {
               <TabsTrigger value="timeline" className="text-xs h-7">Timeline</TabsTrigger>
               <TabsTrigger value="escalation" className="text-xs h-7">Escalation</TabsTrigger>
               <TabsTrigger value="details" className="text-xs h-7">Details</TabsTrigger>
+              <TabsTrigger value="regulator" className="text-xs h-7">Regulator</TabsTrigger>
             </TabsList>
             <div className="p-4">
               <TabsContent value="timeline" className="mt-0">
@@ -102,6 +124,34 @@ function IncidentCard({ incident, onEdit, onDelete, onUpdated }) {
                   <div className="p-2 bg-amber-50 dark:bg-amber-900/20 rounded border border-amber-200 text-amber-700">
                     Regulator notification required{incident.regulator_notified_date ? ` — notified ${incident.regulator_notified_date}` : " — not yet notified"}
                   </div>
+                )}
+              </TabsContent>
+              <TabsContent value="regulator" className="mt-0 space-y-3 text-xs">
+                <div className="flex items-center justify-between gap-2 flex-wrap">
+                  <div>
+                    <p className="font-medium text-muted-foreground">Regulator Notification Status</p>
+                    <p className="font-semibold capitalize mt-0.5">{(incident.regulator_notification_status || "pending_classification").replace(/_/g, " ")}</p>
+                    {incident.regulator_notification_deadline && (
+                      <p className="text-amber-600 mt-1">72h deadline: {new Date(incident.regulator_notification_deadline).toLocaleString()}</p>
+                    )}
+                  </div>
+                  <Button size="sm" variant="outline" onClick={handleDraftNotification} disabled={drafting}>
+                    {drafting ? <Loader2 className="w-3.5 h-3.5 mr-1 animate-spin" /> : <FileText className="w-3.5 h-3.5 mr-1" />}
+                    {incident.regulator_notification_draft ? "Re-draft Notification" : "Draft Notification"}
+                  </Button>
+                </div>
+                {incident.regulator_notification_recipient && (
+                  <div><p className="font-medium text-muted-foreground">Recipient</p><p>{incident.regulator_notification_recipient}</p></div>
+                )}
+                {incident.regulator_notification_draft ? (
+                  <div>
+                    <p className="font-medium text-muted-foreground mb-1">Drafted Notification</p>
+                    <div className="bg-muted/40 rounded border border-border p-3 max-h-64 overflow-y-auto whitespace-pre-wrap text-foreground">
+                      {incident.regulator_notification_draft}
+                    </div>
+                  </div>
+                ) : (
+                  <p className="text-muted-foreground">No draft yet. Click "Draft Notification" to generate a POPIA/GDPR-compliant regulator breach notification.</p>
                 )}
               </TabsContent>
             </div>
