@@ -18,7 +18,11 @@ Deno.serve(async (req) => {
 
     const email = Deno.env.get("JIRA_USER_EMAIL");
     const token = Deno.env.get("JIRA_API_TOKEN");
-    const baseUrl = (Deno.env.get("JIRA_BASE_URL") || "").replace(/\/$/, "");
+    const rawBaseUrl = Deno.env.get("JIRA_BASE_URL") || "";
+    // Strip any trailing path — users often paste the full board URL (e.g. https://site.atlassian.net/jira/your-work).
+    // Keep only the scheme + host (+ optional port).
+    const baseUrlMatch = rawBaseUrl.match(/^https?:\/\/[^/]+/i);
+    const baseUrl = baseUrlMatch ? baseUrlMatch[0] : rawBaseUrl.replace(/\/$/, "");
     if (!email || !token || !baseUrl) {
       return Response.json(
         { error: "Jira not configured — set JIRA_USER_EMAIL, JIRA_API_TOKEN, and JIRA_BASE_URL secrets" },
