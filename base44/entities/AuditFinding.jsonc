@@ -56,6 +56,15 @@
       ],
       "default": "observation"
     },
+    "repeat_finding": {
+      "type": "boolean",
+      "default": false,
+      "description": "Flagged true if this finding recurs from a previous audit cycle"
+    },
+    "previous_finding_id": {
+      "type": "string",
+      "description": "ID of the prior-cycle finding this repeats, if applicable"
+    },
     "linked_control_id": {
       "type": "string",
       "description": "Control this finding relates to"
@@ -63,9 +72,43 @@
     "linked_control_name": {
       "type": "string"
     },
+    "linked_risk_ids": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "Risks this finding creates or exacerbates"
+    },
+    "linked_framework_ids": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "Frameworks this finding impacts"
+    },
+    "linked_evidence_ids": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "Evidence related to this finding or its remediation"
+    },
     "corrective_action": {
       "type": "string",
       "description": "Description of the corrective action plan"
+    },
+    "management_response": {
+      "type": "string",
+      "description": "Formal management response to the finding \u2014 acceptance, rebuttal, or action commitment"
+    },
+    "management_response_by": {
+      "type": "string",
+      "description": "Name of the manager who provided the formal response"
+    },
+    "management_response_at": {
+      "type": "string",
+      "format": "date",
+      "description": "Date the management response was recorded"
     },
     "root_cause": {
       "type": "string"
@@ -80,6 +123,11 @@
     "resolved_date": {
       "type": "string",
       "format": "date"
+    },
+    "closure_date": {
+      "type": "string",
+      "format": "date",
+      "description": "Date the finding was formally closed after verification"
     },
     "evidence_url": {
       "type": "string",

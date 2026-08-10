@@ -24,7 +24,8 @@
         "financial",
         "strategic",
         "reputational",
-        "third_party"
+        "third_party",
+        "emerging"
       ],
       "default": "operational"
     },
@@ -52,10 +53,27 @@
       "default": 3,
       "description": "Qualitative impact (1-5)"
     },
+    "velocity": {
+      "type": "number",
+      "enum": [
+        1,
+        2,
+        3,
+        4,
+        5
+      ],
+      "default": 3,
+      "description": "Risk velocity \u2014 how quickly the risk could materialize (1=slow, 5=rapid onset)"
+    },
+    "inherent_risk_score": {
+      "type": "number",
+      "default": 0,
+      "description": "Inherent risk score before controls (likelihood \u00d7 impact) \u2014 stored separately from residual"
+    },
     "risk_score": {
       "type": "number",
       "default": 0,
-      "description": "Auto-calculated: likelihood \u00d7 impact"
+      "description": "Auto-calculated current risk score: likelihood \u00d7 impact"
     },
     "currency": {
       "type": "string",
@@ -88,6 +106,11 @@
       "default": 0,
       "description": "Auto-calculated residual ALE: residual_financial_impact \u00d7 (residual_likelihood_pct / 100)"
     },
+    "control_effectiveness_pct": {
+      "type": "number",
+      "default": 0,
+      "description": "Aggregate effectiveness of linked controls (0-100) \u2014 drives residual risk reduction"
+    },
     "status": {
       "type": "string",
       "enum": [
@@ -95,7 +118,8 @@
         "mitigating",
         "accepted",
         "transferred",
-        "closed"
+        "closed",
+        "emerging"
       ],
       "default": "open"
     },
@@ -108,6 +132,10 @@
         "avoid"
       ],
       "default": "mitigate"
+    },
+    "treatment_plan": {
+      "type": "string",
+      "description": "Detailed treatment plan with milestones and actions"
     },
     "owner_name": {
       "type": "string"
@@ -156,6 +184,15 @@
       "default": false,
       "description": "Flagged when financial exposure (ALE) exceeds the tenant's risk_appetite_limit (COSO ERM)"
     },
+    "risk_tolerance": {
+      "type": "string",
+      "enum": [
+        "within_tolerance",
+        "at_limit",
+        "above_tolerance"
+      ],
+      "description": "Risk tolerance classification \u2014 distinct from appetite (appetite = willingness, tolerance = capacity)"
+    },
     "tolerance_justification": {
       "type": "string",
       "description": "Reason accepted if risk exceeds tolerance (required for accepted treatment)"
@@ -174,6 +211,22 @@
         "unacceptable"
       ],
       "description": "Manual override band if appetite_override is true"
+    },
+    "emerging_risk": {
+      "type": "boolean",
+      "default": false,
+      "description": "Flagged true for newly identified or rapidly evolving risks requiring monitoring"
+    },
+    "trend": {
+      "type": "string",
+      "enum": [
+        "increasing",
+        "stable",
+        "decreasing",
+        "unknown"
+      ],
+      "default": "unknown",
+      "description": "Risk score trend direction based on historical snapshots"
     },
     "accepted_by_name": {
       "type": "string",

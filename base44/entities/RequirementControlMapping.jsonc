@@ -38,6 +38,17 @@
       "type": "string",
       "description": "UniversalControl control_id for display"
     },
+    "mapping_type": {
+      "type": "string",
+      "enum": [
+        "equivalent",
+        "partial",
+        "related",
+        "derived"
+      ],
+      "default": "equivalent",
+      "description": "Relationship type: equivalent (full match), partial (covers some aspects), related (similar intent), derived (control was built from this requirement)"
+    },
     "mapping_confidence": {
       "type": "string",
       "enum": [
@@ -48,8 +59,17 @@
       "default": "full",
       "description": "How completely the control satisfies the requirement"
     },
+    "mapping_confidence_pct": {
+      "type": "number",
+      "default": 100,
+      "description": "Numeric confidence 0-100 for quantitative coverage scoring"
+    },
     "mapping_notes": {
       "type": "string"
+    },
+    "source_reference": {
+      "type": "string",
+      "description": "Citation or evidence justifying this mapping (e.g., 'ISO 27002:2022 \u00a75.3', 'NIST SP 800-53 Rev 5 AC-2')"
     },
     "evidence_url": {
       "type": "string",

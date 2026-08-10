@@ -15,6 +15,18 @@
     "title": {
       "type": "string"
     },
+    "assessment_type": {
+      "type": "string",
+      "enum": [
+        "security_due_diligence",
+        "privacy_assessment",
+        "reassessment",
+        "remediation_review",
+        "onboarding"
+      ],
+      "default": "security_due_diligence",
+      "description": "Type of vendor assessment being conducted"
+    },
     "status": {
       "type": "string",
       "enum": [
@@ -26,6 +38,16 @@
         "completed"
       ],
       "default": "draft"
+    },
+    "inherent_risk_score": {
+      "type": "number",
+      "default": 0,
+      "description": "Inherent risk score 0-100 from the assessment before mitigations"
+    },
+    "residual_risk_score": {
+      "type": "number",
+      "default": 0,
+      "description": "Residual risk score 0-100 after remediation of assessment findings"
     },
     "risk_score": {
       "type": "number",
@@ -56,6 +78,10 @@
     "answers": {
       "type": "string",
       "description": "JSON array of {question, answer, score, category}"
+    },
+    "remediation_items": {
+      "type": "string",
+      "description": "JSON array of remediation actions: [{item, severity, due_date, status, owner_name}]"
     },
     "notes": {
       "type": "string"

@@ -48,6 +48,26 @@
     "requirement_title": {
       "type": "string"
     },
+    "linked_risk_id": {
+      "type": "string",
+      "description": "Risk this evidence supports or mitigates"
+    },
+    "linked_policy_id": {
+      "type": "string",
+      "description": "Policy this evidence demonstrates adherence to"
+    },
+    "linked_audit_id": {
+      "type": "string",
+      "description": "Audit this evidence was collected for"
+    },
+    "linked_vendor_id": {
+      "type": "string",
+      "description": "Vendor this evidence pertains to"
+    },
+    "linked_assessment_id": {
+      "type": "string",
+      "description": "Assessment this evidence supports"
+    },
     "type": {
       "type": "string",
       "enum": [
@@ -67,9 +87,17 @@
         "pending_review",
         "approved",
         "rejected",
-        "expired"
+        "expired",
+        "missing"
       ],
       "default": "pending_review"
+    },
+    "owner_name": {
+      "type": "string",
+      "description": "Person responsible for collecting and maintaining this evidence"
+    },
+    "owner_id": {
+      "type": "string"
     },
     "collected_date": {
       "type": "string",
@@ -91,6 +119,16 @@
     "review_notes": {
       "type": "string",
       "description": "Notes recorded during the formal approval or rejection"
+    },
+    "missing_evidence": {
+      "type": "boolean",
+      "default": false,
+      "description": "Flagged true when evidence is required but not yet uploaded \u2014 drives missing-evidence alerts"
+    },
+    "missing_since": {
+      "type": "string",
+      "format": "date",
+      "description": "Date the evidence was first flagged as missing"
     },
     "notes": {
       "type": "string"

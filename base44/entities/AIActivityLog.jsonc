@@ -1,0 +1,186 @@
+{
+  "name": "AIActivityLog",
+  "type": "object",
+  "properties": {
+    "tenant_id": {
+      "type": "string",
+      "description": "Tenant isolation key \u2014 mandatory on every record"
+    },
+    "activity_id": {
+      "type": "string",
+      "description": "Unique immutable activity identifier (e.g., AI-2026-001)"
+    },
+    "feature": {
+      "type": "string",
+      "enum": [
+        "ai_auditor",
+        "ai_control_mapper",
+        "ai_gap_analysis",
+        "ai_cross_mapping",
+        "ai_contract_scanner",
+        "ai_assistant",
+        "regulatory_intelligence",
+        "questionnaire_autofill",
+        "anomaly_detection",
+        "evidence_analysis",
+        "risk_identification",
+        "policy_assistance",
+        "remediation_recommendation",
+        "other"
+      ],
+      "default": "ai_assistant",
+      "description": "Which AI feature generated this activity"
+    },
+    "action": {
+      "type": "string",
+      "description": "What the AI was asked to do (e.g., 'map_control_to_framework', 'analyze_evidence', 'identify_gaps')"
+    },
+    "prompt_summary": {
+      "type": "string",
+      "description": "Sanitized summary of the user prompt (no PII)"
+    },
+    "response_summary": {
+      "type": "string",
+      "description": "Summary of the AI response/recommendation"
+    },
+    "reasoning": {
+      "type": "string",
+      "description": "AI's step-by-step reasoning explaining how it arrived at the recommendation"
+    },
+    "confidence_score": {
+      "type": "number",
+      "default": 0,
+      "description": "AI confidence 0-100 in its recommendation"
+    },
+    "confidence_level": {
+      "type": "string",
+      "enum": [
+        "high",
+        "medium",
+        "low"
+      ],
+      "default": "medium"
+    },
+    "source_references": {
+      "type": "string",
+      "description": "JSON array of supporting sources: [{type, id, name, reference}] \u2014 controls, requirements, evidence, regulations cited"
+    },
+    "supporting_data": {
+      "type": "string",
+      "description": "JSON of data points the AI used to make its recommendation (entity snapshots, scores, etc.)"
+    },
+    "affected_entity_type": {
+      "type": "string",
+      "description": "Entity type the AI recommendation pertains to (Control, Risk, Evidence, etc.)"
+    },
+    "affected_entity_id": {
+      "type": "string"
+    },
+    "proposed_changes": {
+      "type": "string",
+      "description": "JSON of changes the AI proposed to make (never applied automatically)"
+    },
+    "human_approval_required": {
+      "type": "boolean",
+      "default": true,
+      "description": "Always true \u2014 AI never silently modifies material GRC records"
+    },
+    "approval_status": {
+      "type": "string",
+      "enum": [
+        "pending",
+        "approved",
+        "rejected",
+        "modified",
+        "expired"
+      ],
+      "default": "pending"
+    },
+    "approved_by_name": {
+      "type": "string"
+    },
+    "approved_by_id": {
+      "type": "string"
+    },
+    "approved_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "approval_notes": {
+      "type": "string"
+    },
+    "applied_at": {
+      "type": "string",
+      "format": "date-time",
+      "description": "When the approved changes were actually applied to the target entity"
+    },
+    "model_used": {
+      "type": "string",
+      "description": "LLM model identifier used for this activity"
+    },
+    "tokens_used": {
+      "type": "number",
+      "default": 0
+    },
+    "requested_by_name": {
+      "type": "string"
+    },
+    "requested_by_id": {
+      "type": "string"
+    },
+    "requested_at": {
+      "type": "string",
+      "format": "date-time"
+    }
+  },
+  "required": [
+    "feature",
+    "action"
+  ],
+  "rls": {
+    "create": {
+      "data.tenant_id": "{{user.data.tenant_id}}"
+    },
+    "read": {
+      "$or": [
+        {
+          "data.tenant_id": "{{user.data.tenant_id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "update": {
+      "$or": [
+        {
+          "data.tenant_id": "{{user.data.tenant_id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        },
+        {
+          "$and": [
+            {
+              "data.tenant_id": "{{user.data.tenant_id}}"
+            },
+            {
+              "user_condition": {
+                "role": "compliance_officer"
+              }
+            }
+          ]
+        }
+      ]
+    },
+    "delete": {
+      "user_condition": {
+        "role": "admin"
+      }
+    }
+  }
+}

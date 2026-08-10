@@ -189,6 +189,7 @@ import CustomReportBuilder from '@/pages/CustomReportBuilder';
 import AnomalyDetection from '@/pages/AnomalyDetection';
 import Connect from '@/pages/Connect';
 import Landing from '@/pages/Landing';
+import AssessmentEngine from '@/pages/AssessmentEngine';
 import { LanguageProvider } from '@/contexts/LanguageContext';
 
 const AuthenticatedApp = () => {
@@ -399,6 +400,7 @@ const AuthenticatedApp = () => {
           <Route path="/risk-scenario-library" element={<RiskScenarioLibrary />} />
           <Route path="/custom-reports" element={<CustomReportBuilder />} />
           <Route path="/anomaly-detection" element={<AnomalyDetection />} />
+          <Route path="/assessment-engine" element={<AssessmentEngine />} />
           <Route path="/connect" element={<Connect />} />
         </Route>
       </Route>

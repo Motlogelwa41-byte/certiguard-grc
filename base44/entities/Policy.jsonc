@@ -41,7 +41,8 @@
         "approved",
         "published",
         "rejected",
-        "archived"
+        "archived",
+        "retired"
       ],
       "default": "draft"
     },
@@ -62,19 +63,70 @@
       "type": "string",
       "format": "date"
     },
+    "effective_date": {
+      "type": "string",
+      "format": "date",
+      "description": "Date the policy becomes formally effective"
+    },
     "published_at": {
       "type": "string",
       "description": "ISO timestamp when the policy was published for acknowledgment"
     },
+    "retirement_date": {
+      "type": "string",
+      "format": "date",
+      "description": "Date the policy was formally retired and superseded"
+    },
     "next_review_date": {
       "type": "string",
       "format": "date"
+    },
+    "review_frequency": {
+      "type": "string",
+      "enum": [
+        "monthly",
+        "quarterly",
+        "semi_annually",
+        "annually",
+        "biennially",
+        "on_change"
+      ],
+      "default": "annually",
+      "description": "Scheduled review cadence"
     },
     "framework_ids": {
       "type": "array",
       "items": {
         "type": "string"
       }
+    },
+    "linked_risk_ids": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "Risks this policy mitigates or relates to"
+    },
+    "linked_control_ids": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "Controls this policy mandates"
+    },
+    "linked_regulation_ids": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "Regulatory requirements this policy satisfies"
+    },
+    "linked_evidence_ids": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "Evidence proving policy is operating"
     },
     "acknowledgment_required": {
       "type": "boolean",

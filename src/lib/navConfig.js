@@ -49,6 +49,7 @@ export const navSections = [
       { label: "Audit Checklists", path: "/audit-checklists", icon: ListChecks, roles: ["admin", "compliance_officer", "auditor"] },
       { label: "Control Monitoring", path: "/control-monitoring", icon: Activity, roles: ["admin", "compliance_officer", "auditor"] },
       { label: "Control Tests", path: "/control-tests", icon: FlaskRound, roles: ["admin", "compliance_officer", "auditor"] },
+      { label: "Assessment Engine", path: "/assessment-engine", icon: ClipboardCheck, roles: ["admin", "compliance_officer", "risk_manager", "auditor"] },
       { label: "Automated Test Library", path: "/automated-tests", icon: Library, roles: ["admin", "compliance_officer", "risk_manager", "auditor"] },
       { label: "Test Library", path: "/control-test-library", icon: Library, roles: ["admin", "compliance_officer", "auditor"] },
       { label: "Auditor Portal", path: "/auditor-portal", icon: ShieldCheck, roles: ["admin", "compliance_officer", "external_auditor", "auditor"] },

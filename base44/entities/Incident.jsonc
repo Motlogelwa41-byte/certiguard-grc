@@ -29,6 +29,10 @@
         "physical_security",
         "policy_violation",
         "third_party",
+        "privacy_breach",
+        "operational",
+        "compliance_violation",
+        "regulatory",
         "other"
       ],
       "default": "security_breach"
@@ -93,9 +97,17 @@
     "lessons_learned": {
       "type": "string"
     },
+    "corrective_actions": {
+      "type": "string",
+      "description": "JSON array of corrective actions: [{action, owner_name, due_date, status, completed_date}]"
+    },
     "notify_regulator": {
       "type": "boolean",
       "default": false
+    },
+    "notification_requirements": {
+      "type": "string",
+      "description": "JSON array of notification obligations: [{authority, deadline_hours, status, required, notified_at}]"
     },
     "regulator_notified_date": {
       "type": "string",

@@ -25,6 +25,18 @@
       ],
       "default": "queued"
     },
+    "posture_state": {
+      "type": "string",
+      "enum": [
+        "compliant",
+        "partially_compliant",
+        "non_compliant",
+        "unknown",
+        "not_applicable"
+      ],
+      "default": "unknown",
+      "description": "Overall compliance posture for this run"
+    },
     "total_checks": {
       "type": "number",
       "default": 0
@@ -38,6 +50,10 @@
       "default": 0
     },
     "skipped": {
+      "type": "number",
+      "default": 0
+    },
+    "not_applicable": {
       "type": "number",
       "default": 0
     },

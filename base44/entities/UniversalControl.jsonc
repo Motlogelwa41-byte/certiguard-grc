@@ -8,7 +8,7 @@
     },
     "control_id": {
       "type": "string",
-      "description": "Unique internal control identifier (e.g., UC-001)"
+      "description": "Unique immutable internal control identifier (e.g., UC-001) \u2014 never changes across versions"
     },
     "title": {
       "type": "string"
@@ -16,6 +16,10 @@
     "description": {
       "type": "string",
       "description": "Internal actionable security rule"
+    },
+    "control_objective": {
+      "type": "string",
+      "description": "The security/compliance objective this control achieves (what risk it mitigates)"
     },
     "category": {
       "type": "string",
@@ -41,6 +45,34 @@
     "evidence_requirements": {
       "type": "string",
       "description": "What evidence proves this control is operating"
+    },
+    "applicability": {
+      "type": "string",
+      "enum": [
+        "always",
+        "conditional",
+        "not_applicable"
+      ],
+      "default": "always",
+      "description": "Whether this control always applies or is conditional on environment/scope"
+    },
+    "applicability_conditions": {
+      "type": "string",
+      "description": "JSON array of conditions that determine applicability: [{field, operator, value}]"
+    },
+    "version": {
+      "type": "string",
+      "default": "1.0",
+      "description": "Control library version \u2014 increments on material change"
+    },
+    "jurisdiction": {
+      "type": "string",
+      "description": "Primary jurisdiction this control is designed for (global, za, bw, eu, us, etc.)",
+      "default": "global"
+    },
+    "source_reference": {
+      "type": "string",
+      "description": "Authoritative source citation (e.g., 'ISO 27001:2022 A.5.1', 'NIST CSF PR.AC-1')"
     },
     "status": {
       "type": "string",

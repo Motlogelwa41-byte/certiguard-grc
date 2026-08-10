@@ -33,16 +33,34 @@
       "enum": [
         "planned",
         "in_progress",
+        "fieldwork",
+        "reporting",
         "completed",
         "cancelled"
       ],
       "default": "planned"
+    },
+    "scope": {
+      "type": "string",
+      "description": "Structured audit scope \u2014 JSON array of scope items: [{entity_type, entity_id, entity_name, in_scope}]"
+    },
+    "objectives": {
+      "type": "string",
+      "description": "Audit objectives \u2014 what the audit aims to verify or achieve"
+    },
+    "criteria": {
+      "type": "string",
+      "description": "Audit criteria \u2014 standards, frameworks, or requirements against which conformance is assessed"
     },
     "auditor_name": {
       "type": "string"
     },
     "auditor_firm": {
       "type": "string"
+    },
+    "lead_auditor_id": {
+      "type": "string",
+      "description": "User ID of the internal lead auditor"
     },
     "start_date": {
       "type": "string",
@@ -59,6 +77,11 @@
     "critical_findings": {
       "type": "number",
       "default": 0
+    },
+    "repeat_findings_count": {
+      "type": "number",
+      "default": 0,
+      "description": "Number of findings that recur from a previous audit cycle"
     },
     "result": {
       "type": "string",

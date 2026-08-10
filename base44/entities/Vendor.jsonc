@@ -25,6 +25,17 @@
       ],
       "default": "saas"
     },
+    "classification": {
+      "type": "string",
+      "enum": [
+        "strategic",
+        "tactical",
+        "operational",
+        "commodity"
+      ],
+      "default": "operational",
+      "description": "Vendor relationship classification \u2014 strategic (core to business) down to commodity"
+    },
     "criticality": {
       "type": "string",
       "enum": [
@@ -46,10 +57,20 @@
       ],
       "default": "medium"
     },
+    "inherent_risk_score": {
+      "type": "number",
+      "default": 0,
+      "description": "Inherent vendor risk 0-100 before due diligence and mitigations"
+    },
     "risk_score": {
       "type": "number",
       "default": 0,
-      "description": "Auto-calculated internal risk score 0-100 from scoreVendorRisk"
+      "description": "Current composite vendor risk score 0-100 from scoreVendorRisk"
+    },
+    "residual_risk_score": {
+      "type": "number",
+      "default": 0,
+      "description": "Residual vendor risk 0-100 after mitigations and compensating controls"
     },
     "risk_grade": {
       "type": "string",
@@ -75,6 +96,18 @@
     "last_risk_assessment": {
       "type": "string",
       "format": "date-time"
+    },
+    "reassessment_frequency": {
+      "type": "string",
+      "enum": [
+        "monthly",
+        "quarterly",
+        "semi_annually",
+        "annually",
+        "biennially"
+      ],
+      "default": "annually",
+      "description": "Scheduled reassessment cadence"
     },
     "external_rating_score": {
       "type": "number",
@@ -118,6 +151,19 @@
         "inactive"
       ],
       "default": "pending_review"
+    },
+    "onboarding_status": {
+      "type": "string",
+      "enum": [
+        "not_started",
+        "due_diligence",
+        "assessment",
+        "contract_review",
+        "approved",
+        "rejected"
+      ],
+      "default": "not_started",
+      "description": "Vendor onboarding lifecycle stage"
     },
     "contact_name": {
       "type": "string"

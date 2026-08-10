@@ -13,13 +13,48 @@
       "type": "string"
     },
     "data_categories": {
-      "type": "string"
+      "type": "string",
+      "description": "JSON array of data categories: [pii, financial, health, biometric, children, credentials, behavioral, special_category]"
+    },
+    "sensitive_data": {
+      "type": "boolean",
+      "default": false,
+      "description": "True if this activity processes special/sensitive category data (health, biometric, children, etc.)"
     },
     "purpose": {
       "type": "string"
     },
     "legal_basis": {
-      "type": "string"
+      "type": "string",
+      "description": "Jurisdiction-neutral lawful basis (consent, contract, legal_obligation, vital_interest, public_task, legitimate_interest)"
+    },
+    "consent_required": {
+      "type": "boolean",
+      "default": false,
+      "description": "True if consent is the lawful basis and must be actively managed"
+    },
+    "consent_status": {
+      "type": "string",
+      "enum": [
+        "not_required",
+        "obtained",
+        "pending",
+        "withdrawn",
+        "expired"
+      ],
+      "default": "not_required"
+    },
+    "privacy_notice_url": {
+      "type": "string",
+      "description": "URL of the privacy notice provided to data subjects for this activity"
+    },
+    "privacy_notice_version": {
+      "type": "string",
+      "description": "Version of the privacy notice in use"
+    },
+    "data_inventory_ref": {
+      "type": "string",
+      "description": "Reference to the data inventory record for the assets/systems involved"
     },
     "data_controller": {
       "type": "string"
@@ -46,6 +81,10 @@
     "dpia_completed": {
       "type": "boolean",
       "default": false
+    },
+    "linked_dpia_id": {
+      "type": "string",
+      "description": "Linked DPIA record if one was required and completed"
     },
     "status": {
       "type": "string",

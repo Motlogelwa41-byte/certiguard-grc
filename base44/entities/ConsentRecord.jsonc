@@ -1,0 +1,181 @@
+{
+  "name": "ConsentRecord",
+  "type": "object",
+  "properties": {
+    "tenant_id": {
+      "type": "string",
+      "description": "Tenant isolation key \u2014 mandatory on every record"
+    },
+    "consent_id": {
+      "type": "string",
+      "description": "Unique immutable consent identifier (e.g., CON-2026-001)"
+    },
+    "data_subject_name": {
+      "type": "string",
+      "description": "Name of the data subject who gave or withdrew consent"
+    },
+    "data_subject_email": {
+      "type": "string",
+      "description": "Email or identifier of the data subject"
+    },
+    "data_subject_type": {
+      "type": "string",
+      "enum": [
+        "customer",
+        "employee",
+        "prospect",
+        "patient",
+        "minor",
+        "website_visitor",
+        "other"
+      ],
+      "default": "customer"
+    },
+    "processing_activity": {
+      "type": "string",
+      "description": "Processing activity or purpose the consent covers"
+    },
+    "linked_ropa_id": {
+      "type": "string",
+      "description": "Linked ROPA record for this processing activity"
+    },
+    "data_categories": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "Data categories covered by this consent: [pii, financial, health, biometric, behavioral, special_category]"
+    },
+    "consent_type": {
+      "type": "string",
+      "enum": [
+        "explicit",
+        "implicit",
+        "opt_in",
+        "opt_out",
+        "legitimate_interest"
+      ],
+      "default": "explicit"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "given",
+        "pending",
+        "withdrawn",
+        "expired",
+        "refused"
+      ],
+      "default": "pending"
+    },
+    "privacy_notice_version": {
+      "type": "string",
+      "description": "Version of the privacy notice the subject consented to"
+    },
+    "privacy_notice_url": {
+      "type": "string"
+    },
+    "consent_given_at": {
+      "type": "string",
+      "format": "date-time",
+      "description": "Timestamp when consent was given"
+    },
+    "consent_withdrawn_at": {
+      "type": "string",
+      "format": "date-time",
+      "description": "Timestamp when consent was withdrawn (if applicable)"
+    },
+    "expiry_date": {
+      "type": "string",
+      "format": "date",
+      "description": "Date the consent expires and must be renewed"
+    },
+    "collection_method": {
+      "type": "string",
+      "enum": [
+        "web_form",
+        "email",
+        "phone",
+        "in_person",
+        "api",
+        "other"
+      ],
+      "default": "web_form"
+    },
+    "collection_point": {
+      "type": "string",
+      "description": "Where consent was collected (e.g., 'website_signup', 'checkout', 'employee_onboarding')"
+    },
+    "proof_of_consent_url": {
+      "type": "string",
+      "description": "Evidence of consent (screenshot, signed form, log entry)"
+    },
+    "jurisdiction": {
+      "type": "string",
+      "description": "Jurisdiction under which this consent was collected (e.g., za, eu, bw) \u2014 jurisdiction-neutral field"
+    },
+    "notes": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "data_subject_email",
+    "processing_activity",
+    "consent_type"
+  ],
+  "rls": {
+    "create": {
+      "data.tenant_id": "{{user.data.tenant_id}}"
+    },
+    "read": {
+      "$or": [
+        {
+          "data.tenant_id": "{{user.data.tenant_id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "update": {
+      "$or": [
+        {
+          "data.tenant_id": "{{user.data.tenant_id}}",
+          "created_by_id": "{{user.id}}"
+        },
+        {
+          "$and": [
+            {
+              "data.tenant_id": "{{user.data.tenant_id}}"
+            },
+            {
+              "user_condition": {
+                "role": "compliance_officer"
+              }
+            }
+          ]
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "delete": {
+      "$or": [
+        {
+          "data.tenant_id": "{{user.data.tenant_id}}",
+          "created_by_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    }
+  }
+}

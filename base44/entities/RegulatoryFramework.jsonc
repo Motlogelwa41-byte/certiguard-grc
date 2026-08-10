@@ -30,6 +30,20 @@
         "uk",
         "au",
         "za",
+        "bw",
+        "na",
+        "mz",
+        "zw",
+        "zm",
+        "tz",
+        "ao",
+        "sz",
+        "ls",
+        "mw",
+        "cd",
+        "mg",
+        "mu",
+        "sc",
         "sadc",
         "africa",
         "apac",
@@ -37,9 +51,21 @@
       ],
       "default": "global"
     },
+    "sectors": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "Industry sectors this framework applies to (e.g., financial_services, healthcare, telecommunications)"
+    },
     "authority": {
       "type": "string",
-      "description": "Issuing body (ISO, NIST, SADC Secretariat, COSO)"
+      "description": "Issuing body (ISO, NIST, SADC Secretariat, COSO, Information Regulator)"
+    },
+    "effective_date": {
+      "type": "string",
+      "format": "date",
+      "description": "Date the framework or regulation became effective"
     },
     "category": {
       "type": "string",
