@@ -10,6 +10,7 @@ import { useToast } from "@/components/ui/use-toast";
 import StatusBadge from "@/components/shared/StatusBadge";
 import { Plus, RefreshCw, Trash2, KeyRound, Users, ShieldCheck, AlertCircle, Loader2, Wifi, Lock, ShieldX, Copy, Webhook, Check } from "lucide-react";
 import ProviderSetupGuide from "@/components/sso/ProviderSetupGuide";
+import SSOSetupGuide from "@/components/sso/SSOSetupGuide";
 import { Switch } from "@/components/ui/switch";
 
 const TYPES = [
@@ -202,6 +203,8 @@ export default function SSOSettings() {
           <p className="text-sky-700 dark:text-sky-300 text-xs">The SCIM providers configured below handle <strong>user provisioning</strong> (auto-creating/updating app users from your IdP directory), which complements OIDC login.</p>
         </div>
       </div>
+
+      <SSOSetupGuide />
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 mb-6">
         <StatTile label="Providers" value={idps.length} icon={KeyRound} color="text-primary" />
