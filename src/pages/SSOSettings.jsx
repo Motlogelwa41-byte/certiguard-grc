@@ -8,7 +8,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useToast } from "@/components/ui/use-toast";
 import StatusBadge from "@/components/shared/StatusBadge";
-import { Plus, RefreshCw, Trash2, KeyRound, Users, ShieldCheck, AlertCircle, Loader2, Wifi, Lock, ShieldX } from "lucide-react";
+import { Plus, RefreshCw, Trash2, KeyRound, Users, ShieldCheck, AlertCircle, Loader2, Wifi, Lock, ShieldX, Copy, Webhook, Check } from "lucide-react";
 import ProviderSetupGuide from "@/components/sso/ProviderSetupGuide";
 import { Switch } from "@/components/ui/switch";
 
@@ -100,6 +100,33 @@ export default function SSOSettings() {
       load();
     } catch (e) { toast({ title: "Sync failed", description: e.message, variant: "destructive" }); }
     setSyncing(null);
+  };
+
+  const [copiedField, setCopiedField] = useState(null);
+  const [generatingToken, setGeneratingToken] = useState(null);
+
+  const SCIM_ENDPOINT_URL = "https://guard-trust-scale.base44.app/functions/scimEndpoint";
+
+  const generateScimToken = async (idp) => {
+    setGeneratingToken(idp.id);
+    try {
+      const token = `scim_${crypto.randomUUID().replace(/-/g, "")}${crypto.randomUUID().replace(/-/g, "").slice(0, 16)}`;
+      await base44.entities.IdentityProvider.update(idp.id, {
+        scim_inbound_token: token,
+        scim_inbound_url: SCIM_ENDPOINT_URL,
+      });
+      toast({ title: "SCIM token generated", description: "Copy the bearer token into your IdP SCIM configuration.", duration: 4000 });
+      load();
+    } catch (e) {
+      toast({ title: "Failed to generate token", description: e.message, variant: "destructive" });
+    }
+    setGeneratingToken(null);
+  };
+
+  const copyToClipboard = (text, field) => {
+    navigator.clipboard.writeText(text);
+    setCopiedField(field);
+    setTimeout(() => setCopiedField(null), 2000);
   };
 
   const toggleSecurity = async (field, value) => {
@@ -203,11 +230,52 @@ export default function SSOSettings() {
               <Meta label="SCIM" value={idp.scim_enabled ? "Enabled" : "Off"} />
             </div>
             {idp.last_error && <p className="text-rose-500 text-xs mb-3 flex items-center gap-1"><AlertCircle className="w-3.5 h-3.5" /> {idp.last_error}</p>}
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-2 mb-4">
               <Button size="sm" variant="outline" onClick={() => openEdit(idp)}>Configure</Button>
               <Button size="sm" variant="outline" onClick={() => testConnection(idp)} disabled={testing === idp.id}>{testing === idp.id ? <Loader2 className="w-3.5 h-3.5 mr-1 animate-spin" /> : <Wifi className="w-3.5 h-3.5 mr-1" />} Test</Button>
               <Button size="sm" onClick={() => sync(idp)} disabled={syncing === idp.id}>{syncing === idp.id ? <Loader2 className="w-3.5 h-3.5 mr-1 animate-spin" /> : <RefreshCw className="w-3.5 h-3.5 mr-1" />} Sync</Button>
               <Button size="sm" variant="ghost" onClick={() => remove(idp)}><Trash2 className="w-3.5 h-3.5 text-destructive" /></Button>
+            </div>
+
+            {/* SCIM Inbound Endpoint */}
+            <div className="rounded-lg bg-muted/40 border border-border p-3 space-y-2">
+              <div className="flex items-center gap-2">
+                <Webhook className="w-4 h-4 text-primary" />
+                <span className="text-xs font-semibold text-foreground">SCIM Inbound Endpoint (Push Provisioning)</span>
+              </div>
+              <div className="space-y-1.5">
+                <div>
+                  <p className="text-[10px] text-muted-foreground uppercase tracking-wide mb-0.5">Endpoint URL</p>
+                  <div className="flex items-center gap-1.5">
+                    <code className="flex-1 text-[11px] font-mono text-foreground bg-background border border-border rounded px-2 py-1 truncate">{SCIM_ENDPOINT_URL}</code>
+                    <button onClick={() => copyToClipboard(SCIM_ENDPOINT_URL, `url-${idp.id}`)} className="p-1 rounded hover:bg-muted border border-border">
+                      {copiedField === `url-${idp.id}` ? <Check className="w-3.5 h-3.5 text-emerald-500" /> : <Copy className="w-3.5 h-3.5 text-muted-foreground" />}
+                    </button>
+                  </div>
+                </div>
+                {idp.scim_inbound_token ? (
+                  <div>
+                    <p className="text-[10px] text-muted-foreground uppercase tracking-wide mb-0.5">Bearer Token</p>
+                    <div className="flex items-center gap-1.5">
+                      <code className="flex-1 text-[11px] font-mono text-foreground bg-background border border-border rounded px-2 py-1 truncate">{idp.scim_inbound_token}</code>
+                      <button onClick={() => copyToClipboard(idp.scim_inbound_token, `token-${idp.id}`)} className="p-1 rounded hover:bg-muted border border-border">
+                        {copiedField === `token-${idp.id}` ? <Check className="w-3.5 h-3.5 text-emerald-500" /> : <Copy className="w-3.5 h-3.5 text-muted-foreground" />}
+                      </button>
+                    </div>
+                  </div>
+                ) : (
+                  <p className="text-xs text-muted-foreground italic">No token generated yet. Click below to generate a bearer token for your IdP.</p>
+                )}
+              </div>
+              <div className="flex items-center gap-2 pt-1">
+                <Button size="sm" variant="outline" onClick={() => generateScimToken(idp)} disabled={generatingToken === idp.id}>
+                  {generatingToken === idp.id ? <Loader2 className="w-3.5 h-3.5 mr-1 animate-spin" /> : <KeyRound className="w-3.5 h-3.5 mr-1" />}
+                  {idp.scim_inbound_token ? "Regenerate Token" : "Generate Token"}
+                </Button>
+              </div>
+              <p className="text-[10px] text-muted-foreground pt-1">
+                Configure your IdP (Okta, Entra ID, etc.) to push user changes to this endpoint. Use the Bearer token in the Authorization header. Operations: POST (create), GET ?id= (retrieve), PUT ?id= (update), PATCH ?id= (patch), DELETE ?id= (deactivate).
+              </p>
             </div>
           </div>
         ))}
