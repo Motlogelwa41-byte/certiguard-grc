@@ -1,0 +1,270 @@
+{
+  "name": "CybersecurityRisk",
+  "type": "object",
+  "properties": {
+    "tenant_id": {
+      "type": "string",
+      "description": "Tenant isolation key"
+    },
+    "csr_id": {
+      "type": "string",
+      "description": "Unique cybersecurity risk identifier (e.g., CSR-001)"
+    },
+    "title": {
+      "type": "string"
+    },
+    "description": {
+      "type": "string"
+    },
+    "risk_domain": {
+      "type": "string",
+      "enum": [
+        "identity_access",
+        "network_security",
+        "endpoint_security",
+        "cloud_security",
+        "data_protection",
+        "application_security",
+        "infrastructure",
+        "supply_chain",
+        "human_factor",
+        "governance",
+        "third_party"
+      ],
+      "default": "network_security",
+      "description": "Cybersecurity risk domain"
+    },
+    "threat_type": {
+      "type": "string",
+      "enum": [
+        "malware",
+        "ransomware",
+        "phishing",
+        "unauthorized_access",
+        "data_exfiltration",
+        "ddos",
+        "insider_threat",
+        "supply_chain",
+        "zero_day",
+        "misconfiguration",
+        "credential_theft",
+        "social_engineering",
+        "other"
+      ],
+      "default": "malware"
+    },
+    "threat_source": {
+      "type": "string",
+      "description": "External, internal, supply chain, nation-state, etc."
+    },
+    "affected_asset_ids": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "ITAsset IDs affected"
+    },
+    "affected_asset_names": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "vulnerability_ids": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "SecurityFinding/vulnerability IDs"
+    },
+    "linked_control_ids": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "Security controls from the unified control library"
+    },
+    "linked_risk_id": {
+      "type": "string",
+      "description": "Linked enterprise Risk record"
+    },
+    "linked_incident_ids": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "likelihood": {
+      "type": "number",
+      "enum": [
+        1,
+        2,
+        3,
+        4,
+        5
+      ],
+      "default": 3
+    },
+    "impact": {
+      "type": "number",
+      "enum": [
+        1,
+        2,
+        3,
+        4,
+        5
+      ],
+      "default": 3
+    },
+    "risk_score": {
+      "type": "number",
+      "default": 0,
+      "description": "Auto-calculated: likelihood \u00d7 impact"
+    },
+    "inherent_risk_score": {
+      "type": "number",
+      "default": 0
+    },
+    "residual_risk_score": {
+      "type": "number",
+      "default": 0
+    },
+    "control_effectiveness_pct": {
+      "type": "number",
+      "default": 0,
+      "description": "Aggregate effectiveness of linked security controls"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "identified",
+        "assessing",
+        "treating",
+        "monitoring",
+        "accepted",
+        "resolved"
+      ],
+      "default": "identified"
+    },
+    "treatment_strategy": {
+      "type": "string",
+      "enum": [
+        "mitigate",
+        "accept",
+        "transfer",
+        "avoid"
+      ],
+      "default": "mitigate"
+    },
+    "treatment_plan": {
+      "type": "string"
+    },
+    "remediation_items": {
+      "type": "string",
+      "description": "JSON array of remediation actions"
+    },
+    "security_posture_impact": {
+      "type": "string",
+      "enum": [
+        "critical",
+        "high",
+        "moderate",
+        "low",
+        "negligible"
+      ],
+      "default": "moderate",
+      "description": "Impact on overall security posture"
+    },
+    "owner_name": {
+      "type": "string"
+    },
+    "owner_id": {
+      "type": "string"
+    },
+    "identified_date": {
+      "type": "string",
+      "format": "date"
+    },
+    "due_date": {
+      "type": "string",
+      "format": "date"
+    },
+    "resolved_date": {
+      "type": "string",
+      "format": "date"
+    },
+    "notes": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "title",
+    "risk_domain"
+  ],
+  "rls": {
+    "create": {
+      "data.tenant_id": "{{user.data.tenant_id}}"
+    },
+    "read": {
+      "$or": [
+        {
+          "data.tenant_id": "{{user.data.tenant_id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "update": {
+      "$or": [
+        {
+          "data.tenant_id": "{{user.data.tenant_id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        },
+        {
+          "$and": [
+            {
+              "data.tenant_id": "{{user.data.tenant_id}}"
+            },
+            {
+              "user_condition": {
+                "role": "risk_manager"
+              }
+            }
+          ]
+        },
+        {
+          "$and": [
+            {
+              "data.tenant_id": "{{user.data.tenant_id}}"
+            },
+            {
+              "user_condition": {
+                "role": "compliance_officer"
+              }
+            }
+          ]
+        }
+      ]
+    },
+    "delete": {
+      "$or": [
+        {
+          "data.tenant_id": "{{user.data.tenant_id}}",
+          "created_by_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    }
+  }
+}

@@ -95,6 +95,32 @@
       "type": "string",
       "description": "Post-exercise after-action report notes"
     },
+    "critical_suppliers": {
+      "type": "string",
+      "description": "JSON array of critical supplier dependencies: [{vendor_id, vendor_name, service, alternative}]"
+    },
+    "recovery_test_results": {
+      "type": "string",
+      "description": "JSON array of test exercise results: [{date, type, rto_achieved, rpo_achieved, gaps_found, participants}]"
+    },
+    "remediation_items": {
+      "type": "string",
+      "description": "JSON array of BCDR remediation actions from test gaps: [{item, owner, due_date, status}]"
+    },
+    "linked_risk_ids": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "Enterprise risk records linked to this critical process"
+    },
+    "linked_control_ids": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "Controls supporting this business continuity plan"
+    },
     "status": {
       "type": "string",
       "enum": [

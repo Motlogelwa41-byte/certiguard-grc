@@ -1,70 +1,110 @@
 import { useCallback, useMemo } from "react";
 import { useAuth } from "@/lib/AuthContext";
 
-// Role hierarchy (higher index = more privileges)
-const ROLE_HIERARCHY = ["user", "viewer", "auditor", "external_auditor", "regulator", "hr", "department_head", "risk_manager", "compliance_officer", "admin"];
+// Enterprise role hierarchy (higher index = more privileges)
+const ROLE_HIERARCHY = [
+  "read_only", "viewer", "user", "contributor", "reviewer",
+  "auditor", "external_auditor", "regulator", "hr", "department_head",
+  "risk_manager", "compliance_officer", "privacy_officer",
+  "executive", "board_user", "tenant_admin", "platform_admin", "admin"
+];
 
-// Permissions required for each operation
+// Granular permissions by module and action
 const PERMISSIONS = {
-  "dashboard:view": ["user", "viewer", "auditor", "external_auditor", "regulator", "hr", "department_head", "risk_manager", "compliance_officer", "admin"],
+  "dashboard:view": ["read_only", "viewer", "user", "contributor", "reviewer", "auditor", "external_auditor", "regulator", "hr", "department_head", "risk_manager", "compliance_officer", "privacy_officer", "executive", "board_user", "tenant_admin", "platform_admin", "admin"],
 
-  "frameworks:read": ["user", "viewer", "auditor", "external_auditor", "regulator", "hr", "department_head", "risk_manager", "compliance_officer", "admin"],
-  "frameworks:write": ["compliance_officer", "admin"],
-  "frameworks:delete": ["admin"],
+  "frameworks:read": ["read_only", "viewer", "user", "contributor", "reviewer", "auditor", "external_auditor", "regulator", "hr", "department_head", "risk_manager", "compliance_officer", "privacy_officer", "executive", "board_user", "tenant_admin", "platform_admin", "admin"],
+  "frameworks:write": ["compliance_officer", "tenant_admin", "platform_admin", "admin"],
+  "frameworks:delete": ["tenant_admin", "platform_admin", "admin"],
 
-  "controls:read": ["user", "viewer", "auditor", "external_auditor", "regulator", "hr", "department_head", "risk_manager", "compliance_officer", "admin"],
-  "controls:write": ["compliance_officer", "admin"],
-  "controls:delete": ["admin"],
-  "controls:approve": ["auditor", "external_auditor", "admin"],
+  "controls:read": ["read_only", "viewer", "user", "contributor", "reviewer", "auditor", "external_auditor", "regulator", "hr", "department_head", "risk_manager", "compliance_officer", "privacy_officer", "executive", "board_user", "tenant_admin", "platform_admin", "admin"],
+  "controls:write": ["contributor", "compliance_officer", "tenant_admin", "platform_admin", "admin"],
+  "controls:delete": ["tenant_admin", "platform_admin", "admin"],
+  "controls:approve": ["reviewer", "auditor", "external_auditor", "compliance_officer", "tenant_admin", "platform_admin", "admin"],
+  "controls:test": ["contributor", "auditor", "compliance_officer", "tenant_admin", "platform_admin", "admin"],
 
-  "risks:read": ["user", "viewer", "auditor", "external_auditor", "regulator", "hr", "department_head", "risk_manager", "compliance_officer", "admin"],
-  "risks:write": ["risk_manager", "compliance_officer", "admin"],
-  "risks:delete": ["risk_manager", "admin"],
-  "risks:approve": ["risk_manager", "auditor", "admin"],
+  "risks:read": ["read_only", "viewer", "user", "contributor", "reviewer", "auditor", "external_auditor", "regulator", "hr", "department_head", "risk_manager", "compliance_officer", "privacy_officer", "executive", "board_user", "tenant_admin", "platform_admin", "admin"],
+  "risks:write": ["contributor", "risk_manager", "compliance_officer", "tenant_admin", "platform_admin", "admin"],
+  "risks:delete": ["risk_manager", "tenant_admin", "platform_admin", "admin"],
+  "risks:approve": ["reviewer", "risk_manager", "auditor", "executive", "tenant_admin", "platform_admin", "admin"],
+  "risks:accept": ["executive", "board_user", "tenant_admin", "platform_admin", "admin"],
 
-  "policies:read": ["user", "viewer", "auditor", "external_auditor", "regulator", "hr", "department_head", "risk_manager", "compliance_officer", "admin"],
-  "policies:write": ["compliance_officer", "admin"],
-  "policies:delete": ["admin"],
-  "policies:approve": ["compliance_officer", "admin"],
+  "policies:read": ["read_only", "viewer", "user", "contributor", "reviewer", "auditor", "external_auditor", "regulator", "hr", "department_head", "risk_manager", "compliance_officer", "privacy_officer", "executive", "board_user", "tenant_admin", "platform_admin", "admin"],
+  "policies:write": ["contributor", "compliance_officer", "privacy_officer", "tenant_admin", "platform_admin", "admin"],
+  "policies:delete": ["tenant_admin", "platform_admin", "admin"],
+  "policies:approve": ["reviewer", "compliance_officer", "executive", "tenant_admin", "platform_admin", "admin"],
 
-  "evidence:read": ["user", "viewer", "auditor", "hr", "department_head", "risk_manager", "compliance_officer", "admin"],
-  "evidence:write": ["auditor", "external_auditor", "compliance_officer", "admin"],
-  "evidence:delete": ["compliance_officer", "admin"],
-  "evidence:approve": ["auditor", "external_auditor", "compliance_officer", "admin"],
+  "evidence:read": ["read_only", "viewer", "user", "contributor", "reviewer", "auditor", "external_auditor", "hr", "department_head", "risk_manager", "compliance_officer", "privacy_officer", "tenant_admin", "platform_admin", "admin"],
+  "evidence:write": ["contributor", "auditor", "external_auditor", "compliance_officer", "tenant_admin", "platform_admin", "admin"],
+  "evidence:delete": ["compliance_officer", "tenant_admin", "platform_admin", "admin"],
+  "evidence:approve": ["reviewer", "auditor", "external_auditor", "compliance_officer", "tenant_admin", "platform_admin", "admin"],
 
-  "audits:read": ["user", "viewer", "auditor", "hr", "department_head", "risk_manager", "compliance_officer", "admin"],
-  "audits:write": ["auditor", "external_auditor", "compliance_officer", "admin"],
-  "audits:delete": ["admin"],
-  "audits:approve": ["auditor", "external_auditor", "admin"],
+  "audits:read": ["read_only", "viewer", "user", "contributor", "reviewer", "auditor", "external_auditor", "hr", "department_head", "risk_manager", "compliance_officer", "tenant_admin", "platform_admin", "admin"],
+  "audits:write": ["contributor", "auditor", "external_auditor", "compliance_officer", "tenant_admin", "platform_admin", "admin"],
+  "audits:delete": ["tenant_admin", "platform_admin", "admin"],
+  "audits:approve": ["reviewer", "auditor", "external_auditor", "compliance_officer", "tenant_admin", "platform_admin", "admin"],
 
-  "vendors:read": ["user", "viewer", "auditor", "hr", "department_head", "risk_manager", "compliance_officer", "admin"],
-  "vendors:write": ["risk_manager", "compliance_officer", "admin"],
-  "vendors:delete": ["risk_manager", "admin"],
+  "vendors:read": ["read_only", "viewer", "user", "contributor", "reviewer", "auditor", "external_auditor", "hr", "department_head", "risk_manager", "compliance_officer", "privacy_officer", "tenant_admin", "platform_admin", "admin"],
+  "vendors:write": ["contributor", "risk_manager", "compliance_officer", "tenant_admin", "platform_admin", "admin"],
+  "vendors:delete": ["risk_manager", "tenant_admin", "platform_admin", "admin"],
 
-  "tasks:read": ["user", "viewer", "auditor", "hr", "department_head", "risk_manager", "compliance_officer", "admin"],
-  "tasks:write": ["compliance_officer", "admin"],
-  "tasks:assign": ["department_head", "risk_manager", "compliance_officer", "admin"],
+  "tasks:read": ["read_only", "viewer", "user", "contributor", "reviewer", "auditor", "external_auditor", "hr", "department_head", "risk_manager", "compliance_officer", "tenant_admin", "platform_admin", "admin"],
+  "tasks:write": ["contributor", "compliance_officer", "tenant_admin", "platform_admin", "admin"],
+  "tasks:assign": ["department_head", "risk_manager", "compliance_officer", "tenant_admin", "platform_admin", "admin"],
 
-  "admin:users": ["admin"],
-  "admin:tenants": ["admin"],
-  "admin:settings": ["admin"],
+  "incidents:read": ["read_only", "viewer", "user", "contributor", "reviewer", "auditor", "external_auditor", "hr", "department_head", "risk_manager", "compliance_officer", "privacy_officer", "executive", "board_user", "tenant_admin", "platform_admin", "admin"],
+  "incidents:write": ["contributor", "risk_manager", "compliance_officer", "privacy_officer", "tenant_admin", "platform_admin", "admin"],
+  "incidents:close": ["risk_manager", "compliance_officer", "tenant_admin", "platform_admin", "admin"],
 
-  "reports:view": ["user", "viewer", "auditor", "external_auditor", "regulator", "hr", "department_head", "risk_manager", "compliance_officer", "admin"],
-  "reports:export": ["auditor", "external_auditor", "risk_manager", "compliance_officer", "admin"],
+  "privacy:read": ["read_only", "viewer", "user", "contributor", "reviewer", "auditor", "external_auditor", "hr", "department_head", "risk_manager", "compliance_officer", "privacy_officer", "executive", "board_user", "tenant_admin", "platform_admin", "admin"],
+  "privacy:write": ["contributor", "privacy_officer", "compliance_officer", "tenant_admin", "platform_admin", "admin"],
+  "privacy:approve": ["reviewer", "privacy_officer", "compliance_officer", "tenant_admin", "platform_admin", "admin"],
 
-  "audit_trail:view": ["auditor", "external_auditor", "regulator", "compliance_officer", "admin"],
+  "remediation:read": ["read_only", "viewer", "user", "contributor", "reviewer", "auditor", "external_auditor", "hr", "department_head", "risk_manager", "compliance_officer", "privacy_officer", "tenant_admin", "platform_admin", "admin"],
+  "remediation:write": ["contributor", "risk_manager", "compliance_officer", "privacy_officer", "tenant_admin", "platform_admin", "admin"],
+  "remediation:approve": ["reviewer", "risk_manager", "compliance_officer", "tenant_admin", "platform_admin", "admin"],
 
-  "incidents:read": ["user", "viewer", "auditor", "hr", "department_head", "risk_manager", "compliance_officer", "admin"],
-  "incidents:write": ["risk_manager", "compliance_officer", "admin"],
-  "incidents:close": ["risk_manager", "admin"],
+  "assets:read": ["read_only", "viewer", "user", "contributor", "reviewer", "auditor", "external_auditor", "hr", "department_head", "risk_manager", "compliance_officer", "privacy_officer", "tenant_admin", "platform_admin", "admin"],
+  "assets:write": ["contributor", "risk_manager", "compliance_officer", "tenant_admin", "platform_admin", "admin"],
+  "assets:delete": ["tenant_admin", "platform_admin", "admin"],
 
-  "training:read": ["user", "viewer", "auditor", "hr", "department_head", "risk_manager", "compliance_officer", "admin"],
-  "training:write": ["hr", "compliance_officer", "admin"],
+  "bcdr:read": ["read_only", "viewer", "user", "contributor", "reviewer", "auditor", "external_auditor", "hr", "department_head", "risk_manager", "compliance_officer", "executive", "board_user", "tenant_admin", "platform_admin", "admin"],
+  "bcdr:write": ["contributor", "risk_manager", "compliance_officer", "tenant_admin", "platform_admin", "admin"],
 
-  "notifications:send": ["risk_manager", "compliance_officer", "admin"],
+  "workflows:read": ["read_only", "viewer", "user", "contributor", "reviewer", "auditor", "risk_manager", "compliance_officer", "tenant_admin", "platform_admin", "admin"],
+  "workflows:write": ["compliance_officer", "tenant_admin", "platform_admin", "admin"],
+  "workflows:delete": ["tenant_admin", "platform_admin", "admin"],
 
-  "ai:audit": ["auditor", "compliance_officer", "admin"],
-  "ai:gap_analysis": ["auditor", "compliance_officer", "admin"],
+  "alerts:read": ["read_only", "viewer", "user", "contributor", "reviewer", "auditor", "external_auditor", "hr", "department_head", "risk_manager", "compliance_officer", "privacy_officer", "executive", "tenant_admin", "platform_admin", "admin"],
+  "alerts:write": ["compliance_officer", "tenant_admin", "platform_admin", "admin"],
+  "alerts:acknowledge": ["contributor", "reviewer", "risk_manager", "compliance_officer", "privacy_officer", "department_head", "tenant_admin", "platform_admin", "admin"],
+
+  "admin:users": ["tenant_admin", "platform_admin", "admin"],
+  "admin:tenants": ["platform_admin", "admin"],
+  "admin:settings": ["tenant_admin", "platform_admin", "admin"],
+  "admin:platform": ["platform_admin", "admin"],
+
+  "reports:view": ["read_only", "viewer", "user", "contributor", "reviewer", "auditor", "external_auditor", "regulator", "hr", "department_head", "risk_manager", "compliance_officer", "privacy_officer", "executive", "board_user", "tenant_admin", "platform_admin", "admin"],
+  "reports:export": ["reviewer", "auditor", "external_auditor", "risk_manager", "compliance_officer", "privacy_officer", "executive", "tenant_admin", "platform_admin", "admin"],
+
+  "audit_trail:view": ["auditor", "external_auditor", "regulator", "compliance_officer", "tenant_admin", "platform_admin", "admin"],
+
+  "training:read": ["read_only", "viewer", "user", "contributor", "reviewer", "auditor", "external_auditor", "hr", "department_head", "risk_manager", "compliance_officer", "tenant_admin", "platform_admin", "admin"],
+  "training:write": ["contributor", "hr", "compliance_officer", "tenant_admin", "platform_admin", "admin"],
+
+  "notifications:send": ["risk_manager", "compliance_officer", "privacy_officer", "tenant_admin", "platform_admin", "admin"],
+
+  "ai:audit": ["auditor", "compliance_officer", "privacy_officer", "tenant_admin", "platform_admin", "admin"],
+  "ai:gap_analysis": ["auditor", "compliance_officer", "tenant_admin", "platform_admin", "admin"],
+  "ai:document_analysis": ["contributor", "auditor", "compliance_officer", "privacy_officer", "tenant_admin", "platform_admin", "admin"],
+  "ai:approve": ["reviewer", "compliance_officer", "privacy_officer", "tenant_admin", "platform_admin", "admin"],
+
+  "cybersecurity:read": ["read_only", "viewer", "user", "contributor", "reviewer", "auditor", "external_auditor", "hr", "department_head", "risk_manager", "compliance_officer", "tenant_admin", "platform_admin", "admin"],
+  "cybersecurity:write": ["contributor", "risk_manager", "compliance_officer", "tenant_admin", "platform_admin", "admin"],
+  "cybersecurity:approve": ["reviewer", "risk_manager", "compliance_officer", "tenant_admin", "platform_admin", "admin"],
+
+  "executive:view": ["executive", "board_user", "tenant_admin", "platform_admin", "admin"],
+  "board:view": ["board_user", "tenant_admin", "platform_admin", "admin"],
 };
 
 export function canPerform(userRole, permission) {
@@ -84,8 +124,15 @@ export function useRBAC() {
   const isAtLeast = useCallback((role) => {
     const userIdx = ROLE_HIERARCHY.indexOf(userRole);
     const targetIdx = ROLE_HIERARCHY.indexOf(role);
+    if (userIdx === -1) return false;
+    if (targetIdx === -1) return false;
     return userIdx >= targetIdx;
   }, [userRole]);
 
-  return { role: userRole, can, cannot, isAtLeast, isReadOnly: userRole === "auditor" || userRole === "viewer", roles: ROLE_HIERARCHY };
+  const isReadOnly = userRole === "read_only" || userRole === "viewer" || userRole === "auditor" || userRole === "external_auditor";
+  const isExecutive = userRole === "executive" || userRole === "board_user";
+  const isPrivacyOfficer = userRole === "privacy_officer";
+  const isAdmin = userRole === "admin" || userRole === "platform_admin" || userRole === "tenant_admin";
+
+  return { role: userRole, can, cannot, isAtLeast, isReadOnly, isExecutive, isPrivacyOfficer, isAdmin, roles: ROLE_HIERARCHY };
 }

@@ -190,6 +190,10 @@ import AnomalyDetection from '@/pages/AnomalyDetection';
 import Connect from '@/pages/Connect';
 import Landing from '@/pages/Landing';
 import AssessmentEngine from '@/pages/AssessmentEngine';
+import GrcWorkflowEngine from '@/pages/GrcWorkflowEngine';
+import GrcAlertCenter from '@/pages/GrcAlertCenter';
+import RemediationCenter from '@/pages/RemediationCenter';
+import CybersecurityRiskCenter from '@/pages/CybersecurityRiskCenter';
 import { LanguageProvider } from '@/contexts/LanguageContext';
 
 const AuthenticatedApp = () => {
@@ -401,6 +405,10 @@ const AuthenticatedApp = () => {
           <Route path="/custom-reports" element={<CustomReportBuilder />} />
           <Route path="/anomaly-detection" element={<AnomalyDetection />} />
           <Route path="/assessment-engine" element={<AssessmentEngine />} />
+          <Route path="/grc-workflows" element={<GrcWorkflowEngine />} />
+          <Route path="/alert-center" element={<GrcAlertCenter />} />
+          <Route path="/remediation-center" element={<RemediationCenter />} />
+          <Route path="/cybersecurity-risk" element={<CybersecurityRiskCenter />} />
           <Route path="/connect" element={<Connect />} />
         </Route>
       </Route>

@@ -175,6 +175,53 @@
       "type": "string",
       "description": "Certificate of destruction URL"
     },
+    "data_types": {
+      "type": "string",
+      "description": "JSON array of data types processed/stored: [pii, financial, health, biometric, credentials, behavioral, special_category]"
+    },
+    "business_impact": {
+      "type": "string",
+      "enum": [
+        "critical",
+        "high",
+        "medium",
+        "low"
+      ],
+      "default": "medium",
+      "description": "Business impact if this asset is compromised or unavailable"
+    },
+    "critical_process_id": {
+      "type": "string",
+      "description": "Linked BcdrPlan critical process this asset supports"
+    },
+    "linked_risk_ids": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "Risks associated with this asset"
+    },
+    "linked_control_ids": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "Controls protecting this asset"
+    },
+    "linked_vendor_ids": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "Vendors providing or managing this asset"
+    },
+    "linked_incident_ids": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "Security incidents involving this asset"
+    },
     "notes": {
       "type": "string"
     }

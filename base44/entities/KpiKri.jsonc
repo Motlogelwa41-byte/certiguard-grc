@@ -132,6 +132,32 @@
         "type": "string"
       }
     },
+    "target_range_min": {
+      "type": "number",
+      "description": "Minimum acceptable value (target range lower bound)"
+    },
+    "target_range_max": {
+      "type": "number",
+      "description": "Maximum acceptable value (target range upper bound)"
+    },
+    "appetite_link": {
+      "type": "string",
+      "description": "Link to the risk appetite statement this KRI monitors"
+    },
+    "escalation_rules": {
+      "type": "string",
+      "description": "JSON array of escalation rules: [{level, role, hours_after_breach, action}]"
+    },
+    "last_breach_date": {
+      "type": "string",
+      "format": "date",
+      "description": "Date of the most recent threshold breach"
+    },
+    "breach_count": {
+      "type": "number",
+      "default": 0,
+      "description": "Total number of threshold breaches recorded"
+    },
     "notes": {
       "type": "string"
     }

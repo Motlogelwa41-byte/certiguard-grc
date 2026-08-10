@@ -4,7 +4,7 @@ import {
   ShieldCheck, FileSearch, Brain, Play, FileSpreadsheet, FileDown, BarChart3, LineChart,
   History, ShieldAlert, GraduationCap, Calendar, Bell, Users, Copy, SlidersHorizontal,
   Target, Upload, Send, Globe, Users2, MapPin, Zap, ListChecks, BellRing,
-  PieChart,   Radar, Landmark, BarChart2, Network, GitCompare, Sparkles, CreditCard, Gauge, Info, ScrollText, Activity, Factory, Plug, UserCheck, Wand2, KeyRound, Bug, Library, Presentation, TrendingDown, CalendarCheck, Rocket, ClipboardCheck,   FlaskRound, Award, FileQuestion, FlaskConical, Lock, Calculator, Server, BookOpen, Settings, Code, Cloud, Webhook, Leaf, Trophy, TestTube, FileBadge, Gavel, Fingerprint, Languages, FileArchive, DollarSign, Palette,   ShieldX, Siren, ScanLine, Laptop, Eye, Atom, Smartphone, Star
+  PieChart,   Radar, Landmark, BarChart2, Network, GitCompare, Sparkles, CreditCard, Gauge, Info, ScrollText, Activity, Factory, Plug, UserCheck, Wand2, KeyRound, Bug, Library, Presentation, TrendingDown, CalendarCheck, Rocket, ClipboardCheck,   FlaskRound, Award, FileQuestion, FlaskConical, Lock, Calculator, Server, BookOpen, Settings, Code, Cloud, Webhook, Leaf, Trophy, TestTube, FileBadge, Gavel, Fingerprint, Languages, FileArchive, DollarSign, Palette,   ShieldX, Siren, ScanLine, Laptop, Eye, Atom, Smartphone, Star, Workflow, Wrench
 } from "lucide-react";
 // NOTE: ClipboardList imported above is reused for the UAT checklist item below.
 
@@ -23,6 +23,7 @@ export const navSections = [
       { label: "User Guide", path: "/user-guide", icon: BookOpen, roles: ["admin", "compliance_officer", "risk_manager", "auditor", "user"] },
       { label: "Testing Guide", path: "/testing-guide", icon: ClipboardList, roles: ["admin", "compliance_officer", "risk_manager", "auditor", "user"] },
       { label: "Maturity Dashboard", path: "/maturity-dashboard", icon: LineChart, roles: ["admin", "compliance_officer", "risk_manager", "auditor"] },
+      { label: "Alert Center", path: "/alert-center", icon: BellRing, roles: ["admin", "compliance_officer", "risk_manager", "auditor", "user"] },
       { label: "Executive Briefing", path: "/executive-briefing", icon: Presentation, roles: ["admin", "compliance_officer", "risk_manager", "auditor", "external_auditor"] },
     ]
   },
@@ -78,6 +79,7 @@ export const navSections = [
       { label: "Cost of Compliance", path: "/cost-of-compliance", icon: DollarSign, roles: ["admin", "compliance_officer", "risk_manager", "auditor"] },
       { label: "Risk Scenario Library", path: "/risk-scenario-library", icon: Library, roles: ["admin", "compliance_officer", "risk_manager", "auditor"] },
       { label: "Cross-Org Rollup", path: "/cross-org-risk", icon: Building2, roles: ["admin", "risk_manager"] },
+      { label: "Cybersecurity Risk", path: "/cybersecurity-risk", icon: Shield, roles: ["admin", "compliance_officer", "risk_manager", "auditor"] },
     ]
   },
   {
@@ -104,6 +106,7 @@ export const navSections = [
       { label: "AI Gap Analysis", path: "/ai-gap-analysis", icon: Brain, roles: ["admin", "compliance_officer", "risk_manager"] },
       { label: "Anomaly Detection", path: "/anomaly-detection", icon: Activity, roles: ["admin", "compliance_officer", "risk_manager", "auditor"] },
       { label: "Compliance Runs", path: "/compliance-runs", icon: Play, roles: ["admin", "compliance_officer", "auditor"] },
+      { label: "GRC Workflow Engine", path: "/grc-workflows", icon: Workflow, roles: ["admin", "compliance_officer"] },
       { label: "Regulatory Localization", path: "/regulatory-localization", icon: Languages, roles: ["admin", "compliance_officer", "risk_manager", "auditor"] },
     ]
   },
@@ -111,6 +114,7 @@ export const navSections = [
     label: "Operations",
     items: [
       { label: "Tasks", path: "/tasks", icon: CheckSquare, roles: ["admin", "compliance_officer", "risk_manager", "auditor", "user"] },
+      { label: "Remediation Center", path: "/remediation-center", icon: Wrench, roles: ["admin", "compliance_officer", "risk_manager", "auditor"] },
       { label: "Task Reminders", path: "/task-reminders", icon: Bell, roles: ["admin", "compliance_officer"] },
       { label: "Calendar", path: "/calendar", icon: Calendar, roles: ["admin", "compliance_officer", "risk_manager", "auditor", "user"] },
       { label: "Incidents", path: "/incidents", icon: ShieldAlert, roles: ["admin", "compliance_officer", "risk_manager", "auditor", "user"] },

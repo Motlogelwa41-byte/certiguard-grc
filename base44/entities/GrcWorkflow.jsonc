@@ -1,0 +1,202 @@
+{
+  "name": "GrcWorkflow",
+  "type": "object",
+  "properties": {
+    "tenant_id": {
+      "type": "string",
+      "description": "Tenant isolation key"
+    },
+    "workflow_id": {
+      "type": "string",
+      "description": "Unique workflow identifier (e.g., WF-001)"
+    },
+    "name": {
+      "type": "string",
+      "description": "Workflow name"
+    },
+    "description": {
+      "type": "string"
+    },
+    "entity_type": {
+      "type": "string",
+      "enum": [
+        "risk",
+        "control",
+        "policy",
+        "evidence",
+        "assessment",
+        "audit_finding",
+        "incident",
+        "vendor_assessment",
+        "privacy_request",
+        "remediation",
+        "control_test",
+        "regulatory_change"
+      ],
+      "description": "What entity this workflow governs"
+    },
+    "trigger_type": {
+      "type": "string",
+      "enum": [
+        "on_create",
+        "on_status_change",
+        "on_field_change",
+        "on_schedule",
+        "on_threshold_breach",
+        "manual"
+      ],
+      "default": "on_create",
+      "description": "What triggers this workflow"
+    },
+    "trigger_condition": {
+      "type": "string",
+      "description": "JSON condition expression: [{field, operator, value}] \u2014 when this is true, the workflow fires"
+    },
+    "steps": {
+      "type": "string",
+      "description": "JSON array of workflow steps: [{step, name, type (assignment/approval/notification/escalation/wait), assignee_role, assignee_id, sla_hours, on_approve, on_reject, escalation_after_hours, escalation_to_role}]"
+    },
+    "approval_required": {
+      "type": "boolean",
+      "default": true,
+      "description": "Whether this workflow requires formal approval"
+    },
+    "approval_levels": {
+      "type": "number",
+      "default": 1,
+      "description": "Number of approval levels"
+    },
+    "auto_assign_on_trigger": {
+      "type": "boolean",
+      "default": true
+    },
+    "default_assignee_role": {
+      "type": "string",
+      "description": "Role to auto-assign to (e.g., risk_manager, compliance_officer)"
+    },
+    "default_assignee_id": {
+      "type": "string",
+      "description": "Specific user to auto-assign to"
+    },
+    "sla_hours": {
+      "type": "number",
+      "description": "SLA for the entire workflow"
+    },
+    "escalation_after_hours": {
+      "type": "number",
+      "description": "Escalate if not completed within this time"
+    },
+    "escalation_to_role": {
+      "type": "string"
+    },
+    "notification_template": {
+      "type": "string",
+      "description": "Template name or JSON for notification content"
+    },
+    "on_completion_action": {
+      "type": "string",
+      "enum": [
+        "set_status",
+        "create_task",
+        "send_notification",
+        "none"
+      ],
+      "default": "set_status"
+    },
+    "on_completion_value": {
+      "type": "string",
+      "description": "Value to set (e.g., status='approved')"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "active",
+        "draft",
+        "paused",
+        "archived"
+      ],
+      "default": "draft"
+    },
+    "version": {
+      "type": "string",
+      "default": "1.0"
+    },
+    "execution_count": {
+      "type": "number",
+      "default": 0,
+      "description": "How many times this workflow has executed"
+    },
+    "last_executed_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "owner_name": {
+      "type": "string"
+    },
+    "owner_id": {
+      "type": "string"
+    },
+    "notes": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "name",
+    "entity_type",
+    "trigger_type"
+  ],
+  "rls": {
+    "create": {
+      "data.tenant_id": "{{user.data.tenant_id}}"
+    },
+    "read": {
+      "$or": [
+        {
+          "data.tenant_id": "{{user.data.tenant_id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "update": {
+      "$or": [
+        {
+          "data.tenant_id": "{{user.data.tenant_id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        },
+        {
+          "$and": [
+            {
+              "data.tenant_id": "{{user.data.tenant_id}}"
+            },
+            {
+              "user_condition": {
+                "role": "compliance_officer"
+              }
+            }
+          ]
+        }
+      ]
+    },
+    "delete": {
+      "$or": [
+        {
+          "data.tenant_id": "{{user.data.tenant_id}}",
+          "created_by_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    }
+  }
+}
