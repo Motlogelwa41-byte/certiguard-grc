@@ -1,0 +1,45 @@
+{
+  "name": "Evidence Integrity Verification Scanner",
+  "trigger": {
+    "condition": null,
+    "config": {
+      "trigger_type": "scheduled",
+      "events": [],
+      "schedule_mode": "recurring",
+      "cron_expression": "0 2 * * 0",
+      "one_time_date": null,
+      "timezone": "Africa/Johannesburg",
+      "interval_value": null,
+      "interval_unit": null,
+      "interval_anchor": null,
+      "ends_type": "never",
+      "ends_on_date": null,
+      "ends_after_count": null
+    }
+  },
+  "definition": {
+    "document": {
+      "dsl": "1.0.0",
+      "name": "evidence_integrity_verification_scanner",
+      "version": "1.0",
+      "namespace": "base44"
+    },
+    "do": [
+      {
+        "verify_integrity": {
+          "call": "invoke_backend_function",
+          "with": {
+            "function_name": "verifyEvidenceIntegrity",
+            "args": {}
+          },
+          "then": "end",
+          "x-base44": {
+            "title": "Re-verify evidence integrity",
+            "description": "Re-hash all stored evidence files and flag any whose SHA-256 no longer matches the ledger"
+          }
+        }
+      }
+    ]
+  },
+  "description": "Weekly scan (Sunday 02:00) that re-hashes every stored evidence file and flags any whose SHA-256 no longer matches the AuditEvidenceLedger, detecting tampering or corruption."
+}

@@ -82,8 +82,11 @@ export default function Controls() {
         await base44.entities.Control.update(editId, payload);
         await logAuditTrail({ action: "update", entity_type: "Control", entity_id: editId, entity_name: payload.title, before, after: payload, user, severity: "info" });
       } else {
-        const created = await base44.entities.Control.create(payload);
-        await logAuditTrail({ action: "create", entity_type: "Control", entity_id: created?.id, entity_name: payload.title, after: payload, user, severity: "info" });
+        // Plan-gated creation — enforces tenant control cap at the data layer
+        const res = await base44.functions.invoke("createControlWithinPlan", { control: payload });
+        const data = res.data || res;
+        if (!data.ok && data.error) throw new Error(data.error);
+        await logAuditTrail({ action: "create", entity_type: "Control", entity_id: data.control?.id, entity_name: payload.title, after: payload, user, severity: "info" });
       }
       setOpen(false); setForm(defaultForm); setEditId(null); load();
       toast({ title: editId ? "Control updated" : "Control created" });

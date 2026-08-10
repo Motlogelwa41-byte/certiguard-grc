@@ -1,0 +1,45 @@
+{
+  "name": "Daily Compliance Score Snapshot",
+  "trigger": {
+    "condition": null,
+    "config": {
+      "trigger_type": "scheduled",
+      "events": [],
+      "schedule_mode": "recurring",
+      "cron_expression": "30 6 * * *",
+      "one_time_date": null,
+      "timezone": "Africa/Johannesburg",
+      "interval_value": null,
+      "interval_unit": null,
+      "interval_anchor": null,
+      "ends_type": "never",
+      "ends_on_date": null,
+      "ends_after_count": null
+    }
+  },
+  "definition": {
+    "document": {
+      "dsl": "1.0.0",
+      "name": "daily_compliance_score_snapshot",
+      "version": "1.0",
+      "namespace": "base44"
+    },
+    "do": [
+      {
+        "snapshot_score": {
+          "call": "invoke_backend_function",
+          "with": {
+            "function_name": "snapshotComplianceScore",
+            "args": {}
+          },
+          "then": "end",
+          "x-base44": {
+            "title": "Snapshot compliance score",
+            "description": "Record a daily compliance readiness score per tenant for trend analysis"
+          }
+        }
+      }
+    ]
+  },
+  "description": "Records a daily append-only compliance readiness score snapshot per tenant, enabling month-over-month trend analysis on the dashboard."
+}

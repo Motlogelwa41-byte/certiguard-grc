@@ -1,0 +1,45 @@
+{
+  "name": "Policy Acknowledgment Escalation Scanner",
+  "trigger": {
+    "condition": null,
+    "config": {
+      "trigger_type": "scheduled",
+      "events": [],
+      "schedule_mode": "recurring",
+      "cron_expression": "0 9 * * *",
+      "one_time_date": null,
+      "timezone": "Africa/Johannesburg",
+      "interval_value": null,
+      "interval_unit": null,
+      "interval_anchor": null,
+      "ends_type": "never",
+      "ends_on_date": null,
+      "ends_after_count": null
+    }
+  },
+  "definition": {
+    "document": {
+      "dsl": "1.0.0",
+      "name": "policy_acknowledgment_escalation_scanner",
+      "version": "1.0",
+      "namespace": "base44"
+    },
+    "do": [
+      {
+        "escalate_acks": {
+          "call": "invoke_backend_function",
+          "with": {
+            "function_name": "escalatePolicyAcknowledgments",
+            "args": {}
+          },
+          "then": "end",
+          "x-base44": {
+            "title": "Escalate unacknowledged policies",
+            "description": "Send reminders, escalate to managers, and flag access blocks for overdue policy acknowledgments"
+          }
+        }
+      }
+    ]
+  },
+  "description": "Daily scan that escalates unacknowledged policies: reminds employees after 7 days, escalates after 14 days, and flags users for access block after 21 days."
+}

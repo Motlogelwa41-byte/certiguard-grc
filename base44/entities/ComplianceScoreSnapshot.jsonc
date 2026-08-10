@@ -1,0 +1,84 @@
+{
+  "name": "ComplianceScoreSnapshot",
+  "type": "object",
+  "properties": {
+    "tenant_id": {
+      "type": "string",
+      "description": "Tenant isolation key \u2014 mandatory on every record"
+    },
+    "score": {
+      "type": "number",
+      "default": 0,
+      "description": "Overall weighted compliance readiness score 0-100"
+    },
+    "grade": {
+      "type": "string",
+      "enum": [
+        "A+",
+        "A",
+        "B",
+        "C",
+        "D",
+        "E",
+        "F"
+      ],
+      "default": "F"
+    },
+    "raw_score": {
+      "type": "number",
+      "default": 0,
+      "description": "Composite score before finding penalty"
+    },
+    "penalty": {
+      "type": "number",
+      "default": 0,
+      "description": "Severity-weighted finding penalty applied to raw score"
+    },
+    "components": {
+      "type": "string",
+      "description": "JSON of component breakdown: {controls, evidence, tests, findings, risks, policies}"
+    },
+    "snapshot_date": {
+      "type": "string",
+      "format": "date",
+      "description": "Calendar date of the snapshot (one per tenant per day)"
+    },
+    "snapshot_at": {
+      "type": "string",
+      "format": "date-time",
+      "description": "Exact timestamp the snapshot was recorded"
+    }
+  },
+  "required": [
+    "tenant_id",
+    "score",
+    "snapshot_date"
+  ],
+  "rls": {
+    "create": {
+      "data.tenant_id": "{{user.data.tenant_id}}"
+    },
+    "read": {
+      "$or": [
+        {
+          "data.tenant_id": "{{user.data.tenant_id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "update": {
+      "user_condition": {
+        "role": "__append_only_denied__"
+      }
+    },
+    "delete": {
+      "user_condition": {
+        "role": "admin"
+      }
+    }
+  }
+}

@@ -17,6 +17,7 @@ import OnboardingProgress from "@/components/dashboard/OnboardingProgress";
 import ComplianceHeatmap from "@/components/dashboard/ComplianceHeatmap";
 import FrameworkReadinessInsights from "@/components/dashboard/FrameworkReadinessInsights";
 import ComplianceTrendChart from "@/components/dashboard/ComplianceTrendChart";
+import ComplianceScoreTrendChart from "@/components/dashboard/ComplianceScoreTrendChart";
 import FrameworkGlobalReadiness from "@/components/dashboard/FrameworkGlobalReadiness";
 import RegulatoryAlertBanner from "@/components/dashboard/RegulatoryAlertBanner";
 import GeoCoverageStrip from "@/components/dashboard/GeoCoverageStrip";
@@ -181,6 +182,11 @@ export default function Dashboard() {
       {/* Compliance Readiness Trend */}
       <div className="mb-8">
         <ComplianceTrendChart />
+      </div>
+
+      {/* Compliance Score Trend — stored daily snapshots for month-over-month trending */}
+      <div className="mb-8">
+        <ComplianceScoreTrendChart />
       </div>
 
       {/* Charts Row */}
