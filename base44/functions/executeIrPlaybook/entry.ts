@@ -121,7 +121,8 @@ export default async function(req) {
     const playbook = playbooks[playbook_type];
     if (!playbook) return Response.json({ error: `Unknown playbook type: ${playbook_type}` }, { status: 400 });
 
-    // Create a ComplianceTask for each playbook step
+    // Create a ComplianceTask for each playbook step (service role + tenant_id for isolation)
+    const tenantId = incident.tenant_id || user.tenant_id || user.data?.tenant_id || "";
     const now = new Date();
     const tasksCreated = [];
     for (let i = 0; i < playbook.length; i++) {
@@ -129,7 +130,8 @@ export default async function(req) {
       const dueDate = new Date(now.getTime() + step.sla * 3600000).toISOString().slice(0, 10);
       const priority = step.phase === "Containment" || step.phase === "Detection & Analysis" ? "critical" : step.phase === "Eradication" ? "high" : "medium";
 
-      const task = await base44.entities.ComplianceTask.create({
+      const task = await base44.asServiceRole.entities.ComplianceTask.create({
+        tenant_id: tenantId,
         title: `[${step.phase}] ${step.action}`,
         description: `IR Playbook (${playbook_type}) step ${i + 1}/${playbook.length} for incident: ${incident.title}. SLA: ${step.sla}h.`,
         type: "remediation",
@@ -137,6 +139,7 @@ export default async function(req) {
         priority,
         assignee_name: incident.assigned_to || "",
         due_date: dueDate,
+        related_control_ids: incident.related_control_ids || [],
         notes: `Playbook: ${playbook_type} | Phase: ${step.phase} | SLA: ${step.sla}h | Incident: ${incident.incident_id || incident.id}`,
       }).catch((e) => { console.error(`Task create failed: ${e.message}`); return null; });
 

@@ -54,9 +54,11 @@ Deno.serve(async (req) => {
       console.error('Slack alert error:', slackError);
     }
 
-    // 2. Create a remediation task
+    // 2. Create a remediation task with a severity-based SLA deadline (recovery speed)
     let taskId = null;
     let taskError = null;
+    const slaHours = severity === 'critical' ? 24 : severity === 'high' ? 48 : 72;
+    const dueDate = new Date(Date.now() + slaHours * 3600000).toISOString().slice(0, 10);
     try {
       const task = await base44.asServiceRole.entities.ComplianceTask.create({
         tenant_id: tenant_id || undefined,
@@ -64,10 +66,12 @@ Deno.serve(async (req) => {
         type: 'remediation',
         status: 'todo',
         priority: severity === 'critical' ? 'critical' : 'high',
+        assignee_name: owner_name || '',
+        due_date: dueDate,
         related_control_id: control_id,
         notes:
           `Control "${title || control_id}" regressed from PASSING to FAILING. ` +
-          `Investigate root cause and restore control effectiveness before next audit cycle.`,
+          `Investigate root cause and restore control effectiveness before next audit cycle. SLA: ${slaHours}h (due ${dueDate}).`,
       });
       taskId = task?.id || null;
     } catch (e) {

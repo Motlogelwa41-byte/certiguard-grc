@@ -18,6 +18,10 @@ Deno.serve(async (req) => {
     if (!control || !control.title) {
       return Response.json({ error: 'Control payload with title is required' }, { status: 400 });
     }
+    // Auto-generate control_id if not provided (entity requires it)
+    if (!control.control_id) {
+      control.control_id = `CTRL-${Date.now().toString().slice(-6)}`;
+    }
 
     const userTenantId = me.tenant_id || me.data?.tenant_id;
     let tenant = userTenantId ? await base44.asServiceRole.entities.Tenant.get(userTenantId).catch(() => null) : null;

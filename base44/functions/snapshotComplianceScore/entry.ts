@@ -21,29 +21,28 @@ Deno.serve(async (req) => {
     ]);
 
     // Group by tenant for correct multi-tenant isolation
-    const allEntities = [
-      ...controls.map((c) => ({ e: c, tid: c.tenant_id, kind: "control" })),
-      ...evidence.map((e) => ({ e, tid: e.tenant_id, kind: "evidence" })),
-      ...tests.map((t) => ({ e: t, tid: t.tenant_id, kind: "test" })),
-      ...findings.map((f) => ({ e: f, tid: f.tenant_id, kind: "finding" })),
-      ...risks.map((r) => ({ e: r, tid: r.tenant_id, kind: "risk" })),
-      ...policies.map((p) => ({ e: p, tid: p.tenant_id, kind: "policy" })),
-    ];
-
     const tenants = {};
-    for (const { e, tid, kind } of allEntities) {
+    const bucket = (tid) => {
       const t = tid || "_default";
-      (tenants[t] = tenants[t] || { controls: [], evidence: [], tests: [], findings: [], risks: [], policies: [] })[kind + "s"].push(e);
-    }
+      return (tenants[t] = tenants[t] || { controls: [], evidence: [], tests: [], findings: [], risks: [], policies: [] });
+    };
+    for (const c of controls) bucket(c.tenant_id).controls.push(c);
+    for (const e of evidence) bucket(e.tenant_id).evidence.push(e);
+    for (const t of tests) bucket(t.tenant_id).tests.push(t);
+    for (const f of findings) bucket(f.tenant_id).findings.push(f);
+    for (const r of risks) bucket(r.tenant_id).risks.push(r);
+    for (const p of policies) bucket(p.tenant_id).policies.push(p);
 
     const snapshotIds = [];
 
     for (const [tenantId, data] of Object.entries(tenants)) {
-      const tid = tenantId === "_default" ? undefined : tenantId;
+      // Skip entities with no tenant_id — can't attribute a snapshot to an unknown tenant
+      if (tenantId === "_default") continue;
+      const tid = tenantId;
 
       // Skip if a snapshot already exists for today (idempotent daily run)
       const existing = await sr.entities.ComplianceScoreSnapshot.filter(
-        { tenant_id: tid || null, snapshot_date: today }, "-snapshot_at", 1
+        { tenant_id: tid, snapshot_date: today }, "-snapshot_at", 1
       ).catch(() => []);
       if (existing && existing.length > 0) { snapshotIds.push(existing[0].id); continue; }
 
