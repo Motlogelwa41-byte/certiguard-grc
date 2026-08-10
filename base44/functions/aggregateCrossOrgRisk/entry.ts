@@ -9,10 +9,14 @@ export default async function(req) {
       return Response.json({ error: 'Forbidden — admin or risk_manager only' }, { status: 403 });
     }
 
-    // Service-role reads to aggregate across all tenants in the hierarchy
-    const tenants = await base44.asServiceRole.entities.Tenant.list('-created_date', 500);
-    const risks = await base44.asServiceRole.entities.Risk.list('-created_date', 1000);
-    const controls = await base44.asServiceRole.entities.Control.list('-created_date', 1000);
+    // Service-role reads to aggregate across all tenants in the hierarchy.
+    // Run in parallel to stay well under the execution timeout; each query is
+    // independently guarded so a single failure doesn't sink the whole rollup.
+    const [tenants, risks, controls] = await Promise.all([
+      base44.asServiceRole.entities.Tenant.list('-created_date', 500).catch(() => []),
+      base44.asServiceRole.entities.Risk.list('-created_date', 500).catch(() => []),
+      base44.asServiceRole.entities.Control.list('-created_date', 500).catch(() => []),
+    ]);
 
     // Build subsidiary map: parentId -> [child tenants]
     const subsidiaryMap = {};

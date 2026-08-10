@@ -18,11 +18,15 @@ Deno.serve(async (req) => {
 
     const ledger = await sr.entities.AuditEvidenceLedger.list("-timestamp", 500).catch(() => []);
 
-    let checked = 0, matched = 0, mismatched = 0, fetchFailed = 0;
+    let checked = 0, matched = 0, mismatched = 0, fetchFailed = 0, skipped = 0;
     const mismatches = [];
 
     for (const entry of ledger || []) {
       if (!entry.file_url) continue;
+      // Skip legacy untenantable ledger entries (pre-fix packs logged with no
+      // tenant_id and a payload-seal hash instead of a file-content hash).
+      // These are not tenant evidence and re-verifying them produces false positives.
+      if (!entry.tenant_id) { skipped++; continue; }
       checked++;
       try {
         const res = await fetch(entry.file_url);
@@ -82,6 +86,7 @@ Deno.serve(async (req) => {
       matched,
       mismatched,
       fetch_failed: fetchFailed,
+      skipped,
       mismatches: mismatches.slice(0, 20),
       ran_at: new Date().toISOString(),
     });

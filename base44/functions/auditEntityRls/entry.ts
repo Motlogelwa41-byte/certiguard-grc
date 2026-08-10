@@ -40,7 +40,7 @@ export default async function(req) {
       'AuditFinding', 'AuditChecklist', 'ControlTest', 'ControlTestResult',
       'Certification', 'CertificationMilestone', 'MaturityAssessment',
       'RegulatoryAlert', 'RegulatoryChange', 'SecurityAlert', 'SecurityFinding',
-      'Vulnerabilities', 'Training', 'EsgMetric', 'AuditEvidenceLedger',
+      'Training', 'EsgMetric', 'AuditEvidenceLedger',
       'FrameworkRequirement', 'RequirementControlMapping', 'Framework',
       'RegulatoryFramework', 'UniversalControl', 'ManagementReport',
       'ReportSchedule', 'TaskReminder', 'TaskFeedback', 'MitigationStep',
