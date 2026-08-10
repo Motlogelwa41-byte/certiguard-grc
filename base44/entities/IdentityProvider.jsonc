@@ -31,6 +31,14 @@
       "type": "string",
       "description": "Name of the env var holding the SCIM/OAuth bearer token"
     },
+    "scim_inbound_token": {
+      "type": "string",
+      "description": "Bearer token the IdP sends to our inbound SCIM endpoint \u2014 auto-generated, used to authenticate push provisioning requests"
+    },
+    "scim_inbound_url": {
+      "type": "string",
+      "description": "Full SCIM inbound endpoint URL displayed to admin for IdP configuration"
+    },
     "saml_entrypoint": {
       "type": "string"
     },
@@ -104,8 +112,7 @@
     "update": {
       "$or": [
         {
-          "data.tenant_id": "{{user.data.tenant_id}}",
-          "created_by_id": "{{user.id}}"
+          "data.tenant_id": "{{user.data.tenant_id}}"
         },
         {
           "user_condition": {
@@ -117,8 +124,7 @@
     "delete": {
       "$or": [
         {
-          "data.tenant_id": "{{user.data.tenant_id}}",
-          "created_by_id": "{{user.id}}"
+          "data.tenant_id": "{{user.data.tenant_id}}"
         },
         {
           "user_condition": {
