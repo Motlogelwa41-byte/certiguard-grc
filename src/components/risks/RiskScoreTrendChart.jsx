@@ -64,7 +64,8 @@ export default function RiskScoreTrendChart() {
             if (lh != null || imp != null) {
               const fallbackL = (Math.floor(score / (Math.floor(score / 5) || 1)) || 3);
               const curL = lh ?? fallbackL;
-              const curI = imp ?? (score / curL || 3);
+              const fallbackI = score / curL || 3;
+              const curI = imp ?? fallbackI;
               score = curL * curI;
             }
             scoreMap[eid] = score;
