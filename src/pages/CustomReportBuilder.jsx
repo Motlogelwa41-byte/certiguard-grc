@@ -142,7 +142,7 @@ export default function CustomReportBuilder() {
       sections: t.sections ? JSON.parse(t.sections) : [],
       format: t.format || "pdf",
       schedule_frequency: t.schedule_frequency || "on_demand",
-      schedule_recipients: t.schedule_recipients ? JSON.parse(t.schedule_recipients).join(", ") : "",
+      schedule_recipients: (() => { try { return t.schedule_recipients ? JSON.parse(t.schedule_recipients).join(", ") : ""; } catch { return t.schedule_recipients || ""; } })(),
     });
     setOpen(true);
   };
@@ -287,7 +287,7 @@ export default function CustomReportBuilder() {
               pdf.text(`${cat.replace(/_/g, " ")}: ${count}`, 15, y);
               y += 6;
             });
-            const topRisks = risks.sort((a, b) => (b.risk_score || 0) - (a.risk_score || 0)).slice(0, 5);
+            const topRisks = [...risks].sort((a, b) => (b.risk_score || 0) - (a.risk_score || 0)).slice(0, 5);
             y += 3;
             pdf.setFont("helvetica", "bold");
             pdf.text("Top 5 Risks:", 15, y); y += 6;
