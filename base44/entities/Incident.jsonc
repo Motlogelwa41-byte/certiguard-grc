@@ -124,29 +124,24 @@
         "filed",
         "not_required_confirmed"
       ],
-      "default": "pending_classification",
-      "description": "Status of the automated regulator / DPO breach notification draft"
+      "default": "pending_classification"
     },
     "regulator_notification_draft": {
-      "type": "string",
-      "description": "AI-drafted regulator / DPO breach notification body (POPIA/GDPR compliant structure)"
+      "type": "string"
     },
     "regulator_notification_deadline": {
       "type": "string",
-      "format": "date-time",
-      "description": "Computed 72-hour notification deadline from detection time"
+      "format": "date-time"
     },
     "regulator_notification_sent_at": {
       "type": "string",
       "format": "date-time"
     },
     "regulator_notification_recipient": {
-      "type": "string",
-      "description": "Regulator authority or DPO the notification is addressed to"
+      "type": "string"
     },
     "dpo_name": {
-      "type": "string",
-      "description": "Data Protection Officer responsible for this incident"
+      "type": "string"
     },
     "assigned_to": {
       "type": "string"
@@ -167,20 +162,17 @@
     },
     "escalation_level": {
       "type": "number",
-      "default": 0,
-      "description": "Current escalation level (0=none, 1=team lead, 2=manager, 3=executive)"
+      "default": 0
     },
     "mttr_hours": {
-      "type": "number",
-      "description": "Mean time to resolve in hours (auto-calculated)"
+      "type": "number"
     },
     "mttc_hours": {
-      "type": "number",
-      "description": "Mean time to contain in hours (auto-calculated)"
+      "type": "number"
     },
     "war_room_messages": {
       "type": "string",
-      "description": "JSON array of war-room collaboration messages and evidence artifacts: [{id, from, from_id, text, timestamp, type, file_name, file_url}]"
+      "description": "JSON array of war-room collaboration messages: [{id, from, from_id, text, timestamp, type, file_name, file_url}]"
     }
   },
   "required": [
@@ -188,7 +180,40 @@
   ],
   "rls": {
     "create": {
-      "data.tenant_id": "{{user.data.tenant_id}}"
+      "$or": [
+        {
+          "data.tenant_id": "{{user.data.tenant_id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        },
+        {
+          "$and": [
+            {
+              "data.tenant_id": "{{user.data.tenant_id}}"
+            },
+            {
+              "user_condition": {
+                "role": "compliance_officer"
+              }
+            }
+          ]
+        },
+        {
+          "$and": [
+            {
+              "data.tenant_id": "{{user.data.tenant_id}}"
+            },
+            {
+              "user_condition": {
+                "role": "risk_manager"
+              }
+            }
+          ]
+        }
+      ]
     },
     "read": {
       "$or": [
