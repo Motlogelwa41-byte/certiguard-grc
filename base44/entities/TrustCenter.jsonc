@@ -138,6 +138,41 @@
     "welcome_message": {
       "type": "string",
       "description": "Custom welcome message shown to visitors"
+    },
+    "badge_enabled": {
+      "type": "boolean",
+      "default": false,
+      "description": "When true, the embeddable trust badge widget is accessible"
+    },
+    "badge_style": {
+      "type": "string",
+      "enum": [
+        "light",
+        "dark",
+        "minimal"
+      ],
+      "default": "light",
+      "description": "Visual style of the embeddable trust badge"
+    },
+    "badge_show_score": {
+      "type": "boolean",
+      "default": true,
+      "description": "Show security score on the badge"
+    },
+    "badge_show_grade": {
+      "type": "boolean",
+      "default": true,
+      "description": "Show letter grade on the badge"
+    },
+    "badge_show_frameworks": {
+      "type": "boolean",
+      "default": true,
+      "description": "Show compliance frameworks on the badge"
+    },
+    "badge_show_certifications": {
+      "type": "boolean",
+      "default": true,
+      "description": "Show active certifications on the badge"
     }
   },
   "required": [

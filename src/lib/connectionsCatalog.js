@@ -34,6 +34,8 @@ export const CATALOG = [
   { service: "pagerduty", label: "PagerDuty", category: "monitoring", authMethod: "api_token", icon: Activity, connectorType: null, secretHint: "PAGERDUTY_API_TOKEN", description: "On-call schedules, incident history, escalation policies, response times.", frameworks: ["SOC 2","ISO 27001"] },
   { service: "1password", label: "1Password", category: "security", authMethod: "api_token", icon: KeyRound, connectorType: null, secretHint: "ONEPASSWORD_API_TOKEN + ONEPASSWORD_VAULT_ID", description: "Vault access logs, password policy config, item usage, team memberships.", frameworks: ["SOC 2","ISO 27001"] },
   { service: "vercel", label: "Vercel", category: "code", authMethod: "api_token", icon: Rocket, connectorType: null, secretHint: "VERCEL_ACCESS_TOKEN", description: "Deployment logs, environment config, team access, project settings.", frameworks: ["SOC 2"] },
+  { service: "aws", label: "Amazon Web Services", category: "cloud", authMethod: "api_key", icon: Cloud, connectorType: null, secretHint: "AWS_ACCESS_KEY_ID + AWS_SECRET_ACCESS_KEY + AWS_REGION", description: "IAM users & MFA, S3 bucket inventory, Security Hub findings, CloudTrail evidence.", frameworks: ["SOC 2","ISO 27001","NIST CSF","PCI DSS"] },
+  { service: "knowbe4", label: "KnowBe4", category: "hr", authMethod: "api_key", icon: Users, connectorType: null, secretHint: "KNOWBE4_API_KEY + KNOWBE4_BASE_URL", description: "Security awareness training completion, phishing simulation results, user enrollment.", frameworks: ["SOC 2","ISO 27001","HIPAA"] },
 ];
 
 export const catalogEntry = (service) => CATALOG.find((c) => c.service === service) || null;

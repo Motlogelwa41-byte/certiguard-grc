@@ -34,6 +34,9 @@ export const navSections = [
       { label: "Guided Onboarding", path: "/guided-onboarding", icon: Rocket, roles: ["admin", "compliance_officer"] },
       { label: "Onboarding Health Check", path: "/onboarding-health-check", icon: HeartPulse, roles: ["admin", "compliance_officer", "risk_manager", "auditor"] },
       { label: "Connections", path: "/connections", icon: Plug, roles: ["admin", "compliance_officer", "risk_manager", "auditor"] },
+      { label: "AWS Integration", path: "/aws-integration", icon: Cloud, roles: ["admin", "compliance_officer", "risk_manager", "auditor"] },
+      { label: "Autopilot Onboarding", path: "/autopilot-onboarding", icon: Zap, roles: ["admin", "compliance_officer"] },
+      { label: "KnowBe4 Training", path: "/knowbe4-integration", icon: GraduationCap, roles: ["admin", "compliance_officer", "risk_manager", "auditor"] },
     ]
   },
   {
@@ -97,6 +100,7 @@ export const navSections = [
       { label: "Evidence", path: "/evidence", icon: Paperclip, roles: ["admin", "compliance_officer", "risk_manager", "auditor"] },
       { label: "Bulk Evidence", path: "/bulk-evidence", icon: Upload, roles: ["admin", "compliance_officer", "auditor"] },
       { label: "Evidence Reminders", path: "/evidence-reminders", icon: BellRing, roles: ["admin", "compliance_officer", "auditor"] },
+      { label: "Evidence Collection", path: "/evidence-collection", icon: Activity, roles: ["admin", "compliance_officer", "risk_manager", "auditor"] },
     ]
   },
   {
@@ -219,6 +223,7 @@ export const navSections = [
     items: [
       { label: "Trust Center", path: "/trust-center-settings", icon: Globe, roles: ["admin", "compliance_officer"] },
       { label: "Trust Center Analytics", path: "/trust-center-analytics", icon: BarChart3, roles: ["admin", "compliance_officer"] },
+      { label: "Trust Badge Widget", path: "/trust-badge-widget", icon: Award, roles: ["admin", "compliance_officer"] },
       { label: "Compliance Badges", path: "/compliance-badges", icon: Award, roles: ["admin", "compliance_officer"] },
       { label: "AWS Marketplace", path: "/aws-marketplace", icon: Store, roles: ["admin", "compliance_officer"] },
       { label: "Security Rating API", path: "/security-rating-api", icon: Globe, roles: ["admin", "compliance_officer"] },

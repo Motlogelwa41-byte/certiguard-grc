@@ -27,7 +27,8 @@
         "crowdstrike",
         "defender",
         "splunk",
-        "jira"
+        "jira",
+        "knowbe4"
       ],
       "description": "Source system identifier"
     },

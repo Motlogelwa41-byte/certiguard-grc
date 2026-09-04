@@ -84,6 +84,20 @@
       "items": {
         "type": "string"
       }
+    },
+    "source_system": {
+      "type": "string",
+      "enum": [
+        "manual",
+        "knowbe4",
+        "proofpoint"
+      ],
+      "default": "manual",
+      "description": "Source system for this training record"
+    },
+    "source_training_id": {
+      "type": "string",
+      "description": "External training campaign ID from KnowBe4/Proofpoint"
     }
   },
   "required": [

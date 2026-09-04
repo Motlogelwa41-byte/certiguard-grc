@@ -219,6 +219,11 @@ import SecureBaselines from '@/pages/SecureBaselines';
 import SharedResponsibilityDashboard from '@/pages/SharedResponsibilityDashboard';
 import IdentityAccessCenter from '@/pages/IdentityAccessCenter';
 import CryptographyCommandCenter from '@/pages/CryptographyCommandCenter';
+import AwsIntegration from '@/pages/AwsIntegration';
+import AutopilotOnboarding from '@/pages/AutopilotOnboarding';
+import EvidenceCollectionDashboard from '@/pages/EvidenceCollectionDashboard';
+import KnowBe4Integration from '@/pages/KnowBe4Integration';
+import TrustBadgeWidget from '@/pages/TrustBadgeWidget';
 import { LanguageProvider } from '@/contexts/LanguageContext';
 
 const AuthenticatedApp = () => {
@@ -459,6 +464,11 @@ const AuthenticatedApp = () => {
           <Route path="/shared-responsibility" element={<SharedResponsibilityDashboard />} />
           <Route path="/identity-access" element={<IdentityAccessCenter />} />
           <Route path="/cryptography" element={<CryptographyCommandCenter />} />
+          <Route path="/aws-integration" element={<AwsIntegration />} />
+          <Route path="/autopilot-onboarding" element={<AutopilotOnboarding />} />
+          <Route path="/evidence-collection" element={<EvidenceCollectionDashboard />} />
+          <Route path="/knowbe4-integration" element={<KnowBe4Integration />} />
+          <Route path="/trust-badge-widget" element={<TrustBadgeWidget />} />
           <Route path="/connect" element={<Connect />} />
         </Route>
       </Route>
