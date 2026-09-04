@@ -71,7 +71,15 @@ export default function Register() {
         base44.auth.setToken(result.access_token);
       }
       await logLogin("otp");
-      window.location.href = safeReturnTo();
+      // Fire the marketing funnel event — once per new registration.
+      try {
+        base44.analytics.track({ eventName: "trial_signup_completed" });
+      } catch (e) { /* analytics is best-effort */ }
+      // New registrants land in the guided onboarding flow so they're not
+      // staring at an empty dashboard. If they came from a protected page
+      // (returnTo is set), respect that destination instead.
+      const rawReturnTo = new URLSearchParams(window.location.search).get("returnTo");
+      window.location.href = rawReturnTo ? safeReturnTo() : "/guided-onboarding";
     } catch (err) {
       setError(err.message || "Invalid verification code");
     } finally {

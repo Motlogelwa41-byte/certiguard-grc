@@ -1,6 +1,7 @@
 import React from "react";
 import { Link } from "react-router-dom";
-import { ArrowRight, CheckCircle2 } from "lucide-react";
+import { ArrowRight, CheckCircle2, CalendarClock } from "lucide-react";
+import { base44 } from "@/api/base44Client";
 
 const INCLUDED = [
   "14-day free trial — no credit card required",
@@ -29,7 +30,16 @@ export default function LandingCTA() {
               <Link to="/register" className="inline-flex items-center gap-2 text-sm font-semibold text-[hsl(222_47%_11%)] bg-[hsl(160_84%_45%)] hover:bg-[hsl(160_84%_50%)] rounded-lg px-6 py-3 transition-colors shadow-lg shadow-emerald-500/20">
                 Start free trial <ArrowRight className="w-4 h-4" />
               </Link>
-              <Link to="/pricing" className="inline-flex items-center gap-2 text-sm font-medium text-white bg-white/10 hover:bg-white/20 border border-white/15 rounded-lg px-6 py-3 transition-colors">
+              <button
+                onClick={() => {
+                  try { base44.analytics.track({ eventName: "demo_requested" }); } catch (e) { /* best-effort */ }
+                  window.location.href = "/register?returnTo=/guided-onboarding";
+                }}
+                className="inline-flex items-center gap-2 text-sm font-medium text-white bg-white/10 hover:bg-white/20 border border-white/15 rounded-lg px-6 py-3 transition-colors"
+              >
+                <CalendarClock className="w-4 h-4" /> Request a demo
+              </button>
+              <Link to="/pricing" className="inline-flex items-center gap-2 text-sm font-medium text-slate-300 hover:text-white transition-colors px-2 py-3">
                 Compare plans
               </Link>
             </div>

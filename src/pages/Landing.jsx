@@ -1,6 +1,7 @@
 import React from "react";
 import { Link } from "react-router-dom";
 import { Shield, ArrowRight, CheckCircle2, Sparkles } from "lucide-react";
+import { base44 } from "@/api/base44Client";
 import LandingHero from "@/components/landing/LandingHero";
 import LandingStats from "@/components/landing/LandingStats";
 import LandingFeatures from "@/components/landing/LandingFeatures";
@@ -30,6 +31,15 @@ export default function Landing() {
             <Link to="/login" className="text-sm font-medium text-muted-foreground hover:text-foreground px-3 py-1.5 transition-colors">
               Sign in
             </Link>
+            <button
+              onClick={() => {
+                try { base44.analytics.track({ eventName: "demo_requested" }); } catch (e) { /* best-effort */ }
+                window.location.href = "/register?returnTo=/guided-onboarding";
+              }}
+              className="hidden sm:inline-flex text-sm font-medium text-muted-foreground hover:text-foreground px-3 py-1.5 transition-colors"
+            >
+              Request a demo
+            </button>
             <Link to="/register" className="inline-flex items-center gap-1.5 text-sm font-medium text-primary-foreground bg-primary hover:bg-primary/90 rounded-lg px-3.5 py-1.5 transition-colors">
               Start free trial <ArrowRight className="w-3.5 h-3.5" />
             </Link>
