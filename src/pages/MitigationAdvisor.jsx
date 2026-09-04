@@ -155,9 +155,21 @@ export default function MitigationAdvisor() {
   const sendMessage = async (text) => {
     const content = (text || input).trim();
     if (!content || sending) return;
-    if (!activeId) {
-      await startNewConversation();
-      return;
+
+    let convId = activeId;
+    if (!convId) {
+      try {
+        const conv = await base44.agents.createConversation({
+          agent_name: AGENT_NAME,
+          metadata: { name: "Mitigation Advisory", description: "Mitigation step selection assistance" },
+        });
+        setConversations([conv, ...conversations]);
+        setActiveId(conv.id);
+        convId = conv.id;
+      } catch (e) {
+        console.error("Failed to create conversation", e);
+        return;
+      }
     }
 
     setInput("");
@@ -165,7 +177,7 @@ export default function MitigationAdvisor() {
     setMessages(prev => [...prev, { role: "user", content }]);
 
     try {
-      const conv = await base44.agents.getConversation(activeId);
+      const conv = await base44.agents.getConversation(convId);
       await base44.agents.addMessage(conv, { role: "user", content });
     } catch (e) {
       console.error("Failed to send message", e);

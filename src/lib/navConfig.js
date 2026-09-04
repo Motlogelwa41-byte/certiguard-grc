@@ -80,6 +80,7 @@ export const navSections = [
       { label: "Risk Scenario Library", path: "/risk-scenario-library", icon: Library, roles: ["admin", "compliance_officer", "risk_manager", "auditor"] },
       { label: "Cross-Org Rollup", path: "/cross-org-risk", icon: Building2, roles: ["admin", "risk_manager"] },
       { label: "Cybersecurity Risk", path: "/cybersecurity-risk", icon: Shield, roles: ["admin", "compliance_officer", "risk_manager", "auditor"] },
+      { label: "Mitigation Advisor", path: "/mitigation-advisor", icon: Sparkles, roles: ["admin", "compliance_officer", "risk_manager"] },
     ]
   },
   {
