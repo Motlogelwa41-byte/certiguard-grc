@@ -52,7 +52,7 @@ export default function ComplianceScoreTrendChart() {
       <div className="flex items-start justify-between mb-4">
         <div>
           <h3 className="font-heading font-semibold text-foreground">Compliance Score Trend</h3>
-          <p className="text-xs text-muted-foreground mt-0.5">Daily readiness score — last {snapshots.length} days</p>
+          <p className="text-xs text-muted-foreground mt-0.5">3-month readiness trend — {snapshots.length} daily snapshots</p>
         </div>
         <div className="text-right">
           <div className="flex items-center gap-2 justify-end">
