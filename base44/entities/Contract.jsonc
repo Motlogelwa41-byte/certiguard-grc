@@ -81,6 +81,63 @@
       "type": "string",
       "description": "Key contractual obligations, SLAs, or compliance commitments"
     },
+    "security_clauses": {
+      "type": "string",
+      "description": "JSON array of embedded security clauses: [{clause_id, title, requirement, framework_ref, mandatory, status}]"
+    },
+    "security_requirements_embedded": {
+      "type": "boolean",
+      "default": false,
+      "description": "True when security requirements have been formally embedded into this contract"
+    },
+    "sla_security_requirements": {
+      "type": "string",
+      "description": "JSON of SLA security requirements: {uptime_pct, incident_response_sla_hours, breach_notification_sla_hours, patching_sla_days, backup_frequency, dr_rto_hours, dr_rpo_hours}"
+    },
+    "breach_notification_sla_hours": {
+      "type": "number",
+      "default": 72,
+      "description": "Vendor must notify within this many hours of a security breach"
+    },
+    "right_to_audit": {
+      "type": "boolean",
+      "default": true,
+      "description": "Contract includes right-to-audit clause"
+    },
+    "subprocessor_approved": {
+      "type": "boolean",
+      "default": false,
+      "description": "Whether subprocessors have been formally approved"
+    },
+    "subprocessor_list": {
+      "type": "string",
+      "description": "JSON array of approved subprocessors: [{name, location, data_access, approved}]"
+    },
+    "data_processing_terms": {
+      "type": "string",
+      "description": "Data processing agreement terms \u2014 GDPR/POPIA Article 28 style"
+    },
+    "data_residency": {
+      "type": "string",
+      "description": "Required data residency location(s) e.g. ZA, EU"
+    },
+    "encryption_requirements": {
+      "type": "string",
+      "description": "Required encryption standards: at_rest, in_transit, key_management"
+    },
+    "liability_cap": {
+      "type": "number",
+      "description": "Liability cap in contract currency"
+    },
+    "insurance_requirements": {
+      "type": "string",
+      "description": "Required insurance coverage: cyber_liability, e&o, general_liability minimums"
+    },
+    "termination_for_noncompliance": {
+      "type": "boolean",
+      "default": true,
+      "description": "Contract allows termination for security non-compliance"
+    },
     "owner_name": {
       "type": "string"
     },
@@ -118,12 +175,21 @@
     "update": {
       "$or": [
         {
-          "data.tenant_id": "{{user.data.tenant_id}}",
-          "created_by_id": "{{user.id}}"
+          "data.tenant_id": "{{user.data.tenant_id}}"
         },
         {
           "user_condition": {
             "role": "admin"
+          }
+        },
+        {
+          "user_condition": {
+            "role": "compliance_officer"
+          }
+        },
+        {
+          "user_condition": {
+            "role": "risk_manager"
           }
         }
       ]
