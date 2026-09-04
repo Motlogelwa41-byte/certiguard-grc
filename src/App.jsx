@@ -180,6 +180,8 @@ import ApiSecurity from '@/pages/ApiSecurity';
 import AiCrossMapping from '@/pages/AiCrossMapping';
 import VendorRiskExchange from '@/pages/VendorRiskExchange';
 import VendorRiskCenter from '@/pages/VendorRiskCenter';
+import JmlComplianceCenter from '@/pages/JmlComplianceCenter';
+import ShadowITDiscovery from '@/pages/ShadowITDiscovery';
 import FairBenchmarks from '@/pages/FairBenchmarks';
 import PrivacyDataMapping from '@/pages/PrivacyDataMapping';
 import EsgBenchmarking from '@/pages/EsgBenchmarking';
@@ -404,6 +406,8 @@ const AuthenticatedApp = () => {
           <Route path="/hadr-documentation" element={<HadrDocumentation />} />
           <Route path="/api-security" element={<ApiSecurity />} />
           <Route path="/ai-cross-mapping" element={<AiCrossMapping />} />
+          <Route path="/jml-compliance" element={<JmlComplianceCenter />} />
+          <Route path="/shadow-it" element={<ShadowITDiscovery />} />
           <Route path="/vendor-risk-center" element={<VendorRiskCenter />} />
           <Route path="/vendor-risk-exchange" element={<VendorRiskExchange />} />
           <Route path="/fair-benchmarks" element={<FairBenchmarks />} />

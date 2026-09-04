@@ -1,0 +1,234 @@
+{
+  "name": "ShadowITApp",
+  "type": "object",
+  "properties": {
+    "tenant_id": {
+      "type": "string",
+      "description": "Tenant isolation key \u2014 mandatory on every record"
+    },
+    "app_id": {
+      "type": "string",
+      "description": "Unique shadow IT app identifier e.g. SHADOW-001"
+    },
+    "app_name": {
+      "type": "string",
+      "description": "Discovered application name"
+    },
+    "app_url": {
+      "type": "string",
+      "description": "Application URL or domain"
+    },
+    "app_category": {
+      "type": "string",
+      "enum": [
+        "productivity",
+        "communication",
+        "file_storage",
+        "ai_tool",
+        "developer_tool",
+        "analytics",
+        "crm",
+        "marketing",
+        "hr",
+        "finance",
+        "design",
+        "project_management",
+        "other"
+      ],
+      "default": "other",
+      "description": "Category of the discovered application"
+    },
+    "discovery_source": {
+      "type": "string",
+      "enum": [
+        "idp_logs",
+        "gmail_oauth",
+        "drive_oauth",
+        "firewall_logs",
+        "proxy_logs",
+        "casb",
+        "manual",
+        "dns_logs"
+      ],
+      "default": "idp_logs",
+      "description": "How this app was discovered"
+    },
+    "discovered_users": {
+      "type": "string",
+      "description": "JSON array of user emails who are using this app: [{email, name, department, first_seen, last_seen}]"
+    },
+    "user_count": {
+      "type": "number",
+      "default": 1,
+      "description": "Number of users using this app"
+    },
+    "departments_using": {
+      "type": "string",
+      "description": "JSON array of departments with users on this app"
+    },
+    "first_seen": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "last_seen": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "data_access_level": {
+      "type": "string",
+      "enum": [
+        "read_only",
+        "read_write",
+        "admin",
+        "unknown"
+      ],
+      "default": "unknown",
+      "description": "Level of data access this app has"
+    },
+    "data_types_accessed": {
+      "type": "string",
+      "description": "JSON array of data types: [pii, financial, credentials, documents, source_code, unknown]"
+    },
+    "risk_level": {
+      "type": "string",
+      "enum": [
+        "low",
+        "medium",
+        "high",
+        "critical"
+      ],
+      "default": "medium",
+      "description": "Risk level based on data access, user count, and vetting status"
+    },
+    "risk_score": {
+      "type": "number",
+      "default": 0,
+      "description": "Composite risk score 0-100"
+    },
+    "risk_factors": {
+      "type": "string",
+      "description": "JSON array of risk factors: [{factor, weight, detail}]"
+    },
+    "vendor_matched": {
+      "type": "boolean",
+      "default": false,
+      "description": "True if this app matches an existing vendor in the inventory"
+    },
+    "vendor_id": {
+      "type": "string",
+      "description": "Linked Vendor id if matched"
+    },
+    "vendor_name": {
+      "type": "string"
+    },
+    "vetted": {
+      "type": "boolean",
+      "default": false,
+      "description": "Whether this app has been through security vetting"
+    },
+    "vetting_status": {
+      "type": "string",
+      "enum": [
+        "unvetted",
+        "under_review",
+        "approved",
+        "blocked",
+        "retired"
+      ],
+      "default": "unvetted"
+    },
+    "vetting_notes": {
+      "type": "string"
+    },
+    "vetted_by": {
+      "type": "string"
+    },
+    "vetted_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "oauth_scope": {
+      "type": "string",
+      "description": "OAuth scopes requested by this app (for Google Workspace apps)"
+    },
+    "security_alert_id": {
+      "type": "string",
+      "description": "Linked SecurityAlert if one was created"
+    },
+    "remediation_action": {
+      "type": "string",
+      "description": "Action taken: approve, block, investigate, retire"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "discovered",
+        "investigating",
+        "approved",
+        "blocked",
+        "retired"
+      ],
+      "default": "discovered"
+    },
+    "notes": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "app_id",
+    "app_name",
+    "discovery_source"
+  ],
+  "rls": {
+    "create": {
+      "data.tenant_id": "{{user.data.tenant_id}}"
+    },
+    "read": {
+      "$or": [
+        {
+          "data.tenant_id": "{{user.data.tenant_id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "update": {
+      "$or": [
+        {
+          "data.tenant_id": "{{user.data.tenant_id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        },
+        {
+          "user_condition": {
+            "role": "compliance_officer"
+          }
+        },
+        {
+          "user_condition": {
+            "role": "risk_manager"
+          }
+        }
+      ]
+    },
+    "delete": {
+      "$or": [
+        {
+          "data.tenant_id": "{{user.data.tenant_id}}",
+          "created_by_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    }
+  }
+}

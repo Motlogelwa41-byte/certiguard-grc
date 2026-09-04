@@ -138,6 +138,8 @@ export const navSections = [
       { label: "PQC Readiness", path: "/pqc-readiness", icon: Atom, roles: ["admin", "compliance_officer", "risk_manager"] },
       { label: "API & Mobile Security", path: "/api-security", icon: Smartphone, roles: ["admin", "compliance_officer", "risk_manager"] },
       { label: "Access Recertification", path: "/access-recertification", icon: UserCheck, roles: ["admin"] },
+      { label: "JML Compliance Center", path: "/jml-compliance", icon: UserCheck, roles: ["admin", "compliance_officer", "risk_manager", "auditor"] },
+      { label: "Shadow IT Discovery", path: "/shadow-it", icon: Eye, roles: ["admin", "compliance_officer", "risk_manager", "auditor"] },
       { label: "Training", path: "/training", icon: GraduationCap, roles: ["admin", "compliance_officer", "risk_manager", "auditor", "user"] },
       { label: "Training Gates", path: "/training-gates", icon: Lock, roles: ["admin", "compliance_officer", "risk_manager"] },
       { label: "Calendar Sync", path: "/calendar-sync", icon: CalendarCheck, roles: ["admin", "compliance_officer", "risk_manager", "auditor", "user"] },

@@ -1,0 +1,44 @@
+{
+  "name": "Daily JML Scanner",
+  "trigger": {
+    "condition": null,
+    "config": {
+      "trigger_type": "scheduled",
+      "events": [],
+      "schedule_mode": "recurring",
+      "cron_expression": "0 7 * * *",
+      "one_time_date": null,
+      "timezone": "Africa/Johannesburg",
+      "interval_value": null,
+      "interval_unit": null,
+      "interval_anchor": null,
+      "ends_type": "never",
+      "ends_on_date": null,
+      "ends_after_count": null
+    }
+  },
+  "definition": {
+    "document": {
+      "dsl": "1.0.0",
+      "name": "daily_jml_scanner",
+      "version": "1.0",
+      "namespace": "base44"
+    },
+    "do": [
+      {
+        "run_jml_scan": {
+          "call": "invoke_backend_function",
+          "with": {
+            "function_name": "processJmlEvents"
+          },
+          "then": "end",
+          "x-base44": {
+            "title": "Run JML compliance scan",
+            "description": "Detect joiners/movers/leavers and flag risky accounts"
+          }
+        }
+      }
+    ]
+  },
+  "description": "Daily automated Joiner/Mover/Leaver compliance scan \u2014 detects new hires, department changes, and terminations from HRIS/IdP sync, flags former employees with active access, and creates security alerts + remediation items for risky accounts."
+}

@@ -1,0 +1,44 @@
+{
+  "name": "Weekly Shadow IT Scan",
+  "trigger": {
+    "condition": null,
+    "config": {
+      "trigger_type": "scheduled",
+      "events": [],
+      "schedule_mode": "recurring",
+      "cron_expression": "0 8 * * 1",
+      "one_time_date": null,
+      "timezone": "Africa/Johannesburg",
+      "interval_value": null,
+      "interval_unit": null,
+      "interval_anchor": null,
+      "ends_type": "never",
+      "ends_on_date": null,
+      "ends_after_count": null
+    }
+  },
+  "definition": {
+    "document": {
+      "dsl": "1.0.0",
+      "name": "weekly_shadow_it_scan",
+      "version": "1.0",
+      "namespace": "base44"
+    },
+    "do": [
+      {
+        "run_shadow_it_scan": {
+          "call": "invoke_backend_function",
+          "with": {
+            "function_name": "discoverShadowIT"
+          },
+          "then": "end",
+          "x-base44": {
+            "title": "Run shadow IT discovery scan",
+            "description": "Discover unsanctioned SaaS apps and AI tools from IdP logs"
+          }
+        }
+      }
+    ]
+  },
+  "description": "Weekly automated shadow IT discovery scan \u2014 analyzes identity provider logs for unsanctioned SaaS apps and AI tools, cross-references against vendor inventory, and flags unvetted high-risk apps with security alerts."
+}

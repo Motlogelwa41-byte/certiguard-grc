@@ -1,0 +1,192 @@
+{
+  "name": "JmlEvent",
+  "type": "object",
+  "properties": {
+    "tenant_id": {
+      "type": "string",
+      "description": "Tenant isolation key \u2014 mandatory on every record"
+    },
+    "event_id": {
+      "type": "string",
+      "description": "Unique JML event identifier e.g. JML-001"
+    },
+    "event_type": {
+      "type": "string",
+      "enum": [
+        "joiner",
+        "mover",
+        "leaver"
+      ],
+      "description": "Joiner = new hire, Mover = department/title change, Leaver = termination/deprovisioning"
+    },
+    "directory_user_id": {
+      "type": "string",
+      "description": "Linked DirectoryUser id"
+    },
+    "user_email": {
+      "type": "string"
+    },
+    "user_name": {
+      "type": "string"
+    },
+    "previous_department": {
+      "type": "string",
+      "description": "For movers \u2014 the old department"
+    },
+    "new_department": {
+      "type": "string",
+      "description": "For movers \u2014 the new department; for joiners \u2014 the initial department"
+    },
+    "previous_title": {
+      "type": "string"
+    },
+    "new_title": {
+      "type": "string"
+    },
+    "previous_status": {
+      "type": "string",
+      "description": "For leavers \u2014 the previous status (usually active)"
+    },
+    "new_status": {
+      "type": "string",
+      "description": "For leavers \u2014 deprovisioned or suspended"
+    },
+    "detected_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "source": {
+      "type": "string",
+      "enum": [
+        "hris_sync",
+        "idp_sync",
+        "manual",
+        "scim"
+      ],
+      "default": "hris_sync"
+    },
+    "access_risk_flagged": {
+      "type": "boolean",
+      "default": false,
+      "description": "True when a leaver still has active access (former employee with access) or a mover has stale access from old department"
+    },
+    "risk_level": {
+      "type": "string",
+      "enum": [
+        "none",
+        "low",
+        "medium",
+        "high",
+        "critical"
+      ],
+      "default": "none"
+    },
+    "risk_reason": {
+      "type": "string",
+      "description": "Why this event is risky e.g. 'Former employee still has access to 3 systems 48h after termination'"
+    },
+    "access_stale_systems": {
+      "type": "string",
+      "description": "JSON array of systems where access was NOT de-provisioned: [{system, access_level, hours_since_termination}]"
+    },
+    "control_tests_triggered": {
+      "type": "string",
+      "description": "JSON array of control test IDs triggered by this event"
+    },
+    "evidence_collected": {
+      "type": "boolean",
+      "default": false,
+      "description": "Whether provisioning/de-provisioning evidence has been collected"
+    },
+    "evidence_url": {
+      "type": "string",
+      "description": "URL to collected evidence (screenshot, log export, etc.)"
+    },
+    "remediation_item_id": {
+      "type": "string",
+      "description": "Linked RemediationItem if one was created"
+    },
+    "security_alert_id": {
+      "type": "string",
+      "description": "Linked SecurityAlert if one was created"
+    },
+    "assigned_to": {
+      "type": "string",
+      "description": "Person assigned to remediate this JML risk"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "detected",
+        "investigating",
+        "remediated",
+        "closed",
+        "false_positive"
+      ],
+      "default": "detected"
+    },
+    "remediated_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "notes": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "event_id",
+    "event_type"
+  ],
+  "rls": {
+    "create": {
+      "data.tenant_id": "{{user.data.tenant_id}}"
+    },
+    "read": {
+      "$or": [
+        {
+          "data.tenant_id": "{{user.data.tenant_id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "update": {
+      "$or": [
+        {
+          "data.tenant_id": "{{user.data.tenant_id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        },
+        {
+          "user_condition": {
+            "role": "compliance_officer"
+          }
+        },
+        {
+          "user_condition": {
+            "role": "risk_manager"
+          }
+        }
+      ]
+    },
+    "delete": {
+      "$or": [
+        {
+          "data.tenant_id": "{{user.data.tenant_id}}",
+          "created_by_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    }
+  }
+}
