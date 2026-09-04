@@ -193,6 +193,9 @@ import ComplianceBadges from '@/pages/ComplianceBadges';
 import AwsMarketplaceIntegration from '@/pages/AwsMarketplaceIntegration';
 import TrustCenterAnalytics from '@/pages/TrustCenterAnalytics';
 import AdaptiveScoping from '@/pages/AdaptiveScoping';
+import RiskScoringModels from '@/pages/RiskScoringModels';
+import DataCenterIntegrations from '@/pages/DataCenterIntegrations';
+import SecurityRatingApi from '@/pages/SecurityRatingApi';
 import FairBenchmarks from '@/pages/FairBenchmarks';
 import PrivacyDataMapping from '@/pages/PrivacyDataMapping';
 import EsgBenchmarking from '@/pages/EsgBenchmarking';
@@ -430,6 +433,9 @@ const AuthenticatedApp = () => {
           <Route path="/aws-marketplace" element={<AwsMarketplaceIntegration />} />
           <Route path="/trust-center-analytics" element={<TrustCenterAnalytics />} />
           <Route path="/adaptive-scoping" element={<AdaptiveScoping />} />
+          <Route path="/risk-scoring-models" element={<RiskScoringModels />} />
+          <Route path="/data-center-integrations" element={<DataCenterIntegrations />} />
+          <Route path="/security-rating-api" element={<SecurityRatingApi />} />
           <Route path="/vendor-risk-center" element={<VendorRiskCenter />} />
           <Route path="/vendor-risk-exchange" element={<VendorRiskExchange />} />
           <Route path="/fair-benchmarks" element={<FairBenchmarks />} />

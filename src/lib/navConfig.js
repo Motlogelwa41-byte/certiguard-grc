@@ -84,6 +84,7 @@ export const navSections = [
       { label: "Cross-Org Rollup", path: "/cross-org-risk", icon: Building2, roles: ["admin", "risk_manager"] },
       { label: "Cybersecurity Risk", path: "/cybersecurity-risk", icon: Shield, roles: ["admin", "compliance_officer", "risk_manager", "auditor"] },
       { label: "Mitigation Advisor", path: "/mitigation-advisor", icon: Sparkles, roles: ["admin", "compliance_officer", "risk_manager"] },
+      { label: "Risk Scoring Models", path: "/risk-scoring-models", icon: Calculator, roles: ["admin", "compliance_officer", "risk_manager", "auditor"] },
     ]
   },
   {
@@ -146,6 +147,7 @@ export const navSections = [
       { label: "Training", path: "/training", icon: GraduationCap, roles: ["admin", "compliance_officer", "risk_manager", "auditor", "user"] },
       { label: "Training Gates", path: "/training-gates", icon: Lock, roles: ["admin", "compliance_officer", "risk_manager"] },
       { label: "Calendar Sync", path: "/calendar-sync", icon: CalendarCheck, roles: ["admin", "compliance_officer", "risk_manager", "auditor", "user"] },
+      { label: "Data Center Sync", path: "/data-center-integrations", icon: Server, roles: ["admin", "compliance_officer", "risk_manager", "auditor"] },
     ]
   },
   {
@@ -219,6 +221,7 @@ export const navSections = [
       { label: "Trust Center Analytics", path: "/trust-center-analytics", icon: BarChart3, roles: ["admin", "compliance_officer"] },
       { label: "Compliance Badges", path: "/compliance-badges", icon: Award, roles: ["admin", "compliance_officer"] },
       { label: "AWS Marketplace", path: "/aws-marketplace", icon: Store, roles: ["admin", "compliance_officer"] },
+      { label: "Security Rating API", path: "/security-rating-api", icon: Globe, roles: ["admin", "compliance_officer"] },
       { label: "Security", path: "/security", icon: ShieldCheck, roles: ["admin"] },
       { label: "Platform Governance", path: "/platform-governance", icon: ShieldCheck, roles: ["admin"] },
       { label: "Users", path: "/users", icon: Users, roles: ["admin"] },
