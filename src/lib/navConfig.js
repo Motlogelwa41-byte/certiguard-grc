@@ -124,6 +124,7 @@ export const navSections = [
       { label: "IR Playbooks", path: "/ir-playbooks", icon: Siren, roles: ["admin", "compliance_officer", "risk_manager"] },
       { label: "SOAR Playbooks", path: "/soar-playbooks", icon: Zap, roles: ["admin", "compliance_officer", "risk_manager"] },
       { label: "Security Findings", path: "/vulnerabilities", icon: Bug, roles: ["admin", "compliance_officer", "risk_manager", "auditor"] },
+      { label: "Vuln Management & Patching", path: "/vuln-management", icon: Shield, roles: ["admin", "compliance_officer", "risk_manager", "auditor"] },
       { label: "Cloud Posture (CSPM)", path: "/cloud-posture", icon: Cloud, roles: ["admin", "compliance_officer", "risk_manager", "auditor"] },
       { label: "Real-Time CSPM Scan", path: "/realtime-cspm", icon: ScanLine, roles: ["admin", "compliance_officer", "risk_manager", "auditor"] },
       { label: "DevSecOps Scanner", path: "/devsecops", icon: ScanLine, roles: ["admin", "compliance_officer", "risk_manager", "auditor"] },

@@ -1,0 +1,318 @@
+{
+  "name": "PatchRecord",
+  "type": "object",
+  "properties": {
+    "tenant_id": {
+      "type": "string",
+      "description": "Tenant isolation key \u2014 mandatory on every record"
+    },
+    "patch_id": {
+      "type": "string",
+      "description": "Unique patch identifier e.g. PATCH-001"
+    },
+    "vulnerability_finding_id": {
+      "type": "string",
+      "description": "Linked SecurityFinding id"
+    },
+    "cve": {
+      "type": "string",
+      "description": "CVE identifier e.g. CVE-2026-1234"
+    },
+    "asset_id": {
+      "type": "string",
+      "description": "Linked ITAsset id"
+    },
+    "asset_name": {
+      "type": "string"
+    },
+    "patch_name": {
+      "type": "string",
+      "description": "Patch name or KB article number"
+    },
+    "patch_description": {
+      "type": "string"
+    },
+    "scanner_source": {
+      "type": "string",
+      "enum": [
+        "nessus",
+        "qualys",
+        "openvas",
+        "defender",
+        "crowdstrike",
+        "rapid7",
+        "tenable",
+        "snipe",
+        "manual",
+        "other"
+      ],
+      "default": "manual"
+    },
+    "severity": {
+      "type": "string",
+      "enum": [
+        "critical",
+        "high",
+        "medium",
+        "low"
+      ],
+      "default": "medium"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "detected",
+        "patch_available",
+        "in_testing",
+        "verified",
+        "deployed",
+        "failed",
+        "rolled_back"
+      ],
+      "default": "detected",
+      "description": "Patch lifecycle stage: detected \u2192 patch_available \u2192 in_testing \u2192 verified \u2192 deployed"
+    },
+    "detection_date": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "patch_release_date": {
+      "type": "string",
+      "format": "date"
+    },
+    "patch_url": {
+      "type": "string",
+      "description": "URL to patch download or KB article"
+    },
+    "patch_checksum": {
+      "type": "string",
+      "description": "SHA-256 checksum of the patch file for cryptographic verification"
+    },
+    "cryptographic_verification": {
+      "type": "string",
+      "enum": [
+        "pending",
+        "verified",
+        "failed",
+        "not_required"
+      ],
+      "default": "pending",
+      "description": "Whether the patch has been cryptographically verified (checksum or signature)"
+    },
+    "verification_method": {
+      "type": "string",
+      "enum": [
+        "sha256",
+        "gpg_signature",
+        "code_signing",
+        "checksum",
+        "not_applicable"
+      ],
+      "default": "sha256"
+    },
+    "verified_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "verified_by": {
+      "type": "string"
+    },
+    "regression_test_status": {
+      "type": "string",
+      "enum": [
+        "pending",
+        "in_progress",
+        "passed",
+        "failed",
+        "not_required"
+      ],
+      "default": "pending",
+      "description": "Automated regression test result before deployment"
+    },
+    "regression_test_results": {
+      "type": "string",
+      "description": "JSON: {tests_run, passed, failed, duration_seconds, details: [{test, result, error}]}"
+    },
+    "regression_tested_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "deployment_method": {
+      "type": "string",
+      "enum": [
+        "auto",
+        "manual",
+        "maintenance_window",
+        "canary",
+        "blue_green"
+      ],
+      "default": "manual"
+    },
+    "deployment_status": {
+      "type": "string",
+      "enum": [
+        "pending",
+        "in_progress",
+        "completed",
+        "failed",
+        "rolled_back"
+      ],
+      "default": "pending"
+    },
+    "deployed_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "deployed_by": {
+      "type": "string"
+    },
+    "approved_by": {
+      "type": "string"
+    },
+    "approved_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "rollback_status": {
+      "type": "string",
+      "enum": [
+        "none",
+        "initiated",
+        "completed"
+      ],
+      "default": "none"
+    },
+    "rollback_reason": {
+      "type": "string"
+    },
+    "rollback_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "sla_hours": {
+      "type": "number",
+      "default": 0,
+      "description": "SLA for patch deployment based on severity"
+    },
+    "sla_breached": {
+      "type": "boolean",
+      "default": false
+    },
+    "linked_control_ids": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "owner_name": {
+      "type": "string"
+    },
+    "notes": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "patch_id",
+    "status"
+  ],
+  "rls": {
+    "create": {
+      "$or": [
+        {
+          "data.tenant_id": "{{user.data.tenant_id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        },
+        {
+          "$and": [
+            {
+              "data.tenant_id": "{{user.data.tenant_id}}"
+            },
+            {
+              "user_condition": {
+                "role": "compliance_officer"
+              }
+            }
+          ]
+        },
+        {
+          "$and": [
+            {
+              "data.tenant_id": "{{user.data.tenant_id}}"
+            },
+            {
+              "user_condition": {
+                "role": "risk_manager"
+              }
+            }
+          ]
+        }
+      ]
+    },
+    "read": {
+      "$or": [
+        {
+          "data.tenant_id": "{{user.data.tenant_id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "update": {
+      "$or": [
+        {
+          "data.tenant_id": "{{user.data.tenant_id}}",
+          "created_by_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        },
+        {
+          "$and": [
+            {
+              "data.tenant_id": "{{user.data.tenant_id}}"
+            },
+            {
+              "user_condition": {
+                "role": "compliance_officer"
+              }
+            }
+          ]
+        },
+        {
+          "$and": [
+            {
+              "data.tenant_id": "{{user.data.tenant_id}}"
+            },
+            {
+              "user_condition": {
+                "role": "risk_manager"
+              }
+            }
+          ]
+        }
+      ]
+    },
+    "delete": {
+      "$or": [
+        {
+          "data.tenant_id": "{{user.data.tenant_id}}",
+          "created_by_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    }
+  }
+}

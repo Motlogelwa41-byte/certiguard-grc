@@ -92,6 +92,7 @@ import AccessRecertification from '@/pages/AccessRecertification';
 import OnboardingWizard from '@/pages/OnboardingWizard';
 import SSOSettings from '@/pages/SSOSettings';
 import Vulnerabilities from '@/pages/Vulnerabilities';
+import VulnerabilityManagementCenter from '@/pages/VulnerabilityManagementCenter';
 import ControlLibraries from '@/pages/ControlLibraries';
 import BoardReport from '@/pages/BoardReport';
 import ExecutiveRiskSummary from '@/pages/ExecutiveRiskSummary';
@@ -324,6 +325,7 @@ const AuthenticatedApp = () => {
           <Route path="/onboarding" element={<OnboardingWizard />} />
           <Route path="/sso" element={<SSOSettings />} />
           <Route path="/vulnerabilities" element={<Vulnerabilities />} />
+          <Route path="/vuln-management" element={<VulnerabilityManagementCenter />} />
           <Route path="/control-libraries" element={<ControlLibraries />} />
           <Route path="/board-report" element={<BoardReport />} />
           <Route path="/executive-risk-summary" element={<ExecutiveRiskSummary />} />
