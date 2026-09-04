@@ -179,6 +179,7 @@ import HadrDocumentation from '@/pages/HadrDocumentation';
 import ApiSecurity from '@/pages/ApiSecurity';
 import AiCrossMapping from '@/pages/AiCrossMapping';
 import VendorRiskExchange from '@/pages/VendorRiskExchange';
+import VendorRiskCenter from '@/pages/VendorRiskCenter';
 import FairBenchmarks from '@/pages/FairBenchmarks';
 import PrivacyDataMapping from '@/pages/PrivacyDataMapping';
 import EsgBenchmarking from '@/pages/EsgBenchmarking';
@@ -403,6 +404,7 @@ const AuthenticatedApp = () => {
           <Route path="/hadr-documentation" element={<HadrDocumentation />} />
           <Route path="/api-security" element={<ApiSecurity />} />
           <Route path="/ai-cross-mapping" element={<AiCrossMapping />} />
+          <Route path="/vendor-risk-center" element={<VendorRiskCenter />} />
           <Route path="/vendor-risk-exchange" element={<VendorRiskExchange />} />
           <Route path="/fair-benchmarks" element={<FairBenchmarks />} />
           <Route path="/privacy-data-mapping" element={<PrivacyDataMapping />} />

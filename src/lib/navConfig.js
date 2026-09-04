@@ -150,6 +150,7 @@ export const navSections = [
       { label: "Contracts (CLM)", path: "/contracts", icon: FileText, roles: ["admin", "compliance_officer", "risk_manager", "auditor"] },
       { label: "Vendor Assessments", path: "/vendor-assessments", icon: ClipboardList, roles: ["admin", "compliance_officer", "risk_manager", "auditor"] },
       { label: "Vendor Scorecard", path: "/vendor-scorecard", icon: Gauge, roles: ["admin", "compliance_officer", "risk_manager", "auditor"] },
+      { label: "Vendor Risk Center", path: "/vendor-risk-center", icon: ShieldCheck, roles: ["admin", "compliance_officer", "risk_manager", "auditor"] },
       { label: "Vendor Risk Exchange", path: "/vendor-risk-exchange", icon: Star, roles: ["admin", "compliance_officer", "risk_manager"] },
       { label: "AI Contract Scanner", path: "/ai-contract-scanner", icon: FileSearch, roles: ["admin", "compliance_officer", "risk_manager"] },
     ]
