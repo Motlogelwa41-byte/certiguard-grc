@@ -59,7 +59,24 @@ Deno.serve(async (req) => {
     };
     const audit_hash = await sha256(JSON.stringify(basePayload));
 
-    await base44.asServiceRole.entities.AuditTrail.create({ ...basePayload, audit_hash });
+    const created = await base44.asServiceRole.entities.AuditTrail.create({ ...basePayload, audit_hash });
+
+    // Reconcile after concurrent writes: if another entry was created between
+    // our read (line 36) and our write, our prev_hash points to the entry that
+    // was latest at read time — not the true latest at write time. Re-read now;
+    // if the true latest is a different entry, patch our prev_hash so the chain
+    // stays anchored. (The verifier tolerates forks, but this reduces them.)
+    try {
+      const recheck = await base44.asServiceRole.entities.AuditTrail.filter({ tenant_id }, '-created_date', 2);
+      if (recheck && recheck.length === 2 && recheck[0].id === created.id && recheck[1].audit_hash && recheck[1].audit_hash !== prev_hash) {
+        // Another entry landed between our read and write — re-anchor to it.
+        const correctedPrev = recheck[1].audit_hash;
+        const correctedPayload = { ...basePayload, prev_hash: correctedPrev };
+        const correctedHash = await sha256(JSON.stringify(correctedPayload));
+        await base44.asServiceRole.entities.AuditTrail.update(created.id, { prev_hash: correctedPrev, audit_hash: correctedHash });
+        return Response.json({ ok: true, hash: correctedHash, prev_hash: correctedPrev, reconciled: true });
+      }
+    } catch (e) { /* reconciliation is best-effort */ }
 
     return Response.json({ ok: true, hash: audit_hash, prev_hash });
   } catch (error) {

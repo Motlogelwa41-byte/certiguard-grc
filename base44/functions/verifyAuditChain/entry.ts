@@ -34,7 +34,14 @@ Deno.serve(async (req) => {
     let linkBreaks = 0;
     let legacy = 0;
     const broken = [];
-    let expectedPrev = 'GENESIS';
+
+    // Build a set of all known audit_hash values so we can tolerate concurrent
+    // writes. When two logAudit calls race, both read the same "latest" entry
+    // before either writes, so both new entries point to the same prev_hash —
+    // creating a fork, not a broken chain. Each entry still links to a real
+    // prior entry, so the chain is intact; we just can't require strict linear
+    // ordering. (GENESIS is always a valid anchor.)
+    const knownHashes = new Set(['GENESIS']);
 
     for (const e of ordered) {
       // Entries without an audit_hash predate the hash-chain format — skip, don't count as tampered.
@@ -72,7 +79,11 @@ Deno.serve(async (req) => {
         }
       }
 
-      const linkOk = (e.prev_hash || 'GENESIS') === expectedPrev;
+      // Fork-tolerant link check: prev_hash must be GENESIS or a known prior hash.
+      // Concurrent writes produce forks (two entries sharing a prev_hash); this is
+      // expected in a serverless environment without distributed locks and does
+      // not indicate tampering — each entry still anchors to a real prior entry.
+      const linkOk = knownHashes.has(e.prev_hash || 'GENESIS');
 
       if (hashOk) verified++;
       else if (isLegacy) legacy++;
@@ -81,7 +92,7 @@ Deno.serve(async (req) => {
         if (broken.length < 20) broken.push({ id: e.id, created_date: e.created_date, action: e.action, entity_type: e.entity_type });
       }
       if (!linkOk) linkBreaks++;
-      expectedPrev = e.audit_hash || expectedPrev;
+      knownHashes.add(e.audit_hash);
     }
 
     const integrity = hashBroken === 0 ? 'verified' : 'compromised';
