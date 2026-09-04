@@ -34,9 +34,7 @@ export const navSections = [
       { label: "Guided Onboarding", path: "/guided-onboarding", icon: Rocket, roles: ["admin", "compliance_officer"] },
       { label: "Onboarding Health Check", path: "/onboarding-health-check", icon: HeartPulse, roles: ["admin", "compliance_officer", "risk_manager", "auditor"] },
       { label: "Connections", path: "/connections", icon: Plug, roles: ["admin", "compliance_officer", "risk_manager", "auditor"] },
-      { label: "AWS Integration", path: "/aws-integration", icon: Cloud, roles: ["admin", "compliance_officer", "risk_manager", "auditor"] },
       { label: "Autopilot Onboarding", path: "/autopilot-onboarding", icon: Zap, roles: ["admin", "compliance_officer"] },
-      { label: "KnowBe4 Training", path: "/knowbe4-integration", icon: GraduationCap, roles: ["admin", "compliance_officer", "risk_manager", "auditor"] },
     ]
   },
   {
