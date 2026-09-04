@@ -1,0 +1,233 @@
+{
+  "name": "Subprocessor",
+  "type": "object",
+  "properties": {
+    "tenant_id": {
+      "type": "string",
+      "description": "Tenant isolation key \u2014 mandatory on every record"
+    },
+    "subprocessor_id": {
+      "type": "string",
+      "description": "Unique subprocessor identifier e.g. SUB-001"
+    },
+    "vendor_id": {
+      "type": "string",
+      "description": "Linked Vendor id (the third party that uses this subprocessor)"
+    },
+    "vendor_name": {
+      "type": "string"
+    },
+    "name": {
+      "type": "string",
+      "description": "Subprocessor (fourth party) name"
+    },
+    "description": {
+      "type": "string",
+      "description": "What this subprocessor does for the vendor"
+    },
+    "category": {
+      "type": "string",
+      "enum": [
+        "cloud_infrastructure",
+        "data_processor",
+        "hosting",
+        "analytics",
+        "payment_processing",
+        "customer_support",
+        "ai_ml",
+        "storage",
+        "monitoring",
+        "other"
+      ],
+      "default": "other"
+    },
+    "location": {
+      "type": "string",
+      "description": "Geographic location of the subprocessor"
+    },
+    "country": {
+      "type": "string",
+      "description": "Country code e.g. US, ZA, EU"
+    },
+    "data_access_level": {
+      "type": "string",
+      "enum": [
+        "none",
+        "limited",
+        "moderate",
+        "extensive"
+      ],
+      "default": "limited",
+      "description": "Level of access this subprocessor has to vendor (and potentially our) data"
+    },
+    "data_types_processed": {
+      "type": "string",
+      "description": "JSON array of data types: [pii, financial, credentials, health, none]"
+    },
+    "purpose": {
+      "type": "string",
+      "description": "Specific purpose for which the subprocessor processes data"
+    },
+    "compliance_status": {
+      "type": "string",
+      "enum": [
+        "compliant",
+        "non_compliant",
+        "pending_review",
+        "unknown"
+      ],
+      "default": "unknown",
+      "description": "Current compliance status of this subprocessor"
+    },
+    "certifications": {
+      "type": "string",
+      "description": "JSON array of certifications: [{type, verified, expiry_date}]"
+    },
+    "risk_score": {
+      "type": "number",
+      "default": 0,
+      "description": "Composite risk score 0-100 based on data access, location, certifications, and compliance status"
+    },
+    "risk_level": {
+      "type": "string",
+      "enum": [
+        "critical",
+        "high",
+        "medium",
+        "low"
+      ],
+      "default": "medium"
+    },
+    "risk_factors": {
+      "type": "string",
+      "description": "JSON array of risk factors: [{factor, detail}]"
+    },
+    "approved": {
+      "type": "boolean",
+      "default": false,
+      "description": "Whether this subprocessor has been formally approved by the tenant"
+    },
+    "approved_by": {
+      "type": "string"
+    },
+    "approved_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "added_date": {
+      "type": "string",
+      "format": "date",
+      "description": "When the vendor added this subprocessor"
+    },
+    "detected_date": {
+      "type": "string",
+      "format": "date-time",
+      "description": "When our monitoring detected/ingested this subprocessor"
+    },
+    "last_reviewed": {
+      "type": "string",
+      "format": "date"
+    },
+    "next_review": {
+      "type": "string",
+      "format": "date"
+    },
+    "monitoring_status": {
+      "type": "string",
+      "enum": [
+        "active",
+        "expired",
+        "removed",
+        "under_review"
+      ],
+      "default": "active"
+    },
+    "change_detected": {
+      "type": "boolean",
+      "default": false,
+      "description": "True when a change was detected (new, modified, or removed subprocessor)"
+    },
+    "change_type": {
+      "type": "string",
+      "enum": [
+        "new",
+        "modified",
+        "removed",
+        "none"
+      ],
+      "default": "new",
+      "description": "Type of change detected by monitoring"
+    },
+    "change_detected_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "security_alert_id": {
+      "type": "string",
+      "description": "Linked SecurityAlert if created for unapproved/new high-risk subprocessor"
+    },
+    "website": {
+      "type": "string"
+    },
+    "notes": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "subprocessor_id",
+    "vendor_id",
+    "name"
+  ],
+  "rls": {
+    "create": {
+      "data.tenant_id": "{{user.data.tenant_id}}"
+    },
+    "read": {
+      "$or": [
+        {
+          "data.tenant_id": "{{user.data.tenant_id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "update": {
+      "$or": [
+        {
+          "data.tenant_id": "{{user.data.tenant_id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        },
+        {
+          "user_condition": {
+            "role": "compliance_officer"
+          }
+        },
+        {
+          "user_condition": {
+            "role": "risk_manager"
+          }
+        }
+      ]
+    },
+    "delete": {
+      "$or": [
+        {
+          "data.tenant_id": "{{user.data.tenant_id}}",
+          "created_by_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    }
+  }
+}

@@ -1,0 +1,178 @@
+{
+  "name": "VendorCollaboration",
+  "type": "object",
+  "properties": {
+    "tenant_id": {
+      "type": "string",
+      "description": "Tenant isolation key \u2014 mandatory on every record"
+    },
+    "collaboration_id": {
+      "type": "string",
+      "description": "Unique collaboration identifier e.g. VC-001"
+    },
+    "vendor_id": {
+      "type": "string",
+      "description": "Linked Vendor id"
+    },
+    "vendor_name": {
+      "type": "string"
+    },
+    "assessment_id": {
+      "type": "string",
+      "description": "Linked VendorAssessment id (optional)"
+    },
+    "assessment_title": {
+      "type": "string"
+    },
+    "title": {
+      "type": "string",
+      "description": "Collaboration thread title"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "open",
+        "in_progress",
+        "awaiting_vendor",
+        "awaiting_tenant",
+        "closed"
+      ],
+      "default": "open",
+      "description": "Current collaboration status"
+    },
+    "messages": {
+      "type": "string",
+      "description": "JSON array of messages: [{id, from_type (tenant|vendor), from_name, text, timestamp, attachment_name, attachment_url}]"
+    },
+    "message_count": {
+      "type": "number",
+      "default": 0
+    },
+    "shared_documents": {
+      "type": "string",
+      "description": "JSON array of shared documents: [{name, url, uploaded_by, uploaded_by_type, uploaded_at, type, size}]"
+    },
+    "document_count": {
+      "type": "number",
+      "default": 0
+    },
+    "follow_up_questions": {
+      "type": "string",
+      "description": "JSON array of follow-up questions: [{id, question, asked_by, asked_by_type, asked_at, answer, answered_by, answered_by_type, answered_at, status}]"
+    },
+    "open_questions": {
+      "type": "number",
+      "default": 0,
+      "description": "Count of unanswered follow-up questions"
+    },
+    "last_activity": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "last_message_from": {
+      "type": "string",
+      "enum": [
+        "tenant",
+        "vendor",
+        "none"
+      ],
+      "default": "none"
+    },
+    "created_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "tenant_participant_name": {
+      "type": "string",
+      "description": "Tenant-side participant name"
+    },
+    "vendor_participant_name": {
+      "type": "string",
+      "description": "Vendor-side participant name"
+    },
+    "vendor_participant_email": {
+      "type": "string"
+    },
+    "unread_count_tenant": {
+      "type": "number",
+      "default": 0,
+      "description": "Unread messages for tenant side"
+    },
+    "unread_count_vendor": {
+      "type": "number",
+      "default": 0,
+      "description": "Unread messages for vendor side"
+    },
+    "priority": {
+      "type": "string",
+      "enum": [
+        "low",
+        "medium",
+        "high",
+        "urgent"
+      ],
+      "default": "medium"
+    },
+    "notes": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "collaboration_id",
+    "vendor_id",
+    "vendor_name",
+    "title"
+  ],
+  "rls": {
+    "create": {
+      "data.tenant_id": "{{user.data.tenant_id}}"
+    },
+    "read": {
+      "$or": [
+        {
+          "data.tenant_id": "{{user.data.tenant_id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "update": {
+      "$or": [
+        {
+          "data.tenant_id": "{{user.data.tenant_id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        },
+        {
+          "user_condition": {
+            "role": "compliance_officer"
+          }
+        },
+        {
+          "user_condition": {
+            "role": "risk_manager"
+          }
+        }
+      ]
+    },
+    "delete": {
+      "$or": [
+        {
+          "data.tenant_id": "{{user.data.tenant_id}}",
+          "created_by_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    }
+  }
+}

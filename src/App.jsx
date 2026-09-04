@@ -185,6 +185,8 @@ import ShadowITDiscovery from '@/pages/ShadowITDiscovery';
 import InboundQuestionnaireCenter from '@/pages/InboundQuestionnaireCenter';
 import SystemSecurityPlanGenerator from '@/pages/SystemSecurityPlanGenerator';
 import VendorIncidentMonitor from '@/pages/VendorIncidentMonitor';
+import SubprocessorTracking from '@/pages/SubprocessorTracking';
+import VendorCollaborationCenter from '@/pages/VendorCollaborationCenter';
 import FairBenchmarks from '@/pages/FairBenchmarks';
 import PrivacyDataMapping from '@/pages/PrivacyDataMapping';
 import EsgBenchmarking from '@/pages/EsgBenchmarking';
@@ -414,6 +416,8 @@ const AuthenticatedApp = () => {
           <Route path="/inbound-questionnaire" element={<InboundQuestionnaireCenter />} />
           <Route path="/ssp-generator" element={<SystemSecurityPlanGenerator />} />
           <Route path="/vendor-incident-monitor" element={<VendorIncidentMonitor />} />
+          <Route path="/subprocessor-tracking" element={<SubprocessorTracking />} />
+          <Route path="/vendor-collaboration" element={<VendorCollaborationCenter />} />
           <Route path="/vendor-risk-center" element={<VendorRiskCenter />} />
           <Route path="/vendor-risk-exchange" element={<VendorRiskExchange />} />
           <Route path="/fair-benchmarks" element={<FairBenchmarks />} />
