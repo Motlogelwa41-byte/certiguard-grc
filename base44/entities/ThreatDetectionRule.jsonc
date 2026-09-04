@@ -1,0 +1,253 @@
+{
+  "name": "ThreatDetectionRule",
+  "type": "object",
+  "properties": {
+    "tenant_id": {
+      "type": "string",
+      "description": "Tenant isolation key \u2014 mandatory on every record"
+    },
+    "rule_id": {
+      "type": "string",
+      "description": "Unique rule identifier e.g. TDR-001"
+    },
+    "name": {
+      "type": "string"
+    },
+    "description": {
+      "type": "string"
+    },
+    "detection_type": {
+      "type": "string",
+      "enum": [
+        "signature_based",
+        "behavioral_ml",
+        "heuristic",
+        "hybrid"
+      ],
+      "default": "signature_based",
+      "description": "Detection engine: signature-based (Snort/Sigma/YARA), behavioral ML (anomaly detection), heuristic (rule-based), hybrid (both)"
+    },
+    "threat_category": {
+      "type": "string",
+      "enum": [
+        "malware",
+        "ransomware",
+        "phishing",
+        "lateral_movement",
+        "data_exfiltration",
+        "privilege_escalation",
+        "insider_threat",
+        "zero_day",
+        "brute_force",
+        "anomalous_access",
+        "ddos",
+        "supply_chain"
+      ],
+      "default": "malware"
+    },
+    "rule_signature": {
+      "type": "string",
+      "description": "Signature rule definition (Snort SID, Sigma rule YAML, YARA rule) for signature-based detection"
+    },
+    "ml_model": {
+      "type": "string",
+      "description": "ML model name for behavioral detection e.g. isolation_forest, autoencoder, lstm_anomaly"
+    },
+    "ml_baseline": {
+      "type": "string",
+      "description": "JSON baseline profile: {metric, mean, std_dev, window_hours, last_calibrated}"
+    },
+    "ml_threshold": {
+      "type": "number",
+      "default": 3,
+      "description": "Standard deviations from baseline to trigger alert (z-score threshold)"
+    },
+    "severity": {
+      "type": "string",
+      "enum": [
+        "critical",
+        "high",
+        "medium",
+        "low"
+      ],
+      "default": "high"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "active",
+        "disabled",
+        "tuning",
+        "deprecated"
+      ],
+      "default": "active"
+    },
+    "siem_source": {
+      "type": "string",
+      "enum": [
+        "splunk",
+        "elastic_siem",
+        "sentinel",
+        "sumo_logic",
+        "internal",
+        "custom"
+      ],
+      "default": "internal",
+      "description": "SIEM platform this rule is deployed on"
+    },
+    "auto_create_incident": {
+      "type": "boolean",
+      "default": false,
+      "description": "Automatically create an Incident record when this rule triggers"
+    },
+    "auto_assign_role": {
+      "type": "string",
+      "enum": [
+        "soc_analyst",
+        "incident_responder",
+        "compliance_officer",
+        "risk_manager",
+        "admin"
+      ],
+      "default": "soc_analyst",
+      "description": "Role to auto-assign incident tickets to"
+    },
+    "playbook_id": {
+      "type": "string",
+      "description": "Linked IR playbook to auto-execute on trigger"
+    },
+    "playbook_name": {
+      "type": "string"
+    },
+    "false_positive_rate": {
+      "type": "number",
+      "default": 0,
+      "description": "Measured false positive rate 0-100"
+    },
+    "trigger_count": {
+      "type": "number",
+      "default": 0,
+      "description": "How many times this rule has triggered"
+    },
+    "last_triggered": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "data_sources": {
+      "type": "string",
+      "description": "JSON array of data sources this rule monitors: [audit_logs, auth_logs, network_flow, endpoint_edr, cloud_trail, api_gateway]"
+    },
+    "owner_name": {
+      "type": "string"
+    },
+    "notes": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "rule_id",
+    "name",
+    "detection_type",
+    "threat_category"
+  ],
+  "rls": {
+    "create": {
+      "$or": [
+        {
+          "data.tenant_id": "{{user.data.tenant_id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        },
+        {
+          "$and": [
+            {
+              "data.tenant_id": "{{user.data.tenant_id}}"
+            },
+            {
+              "user_condition": {
+                "role": "compliance_officer"
+              }
+            }
+          ]
+        },
+        {
+          "$and": [
+            {
+              "data.tenant_id": "{{user.data.tenant_id}}"
+            },
+            {
+              "user_condition": {
+                "role": "risk_manager"
+              }
+            }
+          ]
+        }
+      ]
+    },
+    "read": {
+      "$or": [
+        {
+          "data.tenant_id": "{{user.data.tenant_id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "update": {
+      "$or": [
+        {
+          "data.tenant_id": "{{user.data.tenant_id}}",
+          "created_by_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        },
+        {
+          "$and": [
+            {
+              "data.tenant_id": "{{user.data.tenant_id}}"
+            },
+            {
+              "user_condition": {
+                "role": "compliance_officer"
+              }
+            }
+          ]
+        },
+        {
+          "$and": [
+            {
+              "data.tenant_id": "{{user.data.tenant_id}}"
+            },
+            {
+              "user_condition": {
+                "role": "risk_manager"
+              }
+            }
+          ]
+        }
+      ]
+    },
+    "delete": {
+      "$or": [
+        {
+          "data.tenant_id": "{{user.data.tenant_id}}",
+          "created_by_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    }
+  }
+}

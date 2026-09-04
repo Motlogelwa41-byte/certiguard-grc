@@ -165,6 +165,7 @@ import TenantIsolationDashboard from '@/pages/TenantIsolationDashboard';
 import ProtectionCommandCenter from '@/pages/ProtectionCommandCenter';
 import AutomatedTestLibrary from '@/pages/AutomatedTestLibrary';
 import RealTimeCspm from '@/pages/RealTimeCspm';
+import ThreatDetectionCenter from '@/pages/ThreatDetectionCenter';
 import IrPlaybooks from '@/pages/IrPlaybooks';
 import ContinuousScore from '@/pages/ContinuousScore';
 import SoarPlaybooks from '@/pages/SoarPlaybooks';
@@ -389,6 +390,7 @@ const AuthenticatedApp = () => {
           <Route path="/protection-center" element={<ProtectionCommandCenter />} />
           <Route path="/automated-tests" element={<AutomatedTestLibrary />} />
           <Route path="/realtime-cspm" element={<RealTimeCspm />} />
+          <Route path="/threat-detection" element={<ThreatDetectionCenter />} />
           <Route path="/ir-playbooks" element={<IrPlaybooks />} />
           <Route path="/continuous-score" element={<ContinuousScore />} />
           <Route path="/soar-playbooks" element={<SoarPlaybooks />} />
