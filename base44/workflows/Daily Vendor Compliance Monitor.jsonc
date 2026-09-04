@@ -1,0 +1,44 @@
+{
+  "name": "Daily Vendor Compliance Monitor",
+  "trigger": {
+    "condition": null,
+    "config": {
+      "trigger_type": "scheduled",
+      "events": [],
+      "schedule_mode": "recurring",
+      "cron_expression": "0 6 * * *",
+      "one_time_date": null,
+      "timezone": "Africa/Johannesburg",
+      "interval_value": null,
+      "interval_unit": null,
+      "interval_anchor": null,
+      "ends_type": "never",
+      "ends_on_date": null,
+      "ends_after_count": null
+    }
+  },
+  "definition": {
+    "document": {
+      "dsl": "1.0.0",
+      "name": "daily_vendor_compliance_monitor",
+      "version": "1.0",
+      "namespace": "base44"
+    },
+    "do": [
+      {
+        "run_monitor": {
+          "call": "invoke_backend_function",
+          "with": {
+            "function_name": "runVendorComplianceMonitor"
+          },
+          "then": "end",
+          "x-base44": {
+            "title": "Run vendor compliance monitor",
+            "description": "Re-score vendors, check cert expiries, flag critical suppliers"
+          }
+        }
+      }
+    ]
+  },
+  "description": "Daily automated vendor compliance monitoring \u2014 re-scores all active vendors, checks third-party certification expiries, flags critical suppliers based on BIA scores, and tracks security requirements embedded in contracts."
+}

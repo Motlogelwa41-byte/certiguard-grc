@@ -1,0 +1,201 @@
+{
+  "name": "VendorCertification",
+  "type": "object",
+  "properties": {
+    "tenant_id": {
+      "type": "string",
+      "description": "Tenant isolation key \u2014 mandatory on every record"
+    },
+    "cert_id": {
+      "type": "string",
+      "description": "Unique certification identifier e.g. VCERT-001"
+    },
+    "vendor_id": {
+      "type": "string",
+      "description": "Linked Vendor id"
+    },
+    "vendor_name": {
+      "type": "string"
+    },
+    "certification_type": {
+      "type": "string",
+      "enum": [
+        "soc2_type1",
+        "soc2_type2",
+        "soc3",
+        "iso27001",
+        "iso27017",
+        "iso27018",
+        "iso22301",
+        "iso27701",
+        "pci_dss",
+        "hipaa",
+        "gdpr",
+        "fedramp_low",
+        "fedramp_moderate",
+        "fedramp_high",
+        "cmmc_l1",
+        "cmmc_l2",
+        "cmmc_l3",
+        "nist_csf",
+        "csa_star_l1",
+        "csa_star_l2",
+        "csa_star_l3",
+        "tisax",
+        "cyberessentials",
+        "cyberessentials_plus",
+        "king_iv",
+        "popia",
+        "other"
+      ],
+      "default": "iso27001",
+      "description": "Type of third-party security certification"
+    },
+    "certification_name": {
+      "type": "string",
+      "description": "Full certification name e.g. SOC 2 Type II Report"
+    },
+    "certifying_body": {
+      "type": "string",
+      "description": "Auditor or certifying body e.g. Deloitte, BSI, AICPA"
+    },
+    "certificate_number": {
+      "type": "string"
+    },
+    "scope": {
+      "type": "string",
+      "description": "Certification scope statement \u2014 what systems/services are covered"
+    },
+    "scope_summary": {
+      "type": "string",
+      "description": "Brief summary of what's in scope"
+    },
+    "issue_date": {
+      "type": "string",
+      "format": "date"
+    },
+    "expiry_date": {
+      "type": "string",
+      "format": "date",
+      "description": "Certification expiry date \u2014 null for non-expiring certs"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "valid",
+        "expiring",
+        "expired",
+        "revoked",
+        "pending_verification",
+        "not_applicable"
+      ],
+      "default": "pending_verification",
+      "description": "Current certification status \u2014 auto-updated by compliance monitor"
+    },
+    "document_url": {
+      "type": "string",
+      "description": "URL to the uploaded certification document"
+    },
+    "document_name": {
+      "type": "string"
+    },
+    "document_hash": {
+      "type": "string",
+      "description": "SHA-256 hash of the certification document for integrity verification"
+    },
+    "verified": {
+      "type": "boolean",
+      "default": false,
+      "description": "Whether the certification has been verified by the compliance team"
+    },
+    "verified_by": {
+      "type": "string"
+    },
+    "verified_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "verification_notes": {
+      "type": "string"
+    },
+    "continuous_monitoring": {
+      "type": "boolean",
+      "default": true,
+      "description": "Whether this cert is monitored for expiry alerts"
+    },
+    "months_to_expiry": {
+      "type": "number",
+      "default": 0,
+      "description": "Computed months until expiry \u2014 auto-calculated by compliance monitor"
+    },
+    "ingested_at": {
+      "type": "string",
+      "format": "date-time",
+      "description": "When the certification was ingested into the platform"
+    },
+    "ingested_by": {
+      "type": "string"
+    },
+    "notes": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "cert_id",
+    "vendor_id",
+    "certification_type",
+    "certification_name"
+  ],
+  "rls": {
+    "create": {
+      "data.tenant_id": "{{user.data.tenant_id}}"
+    },
+    "read": {
+      "$or": [
+        {
+          "data.tenant_id": "{{user.data.tenant_id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "update": {
+      "$or": [
+        {
+          "data.tenant_id": "{{user.data.tenant_id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        },
+        {
+          "user_condition": {
+            "role": "compliance_officer"
+          }
+        },
+        {
+          "user_condition": {
+            "role": "risk_manager"
+          }
+        }
+      ]
+    },
+    "delete": {
+      "$or": [
+        {
+          "data.tenant_id": "{{user.data.tenant_id}}",
+          "created_by_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    }
+  }
+}
