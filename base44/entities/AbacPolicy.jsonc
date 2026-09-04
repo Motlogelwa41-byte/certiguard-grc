@@ -1,0 +1,198 @@
+{
+  "name": "AbacPolicy",
+  "type": "object",
+  "properties": {
+    "tenant_id": {
+      "type": "string",
+      "description": "Tenant isolation key \u2014 mandatory on every record"
+    },
+    "policy_id": {
+      "type": "string",
+      "description": "Unique policy identifier e.g. ABAC-001"
+    },
+    "name": {
+      "type": "string"
+    },
+    "description": {
+      "type": "string"
+    },
+    "resource_type": {
+      "type": "string",
+      "enum": [
+        "control",
+        "risk",
+        "evidence",
+        "vendor",
+        "policy",
+        "incident",
+        "audit",
+        "asset",
+        "remediation",
+        "privacy_request",
+        "cybersecurity_risk",
+        "all"
+      ],
+      "default": "all",
+      "description": "The type of resource this policy governs"
+    },
+    "action": {
+      "type": "string",
+      "enum": [
+        "read",
+        "write",
+        "delete",
+        "approve",
+        "export",
+        "assign",
+        "all"
+      ],
+      "default": "read",
+      "description": "The action this policy regulates"
+    },
+    "effect": {
+      "type": "string",
+      "enum": [
+        "allow",
+        "deny"
+      ],
+      "default": "deny",
+      "description": "Whether this policy allows or denies the action when conditions match"
+    },
+    "priority": {
+      "type": "number",
+      "default": 100,
+      "description": "Higher priority policies override lower ones \u2014 deny policies always win on tie"
+    },
+    "user_attribute": {
+      "type": "string",
+      "description": "User attribute to evaluate e.g. role, department, clearance_level, tenant_id"
+    },
+    "user_attribute_value": {
+      "type": "string",
+      "description": "Required value for the user attribute (comma-separated for multiple)"
+    },
+    "resource_attribute": {
+      "type": "string",
+      "description": "Resource attribute to evaluate e.g. classification, severity, category, owner_id"
+    },
+    "resource_attribute_value": {
+      "type": "string",
+      "description": "Required value for the resource attribute (comma-separated for multiple)"
+    },
+    "environment_condition": {
+      "type": "string",
+      "description": "JSON environment condition: {ip_range, time_window, location, device_type}"
+    },
+    "condition_logic": {
+      "type": "string",
+      "enum": [
+        "user_and_resource",
+        "user_only",
+        "resource_only",
+        "user_or_resource",
+        "environment_only"
+      ],
+      "default": "user_and_resource",
+      "description": "How attributes are combined to determine policy match"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "active",
+        "draft",
+        "disabled"
+      ],
+      "default": "active"
+    },
+    "enforcement_mode": {
+      "type": "string",
+      "enum": [
+        "enforce",
+        "monitor",
+        "audit_only"
+      ],
+      "default": "enforce",
+      "description": "Enforce = block access, Monitor = log but allow, Audit_only = silent log"
+    },
+    "match_count": {
+      "type": "number",
+      "default": 0,
+      "description": "How many times this policy has been evaluated and matched"
+    },
+    "last_evaluated": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "owner_name": {
+      "type": "string"
+    },
+    "owner_id": {
+      "type": "string"
+    },
+    "notes": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "policy_id",
+    "name",
+    "resource_type",
+    "action",
+    "effect"
+  ],
+  "rls": {
+    "create": {
+      "data.tenant_id": "{{user.data.tenant_id}}"
+    },
+    "read": {
+      "$or": [
+        {
+          "data.tenant_id": "{{user.data.tenant_id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "update": {
+      "$or": [
+        {
+          "data.tenant_id": "{{user.data.tenant_id}}",
+          "created_by_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        },
+        {
+          "$and": [
+            {
+              "data.tenant_id": "{{user.data.tenant_id}}"
+            },
+            {
+              "user_condition": {
+                "role": "compliance_officer"
+              }
+            }
+          ]
+        }
+      ]
+    },
+    "delete": {
+      "$or": [
+        {
+          "data.tenant_id": "{{user.data.tenant_id}}",
+          "created_by_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    }
+  }
+}
