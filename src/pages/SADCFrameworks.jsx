@@ -7,12 +7,13 @@ import PageHeader from "@/components/shared/PageHeader";
 import { useToast } from "@/components/ui/use-toast";
 import { SADC_LIBRARY } from "@/lib/sadcLibrary";
 
-const REGIONS = ["All Regions", "South Africa", "Botswana", "Zimbabwe", "Kenya", "Tanzania", "Uganda", "Malawi", "Zambia", "DRC", "Nigeria", "African Union", "SADC Region", "Global"];
-const CATEGORIES = ["All Categories", "Data Privacy", "Cybersecurity", "Financial Services", "ESG Reporting", "Mining & ESG", "Telecommunications & ICT", "Healthcare & Pharma", "Energy & Utilities", "Procurement & Public Finance", "Corporate Registry & IP", "Professional Services & Audit", "Real Estate & Property", "Competition & Antitrust", "Trade & Industry", "Public Finance & Governance", "Business & Industry", "Tax & Revenue", "Food Safety & Standards", "Education & Human Resource Development", "Education & Qualifications"];
+const REGIONS = ["All Regions", "South Africa", "Botswana", "Zimbabwe", "Kenya", "Tanzania", "Uganda", "Malawi", "Zambia", "DRC", "Nigeria", "African Union", "SADC Region", "Europe", "Global"];
+const CATEGORIES = ["All Categories", "Data Privacy", "Cybersecurity", "AI Governance", "Financial Services", "ESG Reporting", "Mining & ESG", "Telecommunications & ICT", "Healthcare & Pharma", "Energy & Utilities", "Procurement & Public Finance", "Corporate Registry & IP", "Professional Services & Audit", "Real Estate & Property", "Competition & Antitrust", "Trade & Industry", "Public Finance & Governance", "Business & Industry", "Tax & Revenue", "Food Safety & Standards", "Education & Human Resource Development", "Education & Qualifications"];
 
 const categoryColors = {
   "Data Privacy": "bg-purple-100 text-purple-700",
   "Cybersecurity": "bg-blue-100 text-blue-700",
+  "AI Governance": "bg-fuchsia-100 text-fuchsia-700",
   "Financial Services": "bg-emerald-100 text-emerald-700",
   "ESG Reporting": "bg-teal-100 text-teal-700",
   "Mining & ESG": "bg-amber-100 text-amber-700",
@@ -37,6 +38,7 @@ const categoryColors = {
 const REQ_CATEGORY_MAP = {
   "Data Privacy": "privacy",
   "Cybersecurity": "security_operations",
+  "AI Governance": "governance",
   "Financial Services": "risk_management",
   "Telecommunications & ICT": "security_operations",
   "Healthcare & Pharma": "compliance",
@@ -61,6 +63,7 @@ const REQ_CATEGORY_MAP = {
 const CONTROL_CATEGORY_MAP = {
   "Data Privacy": "data_protection",
   "Cybersecurity": "security_operations",
+  "AI Governance": "compliance",
   "Financial Services": "risk_management",
   "Telecommunications & ICT": "security_operations",
   "Healthcare & Pharma": "compliance",
