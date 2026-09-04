@@ -140,6 +140,7 @@ export const navSections = [
       { label: "Access Recertification", path: "/access-recertification", icon: UserCheck, roles: ["admin"] },
       { label: "JML Compliance Center", path: "/jml-compliance", icon: UserCheck, roles: ["admin", "compliance_officer", "risk_manager", "auditor"] },
       { label: "Shadow IT Discovery", path: "/shadow-it", icon: Eye, roles: ["admin", "compliance_officer", "risk_manager", "auditor"] },
+      { label: "Vendor Incident Monitor", path: "/vendor-incident-monitor", icon: ShieldAlert, roles: ["admin", "compliance_officer", "risk_manager", "auditor"] },
       { label: "Training", path: "/training", icon: GraduationCap, roles: ["admin", "compliance_officer", "risk_manager", "auditor", "user"] },
       { label: "Training Gates", path: "/training-gates", icon: Lock, roles: ["admin", "compliance_officer", "risk_manager"] },
       { label: "Calendar Sync", path: "/calendar-sync", icon: CalendarCheck, roles: ["admin", "compliance_officer", "risk_manager", "auditor", "user"] },
@@ -155,6 +156,7 @@ export const navSections = [
       { label: "Vendor Risk Center", path: "/vendor-risk-center", icon: ShieldCheck, roles: ["admin", "compliance_officer", "risk_manager", "auditor"] },
       { label: "Vendor Risk Exchange", path: "/vendor-risk-exchange", icon: Star, roles: ["admin", "compliance_officer", "risk_manager"] },
       { label: "AI Contract Scanner", path: "/ai-contract-scanner", icon: FileSearch, roles: ["admin", "compliance_officer", "risk_manager"] },
+      { label: "Inbound Questionnaire AI", path: "/inbound-questionnaire", icon: FileQuestion, roles: ["admin", "compliance_officer"] },
     ]
   },
   {
@@ -197,6 +199,7 @@ export const navSections = [
       { label: "One-Click Report", path: "/one-click-report", icon: FileText, roles: ["admin", "compliance_officer", "risk_manager", "auditor"] },
       { label: "AI Board Pack", path: "/board-pack-generator", icon: Presentation, roles: ["admin", "compliance_officer", "risk_manager", "auditor"] },
       { label: "Certification Dossier", path: "/certification-dossier", icon: FileArchive, roles: ["admin", "compliance_officer", "auditor"] },
+      { label: "System Security Plan (SSP)", path: "/ssp-generator", icon: FileText, roles: ["admin", "compliance_officer", "auditor"] },
       { label: "Secure Evidence Pack", path: "/secure-evidence-pack", icon: FileArchive, roles: ["admin", "compliance_officer", "auditor", "external_auditor"] },
       { label: "Cross-Tenant Exec Dashboard", path: "/cross-tenant-executive-dashboard", icon: Globe, roles: ["admin", "compliance_officer", "risk_manager", "auditor"] },
       { label: "Framework Maturity Compare", path: "/framework-maturity-comparison", icon: GitCompare, roles: ["admin", "compliance_officer", "risk_manager", "auditor"] },

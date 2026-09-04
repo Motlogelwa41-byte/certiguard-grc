@@ -1,0 +1,44 @@
+{
+  "name": "Weekly Vendor Incident Monitor",
+  "trigger": {
+    "condition": null,
+    "config": {
+      "trigger_type": "scheduled",
+      "events": [],
+      "schedule_mode": "recurring",
+      "cron_expression": "0 6 * * 1",
+      "one_time_date": null,
+      "timezone": "Africa/Johannesburg",
+      "interval_value": null,
+      "interval_unit": null,
+      "interval_anchor": null,
+      "ends_type": "never",
+      "ends_on_date": null,
+      "ends_after_count": null
+    }
+  },
+  "definition": {
+    "document": {
+      "dsl": "1.0.0",
+      "name": "weekly_vendor_incident_monitor",
+      "version": "1.0",
+      "namespace": "base44"
+    },
+    "do": [
+      {
+        "run_vendor_incident_scan": {
+          "call": "invoke_backend_function",
+          "with": {
+            "function_name": "monitorVendorIncidents"
+          },
+          "then": "end",
+          "x-base44": {
+            "title": "Run vendor incident & breach scan",
+            "description": "Scan vendor inventory for publicly reported breaches and security incidents"
+          }
+        }
+      }
+    ]
+  },
+  "description": "Weekly automated vendor incident & breach monitoring \u2014 scans vendor inventory for publicly reported security incidents, data breaches, and rating changes using AI-powered web search. Creates VendorIncident records and SecurityAlerts for high-exposure vendors."
+}

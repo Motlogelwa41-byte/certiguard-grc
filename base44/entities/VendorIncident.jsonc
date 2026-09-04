@@ -1,0 +1,211 @@
+{
+  "name": "VendorIncident",
+  "type": "object",
+  "properties": {
+    "tenant_id": {
+      "type": "string",
+      "description": "Tenant isolation key \u2014 mandatory on every record"
+    },
+    "incident_id": {
+      "type": "string",
+      "description": "Unique vendor incident identifier e.g. VINC-001"
+    },
+    "vendor_id": {
+      "type": "string",
+      "description": "Linked Vendor id"
+    },
+    "vendor_name": {
+      "type": "string"
+    },
+    "vendor_website": {
+      "type": "string"
+    },
+    "incident_type": {
+      "type": "string",
+      "enum": [
+        "data_breach",
+        "ransomware",
+        "outage",
+        "vulnerability_disclosure",
+        "rating_downgrade",
+        "supply_chain_attack",
+        "insider_threat",
+        "regulatory_action",
+        "other"
+      ],
+      "default": "data_breach",
+      "description": "Type of publicly reported vendor incident"
+    },
+    "severity": {
+      "type": "string",
+      "enum": [
+        "critical",
+        "high",
+        "medium",
+        "low",
+        "info"
+      ],
+      "default": "medium"
+    },
+    "title": {
+      "type": "string",
+      "description": "Short incident title"
+    },
+    "description": {
+      "type": "string",
+      "description": "Detailed incident description from public sources"
+    },
+    "source_url": {
+      "type": "string",
+      "description": "URL to the public report/article"
+    },
+    "source_name": {
+      "type": "string",
+      "description": "Source publication e.g. BleepingComputer, KrebsOnSecurity, vendor advisory"
+    },
+    "reported_date": {
+      "type": "string",
+      "format": "date",
+      "description": "When the incident was publicly reported"
+    },
+    "detected_date": {
+      "type": "string",
+      "format": "date-time",
+      "description": "When our monitoring detected this incident"
+    },
+    "affected_services": {
+      "type": "string",
+      "description": "JSON array of affected vendor services/products"
+    },
+    "data_types_affected": {
+      "type": "string",
+      "description": "JSON array of data types compromised in the breach"
+    },
+    "our_exposure_level": {
+      "type": "string",
+      "enum": [
+        "none",
+        "low",
+        "medium",
+        "high",
+        "critical"
+      ],
+      "default": "low",
+      "description": "Our exposure based on vendor criticality, data shared, and dependency"
+    },
+    "exposure_assessment": {
+      "type": "string",
+      "description": "AI-generated assessment of our potential exposure"
+    },
+    "recommended_actions": {
+      "type": "string",
+      "description": "JSON array of recommended actions: [{action, priority, owner, status}]"
+    },
+    "alert_sent": {
+      "type": "boolean",
+      "default": false,
+      "description": "Whether a Slack/email alert was sent for this incident"
+    },
+    "alert_sent_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "security_alert_id": {
+      "type": "string",
+      "description": "Linked SecurityAlert if created"
+    },
+    "remediation_action": {
+      "type": "string",
+      "description": "Action taken in response to the incident"
+    },
+    "remediation_status": {
+      "type": "string",
+      "enum": [
+        "none",
+        "investigating",
+        "mitigated",
+        "accepted",
+        "vendor_terminated"
+      ],
+      "default": "none"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "detected",
+        "investigating",
+        "remediated",
+        "closed",
+        "false_positive"
+      ],
+      "default": "detected"
+    },
+    "assigned_to": {
+      "type": "string"
+    },
+    "closed_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "notes": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "incident_id",
+    "vendor_name",
+    "incident_type"
+  ],
+  "rls": {
+    "create": {
+      "data.tenant_id": "{{user.data.tenant_id}}"
+    },
+    "read": {
+      "$or": [
+        {
+          "data.tenant_id": "{{user.data.tenant_id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "update": {
+      "$or": [
+        {
+          "data.tenant_id": "{{user.data.tenant_id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        },
+        {
+          "user_condition": {
+            "role": "compliance_officer"
+          }
+        },
+        {
+          "user_condition": {
+            "role": "risk_manager"
+          }
+        }
+      ]
+    },
+    "delete": {
+      "$or": [
+        {
+          "data.tenant_id": "{{user.data.tenant_id}}",
+          "created_by_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    }
+  }
+}

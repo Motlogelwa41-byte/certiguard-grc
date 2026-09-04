@@ -1,0 +1,162 @@
+{
+  "name": "SystemSecurityPlan",
+  "type": "object",
+  "properties": {
+    "tenant_id": {
+      "type": "string",
+      "description": "Tenant isolation key \u2014 mandatory on every record"
+    },
+    "ssp_id": {
+      "type": "string",
+      "description": "Unique SSP identifier e.g. SSP-001"
+    },
+    "title": {
+      "type": "string",
+      "default": "System Security Plan"
+    },
+    "version": {
+      "type": "string",
+      "default": "1.0",
+      "description": "SSP document version \u2014 increments on each regeneration"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "draft",
+        "in_review",
+        "approved",
+        "published",
+        "archived"
+      ],
+      "default": "draft"
+    },
+    "generated_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "last_updated": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "approved_by": {
+      "type": "string"
+    },
+    "approved_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "sections": {
+      "type": "string",
+      "description": "JSON array of SSP sections: [{section_id, title, content, last_updated, source, word_count}]"
+    },
+    "section_count": {
+      "type": "number",
+      "default": 0
+    },
+    "total_word_count": {
+      "type": "number",
+      "default": 0
+    },
+    "control_coverage_count": {
+      "type": "number",
+      "default": 0,
+      "description": "Number of controls referenced in the SSP"
+    },
+    "evidence_count": {
+      "type": "number",
+      "default": 0,
+      "description": "Number of evidence items referenced"
+    },
+    "framework_coverage": {
+      "type": "string",
+      "description": "JSON array of covered frameworks: [{framework_id, name, requirement_count, covered_count}]"
+    },
+    "framework_count": {
+      "type": "number",
+      "default": 0
+    },
+    "ropa_integrated": {
+      "type": "boolean",
+      "default": false,
+      "description": "Whether ROPA (Record of Processing Activities) is integrated"
+    },
+    "asset_count": {
+      "type": "number",
+      "default": 0,
+      "description": "Number of IT assets referenced"
+    },
+    "audit_ready": {
+      "type": "boolean",
+      "default": false,
+      "description": "True when all sections are populated and controls are mapped"
+    },
+    "compliance_score": {
+      "type": "number",
+      "default": 0,
+      "description": "Coverage completeness score 0-100"
+    },
+    "generation_source": {
+      "type": "string",
+      "enum": [
+        "auto",
+        "manual",
+        "hybrid"
+      ],
+      "default": "auto"
+    },
+    "notes": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "ssp_id",
+    "title"
+  ],
+  "rls": {
+    "create": {
+      "data.tenant_id": "{{user.data.tenant_id}}"
+    },
+    "read": {
+      "$or": [
+        {
+          "data.tenant_id": "{{user.data.tenant_id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "update": {
+      "$or": [
+        {
+          "data.tenant_id": "{{user.data.tenant_id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        },
+        {
+          "user_condition": {
+            "role": "compliance_officer"
+          }
+        }
+      ]
+    },
+    "delete": {
+      "$or": [
+        {
+          "data.tenant_id": "{{user.data.tenant_id}}",
+          "created_by_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    }
+  }
+}
