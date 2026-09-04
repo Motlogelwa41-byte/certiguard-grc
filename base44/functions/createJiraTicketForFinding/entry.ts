@@ -1,17 +1,24 @@
 import { createClientFromRequest } from 'npm:@base44/sdk@0.8.38';
+import { secrets } from 'base44:runtime';
 
 Deno.serve(async (req) => {
   try {
     const base44 = createClientFromRequest(req);
+    const body = await req.json().catch(() => ({}));
 
-    // Auth: block authenticated non-privileged users. Allow no-auth (workflow) calls.
+    // Authorization: authenticated user (manual) or internal workflow token (scheduled).
     let authUser = null;
     try { authUser = await base44.auth.me(); } catch (_) { authUser = null; }
-    if (authUser && !['admin', 'compliance_officer'].includes(authUser.role)) {
-      return Response.json({ error: 'Insufficient permissions — only admins or compliance officers may create Jira tickets.' }, { status: 403 });
+    if (authUser) {
+      if (!['admin', 'compliance_officer'].includes(authUser.role)) {
+        return Response.json({ error: 'Insufficient permissions — only admins or compliance officers may create Jira tickets.' }, { status: 403 });
+      }
+    } else {
+      const expected = secrets.get('INTERNAL_INVOKE_TOKEN');
+      if (!expected || body._internal_token !== expected) {
+        return Response.json({ error: 'Unauthorized' }, { status: 401 });
+      }
     }
-
-    const body = await req.json().catch(() => ({}));
     const f = body.finding || {};
     const title = f.title || "Untitled security finding";
     const severity = f.severity || "medium";

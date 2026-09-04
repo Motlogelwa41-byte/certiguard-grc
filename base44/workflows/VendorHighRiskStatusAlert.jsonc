@@ -25,6 +25,7 @@
           "with": {
             "function_name": "sendSlackAlert",
             "args": {
+              "_internal_token": "cg-internal-invoke-7f3a9c2e1b8d4a6f9e2c",
               "text": ":rotating_light: Vendor risk level changed to ${ .trigger.data.risk_level }: *${ .trigger.data.name }* is now flagged ${ .trigger.data.risk_level } risk. Status: ${ .trigger.data.status }. Review in CertiGuard."
             }
           },

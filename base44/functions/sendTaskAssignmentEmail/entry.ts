@@ -1,10 +1,25 @@
 import { createClientFromRequest } from "npm:@base44/sdk@0.8.38";
+import { secrets } from 'base44:runtime';
 import { sendGmail } from "../../shared/gmailSender.ts";
 
 Deno.serve(async (req) => {
   try {
     const body = await req.json().catch(() => ({}));
     const base44 = createClientFromRequest(req);
+
+    // Authorization: authenticated user (manual) or internal workflow token (scheduled).
+    let user = null;
+    try { user = await base44.auth.me(); } catch (_) { user = null; }
+    if (user) {
+      if (!['admin', 'compliance_officer'].includes(user.role)) {
+        return Response.json({ error: 'Insufficient permissions' }, { status: 403 });
+      }
+    } else {
+      const expected = secrets.get('INTERNAL_INVOKE_TOKEN');
+      if (!expected || body._internal_token !== expected) {
+        return Response.json({ error: 'Unauthorized' }, { status: 401 });
+      }
+    }
 
     // Accept either a nested `task` object (from the workflow trigger) or flat fields.
     const t = body.task || {};

@@ -26,6 +26,7 @@
           "with": {
             "function_name": "sendSlackAlert",
             "args": {
+              "_internal_token": "cg-internal-invoke-7f3a9c2e1b8d4a6f9e2c",
               "text": ":clipboard: *Evidence Pending Review*\n*${ .trigger.data.title // \"Untitled evidence\" }*\nControl: ${ .trigger.data.control_title // .trigger.data.control_id // \"\u2014\" } \u2022 Framework: ${ .trigger.data.framework_name // \"\u2014\" }\nType: ${ .trigger.data.type // \"document\" } \u2022 Collected: ${ .trigger.data.collected_date // \"\u2014\" }\n> A reviewer needs to approve or reject this evidence item. Open the Evidence Manager to take action."
             }
           },

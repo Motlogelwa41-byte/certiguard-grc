@@ -24,6 +24,7 @@
           "with": {
             "function_name": "sendSlackAlert",
             "args": {
+              "_internal_token": "cg-internal-invoke-7f3a9c2e1b8d4a6f9e2c",
               "text": ":rotating_light: New risk identified\n*${ .trigger.data.title // \"Untitled risk\" }*\nCategory: ${ .trigger.data.category // \"\u2014\" } \u2022 Score: ${ .trigger.data.risk_score // \"\u2014\" } (L:${ .trigger.data.likelihood // \"\u2014\" } \u00d7 I:${ .trigger.data.impact // \"\u2014\" })\nOwner: ${ .trigger.data.owner_name // \"Unassigned\" } \u2022 Treatment: ${ .trigger.data.treatment // \"mitigate\" } \u2022 Status: ${ .trigger.data.status // \"open\" }"
             }
           },

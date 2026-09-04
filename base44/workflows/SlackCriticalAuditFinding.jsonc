@@ -25,6 +25,7 @@
           "with": {
             "function_name": "sendSlackAlert",
             "args": {
+              "_internal_token": "cg-internal-invoke-7f3a9c2e1b8d4a6f9e2c",
               "text": "\ud83d\udea8 *Critical Audit Finding Logged*\n${ .trigger.data.title // \"Untitled\" }\nSeverity: ${ .trigger.data.severity } \u2022 Status: ${ .trigger.data.status }"
             }
           },

@@ -25,6 +25,7 @@
           "with": {
             "function_name": "sendSlackAlert",
             "args": {
+              "_internal_token": "cg-internal-invoke-7f3a9c2e1b8d4a6f9e2c",
               "text": ":clipboard: Compliance task status changed\n*${ .trigger.data.title // \"Untitled task\" }*\n${ .trigger.old_data.status // \"unknown\" } \u2192 ${ .trigger.data.status }\nPriority: ${ .trigger.data.priority // \"\u2014\" } \u2022 Assignee: ${ .trigger.data.assignee_name // \"Unassigned\" } \u2022 Due: ${ .trigger.data.due_date // \"\u2014\" }"
             }
           },

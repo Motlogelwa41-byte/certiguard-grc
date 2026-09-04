@@ -1,4 +1,5 @@
 import { createClientFromRequest } from 'npm:@base44/sdk@0.8.38';
+import { secrets } from 'base44:runtime';
 
 // Posts an alert to the #compliance Slack channel as the CertiGuard bot.
 // Invoked by workflows (Vendor high-risk status change, new ComplianceTask).
@@ -11,12 +12,27 @@ const BOT_ICON_EMOJI = ':shield:';
 Deno.serve(async (req) => {
   try {
     const base44 = createClientFromRequest(req);
+    const body = await req.json().catch(() => ({}));
+
+    // Authorization: authenticated user (manual) or internal workflow token (scheduled).
+    let user = null;
+    try { user = await base44.auth.me(); } catch (_) { user = null; }
+    if (user) {
+      if (!['admin', 'compliance_officer'].includes(user.role)) {
+        return Response.json({ error: 'Insufficient permissions' }, { status: 403 });
+      }
+    } else {
+      const expected = secrets.get('INTERNAL_INVOKE_TOKEN');
+      if (!expected || body._internal_token !== expected) {
+        return Response.json({ error: 'Unauthorized' }, { status: 401 });
+      }
+    }
+
     const { accessToken } = await base44.asServiceRole.connectors.getConnection('slackbot');
     if (!accessToken) {
       return Response.json({ ok: false, error: 'Slack bot not connected' }, { status: 503 });
     }
 
-    const body = await req.json().catch(() => ({}));
     const text = body.text || 'CertiGuard GRC alert';
     const channelId = body.channel || COMPLIANCE_CHANNEL_ID;
 
