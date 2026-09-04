@@ -196,6 +196,7 @@ import RemediationCenter from '@/pages/RemediationCenter';
 import CybersecurityRiskCenter from '@/pages/CybersecurityRiskCenter';
 import MitigationAdvisor from '@/pages/MitigationAdvisor';
 import SecureBaselines from '@/pages/SecureBaselines';
+import SharedResponsibilityDashboard from '@/pages/SharedResponsibilityDashboard';
 import { LanguageProvider } from '@/contexts/LanguageContext';
 
 const AuthenticatedApp = () => {
@@ -413,6 +414,7 @@ const AuthenticatedApp = () => {
           <Route path="/cybersecurity-risk" element={<CybersecurityRiskCenter />} />
           <Route path="/mitigation-advisor" element={<MitigationAdvisor />} />
           <Route path="/secure-baselines" element={<SecureBaselines />} />
+          <Route path="/shared-responsibility" element={<SharedResponsibilityDashboard />} />
           <Route path="/connect" element={<Connect />} />
         </Route>
       </Route>
