@@ -171,6 +171,7 @@ export const navSections = [
   {
     label: "Privacy & Governance",
     items: [
+      { label: "DPO Command Center", path: "/dpo", icon: ShieldCheck, roles: ["admin", "compliance_officer", "auditor"] },
       { label: "ROPA", path: "/ropa", icon: FileSpreadsheet, roles: ["admin", "compliance_officer", "auditor"] },
       { label: "DPIA", path: "/dpia", icon: ShieldAlert, roles: ["admin", "compliance_officer", "auditor"] },
       { label: "Data Flow Mapping", path: "/privacy-data-mapping", icon: Network, roles: ["admin", "compliance_officer", "risk_manager"] },
