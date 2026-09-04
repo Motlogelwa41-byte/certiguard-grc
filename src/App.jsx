@@ -198,6 +198,7 @@ import MitigationAdvisor from '@/pages/MitigationAdvisor';
 import SecureBaselines from '@/pages/SecureBaselines';
 import SharedResponsibilityDashboard from '@/pages/SharedResponsibilityDashboard';
 import IdentityAccessCenter from '@/pages/IdentityAccessCenter';
+import CryptographyCommandCenter from '@/pages/CryptographyCommandCenter';
 import { LanguageProvider } from '@/contexts/LanguageContext';
 
 const AuthenticatedApp = () => {
@@ -417,6 +418,7 @@ const AuthenticatedApp = () => {
           <Route path="/secure-baselines" element={<SecureBaselines />} />
           <Route path="/shared-responsibility" element={<SharedResponsibilityDashboard />} />
           <Route path="/identity-access" element={<IdentityAccessCenter />} />
+          <Route path="/cryptography" element={<CryptographyCommandCenter />} />
           <Route path="/connect" element={<Connect />} />
         </Route>
       </Route>

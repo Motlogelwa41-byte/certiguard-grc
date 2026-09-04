@@ -1,0 +1,212 @@
+{
+  "name": "CryptoKey",
+  "type": "object",
+  "properties": {
+    "tenant_id": {
+      "type": "string",
+      "description": "Tenant isolation key \u2014 mandatory on every record"
+    },
+    "key_id": {
+      "type": "string",
+      "description": "Unique key identifier e.g. KEY-001"
+    },
+    "name": {
+      "type": "string"
+    },
+    "description": {
+      "type": "string"
+    },
+    "key_type": {
+      "type": "string",
+      "enum": [
+        "aes_256",
+        "rsa_2048",
+        "rsa_4096",
+        "ecc_p256",
+        "ecc_p384",
+        "hmac_sha256",
+        "hmac_sha512",
+        "tls_certificate",
+        "saml_signing",
+        "jwt_signing",
+        "database_tde",
+        "storage_encryption",
+        "email_encryption"
+      ],
+      "default": "aes_256",
+      "description": "Cryptographic key type"
+    },
+    "purpose": {
+      "type": "string",
+      "enum": [
+        "data_at_rest",
+        "data_in_transit",
+        "jwt_signing",
+        "evidence_hashing",
+        "database_tde",
+        "storage_encryption",
+        "email_encryption",
+        "api_authentication",
+        "saml_sso",
+        "backup_encryption"
+      ],
+      "default": "data_at_rest",
+      "description": "What this key is used to protect"
+    },
+    "key_algorithm": {
+      "type": "string",
+      "description": "Full algorithm spec e.g. AES-256-GCM, RSA-4096, ECDSA-P384"
+    },
+    "key_length": {
+      "type": "number",
+      "description": "Key length in bits (256, 2048, 4096, 384)"
+    },
+    "version": {
+      "type": "number",
+      "default": 1,
+      "description": "Current key version \u2014 increments on each rotation"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "active",
+        "rotated",
+        "revoked",
+        "expired",
+        "pending_rotation",
+        "compromised"
+      ],
+      "default": "active"
+    },
+    "kms_provider": {
+      "type": "string",
+      "enum": [
+        "aws_kms",
+        "azure_key_vault",
+        "gcp_kms",
+        "internal_hsm",
+        "hashicorp_vault",
+        "platform_managed",
+        "external"
+      ],
+      "default": "platform_managed",
+      "description": "Where the key material is stored/managed"
+    },
+    "key_reference": {
+      "type": "string",
+      "description": "KMS key ARN or reference identifier \u2014 never the actual key material"
+    },
+    "key_origin": {
+      "type": "string",
+      "enum": [
+        "kms_generated",
+        "hsm_backed",
+        "imported",
+        "platform_generated"
+      ],
+      "default": "platform_generated"
+    },
+    "auto_rotation": {
+      "type": "boolean",
+      "default": true,
+      "description": "Whether this key is automatically rotated on schedule"
+    },
+    "rotation_frequency_days": {
+      "type": "number",
+      "default": 90,
+      "description": "Rotation interval in days (30, 60, 90, 180, 365)"
+    },
+    "last_rotated": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "next_rotation": {
+      "type": "string",
+      "format": "date-time",
+      "description": "Computed: last_rotated + rotation_frequency_days"
+    },
+    "previous_versions": {
+      "type": "string",
+      "description": "JSON array of version history: [{version, activated_at, rotated_at, status, rotated_by}]"
+    },
+    "usage_count": {
+      "type": "number",
+      "default": 0,
+      "description": "How many times this key has been used for encryption/decryption"
+    },
+    "last_used": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "owner_name": {
+      "type": "string"
+    },
+    "owner_id": {
+      "type": "string"
+    },
+    "notes": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "key_id",
+    "name",
+    "key_type",
+    "purpose"
+  ],
+  "rls": {
+    "create": {
+      "data.tenant_id": "{{user.data.tenant_id}}"
+    },
+    "read": {
+      "$or": [
+        {
+          "data.tenant_id": "{{user.data.tenant_id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "update": {
+      "$or": [
+        {
+          "data.tenant_id": "{{user.data.tenant_id}}",
+          "created_by_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        },
+        {
+          "$and": [
+            {
+              "data.tenant_id": "{{user.data.tenant_id}}"
+            },
+            {
+              "user_condition": {
+                "role": "compliance_officer"
+              }
+            }
+          ]
+        }
+      ]
+    },
+    "delete": {
+      "$or": [
+        {
+          "data.tenant_id": "{{user.data.tenant_id}}",
+          "created_by_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    }
+  }
+}

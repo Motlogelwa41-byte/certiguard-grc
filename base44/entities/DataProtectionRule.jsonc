@@ -1,0 +1,171 @@
+{
+  "name": "DataProtectionRule",
+  "type": "object",
+  "properties": {
+    "tenant_id": {
+      "type": "string",
+      "description": "Tenant isolation key \u2014 mandatory on every record"
+    },
+    "rule_id": {
+      "type": "string",
+      "description": "Unique rule identifier e.g. DPR-001"
+    },
+    "name": {
+      "type": "string"
+    },
+    "description": {
+      "type": "string"
+    },
+    "data_category": {
+      "type": "string",
+      "enum": [
+        "pii",
+        "financial",
+        "health",
+        "biometric",
+        "credentials",
+        "behavioral",
+        "special_category",
+        "government_id",
+        "payment_card"
+      ],
+      "default": "pii",
+      "description": "Type of sensitive data this rule protects"
+    },
+    "protection_method": {
+      "type": "string",
+      "enum": [
+        "masking",
+        "tokenization",
+        "anonymization",
+        "pseudonymization",
+        "encryption",
+        "hashing",
+        "redaction",
+        "blurring"
+      ],
+      "default": "masking",
+      "description": "How the data is protected"
+    },
+    "field_pattern": {
+      "type": "string",
+      "description": "Field names or patterns this rule applies to e.g. email, phone, id_number, credit_card, date_of_birth"
+    },
+    "masking_format": {
+      "type": "string",
+      "description": "Masking pattern e.g. XXX-XX-####, preserve_first_4, full_redact, hash_sha256, show_last_4"
+    },
+    "tokenization_vault": {
+      "type": "boolean",
+      "default": false,
+      "description": "True if tokens are stored in a vault for reversible lookup (tokenization only)"
+    },
+    "is_reversible": {
+      "type": "boolean",
+      "default": false,
+      "description": "Whether the protection can be reversed (tokenization, pseudonymization) or is one-way (hashing, anonymization)"
+    },
+    "retention_days": {
+      "type": "number",
+      "default": 0,
+      "description": "How long the original (unprotected) data is retained before purge \u2014 0 means no retention"
+    },
+    "regulatory_reference": {
+      "type": "string",
+      "description": "Regulation requiring this protection e.g. POPIA, GDPR, PCI-DSS, HIPAA, King V"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "active",
+        "draft",
+        "disabled",
+        "under_review"
+      ],
+      "default": "active"
+    },
+    "enforcement_scope": {
+      "type": "string",
+      "enum": [
+        "database",
+        "api_response",
+        "export",
+        "report",
+        "log",
+        "all"
+      ],
+      "default": "all",
+      "description": "Where this masking rule is enforced"
+    },
+    "owner_name": {
+      "type": "string"
+    },
+    "owner_id": {
+      "type": "string"
+    },
+    "notes": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "rule_id",
+    "name",
+    "data_category",
+    "protection_method"
+  ],
+  "rls": {
+    "create": {
+      "data.tenant_id": "{{user.data.tenant_id}}"
+    },
+    "read": {
+      "$or": [
+        {
+          "data.tenant_id": "{{user.data.tenant_id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "update": {
+      "$or": [
+        {
+          "data.tenant_id": "{{user.data.tenant_id}}",
+          "created_by_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        },
+        {
+          "$and": [
+            {
+              "data.tenant_id": "{{user.data.tenant_id}}"
+            },
+            {
+              "user_condition": {
+                "role": "compliance_officer"
+              }
+            }
+          ]
+        }
+      ]
+    },
+    "delete": {
+      "$or": [
+        {
+          "data.tenant_id": "{{user.data.tenant_id}}",
+          "created_by_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    }
+  }
+}
