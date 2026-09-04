@@ -26,19 +26,25 @@ export default async function(req: Request): Promise<Response> {
 async function testConnection(base44, body, ctx) {
   const { integration_id, platform } = body;
 
+  // Fetch the integration record to use its base_url (allows multiple instances)
+  let integration = null;
+  if (integration_id) {
+    integration = await base44.asServiceRole.entities.DataCenterIntegration.get(integration_id);
+  }
+
   let baseUrl, token;
   if (platform === "confluence_dc") {
-    baseUrl = process.env.CONFLUENCE_DC_BASE_URL;
+    baseUrl = integration?.base_url || process.env.CONFLUENCE_DC_BASE_URL;
     token = process.env.CONFLUENCE_DC_TOKEN;
   } else if (platform === "jira_dc") {
-    baseUrl = process.env.JIRA_DC_BASE_URL;
+    baseUrl = integration?.base_url || process.env.JIRA_DC_BASE_URL;
     token = process.env.JIRA_DC_TOKEN;
   }
 
   if (!baseUrl || !token) {
     return Response.json({
       connected: false,
-      error: "Missing configuration. Set the required secrets (base URL and PAT) in Settings."
+      error: "Missing configuration. Set the instance Base URL and configure the PAT secret in Settings."
     });
   }
 
@@ -110,9 +116,8 @@ async function syncIntegration(base44, body, ctx) {
 
   try {
     const platform = integration.platform;
-    const baseUrl = platform === "confluence_dc"
-      ? process.env.CONFLUENCE_DC_BASE_URL
-      : process.env.JIRA_DC_BASE_URL;
+    const baseUrl = integration.base_url ||
+      (platform === "confluence_dc" ? process.env.CONFLUENCE_DC_BASE_URL : process.env.JIRA_DC_BASE_URL);
     const token = platform === "confluence_dc"
       ? process.env.CONFLUENCE_DC_TOKEN
       : process.env.JIRA_DC_TOKEN;

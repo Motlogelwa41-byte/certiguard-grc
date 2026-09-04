@@ -4,8 +4,15 @@ export default async function(req: Request): Promise<Response> {
   try {
     const base44 = createClientFromRequest(req);
     const url = new URL(req.url);
-    const apiKey = req.headers.get("x-api-key") || url.searchParams.get("api_key") || "";
     const action = url.searchParams.get("action") || "get_rating";
+    // api_key can come from header, query param, or JSON body (for SDK invoke calls)
+    let apiKey = req.headers.get("x-api-key") || url.searchParams.get("api_key") || "";
+    if (!apiKey) {
+      try {
+        const body = await req.json();
+        if (body.api_key) apiKey = body.api_key;
+      } catch (_) { /* body may be empty for GET-style calls */ }
+    }
 
     // This is a PUBLIC endpoint — no auth.me() call
     const configs = await base44.asServiceRole.entities.SecurityRatingConfig.filter({
