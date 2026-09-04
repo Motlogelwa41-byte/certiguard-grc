@@ -90,6 +90,7 @@ export default function RiskScoringModels() {
 
   const openCreate = () => {
     setEditing(null);
+    setPreviewResult(null);
     setForm({
       model_id: `RSM-${Date.now().toString().slice(-6)}`,
       name: "",
@@ -116,7 +117,10 @@ export default function RiskScoringModels() {
 
   const openEdit = (model) => {
     setEditing(model);
-    setForm({ ...model });
+    setPreviewResult(null);
+    // Strip built-in fields to prevent overwriting tenant_id, ownership, etc.
+    const { id, created_date, updated_date, created_by_id, tenant_id, applied_risk_count, ...editable } = model;
+    setForm(editable);
     setShowDialog(true);
   };
 
@@ -126,13 +130,29 @@ export default function RiskScoringModels() {
       return;
     }
     try {
+      // Strip built-in/runtime fields so we never overwrite tenant_id, ownership, or counts
+      const { id, created_date, updated_date, created_by_id, tenant_id, applied_risk_count, ...payload } = form;
+
       if (editing) {
-        await base44.entities.RiskScoringModel.update(editing.id, form);
+        await base44.entities.RiskScoringModel.update(editing.id, payload);
         toast({ title: "Model updated" });
       } else {
-        await base44.entities.RiskScoringModel.create(form);
+        await base44.entities.RiskScoringModel.create(payload);
         toast({ title: "Model created" });
       }
+
+      // Enforce is_default exclusivity: only one default per register type
+      if (payload.is_default) {
+        const otherDefaults = models.filter(m =>
+          m.id !== editing?.id &&
+          m.register_type === payload.register_type &&
+          m.is_default
+        );
+        for (const m of otherDefaults) {
+          await base44.entities.RiskScoringModel.update(m.id, { is_default: false });
+        }
+      }
+
       setShowDialog(false);
       loadModels();
     } catch (err) {

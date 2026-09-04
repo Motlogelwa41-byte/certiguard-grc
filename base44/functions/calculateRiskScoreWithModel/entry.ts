@@ -64,7 +64,8 @@ async function calculateScore(base44, body, ctx) {
 
   await base44.asServiceRole.entities.Risk.update(risk_id, {
     risk_score: result.score,
-    inherent_risk_score: result.inherent_score
+    inherent_risk_score: result.inherent_score,
+    appetite_band: result.band
   });
 
   return Response.json({
@@ -154,8 +155,9 @@ function classifyBand(score, low, med, high, crit) {
 }
 
 async function listModels(base44, ctx) {
+  // Return ALL models (active, draft, disabled) so users can edit/reactivate them
   const models = await base44.asServiceRole.entities.RiskScoringModel.filter(
-    tenantScopedFilter(ctx, { status: "active" })
+    tenantScopedFilter(ctx, {})
   );
   return Response.json({ models });
 }
@@ -185,7 +187,8 @@ async function applyToAll(base44, body, ctx) {
     updates.push({
       id: risk.id,
       risk_score: result.score,
-      inherent_risk_score: result.inherent_score
+      inherent_risk_score: result.inherent_score,
+      appetite_band: result.band
     });
     updated++;
   }
