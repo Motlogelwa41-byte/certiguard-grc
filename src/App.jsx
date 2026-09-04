@@ -194,6 +194,7 @@ import GrcWorkflowEngine from '@/pages/GrcWorkflowEngine';
 import GrcAlertCenter from '@/pages/GrcAlertCenter';
 import RemediationCenter from '@/pages/RemediationCenter';
 import CybersecurityRiskCenter from '@/pages/CybersecurityRiskCenter';
+import MitigationAdvisor from '@/pages/MitigationAdvisor';
 import { LanguageProvider } from '@/contexts/LanguageContext';
 
 const AuthenticatedApp = () => {
@@ -409,6 +410,7 @@ const AuthenticatedApp = () => {
           <Route path="/alert-center" element={<GrcAlertCenter />} />
           <Route path="/remediation-center" element={<RemediationCenter />} />
           <Route path="/cybersecurity-risk" element={<CybersecurityRiskCenter />} />
+          <Route path="/mitigation-advisor" element={<MitigationAdvisor />} />
           <Route path="/connect" element={<Connect />} />
         </Route>
       </Route>
