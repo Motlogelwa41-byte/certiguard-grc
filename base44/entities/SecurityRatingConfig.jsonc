@@ -1,0 +1,158 @@
+{
+  "name": "SecurityRatingConfig",
+  "type": "object",
+  "properties": {
+    "tenant_id": {
+      "type": "string",
+      "description": "Tenant isolation key \u2014 mandatory on every record"
+    },
+    "config_id": {
+      "type": "string",
+      "description": "Unique config identifier e.g. SRC-001"
+    },
+    "is_public": {
+      "type": "boolean",
+      "default": false,
+      "description": "When true, the public security rating API is accessible"
+    },
+    "api_key": {
+      "type": "string",
+      "description": "API key prospects must include to query the rating (x-api-key header)"
+    },
+    "rating_scale": {
+      "type": "string",
+      "enum": [
+        "0_100",
+        "0_1000",
+        "letter_grade",
+        "star_5"
+      ],
+      "default": "0_100",
+      "description": "How the rating is expressed in API responses"
+    },
+    "expose_score": {
+      "type": "boolean",
+      "default": true,
+      "description": "Include the numeric security score in API responses"
+    },
+    "expose_grade": {
+      "type": "boolean",
+      "default": true,
+      "description": "Include the letter grade (A-F) in API responses"
+    },
+    "expose_frameworks": {
+      "type": "boolean",
+      "default": true,
+      "description": "Include list of compliance frameworks in API responses"
+    },
+    "expose_certifications": {
+      "type": "boolean",
+      "default": true,
+      "description": "Include active certifications in API responses"
+    },
+    "expose_control_summary": {
+      "type": "boolean",
+      "default": true,
+      "description": "Include control pass/fail counts in API responses"
+    },
+    "expose_incident_count": {
+      "type": "boolean",
+      "default": false,
+      "description": "Include recent incident count (resolved only) in API responses"
+    },
+    "expose_last_audit_date": {
+      "type": "boolean",
+      "default": false,
+      "description": "Include last audit date in API responses"
+    },
+    "expose_uptime": {
+      "type": "boolean",
+      "default": false,
+      "description": "Include uptime SLA percentage in API responses"
+    },
+    "custom_message": {
+      "type": "string",
+      "description": "Custom message included in API response e.g. 'Security posture verified as of YYYY-MM-DD'"
+    },
+    "rate_limit_per_hour": {
+      "type": "number",
+      "default": 100,
+      "description": "Maximum API requests per hour per API key"
+    },
+    "total_api_calls": {
+      "type": "number",
+      "default": 0,
+      "description": "Total API calls made to the public rating endpoint"
+    },
+    "last_api_call_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "last_rating_computed_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "current_score": {
+      "type": "number",
+      "default": 0,
+      "description": "Last computed security score"
+    },
+    "current_grade": {
+      "type": "string",
+      "default": "untested"
+    },
+    "notes": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "config_id"
+  ],
+  "rls": {
+    "create": {
+      "data.tenant_id": "{{user.data.tenant_id}}"
+    },
+    "read": {
+      "$or": [
+        {
+          "data.tenant_id": "{{user.data.tenant_id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "update": {
+      "$or": [
+        {
+          "data.tenant_id": "{{user.data.tenant_id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        },
+        {
+          "user_condition": {
+            "role": "compliance_officer"
+          }
+        }
+      ]
+    },
+    "delete": {
+      "$or": [
+        {
+          "data.tenant_id": "{{user.data.tenant_id}}",
+          "created_by_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    }
+  }
+}

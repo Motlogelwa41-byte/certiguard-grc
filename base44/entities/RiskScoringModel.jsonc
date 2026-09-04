@@ -1,0 +1,194 @@
+{
+  "name": "RiskScoringModel",
+  "type": "object",
+  "properties": {
+    "tenant_id": {
+      "type": "string",
+      "description": "Tenant isolation key \u2014 mandatory on every record"
+    },
+    "model_id": {
+      "type": "string",
+      "description": "Unique model identifier e.g. RSM-001"
+    },
+    "name": {
+      "type": "string",
+      "description": "Model name e.g. Cyber Risk Scoring Model, Vendor Risk Scoring Model"
+    },
+    "description": {
+      "type": "string"
+    },
+    "register_type": {
+      "type": "string",
+      "enum": [
+        "operational",
+        "technical",
+        "compliance",
+        "financial",
+        "strategic",
+        "reputational",
+        "third_party",
+        "emerging",
+        "all"
+      ],
+      "default": "all",
+      "description": "Which risk register/category this scoring model applies to"
+    },
+    "scoring_method": {
+      "type": "string",
+      "enum": [
+        "qualitative_matrix",
+        "weighted_formula",
+        "fair_model",
+        "cvss_style",
+        "custom"
+      ],
+      "default": "qualitative_matrix",
+      "description": "Scoring methodology used by this model"
+    },
+    "likelihood_weight": {
+      "type": "number",
+      "default": 1.0,
+      "description": "Weight multiplier for likelihood in the scoring formula"
+    },
+    "impact_weight": {
+      "type": "number",
+      "default": 1.0,
+      "description": "Weight multiplier for impact in the scoring formula"
+    },
+    "velocity_weight": {
+      "type": "number",
+      "default": 0.0,
+      "description": "Weight multiplier for risk velocity (speed of onset)"
+    },
+    "control_effectiveness_weight": {
+      "type": "number",
+      "default": 0.0,
+      "description": "Weight for control effectiveness reduction factor (0-1, applied as reduction)"
+    },
+    "financial_impact_weight": {
+      "type": "number",
+      "default": 0.0,
+      "description": "Weight for financial quantification (ALE) in the score"
+    },
+    "max_score": {
+      "type": "number",
+      "default": 25,
+      "description": "Maximum possible score (25 for 5x5 matrix, 100 for percentage-based)"
+    },
+    "threshold_low": {
+      "type": "number",
+      "default": 5,
+      "description": "Score below this is classified as Low"
+    },
+    "threshold_medium": {
+      "type": "number",
+      "default": 10,
+      "description": "Score below this is classified as Medium"
+    },
+    "threshold_high": {
+      "type": "number",
+      "default": 15,
+      "description": "Score below this is classified as High; above is Critical"
+    },
+    "threshold_critical": {
+      "type": "number",
+      "default": 20,
+      "description": "Score at or above this is classified as Critical"
+    },
+    "use_control_reduction": {
+      "type": "boolean",
+      "default": false,
+      "description": "When true, residual score = inherent score \u00d7 (1 - control_effectiveness_pct/100 \u00d7 control_effectiveness_weight)"
+    },
+    "formula_description": {
+      "type": "string",
+      "description": "Human-readable description of the scoring formula"
+    },
+    "is_default": {
+      "type": "boolean",
+      "default": false,
+      "description": "Whether this is the default model for its register type"
+    },
+    "applied_risk_count": {
+      "type": "number",
+      "default": 0,
+      "description": "How many risks currently use this scoring model"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "active",
+        "draft",
+        "disabled"
+      ],
+      "default": "active"
+    },
+    "owner_name": {
+      "type": "string"
+    },
+    "owner_id": {
+      "type": "string"
+    },
+    "notes": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "model_id",
+    "name",
+    "register_type",
+    "scoring_method"
+  ],
+  "rls": {
+    "create": {
+      "data.tenant_id": "{{user.data.tenant_id}}"
+    },
+    "read": {
+      "$or": [
+        {
+          "data.tenant_id": "{{user.data.tenant_id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "update": {
+      "$or": [
+        {
+          "data.tenant_id": "{{user.data.tenant_id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        },
+        {
+          "user_condition": {
+            "role": "risk_manager"
+          }
+        },
+        {
+          "user_condition": {
+            "role": "compliance_officer"
+          }
+        }
+      ]
+    },
+    "delete": {
+      "$or": [
+        {
+          "data.tenant_id": "{{user.data.tenant_id}}",
+          "created_by_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    }
+  }
+}
