@@ -1,0 +1,209 @@
+{
+  "name": "SecureBaseline",
+  "type": "object",
+  "properties": {
+    "tenant_id": {
+      "type": "string",
+      "description": "Tenant isolation key \u2014 mandatory on every record"
+    },
+    "baseline_id": {
+      "type": "string",
+      "description": "Unique baseline identifier e.g. BASE-CIS-LIN-01"
+    },
+    "name": {
+      "type": "string"
+    },
+    "description": {
+      "type": "string"
+    },
+    "cis_benchmark": {
+      "type": "string",
+      "description": "CIS benchmark name e.g. CIS Ubuntu Linux 22.04 LTS Benchmark"
+    },
+    "cis_version": {
+      "type": "string",
+      "description": "CIS benchmark version e.g. v2.0.0"
+    },
+    "target_platform": {
+      "type": "string",
+      "enum": [
+        "linux",
+        "windows",
+        "kubernetes",
+        "cloud",
+        "network",
+        "database",
+        "container",
+        "generic"
+      ],
+      "default": "linux"
+    },
+    "platform_detail": {
+      "type": "string",
+      "description": "Specific OS/platform e.g. Ubuntu 22.04, Windows Server 2022, EKS 1.27"
+    },
+    "category": {
+      "type": "string",
+      "enum": [
+        "server_hardening",
+        "package_management",
+        "account_management",
+        "service_management",
+        "network_security",
+        "access_control",
+        "logging_auditing",
+        "data_protection",
+        "configuration_management"
+      ],
+      "default": "server_hardening"
+    },
+    "config_items": {
+      "type": "string",
+      "description": "JSON array of CIS configuration items: [{item_id, name, cis_ref, description, expected_value, validation_method, severity, category}]"
+    },
+    "total_checks": {
+      "type": "number",
+      "default": 0,
+      "description": "Total number of CIS checks in this baseline"
+    },
+    "passing_checks": {
+      "type": "number",
+      "default": 0,
+      "description": "Number of checks passing in the last validation run"
+    },
+    "compliance_pct": {
+      "type": "number",
+      "default": 0,
+      "description": "Auto-calculated: passing_checks / total_checks \u00d7 100"
+    },
+    "version": {
+      "type": "string",
+      "default": "1.0",
+      "description": "Baseline version for version control and drift tracking"
+    },
+    "iac_manifest_url": {
+      "type": "string",
+      "description": "URL to the IaC manifest (Terraform/Ansible/Puppet) defining this baseline"
+    },
+    "iac_manifest_version": {
+      "type": "string",
+      "description": "Version/commit hash of the IaC manifest"
+    },
+    "iac_repository": {
+      "type": "string",
+      "description": "Git repository URL for the version-controlled IaC configuration"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "active",
+        "draft",
+        "deprecated",
+        "under_review"
+      ],
+      "default": "draft"
+    },
+    "enforcement_mode": {
+      "type": "string",
+      "enum": [
+        "monitor",
+        "enforce",
+        "disabled"
+      ],
+      "default": "monitor",
+      "description": "Monitor = alert only, Enforce = block drift, Disabled = no checks"
+    },
+    "owner_name": {
+      "type": "string"
+    },
+    "owner_id": {
+      "type": "string"
+    },
+    "last_validated": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "validation_frequency": {
+      "type": "string",
+      "enum": [
+        "daily",
+        "weekly",
+        "monthly",
+        "on_change",
+        "manual"
+      ],
+      "default": "weekly"
+    },
+    "linked_control_ids": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "Controls this baseline supports"
+    },
+    "notes": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "baseline_id",
+    "name",
+    "cis_benchmark",
+    "target_platform"
+  ],
+  "rls": {
+    "create": {
+      "data.tenant_id": "{{user.data.tenant_id}}"
+    },
+    "read": {
+      "$or": [
+        {
+          "data.tenant_id": "{{user.data.tenant_id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "update": {
+      "$or": [
+        {
+          "data.tenant_id": "{{user.data.tenant_id}}",
+          "created_by_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        },
+        {
+          "$and": [
+            {
+              "data.tenant_id": "{{user.data.tenant_id}}"
+            },
+            {
+              "user_condition": {
+                "role": "compliance_officer"
+              }
+            }
+          ]
+        }
+      ]
+    },
+    "delete": {
+      "$or": [
+        {
+          "data.tenant_id": "{{user.data.tenant_id}}",
+          "created_by_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    }
+  }
+}

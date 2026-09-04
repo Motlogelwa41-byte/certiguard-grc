@@ -1,0 +1,159 @@
+{
+  "name": "ConfigurationChangeLog",
+  "type": "object",
+  "properties": {
+    "tenant_id": {
+      "type": "string",
+      "description": "Tenant isolation key \u2014 mandatory on every record"
+    },
+    "log_id": {
+      "type": "string",
+      "description": "Unique log entry identifier e.g. CCL-001"
+    },
+    "baseline_id": {
+      "type": "string",
+      "description": "Linked SecureBaseline id"
+    },
+    "baseline_name": {
+      "type": "string"
+    },
+    "asset_id": {
+      "type": "string",
+      "description": "Linked ITAsset id (if applicable)"
+    },
+    "asset_name": {
+      "type": "string"
+    },
+    "change_type": {
+      "type": "string",
+      "enum": [
+        "config_drift",
+        "planned_change",
+        "emergency_change",
+        "baseline_update",
+        "iac_deploy",
+        "manual_override"
+      ],
+      "default": "config_drift",
+      "description": "Type of configuration change recorded"
+    },
+    "field_changed": {
+      "type": "string",
+      "description": "The configuration field that changed"
+    },
+    "previous_value": {
+      "type": "string"
+    },
+    "new_value": {
+      "type": "string"
+    },
+    "cis_reference": {
+      "type": "string",
+      "description": "CIS benchmark reference this change relates to"
+    },
+    "changed_by": {
+      "type": "string",
+      "description": "User name or system/agent that made the change"
+    },
+    "changed_by_id": {
+      "type": "string"
+    },
+    "changed_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "drift_detected": {
+      "type": "boolean",
+      "default": false,
+      "description": "True when this change deviates from the golden baseline configuration"
+    },
+    "drift_severity": {
+      "type": "string",
+      "enum": [
+        "critical",
+        "high",
+        "medium",
+        "low"
+      ],
+      "default": "medium"
+    },
+    "alert_sent": {
+      "type": "boolean",
+      "default": false,
+      "description": "Whether a drift alert was sent for this entry"
+    },
+    "approval_required": {
+      "type": "boolean",
+      "default": true,
+      "description": "Whether formal change approval was required"
+    },
+    "approved_by": {
+      "type": "string"
+    },
+    "approved_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "approval_status": {
+      "type": "string",
+      "enum": [
+        "pending",
+        "approved",
+        "rejected",
+        "not_required"
+      ],
+      "default": "pending"
+    },
+    "iac_manifest_ref": {
+      "type": "string",
+      "description": "IaC manifest version/commit this change corresponds to"
+    },
+    "remediation_action": {
+      "type": "string",
+      "description": "Action taken to remediate drift, if any"
+    },
+    "notes": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "baseline_id",
+    "change_type"
+  ],
+  "rls": {
+    "create": {
+      "$or": [
+        {
+          "data.tenant_id": "{{user.data.tenant_id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "read": {
+      "$or": [
+        {
+          "data.tenant_id": "{{user.data.tenant_id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "update": {
+      "user_condition": {
+        "role": "__append_only_denied__"
+      }
+    },
+    "delete": {
+      "user_condition": {
+        "role": "__append_only_denied__"
+      }
+    }
+  }
+}

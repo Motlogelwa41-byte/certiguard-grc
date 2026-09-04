@@ -131,6 +131,7 @@ export const navSections = [
       { label: "DLP Monitor", path: "/dlp-monitor", icon: Eye, roles: ["admin", "compliance_officer", "risk_manager", "auditor"] },
       { label: "EDR / XDR", path: "/edr-dashboard", icon: Radar, roles: ["admin", "compliance_officer", "risk_manager", "auditor"] },
       { label: "IT Asset Management", path: "/itam", icon: Laptop, roles: ["admin", "compliance_officer", "risk_manager", "auditor"] },
+      { label: "Secure Baselines", path: "/secure-baselines", icon: Shield, roles: ["admin", "compliance_officer", "risk_manager", "auditor"] },
       { label: "PQC Readiness", path: "/pqc-readiness", icon: Atom, roles: ["admin", "compliance_officer", "risk_manager"] },
       { label: "API & Mobile Security", path: "/api-security", icon: Smartphone, roles: ["admin", "compliance_officer", "risk_manager"] },
       { label: "Access Recertification", path: "/access-recertification", icon: UserCheck, roles: ["admin"] },

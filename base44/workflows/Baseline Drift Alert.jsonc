@@ -1,0 +1,41 @@
+{
+  "name": "Baseline Drift Alert",
+  "description": "Posts an immediate Slack alert to #compliance whenever a configuration drift from a golden CIS baseline is logged in the immutable ConfigurationChangeLog \u2014 ensuring the team is notified the moment any asset deviates from its hardened baseline.",
+  "trigger": {
+    "condition": "${ .trigger.data.drift_detected == true }",
+    "config": {
+      "trigger_type": "entity",
+      "entity_name": "ConfigurationChangeLog",
+      "events": [
+        "create"
+      ]
+    }
+  },
+  "definition": {
+    "document": {
+      "dsl": "1.0.0",
+      "name": "baseline_drift_alert",
+      "version": "1.0",
+      "namespace": "base44"
+    },
+    "do": [
+      {
+        "post_drift_alert": {
+          "call": "invoke_backend_function",
+          "with": {
+            "function_name": "sendSlackAlert",
+            "args": {
+              "_internal_token": "cg-internal-invoke-7f3a9c2e1b8d4a6f9e2c",
+              "text": ":rotating_light: *CONFIGURATION DRIFT DETECTED*\n*${ .trigger.data.baseline_name // \"Unknown baseline\" }*\n:warning: CIS Check: ${ .trigger.data.field_changed // \"\u2014\" }\nAsset: ${ .trigger.data.asset_name // \"\u2014\" } \u2022 CIS Ref: ${ .trigger.data.cis_reference // \"\u2014\" }\nExpected: `${ .trigger.data.previous_value // \"\u2014\" }` \u2192 Actual: `${ .trigger.data.new_value // \"\u2014\" }`\nSeverity: ${ .trigger.data.drift_severity // \"medium\" } \u2022 Change Type: ${ .trigger.data.change_type // \"config_drift\" }\n> Deviation from the golden configuration baseline detected. Review and remediate to restore compliance."
+            }
+          },
+          "then": "end",
+          "x-base44": {
+            "title": "Post drift alert",
+            "description": "Config drift logged \u2192 urgent #compliance Slack alert"
+          }
+        }
+      }
+    ]
+  }
+}

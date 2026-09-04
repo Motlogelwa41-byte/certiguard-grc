@@ -1,0 +1,148 @@
+{
+  "name": "BaselineCheckResult",
+  "type": "object",
+  "properties": {
+    "tenant_id": {
+      "type": "string",
+      "description": "Tenant isolation key"
+    },
+    "result_id": {
+      "type": "string",
+      "description": "Unique result identifier e.g. BCR-001"
+    },
+    "baseline_id": {
+      "type": "string",
+      "description": "Linked SecureBaseline id"
+    },
+    "baseline_name": {
+      "type": "string"
+    },
+    "asset_id": {
+      "type": "string",
+      "description": "Linked ITAsset id"
+    },
+    "asset_name": {
+      "type": "string"
+    },
+    "item_id": {
+      "type": "string",
+      "description": "CIS config item ID from the baseline"
+    },
+    "check_name": {
+      "type": "string"
+    },
+    "cis_reference": {
+      "type": "string",
+      "description": "CIS benchmark reference e.g. 4.2.1"
+    },
+    "category": {
+      "type": "string",
+      "description": "CIS category: server_hardening, package_management, account_management, service_management, etc."
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "pass",
+        "fail",
+        "error",
+        "not_applicable",
+        "not_checked"
+      ],
+      "default": "not_checked"
+    },
+    "severity": {
+      "type": "string",
+      "enum": [
+        "critical",
+        "high",
+        "medium",
+        "low"
+      ],
+      "default": "medium"
+    },
+    "expected_value": {
+      "type": "string"
+    },
+    "actual_value": {
+      "type": "string"
+    },
+    "remediation_guidance": {
+      "type": "string"
+    },
+    "validated_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "validated_by": {
+      "type": "string",
+      "description": "automated, manual, or agent name"
+    },
+    "drift_detected": {
+      "type": "boolean",
+      "default": false,
+      "description": "True when this check deviates from the golden baseline"
+    },
+    "notes": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "baseline_id",
+    "check_name"
+  ],
+  "rls": {
+    "create": {
+      "data.tenant_id": "{{user.data.tenant_id}}"
+    },
+    "read": {
+      "$or": [
+        {
+          "data.tenant_id": "{{user.data.tenant_id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "update": {
+      "$or": [
+        {
+          "data.tenant_id": "{{user.data.tenant_id}}",
+          "created_by_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        },
+        {
+          "$and": [
+            {
+              "data.tenant_id": "{{user.data.tenant_id}}"
+            },
+            {
+              "user_condition": {
+                "role": "compliance_officer"
+              }
+            }
+          ]
+        }
+      ]
+    },
+    "delete": {
+      "$or": [
+        {
+          "data.tenant_id": "{{user.data.tenant_id}}",
+          "created_by_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    }
+  }
+}
