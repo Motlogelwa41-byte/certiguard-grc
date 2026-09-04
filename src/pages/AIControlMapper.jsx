@@ -133,9 +133,9 @@ ${documentText.substring(0, 10000)}`;
     const fw = targetFramework !== "all" ? frameworks.find(f => f.id === targetFramework) : null;
     let successCount = 0;
 
-    for (const ctrl of toImport) {
-      try {
-        await base44.entities.Control.create({
+    try {
+      const res = await base44.functions.invoke('bulkCreateControlsWithinPlan', {
+        controls: toImport.map(ctrl => ({
           control_id: ctrl.suggested_control_id,
           title: ctrl.title,
           description: ctrl.description,
@@ -146,9 +146,13 @@ ${documentText.substring(0, 10000)}`;
           notes: `Framework references: ${(ctrl.framework_references || []).join(", ")}\n\nEvidence: "${ctrl.evidence_quote}"`,
           framework_ids: fw ? [fw.id] : [],
           framework_names: fw ? [fw.name] : [],
-        });
-        successCount++;
-      } catch {}
+        }))
+      });
+      const data = res.data || res;
+      if (data.ok) successCount = data.created;
+      else if (data.error) throw new Error(data.error);
+    } catch (e) {
+      toast({ title: "Import failed", description: e.message, variant: "destructive" });
     }
 
     toast({ title: `${successCount} controls imported`, description: "Added to your Controls library for testing and tracking." });

@@ -4,6 +4,7 @@ import { createClientFromRequest } from 'npm:@base44/sdk@0.8.40';
 // Used by the PlanUsage widget and plan-enforcement gates.
 const TIER_MAX_USERS = { trial: 3, starter: 10, professional: 100, enterprise: 999999 };
 const TIER_MAX_FRAMEWORKS = { trial: 20, starter: 20, professional: 50, enterprise: 999999 };
+const TIER_MAX_CONTROLS = { trial: 50, starter: 100, professional: 1000, enterprise: 999999 };
 
 Deno.serve(async (req) => {
   try {
@@ -22,10 +23,12 @@ Deno.serve(async (req) => {
     const tier = tenant.subscription_tier || 'trial';
     const userCap = tenant.max_users ?? TIER_MAX_USERS[tier] ?? 3;
     const fwCap = tenant.max_frameworks ?? TIER_MAX_FRAMEWORKS[tier] ?? 2;
+    const ctrlCap = tenant.max_controls ?? TIER_MAX_CONTROLS[tier] ?? 50;
 
-    const [users, frameworks] = await Promise.all([
+    const [users, frameworks, controls] = await Promise.all([
       base44.asServiceRole.entities.User.list().catch(() => []),
       base44.entities.Framework.list().catch(() => []),
+      base44.entities.Control.list().catch(() => []),
     ]);
 
     return Response.json({
@@ -34,6 +37,7 @@ Deno.serve(async (req) => {
       trial_ends_at: tenant.trial_ends_at || null,
       users: { count: (users || []).length, cap: userCap },
       frameworks: { count: (frameworks || []).length, cap: fwCap },
+      controls: { count: (controls || []).length, cap: ctrlCap },
     });
   } catch (error) {
     console.error('checkPlanLimits error:', error?.message || error);

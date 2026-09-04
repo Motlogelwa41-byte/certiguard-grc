@@ -137,9 +137,9 @@ export default function SADCFrameworks() {
         }))
       );
 
-      // 3. Create Control records (one per requirement)
-      const controls = await base44.entities.Control.bulkCreate(
-        lib.key_requirements.map((req, i) => ({
+      // 3. Create Control records via plan-limited bulk guard (enforces tenant control cap)
+      const ctrlRes = await base44.functions.invoke('bulkCreateControlsWithinPlan', {
+        controls: lib.key_requirements.map((req, i) => ({
           control_id: `${codePrefix}-${String(i + 1).padStart(2, "0")}`,
           title: req,
           description: `Implementation control for ${req} under ${lib.name}.`,
@@ -150,7 +150,10 @@ export default function SADCFrameworks() {
           framework_names: [lib.name],
           automation_status: "manual",
         }))
-      );
+      });
+      const ctrlData = ctrlRes.data || ctrlRes;
+      if (!ctrlData.ok && ctrlData.error) throw new Error(ctrlData.error);
+      const controls = ctrlData.controls || [];
 
       // 4. Wire requirements ↔ controls via RequirementControlMapping
       await base44.entities.RequirementControlMapping.bulkCreate(

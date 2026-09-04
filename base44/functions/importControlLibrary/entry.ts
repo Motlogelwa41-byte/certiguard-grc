@@ -77,6 +77,30 @@ Deno.serve(async (req) => {
         severity: 'medium'
       }));
 
+    // Enforce tenant control cap before bulk creation (plan limit defense-in-depth)
+    if (toCreate.length) {
+      const TIER_MAX_CONTROLS = { trial: 50, starter: 100, professional: 1000, enterprise: 999999 };
+      let capTenant = null;
+      if (tenantId) capTenant = await db.entities.Tenant.get(tenantId).catch(() => null);
+      if (!capTenant) {
+        const byEmail = await db.entities.Tenant.filter({ admin_email: user.email }).catch(() => []);
+        if (byEmail.length > 0) capTenant = byEmail[0];
+      }
+      if (capTenant) {
+        const tier = capTenant.subscription_tier || 'trial';
+        const cap = capTenant.max_controls ?? TIER_MAX_CONTROLS[tier] ?? 50;
+        const visibleControls = await base44.entities.Control.list().catch(() => []);
+        const currentCount = (visibleControls || []).length;
+        if (currentCount + toCreate.length > cap) {
+          return Response.json({
+            error: `Control limit reached (${currentCount}/${cap}). Cannot import ${toCreate.length} controls — upgrade your plan.`,
+            limit: cap,
+            count: currentCount,
+            requested: toCreate.length,
+          }, { status: 402 });
+        }
+      }
+    }
     let created = [];
     if (toCreate.length) created = await db.entities.Control.bulkCreate(toCreate);
 

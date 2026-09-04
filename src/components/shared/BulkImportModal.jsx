@@ -10,7 +10,7 @@ import { base44 } from "@/api/base44Client";
  * Props:
  *   open, onOpenChange, entityName, columns: [{key, label, required, transform}], onSuccess, sampleRows
  */
-export default function BulkImportModal({ open, onOpenChange, entityName, columns, onSuccess, sampleRows }) {
+export default function BulkImportModal({ open, onOpenChange, entityName, columns, onSuccess, sampleRows, onBulkCreate }) {
   const [file, setFile] = useState(null);
   const [preview, setPreview] = useState([]);
   const [errors, setErrors] = useState([]);
@@ -78,9 +78,21 @@ export default function BulkImportModal({ open, onOpenChange, entityName, column
         return record;
       });
       let success = 0, failed = 0;
-      for (const record of mapped) {
-        try { await base44.entities[entityName].create(record); success++; }
-        catch { failed++; }
+      if (onBulkCreate) {
+        try {
+          const res = await onBulkCreate(mapped);
+          const data = res?.data || res;
+          if (data?.ok) success = data.created || mapped.length;
+          else { failed = mapped.length; if (data?.error) toast({ title: "Import failed", description: data.error, variant: "destructive" }); }
+        } catch (e) {
+          failed = mapped.length;
+          toast({ title: "Import failed", description: e.message, variant: "destructive" });
+        }
+      } else {
+        for (const record of mapped) {
+          try { await base44.entities[entityName].create(record); success++; }
+          catch { failed++; }
+        }
       }
       setResult({ success, failed });
       setImporting(false);

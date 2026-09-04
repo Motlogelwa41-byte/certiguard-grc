@@ -287,7 +287,8 @@ export default function Controls() {
         </div>
       )}
 
-      <BulkImportModal open={importOpen} onOpenChange={setImportOpen} entityName="Control" columns={importColumns} sampleRows={importSampleRows} onSuccess={load} />
+      <BulkImportModal open={importOpen} onOpenChange={setImportOpen} entityName="Control" columns={importColumns} sampleRows={importSampleRows} onSuccess={load}
+        onBulkCreate={async (records) => base44.functions.invoke("bulkCreateControlsWithinPlan", { controls: records })} />
       <RemediationDialog open={!!remediationControl} onOpenChange={v => { if (!v) setRemediationControl(null); }} control={remediationControl} onSuccess={load} />
 
       <Dialog open={open} onOpenChange={setOpen}>
