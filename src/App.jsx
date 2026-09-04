@@ -97,6 +97,7 @@ import BoardReport from '@/pages/BoardReport';
 import ExecutiveRiskSummary from '@/pages/ExecutiveRiskSummary';
 import CalendarSync from '@/pages/CalendarSync';
 import GuidedOnboarding from '@/pages/GuidedOnboarding';
+import OnboardingHealthCheckDashboard from '@/pages/OnboardingHealthCheckDashboard';
 import AuditReadinessReport from '@/pages/AuditReadinessReport';
 import ActivityLog from '@/pages/ActivityLog';
 import PlatformGovernance from '@/pages/PlatformGovernance';
@@ -328,6 +329,7 @@ const AuthenticatedApp = () => {
           <Route path="/executive-risk-summary" element={<ExecutiveRiskSummary />} />
           <Route path="/calendar-sync" element={<CalendarSync />} />
           <Route path="/guided-onboarding" element={<GuidedOnboarding />} />
+          <Route path="/onboarding-health-check" element={<OnboardingHealthCheckDashboard />} />
           <Route path="/audit-readiness-report" element={<AuditReadinessReport />} />
           <Route path="/activity-log" element={<ActivityLog />} />
           <Route path="/platform-governance" element={<PlatformGovernance />} />

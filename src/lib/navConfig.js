@@ -3,7 +3,7 @@ import {
   ClipboardList, Building2, CheckSquare, ChevronLeft, ChevronRight, LogOut,
   ShieldCheck, FileSearch, Brain, Play, FileSpreadsheet, FileDown, BarChart3, LineChart,
   History, ShieldAlert, GraduationCap, Calendar, Bell, Users, Copy, SlidersHorizontal,
-  Target, Upload, Send, Globe, Users2, MapPin, Zap, ListChecks, BellRing,
+  Target, Upload, Send, Globe, Users2, MapPin, Zap, ListChecks, BellRing, HeartPulse,
   PieChart,   Radar, Landmark, BarChart2, Network, GitCompare, Sparkles, CreditCard, Gauge, Info, ScrollText, Activity, Factory, Plug, UserCheck, Wand2, KeyRound, Bug, Library, Presentation, TrendingDown, CalendarCheck, Rocket, ClipboardCheck,   FlaskRound, Award, FileQuestion, FlaskConical, Lock, Calculator, Server, BookOpen, Settings, Code, Cloud, Webhook, Leaf, Trophy, TestTube, FileBadge, Gavel, Fingerprint, Languages, FileArchive, DollarSign, Palette,   ShieldX, Siren, ScanLine, Laptop, Eye, Atom, Smartphone, Star, Workflow, Wrench
 } from "lucide-react";
 // NOTE: ClipboardList imported above is reused for the UAT checklist item below.
@@ -32,6 +32,7 @@ export const navSections = [
     items: [
       { label: "Setup Wizard", path: "/onboarding", icon: Wand2, roles: ["admin", "compliance_officer", "risk_manager"] },
       { label: "Guided Onboarding", path: "/guided-onboarding", icon: Rocket, roles: ["admin", "compliance_officer"] },
+      { label: "Onboarding Health Check", path: "/onboarding-health-check", icon: HeartPulse, roles: ["admin", "compliance_officer", "risk_manager", "auditor"] },
       { label: "Connections", path: "/connections", icon: Plug, roles: ["admin", "compliance_officer", "risk_manager", "auditor"] },
     ]
   },

@@ -1,0 +1,177 @@
+{
+  "name": "OnboardingHealthCheck",
+  "type": "object",
+  "properties": {
+    "tenant_id": {
+      "type": "string",
+      "description": "Tenant isolation key \u2014 mandatory on every record"
+    },
+    "check_id": {
+      "type": "string",
+      "description": "Unique health check identifier e.g. OHC-001"
+    },
+    "tenant_name": {
+      "type": "string",
+      "description": "Tenant name at time of scan"
+    },
+    "triggered_by": {
+      "type": "string",
+      "description": "User name or 'auto_onboarding' if triggered automatically"
+    },
+    "scan_status": {
+      "type": "string",
+      "enum": [
+        "running",
+        "completed",
+        "failed",
+        "partial"
+      ],
+      "default": "running"
+    },
+    "scan_started_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "scan_completed_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "evidence_ingestion": {
+      "type": "string",
+      "description": "JSON: {policies: {uploaded, validated, count, hash_verified}, asset_inventories: {...}, access_logs: {...}, audit_reports: {...}}"
+    },
+    "framework_results": {
+      "type": "string",
+      "description": "JSON array: [{framework_code, framework_name, total_requirements, mapped_controls, coverage_pct, gaps_identified, residual_risk_score, risk_tolerance, risk_appetite_status}]"
+    },
+    "total_findings": {
+      "type": "number",
+      "default": 0
+    },
+    "critical_findings": {
+      "type": "number",
+      "default": 0
+    },
+    "high_findings": {
+      "type": "number",
+      "default": 0
+    },
+    "medium_findings": {
+      "type": "number",
+      "default": 0
+    },
+    "low_findings": {
+      "type": "number",
+      "default": 0
+    },
+    "residual_risk_score": {
+      "type": "number",
+      "default": 0,
+      "description": "Overall residual risk score 0-100 after controls"
+    },
+    "risk_tolerance": {
+      "type": "number",
+      "default": 70,
+      "description": "Organizational risk tolerance threshold 0-100"
+    },
+    "risk_appetite_status": {
+      "type": "string",
+      "enum": [
+        "within_tolerance",
+        "near_limit",
+        "breached"
+      ],
+      "default": "within_tolerance"
+    },
+    "poam_items": {
+      "type": "string",
+      "description": "JSON array of POA&M items: [{item_id, finding, linked_control, linked_requirement, framework, priority, residual_risk, milestone, target_date, owner, status}]"
+    },
+    "poam_count": {
+      "type": "number",
+      "default": 0
+    },
+    "overall_health_score": {
+      "type": "number",
+      "default": 0,
+      "description": "Composite health score 0-100"
+    },
+    "health_grade": {
+      "type": "string",
+      "enum": [
+        "excellent",
+        "good",
+        "fair",
+        "poor",
+        "critical"
+      ],
+      "default": "fair"
+    },
+    "recommendations": {
+      "type": "string",
+      "description": "JSON array of prioritized recommendations: [{priority, recommendation, framework, target_date}]"
+    },
+    "notes": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "check_id",
+    "scan_status"
+  ],
+  "rls": {
+    "create": {
+      "data.tenant_id": "{{user.data.tenant_id}}"
+    },
+    "read": {
+      "$or": [
+        {
+          "data.tenant_id": "{{user.data.tenant_id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "update": {
+      "$or": [
+        {
+          "data.tenant_id": "{{user.data.tenant_id}}",
+          "created_by_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        },
+        {
+          "$and": [
+            {
+              "data.tenant_id": "{{user.data.tenant_id}}"
+            },
+            {
+              "user_condition": {
+                "role": "compliance_officer"
+              }
+            }
+          ]
+        }
+      ]
+    },
+    "delete": {
+      "$or": [
+        {
+          "data.tenant_id": "{{user.data.tenant_id}}",
+          "created_by_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    }
+  }
+}
