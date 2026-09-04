@@ -1,10 +1,10 @@
 import { createClientFromRequest } from 'npm:@base44/sdk@0.8.44';
+import { resolveTenantContext } from "../../shared/tenantGuard.ts";
 
 export default async function(req) {
   try {
     const base44 = createClientFromRequest(req);
-    const user = await base44.auth.me();
-    if (!user) return Response.json({ error: 'Unauthorized' }, { status: 401 });
+    const ctx = await resolveTenantContext(base44);
 
     const body = await req.json();
     const { framework_id, framework_name, audit_type, analysis_period_days, title, profile_id } = body;
@@ -39,7 +39,8 @@ export default async function(req) {
         total_systems_analyzed: 0,
         systems_in_scope: 0,
         systems_out_of_scope: 0,
-        systems_borderline: 0
+        systems_borderline: 0,
+        ...(ctx.tenant_id ? { tenant_id: ctx.tenant_id } : {})
       });
     }
 

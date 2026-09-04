@@ -44,8 +44,8 @@ export default function DataCenterIntegrations() {
 
   const load = useCallback(async () => {
     try {
-      const data = await base44.functions.syncDataCenterIntegration({ action: "list_integrations" });
-      setIntegrations(data.integrations || []);
+      const res = await base44.functions.invoke("syncDataCenterIntegration", { action: "list_integrations" });
+      setIntegrations(res.data?.integrations || []);
     } catch (err) {
       toast({ title: "Error", description: "Failed to load integrations", variant: "destructive" });
     } finally {
@@ -88,15 +88,15 @@ export default function DataCenterIntegrations() {
   const testConnection = async (integration) => {
     setTesting(integration.id);
     try {
-      const result = await base44.functions.syncDataCenterIntegration({
+      const result = await base44.functions.invoke("syncDataCenterIntegration", {
         action: "test_connection",
         integration_id: integration.id,
         platform: integration.platform
       });
-      if (result.connected) {
+      if (result.data?.connected) {
         toast({ title: "Connection successful", description: `Connected to ${integration.platform === "confluence_dc" ? "Confluence" : "Jira"} Data Center` });
       } else {
-        toast({ title: "Connection failed", description: result.error, variant: "destructive" });
+        toast({ title: "Connection failed", description: result.data?.error, variant: "destructive" });
       }
       load();
     } catch (err) {
@@ -109,15 +109,16 @@ export default function DataCenterIntegrations() {
   const syncNow = async (integration) => {
     setSyncing(integration.id);
     try {
-      const result = await base44.functions.syncDataCenterIntegration({
+      const result = await base44.functions.invoke("syncDataCenterIntegration", {
         action: "sync",
         integration_id: integration.id
       });
+      const d = result.data;
       toast({
         title: "Sync complete",
-        description: result.total_spaces != null
-          ? `${result.total_spaces} spaces, ${result.total_pages} pages synced`
-          : `${result.total_projects} projects, ${result.total_issues} issues synced`
+        description: d?.total_spaces != null
+          ? `${d.total_spaces} spaces, ${d.total_pages} pages synced`
+          : `${d?.total_projects} projects, ${d?.total_issues} issues synced`
       });
       load();
     } catch (err) {
@@ -129,6 +130,11 @@ export default function DataCenterIntegrations() {
 
   const toggleAutoSync = async (integration, value) => {
     await base44.entities.DataCenterIntegration.update(integration.id, { auto_sync_enabled: value });
+    load();
+  };
+
+  const toggleTrackAccess = async (integration, value) => {
+    await base44.entities.DataCenterIntegration.update(integration.id, { track_access_events: value });
     load();
   };
 
@@ -238,7 +244,7 @@ export default function DataCenterIntegrations() {
                       <Label>Auto-sync ({int.sync_frequency})</Label>
                     </div>
                     <div className="flex items-center gap-2">
-                      <Switch checked={int.track_access_events} onCheckedChange={v => base44.entities.DataCenterIntegration.update(int.id, { track_access_events: v })} />
+                      <Switch checked={int.track_access_events} onCheckedChange={v => toggleTrackAccess(int, v)} />
                       <Label>Track access events</Label>
                     </div>
                   </div>

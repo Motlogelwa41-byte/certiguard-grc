@@ -31,7 +31,18 @@ const TENANT_SCOPED_ENTITIES = new Set([
   'DirectoryUser', 'DPIA', 'RiskQuantification', 'PrivacyRequest', 'PrivacyRequestTask',
   'IdentityProvider', 'Connection', 'TaskFeedback', 'AuditorScope', 'AuditorRequest', 'AuditorLink',
   // Added 2026-08-05: tenant-scoped entities missing from the auto-stamp set, causing create RLS rejections.
-  'ComplianceBenchmark', 'Contract', 'EsgMetric', 'WebhookEndpoint'
+  'ComplianceBenchmark', 'Contract', 'EsgMetric', 'WebhookEndpoint',
+  // Added 2026-09-04: tenant-scoped entities for recently built modules — without these, frontend
+  // creates fail RLS for non-admin users because tenant_id is never stamped on the payload.
+  'RiskScoringModel', 'DataCenterIntegration', 'SecurityRatingConfig', 'AdaptiveScopeProfile',
+  'TrustCenterAccess', 'TrustCenterActivity', 'VendorBIA', 'VendorCertification',
+  'ThreatDetectionRule', 'CryptoKey', 'DataProtectionRule', 'AbacPolicy',
+  'SharedResponsibilityItem', 'SecureBaseline', 'FrameworkRequirement', 'PatchRecord',
+  'RegulatoryFramework', 'AwsMarketplaceConfig', 'VendorCollaboration', 'RemediationTicketSync',
+  'Subprocessor', 'ShadowITApp', 'JmlEvent', 'VendorIncident', 'SystemSecurityPlan',
+  'AnomalyAlert', 'RemediationItem', 'CybersecurityRisk', 'OnboardingHealthCheck',
+  'GrcWorkflow', 'GrcAlertRule', 'RequirementControlMapping', 'BaselineCheckResult',
+  'ConfigurationChangeLog', 'AuditEvidenceLedger'
 ]);
 
 // AuditTrail is created server-side via the logAudit function; skip client logging for it.

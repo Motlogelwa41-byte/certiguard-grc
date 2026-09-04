@@ -76,7 +76,8 @@ export default function SecurityRatingApi() {
   const save = async () => {
     setSaving(true);
     try {
-      await base44.entities.SecurityRatingConfig.update(config.id, config);
+      const { id, created_date, updated_date, created_by_id, tenant_id, total_api_calls, last_api_call_at, current_score, current_grade, last_rating_computed_at, ...payload } = config;
+      await base44.entities.SecurityRatingConfig.update(config.id, payload);
       toast({ title: "Settings saved" });
     } catch (err) {
       toast({ title: "Error", description: err.message, variant: "destructive" });
@@ -103,8 +104,8 @@ export default function SecurityRatingApi() {
     setTesting(true);
     setTestResult(null);
     try {
-      const result = await base44.functions.getPublicSecurityRating({ api_key: config.api_key });
-      setTestResult(result);
+      const result = await base44.functions.invoke("getPublicSecurityRating", { api_key: config.api_key });
+      setTestResult(result.data);
       toast({ title: "API test successful" });
       load();
     } catch (err) {

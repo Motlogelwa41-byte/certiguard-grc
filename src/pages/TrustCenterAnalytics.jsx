@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Users, Building2, FileCheck, Download, MessageSquare, Lock, Eye, Activity, RefreshCw, Mail, ExternalLink } from "lucide-react";
+import { useToast } from "@/components/ui/use-toast";
 
 const ACTIVITY_ICONS = {
   page_view: Eye, document_view: FileCheck, document_download: Download,
@@ -17,13 +18,16 @@ export default function TrustCenterAnalytics() {
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
+  const { toast } = useToast();
 
   const load = async () => {
     setLoading(true);
     try {
       const res = await base44.functions.invoke("processNdaRequest", { action: "get_analytics" });
       setData(res.data);
-    } catch (_) {}
+    } catch (e) {
+      toast({ title: "Error", description: "Failed to load analytics", variant: "destructive" });
+    }
     setLoading(false);
   };
 

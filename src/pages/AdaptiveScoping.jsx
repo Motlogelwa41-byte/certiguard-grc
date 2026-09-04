@@ -32,7 +32,9 @@ export default function AdaptiveScoping() {
       ]);
       setProfiles(profs || []);
       setFrameworks(fws || []);
-    } catch (_) {}
+    } catch (e) {
+      toast({ title: "Error", description: "Failed to load scope profiles", variant: "destructive" });
+    }
     setLoading(false);
   };
 

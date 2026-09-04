@@ -30,6 +30,10 @@ async function testConnection(base44, body, ctx) {
   let integration = null;
   if (integration_id) {
     integration = await base44.asServiceRole.entities.DataCenterIntegration.get(integration_id);
+    // Verify tenant ownership to prevent cross-tenant access
+    if (integration && ctx.tenant_id && integration.tenant_id !== ctx.tenant_id) {
+      return Response.json({ connected: false, error: "Integration not found" }, { status: 404 });
+    }
   }
 
   let baseUrl, token;
@@ -107,6 +111,10 @@ async function syncIntegration(base44, body, ctx) {
 
   const integration = await base44.asServiceRole.entities.DataCenterIntegration.get(integration_id);
   if (!integration) {
+    return Response.json({ error: "Integration not found" }, { status: 404 });
+  }
+  // Verify tenant ownership to prevent cross-tenant access
+  if (ctx.tenant_id && integration.tenant_id !== ctx.tenant_id) {
     return Response.json({ error: "Integration not found" }, { status: 404 });
   }
 
