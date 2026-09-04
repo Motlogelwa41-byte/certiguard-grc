@@ -1,0 +1,154 @@
+{
+  "name": "RemediationTicketSync",
+  "type": "object",
+  "properties": {
+    "tenant_id": {
+      "type": "string",
+      "description": "Tenant isolation key \u2014 mandatory on every record"
+    },
+    "sync_id": {
+      "type": "string",
+      "description": "Unique sync identifier e.g. RTS-001"
+    },
+    "remediation_item_id": {
+      "type": "string",
+      "description": "Linked RemediationItem id"
+    },
+    "remediation_title": {
+      "type": "string"
+    },
+    "external_system": {
+      "type": "string",
+      "enum": [
+        "jira",
+        "linear",
+        "asana",
+        "clickup"
+      ],
+      "default": "jira",
+      "description": "Which ticketing system this sync connects to"
+    },
+    "external_ticket_id": {
+      "type": "string",
+      "description": "Ticket ID in the external system"
+    },
+    "external_ticket_key": {
+      "type": "string",
+      "description": "Human-readable ticket key e.g. ENG-123"
+    },
+    "external_ticket_url": {
+      "type": "string",
+      "description": "Direct URL to the external ticket"
+    },
+    "external_status": {
+      "type": "string",
+      "description": "Current status in the external system e.g. Open, In Progress, Done, Closed"
+    },
+    "external_priority": {
+      "type": "string"
+    },
+    "external_assignee": {
+      "type": "string"
+    },
+    "external_resolution": {
+      "type": "string",
+      "description": "Resolution text if the ticket was resolved"
+    },
+    "external_resolved_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "sync_status": {
+      "type": "string",
+      "enum": [
+        "pending_create",
+        "synced",
+        "pending_update",
+        "auto_closed",
+        "manually_closed",
+        "error"
+      ],
+      "default": "pending_create",
+      "description": "Two-way sync state"
+    },
+    "auto_close_on_resolve": {
+      "type": "boolean",
+      "default": true,
+      "description": "When true, resolving the external ticket auto-closes the linked remediation item"
+    },
+    "last_synced_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "last_status_check": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "created_by_name": {
+      "type": "string"
+    },
+    "error_message": {
+      "type": "string"
+    },
+    "notes": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "sync_id",
+    "remediation_item_id",
+    "external_system"
+  ],
+  "rls": {
+    "create": {
+      "data.tenant_id": "{{user.data.tenant_id}}"
+    },
+    "read": {
+      "$or": [
+        {
+          "data.tenant_id": "{{user.data.tenant_id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "update": {
+      "$or": [
+        {
+          "data.tenant_id": "{{user.data.tenant_id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        },
+        {
+          "user_condition": {
+            "role": "compliance_officer"
+          }
+        },
+        {
+          "user_condition": {
+            "role": "risk_manager"
+          }
+        }
+      ]
+    },
+    "delete": {
+      "$or": [
+        {
+          "data.tenant_id": "{{user.data.tenant_id}}",
+          "created_by_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    }
+  }
+}
