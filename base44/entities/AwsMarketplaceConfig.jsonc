@@ -1,0 +1,232 @@
+{
+  "name": "AwsMarketplaceConfig",
+  "type": "object",
+  "properties": {
+    "tenant_id": {
+      "type": "string",
+      "description": "Tenant isolation key \u2014 mandatory on every record"
+    },
+    "config_id": {
+      "type": "string",
+      "description": "Unique config identifier e.g. AWS-MKT-001"
+    },
+    "seller_name": {
+      "type": "string",
+      "description": "AWS Marketplace seller display name"
+    },
+    "seller_id": {
+      "type": "string",
+      "description": "AWS Marketplace seller ID (12-digit AWS account)"
+    },
+    "product_name": {
+      "type": "string",
+      "description": "Product listing name on AWS Marketplace"
+    },
+    "product_id": {
+      "type": "string",
+      "description": "AWS Marketplace product ID (prod-xxxx)"
+    },
+    "listing_url": {
+      "type": "string",
+      "description": "Full URL to the AWS Marketplace listing"
+    },
+    "feed_slug": {
+      "type": "string",
+      "description": "Public feed URL slug \u2014 appended to /aws-marketplace-feed?slug=xxx"
+    },
+    "integration_status": {
+      "type": "string",
+      "enum": [
+        "draft",
+        "pending_review",
+        "active",
+        "suspended",
+        "disabled"
+      ],
+      "default": "draft",
+      "description": "Current integration lifecycle status"
+    },
+    "expose_frameworks": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "Framework codes to expose in the feed (soc2, iso27001, etc.)"
+    },
+    "expose_certifications": {
+      "type": "boolean",
+      "default": true,
+      "description": "Include certification records in the feed"
+    },
+    "expose_controls_summary": {
+      "type": "boolean",
+      "default": true,
+      "description": "Include control pass/fail counts"
+    },
+    "expose_subprocessors": {
+      "type": "boolean",
+      "default": true,
+      "description": "Include subprocessor list in the feed"
+    },
+    "expose_incident_history": {
+      "type": "boolean",
+      "default": false,
+      "description": "Include recent incident summaries (resolved only)"
+    },
+    "expose_pen_tests": {
+      "type": "boolean",
+      "default": true,
+      "description": "Include penetration test summaries"
+    },
+    "expose_data_residency": {
+      "type": "boolean",
+      "default": true,
+      "description": "Include data residency and hosting info"
+    },
+    "document_access_mode": {
+      "type": "string",
+      "enum": [
+        "public",
+        "request_access",
+        "nda_required"
+      ],
+      "default": "request_access",
+      "description": "How buyers access compliance documents"
+    },
+    "nda_request_email": {
+      "type": "string",
+      "description": "Email where NDA/document access requests are sent"
+    },
+    "auto_approve_aws_buyers": {
+      "type": "boolean",
+      "default": false,
+      "description": "Auto-approve document access for verified AWS Marketplace buyers"
+    },
+    "data_hosting_regions": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "AWS regions where data is hosted e.g. us-east-1, eu-west-1"
+    },
+    "data_residency_statement": {
+      "type": "string",
+      "description": "Data residency commitment statement for buyers"
+    },
+    "encryption_at_rest": {
+      "type": "string",
+      "default": "AES-256-GCM",
+      "description": "Encryption standard at rest"
+    },
+    "encryption_in_transit": {
+      "type": "string",
+      "default": "TLS 1.2+",
+      "description": "Encryption standard in transit"
+    },
+    "kms_provider": {
+      "type": "string",
+      "default": "AWS KMS",
+      "description": "Key management service provider"
+    },
+    "incident_response_sla_hours": {
+      "type": "number",
+      "default": 24,
+      "description": "SLA for initial incident response"
+    },
+    "breach_notification_sla_hours": {
+      "type": "number",
+      "default": 72,
+      "description": "SLA for breach notification to customers"
+    },
+    "uptime_sla_percentage": {
+      "type": "number",
+      "default": 99.9,
+      "description": "Uptime SLA commitment"
+    },
+    "support_plan": {
+      "type": "string",
+      "enum": [
+        "basic",
+        "business",
+        "enterprise",
+        "enterprise_plus"
+      ],
+      "default": "business",
+      "description": "Support plan offered to AWS Marketplace buyers"
+    },
+    "last_sync_at": {
+      "type": "string",
+      "format": "date-time",
+      "description": "Last time the feed was synced/requested"
+    },
+    "feed_request_count": {
+      "type": "number",
+      "default": 0,
+      "description": "How many times the public feed has been accessed"
+    },
+    "last_buyer_access_request": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "buyer_access_requests": {
+      "type": "number",
+      "default": 0,
+      "description": "Total document access requests from AWS Marketplace buyers"
+    },
+    "notes": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "config_id",
+    "seller_name",
+    "feed_slug"
+  ],
+  "rls": {
+    "create": {
+      "data.tenant_id": "{{user.data.tenant_id}}"
+    },
+    "read": {
+      "$or": [
+        {
+          "data.tenant_id": "{{user.data.tenant_id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "update": {
+      "$or": [
+        {
+          "data.tenant_id": "{{user.data.tenant_id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        },
+        {
+          "user_condition": {
+            "role": "compliance_officer"
+          }
+        }
+      ]
+    },
+    "delete": {
+      "$or": [
+        {
+          "data.tenant_id": "{{user.data.tenant_id}}",
+          "created_by_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    }
+  }
+}
