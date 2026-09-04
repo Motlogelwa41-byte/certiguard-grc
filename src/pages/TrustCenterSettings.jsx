@@ -1,11 +1,12 @@
 import React, { useState, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
-import { Shield, Eye, Save, Plus, Trash2, ExternalLink, Globe, RefreshCw, ToggleLeft, ToggleRight } from "lucide-react";
+import { Shield, Eye, Save, Plus, Trash2, ExternalLink, Globe, RefreshCw, ToggleLeft, ToggleRight, Lock, BarChart3, Webhook } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Switch } from "@/components/ui/switch";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import PageHeader from "@/components/shared/PageHeader";
 import { useToast } from "@/components/ui/use-toast";
 
@@ -17,6 +18,9 @@ const defaultConfig = {
   show_frameworks: true, show_controls_count: true, show_uptime: true, uptime_percentage: 99.9,
   show_pentest: false, pentest_date: "", pentest_firm: "",
   show_subprocessors: true, subprocessors: "[]", custom_sections: "[]", accent_color: "#2563eb",
+  access_mode: "public", nda_required: false, nda_template: "", nda_validity_days: 90,
+  crm_sync_enabled: false, crm_webhook_url: "", crm_provider: "none",
+  analytics_enabled: true, auto_approve_access: false, welcome_message: "",
 };
 
 export default function TrustCenterSettings() {
@@ -161,6 +165,96 @@ export default function TrustCenterSettings() {
               <Switch checked={!!config[item.key]} onCheckedChange={v => set(item.key, v)} />
             </div>
           ))}
+        </div>
+      </Card>
+
+      {/* NDA & Access Control */}
+      <Card title="NDA & Document Access Control" action={<Lock className="w-4 h-4 text-muted-foreground" />}>
+        <div className="space-y-4">
+          <Field label="Access Mode">
+            <Select value={config.access_mode || "public"} onValueChange={v => set("access_mode", v)}>
+              <SelectTrigger><SelectValue /></SelectTrigger>
+              <SelectContent>
+                <SelectItem value="public">Public — Open access, no form required</SelectItem>
+                <SelectItem value="request_access">Request Access — Visitors fill a form</SelectItem>
+                <SelectItem value="nda_required">NDA Required — Visitors must sign an NDA</SelectItem>
+              </SelectContent>
+            </Select>
+          </Field>
+          <div className="flex items-center justify-between py-2">
+            <div>
+              <p className="text-sm font-medium text-foreground">Require NDA Signing</p>
+              <p className="text-xs text-muted-foreground">Visitors must sign a mutual NDA before accessing compliance documents</p>
+            </div>
+            <Switch checked={!!config.nda_required} onCheckedChange={v => set("nda_required", v)} />
+          </div>
+          <div className="flex items-center justify-between py-2">
+            <div>
+              <p className="text-sm font-medium text-foreground">Auto-Approve Access</p>
+              <p className="text-xs text-muted-foreground">Automatically approve access requests without manual review</p>
+            </div>
+            <Switch checked={!!config.auto_approve_access} onCheckedChange={v => set("auto_approve_access", v)} />
+          </div>
+          <Field label="NDA Validity (days)">
+            <Input type="number" value={config.nda_validity_days || 90} onChange={e => set("nda_validity_days", parseInt(e.target.value) || 90)} />
+          </Field>
+          <Field label="NDA Template (optional — leave blank for default)">
+            <Textarea
+              value={config.nda_template || ""}
+              onChange={e => set("nda_template", e.target.value)}
+              placeholder="Use {{visitor_name}}, {{visitor_company}}, {{company_name}}, {{date}} as placeholders..."
+              rows={4}
+            />
+          </Field>
+          <Field label="Welcome Message (optional)">
+            <Textarea
+              value={config.welcome_message || ""}
+              onChange={e => set("welcome_message", e.target.value)}
+              placeholder="Custom message shown to visitors on the access request form"
+              rows={2}
+            />
+          </Field>
+        </div>
+      </Card>
+
+      {/* CRM Integration */}
+      <Card title="CRM Integration" action={<Webhook className="w-4 h-4 text-muted-foreground" />}>
+        <div className="space-y-4">
+          <div className="flex items-center justify-between py-2">
+            <div>
+              <p className="text-sm font-medium text-foreground">Enable CRM Sync</p>
+              <p className="text-xs text-muted-foreground">Sync visitor activity (access requests, NDA signings, document downloads) to your CRM</p>
+            </div>
+            <Switch checked={!!config.crm_sync_enabled} onCheckedChange={v => set("crm_sync_enabled", v)} />
+          </div>
+          <Field label="CRM Provider">
+            <Select value={config.crm_provider || "none"} onValueChange={v => set("crm_provider", v)}>
+              <SelectTrigger><SelectValue /></SelectTrigger>
+              <SelectContent>
+                <SelectItem value="none">None</SelectItem>
+                <SelectItem value="salesforce">Salesforce</SelectItem>
+                <SelectItem value="hubspot">HubSpot</SelectItem>
+                <SelectItem value="pipedrive">Pipedrive</SelectItem>
+                <SelectItem value="zoho">Zoho CRM</SelectItem>
+                <SelectItem value="custom">Custom Webhook</SelectItem>
+              </SelectContent>
+            </Select>
+          </Field>
+          <Field label="CRM Webhook URL">
+            <Input
+              value={config.crm_webhook_url || ""}
+              onChange={e => set("crm_webhook_url", e.target.value)}
+              placeholder="https://your-crm-webhook-url..."
+              disabled={!config.crm_sync_enabled}
+            />
+          </Field>
+          <div className="flex items-center justify-between py-2">
+            <div>
+              <p className="text-sm font-medium text-foreground flex items-center gap-1.5"><BarChart3 className="w-3.5 h-3.5" /> Enable Visitor Analytics</p>
+              <p className="text-xs text-muted-foreground">Track page views, document downloads, and questions for account-level analytics</p>
+            </div>
+            <Switch checked={!!config.analytics_enabled} onCheckedChange={v => set("analytics_enabled", v)} />
+          </div>
         </div>
       </Card>
 

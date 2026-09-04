@@ -57,6 +57,7 @@ export const navSections = [
       { label: "Test Library", path: "/control-test-library", icon: Library, roles: ["admin", "compliance_officer", "auditor"] },
       { label: "Auditor Portal", path: "/auditor-portal", icon: ShieldCheck, roles: ["admin", "compliance_officer", "external_auditor", "auditor"] },
       { label: "Auditor Scope", path: "/auditor-scope", icon: UserCheck, roles: ["admin", "compliance_officer"] },
+      { label: "Adaptive Scoping", path: "/adaptive-scoping", icon: Zap, roles: ["admin", "compliance_officer", "auditor"] },
       { label: "Certifications", path: "/certifications", icon: Award, roles: ["admin", "compliance_officer", "auditor", "external_auditor"] },
       { label: "Questionnaires", path: "/questionnaires", icon: FileQuestion, roles: ["admin", "compliance_officer"] },
       { label: "Penetration Tests", path: "/pen-tests", icon: FlaskConical, roles: ["admin", "compliance_officer", "auditor", "external_auditor"] },
@@ -215,6 +216,7 @@ export const navSections = [
     label: "Settings",
     items: [
       { label: "Trust Center", path: "/trust-center-settings", icon: Globe, roles: ["admin", "compliance_officer"] },
+      { label: "Trust Center Analytics", path: "/trust-center-analytics", icon: BarChart3, roles: ["admin", "compliance_officer"] },
       { label: "Compliance Badges", path: "/compliance-badges", icon: Award, roles: ["admin", "compliance_officer"] },
       { label: "AWS Marketplace", path: "/aws-marketplace", icon: Store, roles: ["admin", "compliance_officer"] },
       { label: "Security", path: "/security", icon: ShieldCheck, roles: ["admin"] },

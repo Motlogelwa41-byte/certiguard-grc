@@ -1,0 +1,220 @@
+{
+  "name": "TrustCenterAccess",
+  "type": "object",
+  "properties": {
+    "tenant_id": {
+      "type": "string",
+      "description": "Tenant isolation key"
+    },
+    "request_id": {
+      "type": "string",
+      "description": "Unique access request identifier e.g. TCAR-001"
+    },
+    "visitor_name": {
+      "type": "string",
+      "description": "Full name of the prospect/visitor requesting access"
+    },
+    "visitor_email": {
+      "type": "string",
+      "description": "Email address of the prospect/visitor"
+    },
+    "visitor_company": {
+      "type": "string",
+      "description": "Company name of the prospect"
+    },
+    "visitor_title": {
+      "type": "string",
+      "description": "Job title of the visitor"
+    },
+    "visitor_phone": {
+      "type": "string"
+    },
+    "account_domain": {
+      "type": "string",
+      "description": "Email domain extracted for account-level grouping e.g. acme.com"
+    },
+    "access_token": {
+      "type": "string",
+      "description": "Unique token granting document access after NDA signing"
+    },
+    "nda_status": {
+      "type": "string",
+      "enum": [
+        "not_required",
+        "requested",
+        "generated",
+        "sent",
+        "viewed",
+        "signed",
+        "rejected",
+        "expired"
+      ],
+      "default": "requested",
+      "description": "NDA lifecycle: requested \u2192 generated \u2192 sent \u2192 viewed \u2192 signed \u2192 access granted"
+    },
+    "nda_document_text": {
+      "type": "string",
+      "description": "Generated NDA document text"
+    },
+    "nda_signed_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "nda_signed_ip": {
+      "type": "string"
+    },
+    "nda_signed_user_agent": {
+      "type": "string"
+    },
+    "access_granted": {
+      "type": "boolean",
+      "default": false,
+      "description": "True when NDA is signed and document access is unlocked"
+    },
+    "access_granted_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "access_expires_at": {
+      "type": "string",
+      "format": "date-time",
+      "description": "When the access token expires"
+    },
+    "documents_viewed": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "List of document names viewed by this visitor"
+    },
+    "documents_downloaded": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "List of document names downloaded by this visitor"
+    },
+    "questions_asked": {
+      "type": "number",
+      "default": 0,
+      "description": "Count of questions submitted by this visitor"
+    },
+    "last_activity": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "visit_count": {
+      "type": "number",
+      "default": 1,
+      "description": "How many times this visitor has accessed the Trust Center"
+    },
+    "first_visit": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "crm_synced": {
+      "type": "boolean",
+      "default": false,
+      "description": "Whether this access request has been synced to the CRM"
+    },
+    "crm_synced_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "crm_account_id": {
+      "type": "string",
+      "description": "External CRM account ID if synced"
+    },
+    "crm_lead_id": {
+      "type": "string",
+      "description": "External CRM lead ID if synced"
+    },
+    "source": {
+      "type": "string",
+      "enum": [
+        "trust_center",
+        "aws_marketplace",
+        "direct_link",
+        "referral",
+        "other"
+      ],
+      "default": "trust_center"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "pending",
+        "approved",
+        "rejected",
+        "expired",
+        "revoked"
+      ],
+      "default": "pending",
+      "description": "Overall access request status"
+    },
+    "notes": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "request_id",
+    "visitor_name",
+    "visitor_email"
+  ],
+  "rls": {
+    "create": {
+      "$or": [
+        {
+          "data.tenant_id": "{{user.data.tenant_id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "read": {
+      "$or": [
+        {
+          "data.tenant_id": "{{user.data.tenant_id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "update": {
+      "$or": [
+        {
+          "data.tenant_id": "{{user.data.tenant_id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        },
+        {
+          "user_condition": {
+            "role": "compliance_officer"
+          }
+        }
+      ]
+    },
+    "delete": {
+      "$or": [
+        {
+          "data.tenant_id": "{{user.data.tenant_id}}",
+          "created_by_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    }
+  }
+}

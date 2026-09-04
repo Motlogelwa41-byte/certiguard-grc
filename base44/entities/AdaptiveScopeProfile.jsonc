@@ -1,0 +1,210 @@
+{
+  "name": "AdaptiveScopeProfile",
+  "type": "object",
+  "properties": {
+    "tenant_id": {
+      "type": "string",
+      "description": "Tenant isolation key"
+    },
+    "profile_id": {
+      "type": "string",
+      "description": "Unique profile identifier e.g. ASP-001"
+    },
+    "title": {
+      "type": "string",
+      "description": "Profile title e.g. SOC 2 Type II \u2014 Q4 2026 Adaptive Scope"
+    },
+    "framework_id": {
+      "type": "string",
+      "description": "Linked Framework id"
+    },
+    "framework_name": {
+      "type": "string"
+    },
+    "audit_type": {
+      "type": "string",
+      "enum": [
+        "soc2_type1",
+        "soc2_type2",
+        "iso27001",
+        "iso27017",
+        "iso27018",
+        "iso27701",
+        "pci_dss",
+        "hipaa",
+        "fedramp",
+        "nist_csf",
+        "gdpr",
+        "popia",
+        "nis2",
+        "iso42001",
+        "other"
+      ],
+      "default": "soc2_type2"
+    },
+    "analysis_status": {
+      "type": "string",
+      "enum": [
+        "pending",
+        "analyzing",
+        "completed",
+        "applied",
+        "failed"
+      ],
+      "default": "pending"
+    },
+    "total_systems_analyzed": {
+      "type": "number",
+      "default": 0,
+      "description": "Total IT assets/systems analyzed"
+    },
+    "systems_in_scope": {
+      "type": "number",
+      "default": 0,
+      "description": "Systems recommended for inclusion in audit scope"
+    },
+    "systems_out_of_scope": {
+      "type": "number",
+      "default": 0,
+      "description": "Systems recommended for exclusion from audit scope"
+    },
+    "systems_borderline": {
+      "type": "number",
+      "default": 0,
+      "description": "Systems with borderline usage requiring manual review"
+    },
+    "scope_reduction_pct": {
+      "type": "number",
+      "default": 0,
+      "description": "Percentage reduction in scope vs. static scoping"
+    },
+    "usage_data_points": {
+      "type": "number",
+      "default": 0,
+      "description": "Total usage data points analyzed"
+    },
+    "analysis_period_days": {
+      "type": "number",
+      "default": 90,
+      "description": "How many days of usage data were analyzed"
+    },
+    "in_scope_systems": {
+      "type": "string",
+      "description": "JSON array of systems in scope: [{system_id, name, usage_score, reason, last_active}]"
+    },
+    "out_of_scope_systems": {
+      "type": "string",
+      "description": "JSON array of systems out of scope: [{system_id, name, usage_score, reason, last_active, days_inactive}]"
+    },
+    "borderline_systems": {
+      "type": "string",
+      "description": "JSON array of borderline systems: [{system_id, name, usage_score, reason, recommendation}]"
+    },
+    "scope_recommendations": {
+      "type": "string",
+      "description": "JSON array of AI-generated recommendations: [{priority, recommendation, impact, systems_affected}]"
+    },
+    "controls_in_scope": {
+      "type": "number",
+      "default": 0
+    },
+    "controls_excluded": {
+      "type": "number",
+      "default": 0
+    },
+    "evidence_required": {
+      "type": "number",
+      "default": 0,
+      "description": "Estimated evidence items required for scoped systems"
+    },
+    "evidence_savings": {
+      "type": "number",
+      "default": 0,
+      "description": "Evidence items saved by excluding out-of-scope systems"
+    },
+    "risk_assessment": {
+      "type": "string",
+      "description": "AI-generated risk assessment of the adaptive scope"
+    },
+    "confidence_score": {
+      "type": "number",
+      "default": 0,
+      "description": "AI confidence in the scope recommendation 0-100"
+    },
+    "applied_at": {
+      "type": "string",
+      "format": "date-time",
+      "description": "When the adaptive scope was applied to the audit"
+    },
+    "applied_by": {
+      "type": "string"
+    },
+    "analysis_completed_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "notes": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "profile_id",
+    "title"
+  ],
+  "rls": {
+    "create": {
+      "$or": [
+        {
+          "data.tenant_id": "{{user.data.tenant_id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "read": {
+      "$or": [
+        {
+          "data.tenant_id": "{{user.data.tenant_id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "update": {
+      "$or": [
+        {
+          "data.tenant_id": "{{user.data.tenant_id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        },
+        {
+          "user_condition": {
+            "role": "compliance_officer"
+          }
+        }
+      ]
+    },
+    "delete": {
+      "$or": [
+        {
+          "data.tenant_id": "{{user.data.tenant_id}}",
+          "created_by_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    }
+  }
+}

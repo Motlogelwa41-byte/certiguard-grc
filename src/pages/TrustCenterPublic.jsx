@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { base44 } from "@/api/base44Client";
 import PlatformStatus from "@/components/trust/PlatformStatus";
+import TrustCenterNdaGate from "@/components/trust/TrustCenterNdaGate";
 import {
   Shield, CheckCircle, Lock, Eye, Server, Globe, Mail, Award,
   AlertTriangle, Activity, Zap, FileCheck, Users, Clock,
@@ -52,6 +53,8 @@ export default function TrustCenterPublic() {
   const [loading, setLoading] = useState(true);
   const [notFound, setNotFound] = useState(false);
   const [expandedFw, setExpandedFw] = useState(null);
+  const [accessGranted, setAccessGranted] = useState(false);
+  const [accessToken, setAccessToken] = useState(null);
 
   useEffect(() => {
     const load = async () => {
@@ -72,11 +75,40 @@ export default function TrustCenterPublic() {
         const openRisks = (rks || []).filter(r => r.status === "open");
         const criticalRisks = openRisks.filter(r => (r.likelihood || 1) * (r.impact || 1) >= 16);
         setRisks({ open: openRisks.length, critical: criticalRisks.length });
+
+        // Check for existing access token in URL params or localStorage
+        const urlParams = new URLSearchParams(window.location.search);
+        const existingToken = urlParams.get('access_token') || localStorage.getItem('tc_access_token');
+        if (existingToken && (tc.nda_required || tc.access_mode === 'nda_required' || tc.access_mode === 'request_access')) {
+          setAccessToken(existingToken);
+          setAccessGranted(true);
+        }
       } catch { setNotFound(true); }
       setLoading(false);
     };
     load();
   }, []);
+
+  const handleAccessGranted = (data) => {
+    if (data?.access_token) {
+      localStorage.setItem('tc_access_token', data.access_token);
+      setAccessToken(data.access_token);
+    }
+    setAccessGranted(true);
+  };
+
+  const logActivity = async (activity_type, activity_detail, page_section) => {
+    if (!accessToken) return;
+    try {
+      await base44.functions.invoke('processNdaRequest', {
+        action: 'log_activity',
+        access_token: accessToken,
+        activity_type,
+        activity_detail,
+        page_section
+      });
+    } catch (_) {}
+  };
 
   if (loading) return (
     <div className="min-h-screen flex items-center justify-center bg-slate-50">
@@ -102,6 +134,21 @@ export default function TrustCenterPublic() {
   const securityStatus = passRate >= 85 ? "Operational" : passRate >= 60 ? "Monitoring" : "Attention Required";
   const statusColors = { "Operational": { bg: "#dcfce7", text: "#15803d", dot: "#16a34a" }, "Monitoring": { bg: "#fef9c3", text: "#a16207", dot: "#d97706" }, "Attention Required": { bg: "#fee2e2", text: "#b91c1c", dot: "#dc2626" } };
   const sc = statusColors[securityStatus];
+
+  // NDA / Access Gate — if required and not yet granted, show gate instead of full content
+  const needsAccess = (config.nda_required || config.access_mode === 'nda_required' || config.access_mode === 'request_access') && !accessGranted;
+  if (needsAccess) {
+    return (
+      <div className="min-h-screen bg-slate-50 font-sans flex flex-col">
+        <div className="flex-1 flex items-center justify-center px-4 py-12">
+          <TrustCenterNdaGate config={config} onAccessGranted={handleAccessGranted} />
+        </div>
+        <footer className="text-center py-4 text-xs text-slate-400">
+          {config.company_name} · Trust Center
+        </footer>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-white font-sans">

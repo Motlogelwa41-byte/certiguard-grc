@@ -74,6 +74,70 @@
     "slug": {
       "type": "string",
       "description": "Public URL slug e.g. trust"
+    },
+    "access_mode": {
+      "type": "string",
+      "enum": [
+        "public",
+        "request_access",
+        "nda_required"
+      ],
+      "default": "public",
+      "description": "Document access mode: public (open), request_access (form), nda_required (NDA must be signed)"
+    },
+    "nda_required": {
+      "type": "boolean",
+      "default": false,
+      "description": "When true, visitors must sign an NDA before accessing compliance documents"
+    },
+    "nda_template": {
+      "type": "string",
+      "description": "NDA template text with {{visitor_name}}, {{visitor_company}}, {{company_name}} placeholders"
+    },
+    "nda_validity_days": {
+      "type": "number",
+      "default": 90,
+      "description": "How many days NDA-based access remains valid"
+    },
+    "documents": {
+      "type": "string",
+      "description": "JSON array of compliance documents: [{id, name, description, url, requires_nda, category, last_updated}]"
+    },
+    "crm_sync_enabled": {
+      "type": "boolean",
+      "default": false,
+      "description": "When true, visitor activity is synced to CRM via webhook"
+    },
+    "crm_webhook_url": {
+      "type": "string",
+      "description": "Webhook URL for CRM sync (Salesforce, HubSpot, etc.)"
+    },
+    "crm_provider": {
+      "type": "string",
+      "enum": [
+        "salesforce",
+        "hubspot",
+        "pipedrive",
+        "zoho",
+        "custom",
+        "none"
+      ],
+      "default": "none",
+      "description": "Which CRM provider to sync visitor activity to"
+    },
+    "analytics_enabled": {
+      "type": "boolean",
+      "default": true,
+      "description": "When true, visitor activity is tracked for account-level analytics"
+    },
+    "auto_approve_access": {
+      "type": "boolean",
+      "default": false,
+      "description": "When true, access requests are auto-approved without manual review"
+    },
+    "welcome_message": {
+      "type": "string",
+      "description": "Custom welcome message shown to visitors"
     }
   },
   "required": [

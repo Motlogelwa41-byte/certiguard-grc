@@ -1,0 +1,142 @@
+{
+  "name": "TrustCenterActivity",
+  "type": "object",
+  "properties": {
+    "tenant_id": {
+      "type": "string",
+      "description": "Tenant isolation key"
+    },
+    "activity_id": {
+      "type": "string",
+      "description": "Unique activity identifier e.g. TCA-001"
+    },
+    "access_request_id": {
+      "type": "string",
+      "description": "Linked TrustCenterAccess request id"
+    },
+    "visitor_name": {
+      "type": "string"
+    },
+    "visitor_email": {
+      "type": "string"
+    },
+    "visitor_company": {
+      "type": "string"
+    },
+    "account_domain": {
+      "type": "string",
+      "description": "Email domain for account-level grouping"
+    },
+    "activity_type": {
+      "type": "string",
+      "enum": [
+        "page_view",
+        "document_view",
+        "document_download",
+        "question_submitted",
+        "nda_viewed",
+        "nda_signed",
+        "framework_viewed",
+        "badge_clicked",
+        "contact_form",
+        "access_requested"
+      ],
+      "default": "page_view",
+      "description": "Type of Trust Center activity"
+    },
+    "activity_detail": {
+      "type": "string",
+      "description": "Additional context e.g. document name, framework name, question text"
+    },
+    "page_section": {
+      "type": "string",
+      "description": "Which section of the Trust Center was viewed"
+    },
+    "ip_address": {
+      "type": "string"
+    },
+    "user_agent": {
+      "type": "string"
+    },
+    "referrer": {
+      "type": "string",
+      "description": "Referring URL"
+    },
+    "session_id": {
+      "type": "string",
+      "description": "Visitor session identifier"
+    },
+    "duration_seconds": {
+      "type": "number",
+      "default": 0,
+      "description": "Time spent on page/section"
+    },
+    "crm_synced": {
+      "type": "boolean",
+      "default": false
+    },
+    "notes": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "activity_id",
+    "activity_type"
+  ],
+  "rls": {
+    "create": {
+      "$or": [
+        {
+          "data.tenant_id": "{{user.data.tenant_id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "read": {
+      "$or": [
+        {
+          "data.tenant_id": "{{user.data.tenant_id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "update": {
+      "$or": [
+        {
+          "data.tenant_id": "{{user.data.tenant_id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        },
+        {
+          "user_condition": {
+            "role": "compliance_officer"
+          }
+        }
+      ]
+    },
+    "delete": {
+      "$or": [
+        {
+          "data.tenant_id": "{{user.data.tenant_id}}",
+          "created_by_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    }
+  }
+}

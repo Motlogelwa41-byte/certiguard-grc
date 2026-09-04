@@ -191,6 +191,8 @@ import RemediationSyncCenter from '@/pages/RemediationSyncCenter';
 import FrameworkTemplateLibrary from '@/pages/FrameworkTemplateLibrary';
 import ComplianceBadges from '@/pages/ComplianceBadges';
 import AwsMarketplaceIntegration from '@/pages/AwsMarketplaceIntegration';
+import TrustCenterAnalytics from '@/pages/TrustCenterAnalytics';
+import AdaptiveScoping from '@/pages/AdaptiveScoping';
 import FairBenchmarks from '@/pages/FairBenchmarks';
 import PrivacyDataMapping from '@/pages/PrivacyDataMapping';
 import EsgBenchmarking from '@/pages/EsgBenchmarking';
@@ -426,6 +428,8 @@ const AuthenticatedApp = () => {
           <Route path="/framework-templates" element={<FrameworkTemplateLibrary />} />
           <Route path="/compliance-badges" element={<ComplianceBadges />} />
           <Route path="/aws-marketplace" element={<AwsMarketplaceIntegration />} />
+          <Route path="/trust-center-analytics" element={<TrustCenterAnalytics />} />
+          <Route path="/adaptive-scoping" element={<AdaptiveScoping />} />
           <Route path="/vendor-risk-center" element={<VendorRiskCenter />} />
           <Route path="/vendor-risk-exchange" element={<VendorRiskExchange />} />
           <Route path="/fair-benchmarks" element={<FairBenchmarks />} />
