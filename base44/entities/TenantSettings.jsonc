@@ -114,6 +114,39 @@
       "default": true,
       "description": "When true, all users must enroll MFA before accessing the platform (enforced by MfaEnforcementGate)"
     },
+    "dpo_name": {
+      "type": "string",
+      "description": "Data Protection Officer full name (POPIA/GDPR Article 37 designation)"
+    },
+    "dpo_email": {
+      "type": "string",
+      "description": "DPO contact email \u2014 must be monitored and reachable by data subjects and the regulator"
+    },
+    "dpo_phone": {
+      "type": "string",
+      "description": "DPO contact phone number"
+    },
+    "dpo_appointed_at": {
+      "type": "string",
+      "format": "date",
+      "description": "Date the DPO was formally appointed"
+    },
+    "dpo_regulator": {
+      "type": "string",
+      "enum": [
+        "POPIA",
+        "GDPR",
+        "BW_DPA",
+        "NA_DPA",
+        "OTHER"
+      ],
+      "default": "POPIA",
+      "description": "Regulatory authority the DPO is registered with"
+    },
+    "dpo_registration_ref": {
+      "type": "string",
+      "description": "Registration reference number with the relevant data protection authority"
+    },
     "updated_by_name": {
       "type": "string"
     }
@@ -145,6 +178,11 @@
         {
           "user_condition": {
             "role": "admin"
+          }
+        },
+        {
+          "user_condition": {
+            "role": "compliance_officer"
           }
         }
       ]
