@@ -1,0 +1,184 @@
+{
+  "name": "RegulatoryFiling",
+  "type": "object",
+  "properties": {
+    "tenant_id": {
+      "type": "string",
+      "description": "Tenant isolation key \u2014 mandatory on every record"
+    },
+    "filing_id": {
+      "type": "string",
+      "description": "Unique filing identifier e.g. RF-2026-001"
+    },
+    "filing_name": {
+      "type": "string",
+      "description": "Name of the filing e.g. 'SARB Prudential Report Q3 2026'"
+    },
+    "regulator": {
+      "type": "string",
+      "enum": [
+        "SARB",
+        "FSCA",
+        "information_regulator",
+        "SARS",
+        "ICASA",
+        "COMPAC",
+        "FIC",
+        "NCR",
+        "other"
+      ],
+      "default": "SARB",
+      "description": "Regulatory body receiving the filing"
+    },
+    "regulator_display": {
+      "type": "string",
+      "description": "Display name of the regulator if 'other'"
+    },
+    "filing_type": {
+      "type": "string",
+      "enum": [
+        "annual_return",
+        "prudential_report",
+        "compliance_certificate",
+        "data_breach_notification",
+        "audit_report",
+        "financial_statement",
+        "regulatory_return",
+        "aml_report",
+        "tax_return",
+        "other"
+      ],
+      "default": "regulatory_return"
+    },
+    "jurisdiction": {
+      "type": "string",
+      "description": "Country/jurisdiction e.g. South Africa, Botswana"
+    },
+    "due_date": {
+      "type": "string",
+      "format": "date",
+      "description": "Deadline for submission"
+    },
+    "submitted_date": {
+      "type": "string",
+      "format": "date",
+      "description": "Date the filing was actually submitted"
+    },
+    "receipt_number": {
+      "type": "string",
+      "description": "Receipt or reference number from the regulator"
+    },
+    "acknowledged_date": {
+      "type": "string",
+      "format": "date",
+      "description": "Date the regulator acknowledged receipt"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "not_started",
+        "in_progress",
+        "submitted",
+        "acknowledged",
+        "rejected",
+        "overdue"
+      ],
+      "default": "not_started"
+    },
+    "submitted_by_name": {
+      "type": "string"
+    },
+    "submitted_by_id": {
+      "type": "string"
+    },
+    "filing_method": {
+      "type": "string",
+      "enum": [
+        "online_portal",
+        "email",
+        "physical",
+        "courier",
+        "api"
+      ],
+      "default": "online_portal"
+    },
+    "confirmation_reference": {
+      "type": "string",
+      "description": "Confirmation reference from the filing system"
+    },
+    "document_url": {
+      "type": "string",
+      "description": "URL to the filed document"
+    },
+    "rejection_reason": {
+      "type": "string",
+      "description": "Reason if the filing was rejected by the regulator"
+    },
+    "resubmission_due_date": {
+      "type": "string",
+      "format": "date"
+    },
+    "owner_name": {
+      "type": "string"
+    },
+    "owner_id": {
+      "type": "string"
+    },
+    "notes": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "filing_id",
+    "filing_name",
+    "regulator",
+    "filing_type"
+  ],
+  "rls": {
+    "create": {
+      "data.tenant_id": "{{user.data.tenant_id}}"
+    },
+    "read": {
+      "$or": [
+        {
+          "data.tenant_id": "{{user.data.tenant_id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "update": {
+      "$or": [
+        {
+          "data.tenant_id": "{{user.data.tenant_id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        },
+        {
+          "user_condition": {
+            "role": "compliance_officer"
+          }
+        }
+      ]
+    },
+    "delete": {
+      "$or": [
+        {
+          "data.tenant_id": "{{user.data.tenant_id}}",
+          "created_by_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    }
+  }
+}

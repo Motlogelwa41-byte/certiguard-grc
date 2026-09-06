@@ -140,6 +140,8 @@ export const navSections = [
       { label: "DLP Monitor", path: "/dlp-monitor", icon: Eye, roles: ["admin", "compliance_officer", "risk_manager", "auditor"] },
       { label: "EDR / XDR", path: "/edr-dashboard", icon: Radar, roles: ["admin", "compliance_officer", "risk_manager", "auditor"] },
       { label: "IT Asset Management", path: "/itam", icon: Laptop, roles: ["admin", "compliance_officer", "risk_manager", "auditor"] },
+      { label: "MDM / Devices", path: "/mdm-dashboard", icon: Smartphone, roles: ["admin", "compliance_officer", "risk_manager", "auditor"] },
+      { label: "Insider Threat Program", path: "/insider-threat", icon: Eye, roles: ["admin", "compliance_officer", "risk_manager", "auditor"] },
       { label: "Secure Baselines", path: "/secure-baselines", icon: Shield, roles: ["admin", "compliance_officer", "risk_manager", "auditor"] },
       { label: "PQC Readiness", path: "/pqc-readiness", icon: Atom, roles: ["admin", "compliance_officer", "risk_manager"] },
       { label: "API & Mobile Security", path: "/api-security", icon: Smartphone, roles: ["admin", "compliance_officer", "risk_manager"] },
@@ -184,6 +186,8 @@ export const navSections = [
       { label: "HRIS Directory", path: "/hris-directory", icon: Users, roles: ["admin", "compliance_officer", "auditor"] },
       { label: "Board Resolutions", path: "/board-resolutions", icon: Gavel, roles: ["admin", "compliance_officer"] },
       { label: "Zero-Trust Ledger", path: "/zero-trust-ledger", icon: Fingerprint, roles: ["admin", "compliance_officer", "risk_manager"] },
+      { label: "Data Retention Schedule", path: "/data-retention", icon: FileArchive, roles: ["admin", "compliance_officer", "auditor"] },
+      { label: "ABAC Policy Manager", path: "/abac-policies", icon: Fingerprint, roles: ["admin", "compliance_officer", "risk_manager"] },
     ]
   },
   {
@@ -245,6 +249,7 @@ export const navSections = [
       { label: "BCDR Tracker", path: "/bcdr-tracker", icon: Shield, roles: ["admin", "compliance_officer", "risk_manager"] },
       { label: "Tabletop Simulator", path: "/tabletop-simulator", icon: AlertTriangle, roles: ["admin", "compliance_officer", "risk_manager"] },
       { label: "Statutory Calendar", path: "/statutory-calendar", icon: FileBadge, roles: ["admin", "compliance_officer", "risk_manager"] },
+      { label: "Regulatory Filing Tracker", path: "/regulatory-filings", icon: FileBadge, roles: ["admin", "compliance_officer", "risk_manager"] },
       { label: "Whistleblower Cases", path: "/whistleblower-cases", icon: Shield, roles: ["admin", "compliance_officer"] },
       { label: "COI & Insider Threat", path: "/coi-portal", icon: ShieldAlert, roles: ["admin", "compliance_officer", "risk_manager", "user"] },
       { label: "White-Label Branding", path: "/white-label", icon: Palette, roles: ["admin"] },

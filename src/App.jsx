@@ -226,6 +226,11 @@ import KnowBe4Integration from '@/pages/KnowBe4Integration';
 import TrustBadgeWidget from '@/pages/TrustBadgeWidget';
 import DpoCommandCenter from '@/pages/DpoCommandCenter';
 import ClientDashboard from '@/pages/ClientDashboard';
+import MdmDashboard from '@/pages/MdmDashboard';
+import DataRetentionSchedule from '@/pages/DataRetentionSchedule';
+import RegulatoryFilingTracker from '@/pages/RegulatoryFilingTracker';
+import InsiderThreatProgram from '@/pages/InsiderThreatProgram';
+import AbacPolicyManager from '@/pages/AbacPolicyManager';
 import { LanguageProvider } from '@/contexts/LanguageContext';
 
 const AuthenticatedApp = () => {
@@ -473,6 +478,11 @@ const AuthenticatedApp = () => {
           <Route path="/trust-badge-widget" element={<TrustBadgeWidget />} />
           <Route path="/dpo" element={<DpoCommandCenter />} />
           <Route path="/client-dashboard" element={<ClientDashboard />} />
+          <Route path="/mdm-dashboard" element={<MdmDashboard />} />
+          <Route path="/data-retention" element={<DataRetentionSchedule />} />
+          <Route path="/regulatory-filings" element={<RegulatoryFilingTracker />} />
+          <Route path="/insider-threat" element={<InsiderThreatProgram />} />
+          <Route path="/abac-policies" element={<AbacPolicyManager />} />
           <Route path="/connect" element={<Connect />} />
         </Route>
       </Route>

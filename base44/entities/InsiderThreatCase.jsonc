@@ -1,0 +1,229 @@
+{
+  "name": "InsiderThreatCase",
+  "type": "object",
+  "properties": {
+    "tenant_id": {
+      "type": "string",
+      "description": "Tenant isolation key \u2014 mandatory on every record"
+    },
+    "case_id": {
+      "type": "string",
+      "description": "Unique case identifier e.g. IT-2026-001"
+    },
+    "case_name": {
+      "type": "string"
+    },
+    "subject_name": {
+      "type": "string",
+      "description": "Name of the employee/contractor under monitoring"
+    },
+    "subject_id": {
+      "type": "string",
+      "description": "Employee ID or user ID of the subject"
+    },
+    "subject_department": {
+      "type": "string"
+    },
+    "subject_role": {
+      "type": "string",
+      "description": "Job title or role of the subject"
+    },
+    "subject_employment_type": {
+      "type": "string",
+      "enum": [
+        "employee",
+        "contractor",
+        "vendor",
+        "intern",
+        "departing",
+        "former"
+      ],
+      "default": "employee"
+    },
+    "enrollment_date": {
+      "type": "string",
+      "format": "date",
+      "description": "Date the subject was enrolled in the insider threat program"
+    },
+    "enrollment_reason": {
+      "type": "string",
+      "enum": [
+        "privileged_access",
+        "sensitive_data_access",
+        "departure_watch",
+        "behavioral_concern",
+        "hr_referral",
+        "access_anomaly",
+        "proactive_monitoring",
+        "incident_triggered"
+      ],
+      "default": "proactive_monitoring"
+    },
+    "risk_level": {
+      "type": "string",
+      "enum": [
+        "low",
+        "medium",
+        "high",
+        "critical"
+      ],
+      "default": "low"
+    },
+    "case_status": {
+      "type": "string",
+      "enum": [
+        "monitoring",
+        "investigating",
+        "escalated",
+        "contained",
+        "closed",
+        "false_positive"
+      ],
+      "default": "monitoring"
+    },
+    "detection_source": {
+      "type": "string",
+      "enum": [
+        "siem_alert",
+        "hr_referral",
+        "behavioral_analytics",
+        "peer_report",
+        "access_anomaly",
+        "dlp_alert",
+        "data_exfiltration",
+        "after_hours_activity",
+        "policy_violation",
+        "other"
+      ],
+      "default": "behavioral_analytics"
+    },
+    "indicators_observed": {
+      "type": "string",
+      "description": "Text description of observed indicators e.g. 'Mass file download at 2am, access to systems outside job scope'"
+    },
+    "indicators_json": {
+      "type": "string",
+      "description": "JSON array of structured indicators: [{indicator, severity, first_observed, last_observed, count}]"
+    },
+    "investigation_notes": {
+      "type": "string"
+    },
+    "assigned_to_name": {
+      "type": "string"
+    },
+    "assigned_to_id": {
+      "type": "string"
+    },
+    "escalation_date": {
+      "type": "string",
+      "format": "date"
+    },
+    "resolution_date": {
+      "type": "string",
+      "format": "date"
+    },
+    "resolution_summary": {
+      "type": "string",
+      "description": "Summary of how the case was resolved"
+    },
+    "resolution_action": {
+      "type": "string",
+      "enum": [
+        "no_action",
+        "counseling",
+        "access_restriction",
+        "disciplinary",
+        "termination",
+        "legal_action",
+        "false_positive",
+        "monitoring_continued"
+      ],
+      "description": "Action taken to resolve the case"
+    },
+    "linked_incident_ids": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "linked_alert_ids": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "evidence_collected": {
+      "type": "string",
+      "description": "JSON array of evidence items: [{type, description, url, collected_date}]"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "active",
+        "closed",
+        "monitoring"
+      ],
+      "default": "active"
+    },
+    "notes": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "case_id",
+    "case_name",
+    "subject_name"
+  ],
+  "rls": {
+    "create": {
+      "data.tenant_id": "{{user.data.tenant_id}}"
+    },
+    "read": {
+      "$or": [
+        {
+          "data.tenant_id": "{{user.data.tenant_id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "update": {
+      "$or": [
+        {
+          "data.tenant_id": "{{user.data.tenant_id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        },
+        {
+          "user_condition": {
+            "role": "compliance_officer"
+          }
+        },
+        {
+          "user_condition": {
+            "role": "risk_manager"
+          }
+        }
+      ]
+    },
+    "delete": {
+      "$or": [
+        {
+          "data.tenant_id": "{{user.data.tenant_id}}",
+          "created_by_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    }
+  }
+}
