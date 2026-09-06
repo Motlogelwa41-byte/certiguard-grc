@@ -6,6 +6,7 @@ import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import StatusBadge from "@/components/shared/StatusBadge";
+import { generateAuditorPdf } from "@/lib/auditorPdfExport";
 
 export default function AuditorDashboard() {
   const { user, logout } = useAuth();
@@ -114,6 +115,10 @@ export default function AuditorDashboard() {
             </div>
           </div>
           <div className="flex items-center gap-3">
+            <Button variant="outline" size="sm" onClick={() => generateAuditorPdf({ controls, policies, ledger, user })} disabled={loading}>
+              <Download className="w-4 h-4" />
+              <span className="hidden sm:inline">Export PDF</span>
+            </Button>
             <span className="hidden sm:inline text-xs text-muted-foreground">{user?.full_name || user?.email}</span>
             <Button variant="ghost" size="sm" onClick={handleLogout}>
               <LogOut className="w-4 h-4" />

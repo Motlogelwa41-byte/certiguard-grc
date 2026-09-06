@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useMemo } from "react";
 import { base44 } from "@/api/base44Client";
-import { AlertTriangle, Target, TrendingDown, Shield, Info } from "lucide-react";
+import { AlertTriangle, Target, TrendingDown, Shield, Info, Flame } from "lucide-react";
 import PageHeader from "@/components/shared/PageHeader";
 import StatusBadge from "@/components/shared/StatusBadge";
 import EmptyState from "@/components/shared/EmptyState";
@@ -30,6 +30,7 @@ export default function RiskAppetiteHeatmap() {
   const [tmpThresholds, setTmpThresholds] = useState(thresholds);
   const [selectedCell, setSelectedCell] = useState(null);
   const [view, setView] = useState("inherent"); // "inherent" | "residual" | "both"
+  const [highImpactFirst, setHighImpactFirst] = useState(true);
 
   useEffect(() => {
     base44.entities.Risk.list().then(d => { setRisks(d); setLoading(false); });
@@ -288,28 +289,56 @@ export default function RiskAppetiteHeatmap() {
               <h3 className="text-sm font-semibold text-foreground">Exceeding Tolerance</h3>
               <span className="ml-auto text-xs text-muted-foreground">{counts.inherentExceeds}</span>
             </div>
+            {/* High-impact filter toggle */}
+            <div className="px-3 py-2 border-b border-border bg-muted/30 flex items-center gap-2">
+              <button
+                onClick={() => setHighImpactFirst(!highImpactFirst)}
+                className={`flex items-center gap-1.5 text-xs font-medium px-2.5 py-1 rounded-lg border transition-colors ${
+                  highImpactFirst
+                    ? "border-red-400/40 bg-red-500/10 text-red-700"
+                    : "border-border text-muted-foreground hover:text-foreground"
+                }`}
+              >
+                <Flame className="w-3.5 h-3.5" />
+                High Impact First
+              </button>
+              <span className="text-xs text-muted-foreground">
+                {highImpactFirst ? "Sorted by impact (Catastrophic → Negligible)" : "Sorted by risk score"}
+              </span>
+            </div>
             <div className="divide-y divide-border max-h-64 overflow-y-auto">
-              {risks.filter(r => (r.likelihood * r.impact) > thresholds.tolerance)
-                .sort((a, b) => (b.likelihood * b.impact) - (a.likelihood * a.impact))
-                .slice(0, 8)
-                .map(r => {
+              {(() => {
+                let list = risks.filter(r => (r.likelihood * r.impact) > thresholds.tolerance);
+                if (highImpactFirst) {
+                  list = list.sort((a, b) => (b.impact || 0) - (a.impact || 0) || (b.likelihood * b.impact) - (a.likelihood * a.impact));
+                } else {
+                  list = list.sort((a, b) => (b.likelihood * b.impact) - (a.likelihood * a.impact));
+                }
+                return list.slice(0, 10).map(r => {
                   const iScore = r.likelihood * r.impact;
                   const rScore = (r.residual_likelihood || r.likelihood) * (r.residual_impact || r.impact);
+                  const isHighImpact = (r.impact || 0) >= 4;
                   return (
-                    <div key={r.id} className="p-3">
-                      <p className="text-xs font-semibold text-foreground">{r.title}</p>
-                      <div className="flex items-center gap-2 mt-1">
-                        <span className="text-xs bg-red-100 text-red-700 px-1.5 py-0.5 rounded font-mono font-bold">I:{iScore}</span>
-                        <TrendingDown className="w-3 h-3 text-muted-foreground" />
-                        <span className={`text-xs px-1.5 py-0.5 rounded font-mono ${rScore <= thresholds.tolerance ? "bg-emerald-100 text-emerald-700" : "bg-orange-100 text-orange-700"}`}>R:{rScore}</span>
-                        <StatusBadge status={r.status} />
+                    <div key={r.id} className={`p-3 ${isHighImpact && highImpactFirst ? "border-l-2 border-l-red-500 bg-red-500/5" : ""}`}>
+                      <div className="flex items-start gap-1.5">
+                        {isHighImpact && highImpactFirst && <Flame className="w-3.5 h-3.5 text-red-500 shrink-0 mt-0.5" />}
+                        <div className="flex-1 min-w-0">
+                          <p className="text-xs font-semibold text-foreground">{r.title}</p>
+                          <div className="flex items-center gap-2 mt-1">
+                            <span className="text-xs bg-red-100 text-red-700 px-1.5 py-0.5 rounded font-mono font-bold">I:{iScore}</span>
+                            <TrendingDown className="w-3 h-3 text-muted-foreground" />
+                            <span className={`text-xs px-1.5 py-0.5 rounded font-mono ${rScore <= thresholds.tolerance ? "bg-emerald-100 text-emerald-700" : "bg-orange-100 text-orange-700"}`}>R:{rScore}</span>
+                            <StatusBadge status={r.status} />
+                          </div>
+                          {r.tolerance_justification && (
+                            <p className="text-xs text-muted-foreground mt-1 italic truncate">"{r.tolerance_justification}"</p>
+                          )}
+                        </div>
                       </div>
-                      {r.tolerance_justification && (
-                        <p className="text-xs text-muted-foreground mt-1 italic truncate">"{r.tolerance_justification}"</p>
-                      )}
                     </div>
                   );
-                })}
+                });
+              })()}
               {counts.inherentExceeds === 0 && (
                 <div className="flex flex-col items-center justify-center py-6 text-muted-foreground">
                   <Shield className="w-6 h-6 mb-1 text-emerald-500" />

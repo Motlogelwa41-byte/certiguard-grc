@@ -1,6 +1,6 @@
 import React from "react";
 import { Link } from "react-router-dom";
-import { Plus, FileText, AlertTriangle, Paperclip, Brain, ClipboardList, ShieldAlert, Target } from "lucide-react";
+import { Plus, FileText, AlertTriangle, Paperclip, Brain, ClipboardList, ShieldAlert, Target, CalendarCheck } from "lucide-react";
 
 const actions = [
   { label: "Add Control", icon: Plus, path: "/controls", accent: "text-blue-400 bg-blue-500/10 border-blue-500/20 hover:bg-blue-500/20" },
@@ -11,6 +11,7 @@ const actions = [
   { label: "Report Incident", icon: ShieldAlert, path: "/incidents", accent: "text-rose-400 bg-rose-500/10 border-rose-500/20 hover:bg-rose-500/20" },
   { label: "Risk Heatmap", icon: Target, path: "/risk-heatmap", accent: "text-pink-400 bg-pink-500/10 border-pink-500/20 hover:bg-pink-500/20" },
   { label: "Audit Checklist", icon: ClipboardList, path: "/audit-checklists", accent: "text-cyan-400 bg-cyan-500/10 border-cyan-500/20 hover:bg-cyan-500/20" },
+  { label: "Calendar Sync", icon: CalendarCheck, path: "/calendar-sync", accent: "text-sky-400 bg-sky-500/10 border-sky-500/20 hover:bg-sky-500/20" },
 ];
 
 export default function QuickActions() {
