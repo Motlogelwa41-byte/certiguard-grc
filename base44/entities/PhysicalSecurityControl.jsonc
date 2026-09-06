@@ -1,0 +1,262 @@
+{
+  "name": "PhysicalSecurityControl",
+  "type": "object",
+  "properties": {
+    "tenant_id": {
+      "type": "string",
+      "description": "Tenant isolation key \u2014 mandatory on every record"
+    },
+    "control_id": {
+      "type": "string",
+      "description": "Unique control identifier e.g. PHY-001"
+    },
+    "control_name": {
+      "type": "string"
+    },
+    "control_type": {
+      "type": "string",
+      "enum": [
+        "badge_access",
+        "visitor_management",
+        "cctv_surveillance",
+        "data_center_access",
+        "perimeter_security",
+        "key_management",
+        "environmental_control",
+        "clean_desk_clear_screen",
+        "physical_inventory",
+        "secure_disposal"
+      ],
+      "default": "badge_access",
+      "description": "Type of physical security control"
+    },
+    "location": {
+      "type": "string",
+      "description": "Building, floor, room, or data center location"
+    },
+    "description": {
+      "type": "string"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "active",
+        "inactive",
+        "non_compliant",
+        "under_review",
+        "remediation_required"
+      ],
+      "default": "active"
+    },
+    "control_owner_name": {
+      "type": "string"
+    },
+    "control_owner_id": {
+      "type": "string"
+    },
+    "last_audit_date": {
+      "type": "string",
+      "format": "date"
+    },
+    "next_audit_date": {
+      "type": "string",
+      "format": "date"
+    },
+    "audit_frequency_months": {
+      "type": "number",
+      "default": 12
+    },
+    "badge_system_type": {
+      "type": "string",
+      "enum": [
+        "hid_prox",
+        "smart_card",
+        "biometric",
+        "mobile_credential",
+        "pin_pad",
+        "mixed",
+        "not_applicable"
+      ],
+      "default": "not_applicable",
+      "description": "Badge/access card system type (for badge_access controls)"
+    },
+    "badge_access_log_retention_days": {
+      "type": "number",
+      "default": 365,
+      "description": "How long badge access logs are retained"
+    },
+    "active_badge_count": {
+      "type": "number",
+      "default": 0
+    },
+    "revoked_badge_count": {
+      "type": "number",
+      "default": 0
+    },
+    "visitor_log_required": {
+      "type": "boolean",
+      "default": true
+    },
+    "visitor_sign_in_method": {
+      "type": "string",
+      "enum": [
+        "paper_logbook",
+        "digital_kiosk",
+        "biometric",
+        "qr_code",
+        "security_desk",
+        "not_applicable"
+      ],
+      "default": "digital_kiosk"
+    },
+    "visitor_escort_required": {
+      "type": "boolean",
+      "default": true
+    },
+    "visitor_log_retention_days": {
+      "type": "number",
+      "default": 365
+    },
+    "monthly_visitor_count": {
+      "type": "number",
+      "default": 0
+    },
+    "cctv_camera_count": {
+      "type": "number",
+      "default": 0
+    },
+    "cctv_coverage_areas": {
+      "type": "string",
+      "description": "JSON array of areas covered by CCTV: [entrance, server_room, parking, reception, corridors]"
+    },
+    "cctv_retention_days": {
+      "type": "number",
+      "default": 90
+    },
+    "cctv_monitoring_type": {
+      "type": "string",
+      "enum": [
+        "live_monitoring",
+        "recorded_only",
+        "both",
+        "not_applicable"
+      ],
+      "default": "both"
+    },
+    "cctv_offsite_backup": {
+      "type": "boolean",
+      "default": false
+    },
+    "data_center_access_control": {
+      "type": "string",
+      "enum": [
+        "biometric",
+        "mantrap",
+        "card_reader",
+        "security_guard",
+        "multi_factor",
+        "not_applicable"
+      ],
+      "default": "not_applicable"
+    },
+    "environmental_controls": {
+      "type": "string",
+      "description": "JSON array of environmental controls: [fire_suppression, hvac_monitoring, water_leak_detection, ups_backup, temperature_monitoring, humidity_control]"
+    },
+    "perimeter_security_type": {
+      "type": "string",
+      "enum": [
+        "fencing",
+        "security_guard",
+        "intrusion_detection",
+        "cctv_perimeter",
+        "barrier",
+        "not_applicable"
+      ],
+      "default": "not_applicable"
+    },
+    "key_management_method": {
+      "type": "string",
+      "enum": [
+        "electronic_key_system",
+        "physical_lockbox",
+        "key_card",
+        "combination_lock",
+        "not_applicable"
+      ],
+      "default": "not_applicable"
+    },
+    "evidence_url": {
+      "type": "string",
+      "description": "URL to evidence document (audit report, photo, log sample)"
+    },
+    "compliance_frameworks": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "Frameworks this control satisfies e.g. [SOC2_CC6.4, ISO27001_A11, PCI_DSS_9]"
+    },
+    "linked_control_ids": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "notes": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "control_id",
+    "control_name",
+    "control_type"
+  ],
+  "rls": {
+    "create": {
+      "data.tenant_id": "{{user.data.tenant_id}}"
+    },
+    "read": {
+      "$or": [
+        {
+          "data.tenant_id": "{{user.data.tenant_id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "update": {
+      "$or": [
+        {
+          "data.tenant_id": "{{user.data.tenant_id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        },
+        {
+          "user_condition": {
+            "role": "compliance_officer"
+          }
+        }
+      ]
+    },
+    "delete": {
+      "$or": [
+        {
+          "data.tenant_id": "{{user.data.tenant_id}}",
+          "created_by_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    }
+  }
+}

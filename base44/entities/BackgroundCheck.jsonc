@@ -1,0 +1,223 @@
+{
+  "name": "BackgroundCheck",
+  "type": "object",
+  "properties": {
+    "tenant_id": {
+      "type": "string",
+      "description": "Tenant isolation key \u2014 mandatory on every record"
+    },
+    "check_id": {
+      "type": "string",
+      "description": "Unique check identifier e.g. BG-2026-001"
+    },
+    "employee_name": {
+      "type": "string"
+    },
+    "employee_id": {
+      "type": "string",
+      "description": "Internal employee or contractor ID"
+    },
+    "employee_email": {
+      "type": "string"
+    },
+    "department": {
+      "type": "string"
+    },
+    "role_title": {
+      "type": "string"
+    },
+    "employment_type": {
+      "type": "string",
+      "enum": [
+        "employee",
+        "contractor",
+        "vendor",
+        "intern",
+        "consultant"
+      ],
+      "default": "employee"
+    },
+    "check_type": {
+      "type": "string",
+      "enum": [
+        "identity_verification",
+        "criminal_record",
+        "credit_check",
+        "employment_verification",
+        "education_verification",
+        "reference_check",
+        "drug_screen",
+        "security_clearance",
+        "right_to_work",
+        "comprehensive"
+      ],
+      "default": "comprehensive",
+      "description": "Type of background screening check"
+    },
+    "check_status": {
+      "type": "string",
+      "enum": [
+        "pending",
+        "in_progress",
+        "completed",
+        "failed",
+        "expired",
+        "not_required"
+      ],
+      "default": "pending"
+    },
+    "check_provider": {
+      "type": "string",
+      "description": "Screening provider e.g. MIE, LexisNexis, HireRight, internal HR"
+    },
+    "check_initiated_date": {
+      "type": "string",
+      "format": "date"
+    },
+    "completion_date": {
+      "type": "string",
+      "format": "date"
+    },
+    "result": {
+      "type": "string",
+      "enum": [
+        "pass",
+        "fail",
+        "conditional",
+        "pending",
+        "not_applicable"
+      ],
+      "default": "pending"
+    },
+    "result_details": {
+      "type": "string",
+      "description": "Detailed results of the background check"
+    },
+    "security_clearance_level": {
+      "type": "string",
+      "enum": [
+        "none",
+        "baseline",
+        "confidential",
+        "secret",
+        "top_secret",
+        "not_applicable"
+      ],
+      "default": "none",
+      "description": "Security clearance level granted"
+    },
+    "clearance_expiry_date": {
+      "type": "string",
+      "format": "date"
+    },
+    "clearance_granted_by": {
+      "type": "string",
+      "description": "Authority that granted the security clearance"
+    },
+    "nda_signed": {
+      "type": "boolean",
+      "default": false,
+      "description": "Whether the NDA has been signed"
+    },
+    "nda_signed_date": {
+      "type": "string",
+      "format": "date"
+    },
+    "nda_document_url": {
+      "type": "string",
+      "description": "URL to the signed NDA document"
+    },
+    "right_to_work_verified": {
+      "type": "boolean",
+      "default": false,
+      "description": "Whether right-to-work / work permit has been verified"
+    },
+    "right_to_work_expiry": {
+      "type": "string",
+      "format": "date",
+      "description": "Expiry date of work permit / visa if applicable"
+    },
+    "re_verification_due_date": {
+      "type": "string",
+      "format": "date",
+      "description": "Next date this background check must be re-verified"
+    },
+    "re_verification_frequency_months": {
+      "type": "number",
+      "default": 36,
+      "description": "How often the background check must be re-verified (months)"
+    },
+    "document_url": {
+      "type": "string",
+      "description": "URL to the background check report document"
+    },
+    "cost": {
+      "type": "number",
+      "description": "Cost of the background check"
+    },
+    "currency": {
+      "type": "string",
+      "default": "ZAR"
+    },
+    "notes": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "check_id",
+    "employee_name",
+    "check_type"
+  ],
+  "rls": {
+    "create": {
+      "data.tenant_id": "{{user.data.tenant_id}}"
+    },
+    "read": {
+      "$or": [
+        {
+          "data.tenant_id": "{{user.data.tenant_id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "update": {
+      "$or": [
+        {
+          "data.tenant_id": "{{user.data.tenant_id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        },
+        {
+          "user_condition": {
+            "role": "compliance_officer"
+          }
+        },
+        {
+          "user_condition": {
+            "role": "hr"
+          }
+        }
+      ]
+    },
+    "delete": {
+      "$or": [
+        {
+          "data.tenant_id": "{{user.data.tenant_id}}",
+          "created_by_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    }
+  }
+}
