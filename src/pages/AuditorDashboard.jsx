@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useMemo } from "react";
 import { base44 } from "@/api/base44Client";
 import { useAuth } from "@/lib/AuthContext";
-import { Loader2, ShieldCheck, FileText, Database, Download, LogOut, Search } from "lucide-react";
+import { Loader2, ShieldCheck, FileText, Database, Download, LogOut, Search, CheckCircle2, XCircle, Clock, TrendingUp, AlertTriangle } from "lucide-react";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -124,6 +124,9 @@ export default function AuditorDashboard() {
       </header>
 
       <main className="max-w-6xl mx-auto px-4 sm:px-6 py-6">
+        {/* Readiness Summary — for bank regulators to see progress at a glance */}
+        <ReadinessBanner controls={controls} ledger={ledger} />
+
         {/* Summary */}
         <div className="grid grid-cols-3 gap-3 sm:gap-4 mb-6">
           <div className="bg-card rounded-xl border border-border p-4">
@@ -320,6 +323,83 @@ export default function AuditorDashboard() {
           </TabsContent>
         </Tabs>
       </main>
+    </div>
+  );
+}
+
+function ReadinessBanner({ controls, ledger }) {
+  const passing = controls.filter((c) => c.status === "passing");
+  const failing = controls.filter((c) => c.status === "failing");
+  const notTested = controls.filter((c) => c.status === "not_tested" || !c.status);
+  const tested = passing.length + failing.length;
+  const score = tested > 0 ? Math.round((passing.length / tested) * 100) : 0;
+  const grade = score >= 90 ? "A" : score >= 80 ? "B" : score >= 70 ? "C" : score >= 60 ? "D" : "F";
+  const scoreColor = score >= 80 ? "#16a34a" : score >= 60 ? "#d97706" : "#dc2626";
+
+  const approvedEvidence = ledger.filter((l) => l.status === "approved" || l.approved);
+  const pendingEvidence = ledger.filter((l) => l.status === "pending_review" || (!l.status && !l.approved));
+  const expiredEvidence = ledger.filter((l) => l.status === "expired");
+
+  return (
+    <div className="rounded-xl border border-border bg-card p-5 mb-6">
+      <div className="flex items-center gap-2 mb-4">
+        <TrendingUp className="w-5 h-5 text-primary" />
+        <h2 className="text-base font-heading font-semibold text-foreground">Compliance Readiness Summary</h2>
+        <span className="ml-auto text-xs text-muted-foreground">Auto-calculated from live control test results</span>
+      </div>
+
+      <div className="flex flex-col sm:flex-row items-center gap-6">
+        {/* Score ring */}
+        <div className="relative flex items-center justify-center shrink-0">
+          <svg className="w-24 h-24 -rotate-90" viewBox="0 0 100 100">
+            <circle cx="50" cy="50" r="42" fill="none" stroke="hsl(var(--muted))" strokeWidth="8" />
+            <circle
+              cx="50" cy="50" r="42" fill="none"
+              stroke={scoreColor}
+              strokeWidth="8" strokeLinecap="round"
+              strokeDasharray={`${(score / 100) * 264} 264`}
+              className="transition-all duration-1000"
+            />
+          </svg>
+          <div className="absolute text-center">
+            <p className="text-2xl font-heading font-bold tabular-nums" style={{ color: scoreColor }}>{score}%</p>
+            <p className="text-xs text-muted-foreground">Grade {grade}</p>
+          </div>
+        </div>
+
+        {/* Breakdown */}
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 flex-1 w-full">
+          <div className="rounded-lg border border-border p-3 text-center">
+            <CheckCircle2 className="w-4 h-4 mx-auto mb-1 text-emerald-600" />
+            <p className="text-xl font-heading font-bold text-emerald-600 tabular-nums">{passing.length}</p>
+            <p className="text-xs text-muted-foreground">Passing</p>
+          </div>
+          <div className="rounded-lg border border-border p-3 text-center">
+            <XCircle className="w-4 h-4 mx-auto mb-1 text-rose-600" />
+            <p className="text-xl font-heading font-bold text-rose-600 tabular-nums">{failing.length}</p>
+            <p className="text-xs text-muted-foreground">Failing</p>
+          </div>
+          <div className="rounded-lg border border-border p-3 text-center">
+            <Clock className="w-4 h-4 mx-auto mb-1 text-amber-600" />
+            <p className="text-xl font-heading font-bold text-amber-600 tabular-nums">{notTested.length}</p>
+            <p className="text-xs text-muted-foreground">Not Tested</p>
+          </div>
+          <div className="rounded-lg border border-border p-3 text-center">
+            <Database className="w-4 h-4 mx-auto mb-1 text-primary" />
+            <p className="text-xl font-heading font-bold text-primary tabular-nums">{ledger.length}</p>
+            <p className="text-xs text-muted-foreground">Evidence Items</p>
+          </div>
+        </div>
+      </div>
+
+      {failing.length > 0 && (
+        <div className="flex items-center gap-2 mt-4 rounded-lg border border-rose-500/20 bg-rose-500/5 px-3 py-2">
+          <AlertTriangle className="w-4 h-4 text-rose-600 shrink-0" />
+          <p className="text-xs text-rose-700 font-medium">
+            {failing.length} control(s) currently failing — remediation required before audit sign-off.
+          </p>
+        </div>
+      )}
     </div>
   );
 }
