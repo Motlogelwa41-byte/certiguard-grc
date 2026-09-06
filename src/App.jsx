@@ -231,6 +231,11 @@ import DataRetentionSchedule from '@/pages/DataRetentionSchedule';
 import RegulatoryFilingTracker from '@/pages/RegulatoryFilingTracker';
 import InsiderThreatProgram from '@/pages/InsiderThreatProgram';
 import AbacPolicyManager from '@/pages/AbacPolicyManager';
+import ChangeManagement from '@/pages/ChangeManagement';
+import PatchManagement from '@/pages/PatchManagement';
+import PhysicalSecurity from '@/pages/PhysicalSecurity';
+import ConsentManagement from '@/pages/ConsentManagement';
+import BackgroundChecks from '@/pages/BackgroundChecks';
 import { LanguageProvider } from '@/contexts/LanguageContext';
 
 const AuthenticatedApp = () => {
@@ -483,6 +488,11 @@ const AuthenticatedApp = () => {
           <Route path="/regulatory-filings" element={<RegulatoryFilingTracker />} />
           <Route path="/insider-threat" element={<InsiderThreatProgram />} />
           <Route path="/abac-policies" element={<AbacPolicyManager />} />
+          <Route path="/change-management" element={<ChangeManagement />} />
+          <Route path="/patch-management" element={<PatchManagement />} />
+          <Route path="/physical-security" element={<PhysicalSecurity />} />
+          <Route path="/consent-management" element={<ConsentManagement />} />
+          <Route path="/background-checks" element={<BackgroundChecks />} />
           <Route path="/connect" element={<Connect />} />
         </Route>
       </Route>

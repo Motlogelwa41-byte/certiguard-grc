@@ -4,7 +4,7 @@ import {
   ShieldCheck, FileSearch, Brain, Play, FileSpreadsheet, FileDown, BarChart3, LineChart,
   History, ShieldAlert, GraduationCap, Calendar, Bell, Users, Copy, SlidersHorizontal,
   Target, Upload, Send, Globe, Users2, MapPin, Zap, ListChecks, BellRing, HeartPulse,
-  PieChart,   Radar, Landmark, BarChart2, Network, GitCompare, Sparkles, CreditCard, Gauge, Info, ScrollText, Activity, Factory, Plug, UserCheck, Wand2, KeyRound, Bug, Library, Presentation, TrendingDown, CalendarCheck, Rocket, ClipboardCheck,   FlaskRound, Award, FileQuestion, FlaskConical, Lock, Calculator, Server, BookOpen, Settings, Code, Cloud, Webhook, Leaf, Trophy, TestTube, FileBadge, Gavel, Fingerprint, Languages, FileArchive, DollarSign, Palette,   ShieldX, Siren, ScanLine, Laptop, Eye, Atom, Smartphone, Star, Workflow, Wrench, MessageSquare, ArrowLeftRight, Store
+  PieChart,   Radar, Landmark, BarChart2, Network, GitCompare, Sparkles, CreditCard, Gauge, Info, ScrollText, Activity, Factory, Plug, UserCheck, Wand2, KeyRound, Bug, Library, Presentation, TrendingDown, CalendarCheck, Rocket, ClipboardCheck,   FlaskRound, Award, FileQuestion, FlaskConical, Lock, Calculator, Server, BookOpen, Settings, Code, Cloud, Webhook, Leaf, Trophy, TestTube, FileBadge, Gavel, Fingerprint, Languages, FileArchive, DollarSign, Palette,   ShieldX, Siren, ScanLine, Laptop, Eye, Atom, Smartphone, Star, Workflow, Wrench, MessageSquare, ArrowLeftRight, Store, GitCommit, Bandage, Building, HandHeart, IdCard
 } from "lucide-react";
 // NOTE: ClipboardList imported above is reused for the UAT checklist item below.
 
@@ -131,6 +131,9 @@ export const navSections = [
       { label: "SOAR Playbooks", path: "/soar-playbooks", icon: Zap, roles: ["admin", "compliance_officer", "risk_manager"] },
       { label: "Security Findings", path: "/vulnerabilities", icon: Bug, roles: ["admin", "compliance_officer", "risk_manager", "auditor"] },
       { label: "Vuln Management & Patching", path: "/vuln-management", icon: Shield, roles: ["admin", "compliance_officer", "risk_manager", "auditor"] },
+      { label: "Patch Management", path: "/patch-management", icon: Bandage, roles: ["admin", "compliance_officer", "risk_manager", "auditor"] },
+      { label: "Change Management", path: "/change-management", icon: GitCommit, roles: ["admin", "compliance_officer", "risk_manager", "auditor"] },
+      { label: "Physical Security", path: "/physical-security", icon: Building, roles: ["admin", "compliance_officer", "risk_manager", "auditor"] },
       { label: "Cloud Posture (CSPM)", path: "/cloud-posture", icon: Cloud, roles: ["admin", "compliance_officer", "risk_manager", "auditor"] },
       { label: "Real-Time CSPM Scan", path: "/realtime-cspm", icon: ScanLine, roles: ["admin", "compliance_officer", "risk_manager", "auditor"] },
       { label: "DevSecOps Scanner", path: "/devsecops", icon: ScanLine, roles: ["admin", "compliance_officer", "risk_manager", "auditor"] },
@@ -183,6 +186,8 @@ export const navSections = [
       { label: "Audit Trail", path: "/audit-trail", icon: History, roles: ["admin", "compliance_officer", "auditor", "external_auditor", "regulator"] },
       { label: "Activity Log", path: "/activity-log", icon: Activity, roles: ["admin", "compliance_officer", "risk_manager", "auditor"] },
       { label: "People Compliance", path: "/people", icon: Users2, roles: ["admin", "compliance_officer", "auditor"] },
+      { label: "Consent Management", path: "/consent-management", icon: HandHeart, roles: ["admin", "compliance_officer", "auditor"] },
+      { label: "Background Checks", path: "/background-checks", icon: IdCard, roles: ["admin", "compliance_officer", "auditor"] },
       { label: "HRIS Directory", path: "/hris-directory", icon: Users, roles: ["admin", "compliance_officer", "auditor"] },
       { label: "Board Resolutions", path: "/board-resolutions", icon: Gavel, roles: ["admin", "compliance_officer"] },
       { label: "Zero-Trust Ledger", path: "/zero-trust-ledger", icon: Fingerprint, roles: ["admin", "compliance_officer", "risk_manager"] },
