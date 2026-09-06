@@ -8,6 +8,7 @@ import LandingFeatures from "@/components/landing/LandingFeatures";
 import LandingFrameworks from "@/components/landing/LandingFrameworks";
 import LandingGeo from "@/components/landing/LandingGeo";
 import LandingCTA from "@/components/landing/LandingCTA";
+import ProductTour from "@/components/landing/ProductTour";
 
 export default function Landing() {
   return (
@@ -40,6 +41,7 @@ export default function Landing() {
             >
               Request a demo
             </button>
+            <ProductTour />
             <Link to="/register" className="inline-flex items-center gap-1.5 text-sm font-medium text-primary-foreground bg-primary hover:bg-primary/90 rounded-lg px-3.5 py-1.5 transition-colors">
               Start free trial <ArrowRight className="w-3.5 h-3.5" />
             </Link>

@@ -225,6 +225,7 @@ import EvidenceCollectionDashboard from '@/pages/EvidenceCollectionDashboard';
 import KnowBe4Integration from '@/pages/KnowBe4Integration';
 import TrustBadgeWidget from '@/pages/TrustBadgeWidget';
 import DpoCommandCenter from '@/pages/DpoCommandCenter';
+import ClientDashboard from '@/pages/ClientDashboard';
 import { LanguageProvider } from '@/contexts/LanguageContext';
 
 const AuthenticatedApp = () => {
@@ -471,6 +472,7 @@ const AuthenticatedApp = () => {
           <Route path="/knowbe4-integration" element={<KnowBe4Integration />} />
           <Route path="/trust-badge-widget" element={<TrustBadgeWidget />} />
           <Route path="/dpo" element={<DpoCommandCenter />} />
+          <Route path="/client-dashboard" element={<ClientDashboard />} />
           <Route path="/connect" element={<Connect />} />
         </Route>
       </Route>
