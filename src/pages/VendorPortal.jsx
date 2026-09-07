@@ -102,7 +102,7 @@ export default function VendorPortal() {
 
   if (submitted) {
     const riskLabel = riskLevel ? riskLevel.charAt(0).toUpperCase() + riskLevel.slice(1) : "Verified";
-    const badgeImgUrl = "https://media.base44.com/images/public/6a35358668f36d27123b5f0f/003ab4734_generated_image.png";
+    const badgeImgUrl = "https://media.base44.com/images/public/6a35358668f36d27123b5f0f/6ecdf737a_generated_image.png";
     const embedSnippet = verificationUrl
       ? `<a href="${verificationUrl}" target="_blank" rel="noopener noreferrer">\n  <img src="${badgeImgUrl}" alt="Security Verified — ${riskLabel} Risk" style="height:40px;border:0;" />\n</a>`
       : "";
