@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { Check, X, Shield, Zap, Building2, ArrowRight, Star, Lock, Sparkles, Heart, Building, Mountain } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { startDpoCheckout } from "@/lib/billing";
+import { base44 } from "@/api/base44Client";
 
 const plans = [
   {
@@ -170,6 +171,18 @@ export default function Pricing() {
             onClick={() => setBillingCycle("annual")}
             className={`px-4 py-2 rounded-md text-sm font-medium transition-colors flex items-center gap-1.5 ${billingCycle === "annual" ? "bg-card text-foreground shadow-sm" : "text-muted-foreground hover:text-foreground"}`}
           >Annual <span className="text-[10px] bg-emerald-100 text-emerald-700 px-1.5 py-0.5 rounded-full font-bold">Save 20%</span></button>
+        </div>
+
+        <div className="mt-6">
+          <button
+            onClick={() => {
+              try { base44.analytics.track({ eventName: "demo_requested" }); } catch (e) { /* best-effort */ }
+              window.location.href = "/register?returnTo=/guided-onboarding";
+            }}
+            className="inline-flex items-center gap-1.5 text-sm font-medium text-primary-foreground bg-primary hover:bg-primary/90 rounded-lg px-4 py-2 transition-colors"
+          >
+            <Sparkles className="w-4 h-4" /> Request a Demo
+          </button>
         </div>
       </div>
 

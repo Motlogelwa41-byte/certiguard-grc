@@ -70,7 +70,7 @@ export default function Dashboard() {
   if (role === "auditor") return <AuditorDashboard />;
   if (role === "hr") return <HRDashboard />;
   if (role === "department_head") return <DepartmentHeadDashboard />;
-  if (role === "viewer" || role === "user") return <ExecutiveDashboard />;
+  if (role === "viewer" || role === "user" || role === "executive") return <ExecutiveDashboard />;
 
   if (loading) {
     return (

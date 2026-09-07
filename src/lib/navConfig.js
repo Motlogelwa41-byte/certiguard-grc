@@ -271,7 +271,7 @@ export const navSections = [
   },
 ];
 
-export const ALL_ROLES = ["admin", "compliance_officer", "risk_manager", "auditor", "external_auditor", "regulator", "hr", "department_head", "user"];
+export const ALL_ROLES = ["admin", "compliance_officer", "risk_manager", "auditor", "external_auditor", "regulator", "hr", "department_head", "executive", "user"];
 
 function routeMatches(pathname, route) {
   if (route === "/") return pathname === "/";

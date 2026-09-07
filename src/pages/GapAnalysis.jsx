@@ -68,7 +68,10 @@ Return a JSON with:
   const handleSave = async () => {
     try {
       if (editId) await base44.entities.GapAnalysis.update(editId, form);
-      else await base44.entities.GapAnalysis.create(form);
+      else {
+        await base44.entities.GapAnalysis.create(form);
+        try { base44.analytics.track({ eventName: "gap_analysis_completed" }); } catch (e) { /* best-effort */ }
+      }
       setOpen(false); setForm(defaultForm); setEditId(null); setAiResult(null); load();
       toast({ title: editId ? "Gap analysis updated" : "Gap analysis created" });
     } catch (e) { toast({ title: "Error", description: e.message, variant: "destructive" }); }
