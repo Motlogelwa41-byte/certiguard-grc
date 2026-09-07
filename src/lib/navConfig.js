@@ -27,6 +27,7 @@ export const navSections = [
       { label: "Maturity Dashboard", path: "/maturity-dashboard", icon: LineChart, roles: ["admin", "compliance_officer", "risk_manager", "auditor"] },
       { label: "Alert Center", path: "/alert-center", icon: BellRing, roles: ["admin", "compliance_officer", "risk_manager", "auditor", "user"] },
       { label: "Notification Center", path: "/notification-center", icon: BellRing, roles: ["admin", "compliance_officer", "risk_manager", "auditor", "user"] },
+      { label: "Mobile Hub", path: "/mobile-hub", icon: Smartphone, roles: ["admin", "compliance_officer", "risk_manager", "auditor", "executive", "user"] },
       { label: "Executive Briefing", path: "/executive-briefing", icon: Presentation, roles: ["admin", "compliance_officer", "risk_manager", "auditor", "external_auditor", "executive"] },
     ]
   },
@@ -103,6 +104,7 @@ export const navSections = [
       { label: "Bulk Evidence", path: "/bulk-evidence", icon: Upload, roles: ["admin", "compliance_officer", "auditor"] },
       { label: "Evidence Reminders", path: "/evidence-reminders", icon: BellRing, roles: ["admin", "compliance_officer", "auditor"] },
       { label: "Evidence Collection", path: "/evidence-collection", icon: Activity, roles: ["admin", "compliance_officer", "risk_manager", "auditor"] },
+      { label: "Cloud Evidence Collector", path: "/cloud-evidence", icon: Cloud, roles: ["admin", "compliance_officer", "risk_manager", "auditor"] },
     ]
   },
   {

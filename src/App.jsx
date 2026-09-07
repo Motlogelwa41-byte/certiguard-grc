@@ -242,6 +242,8 @@ import BankRegulatorDashboard from '@/pages/BankRegulatorDashboard';
 import RegulatoryRoadmap from '@/pages/RegulatoryRoadmap';
 import Workspaces from '@/pages/Workspaces';
 import NotificationCenter from '@/pages/NotificationCenter';
+import CloudEvidenceCollector from '@/pages/CloudEvidenceCollector';
+import MobileHub from '@/pages/MobileHub';
 import { LanguageProvider } from '@/contexts/LanguageContext';
 
 const AuthenticatedApp = () => {
@@ -506,6 +508,8 @@ const AuthenticatedApp = () => {
           <Route path="/regulator-dashboard" element={<BankRegulatorDashboard />} />
           <Route path="/regulatory-roadmap" element={<RegulatoryRoadmap />} />
           <Route path="/notification-center" element={<NotificationCenter />} />
+          <Route path="/cloud-evidence" element={<CloudEvidenceCollector />} />
+          <Route path="/mobile-hub" element={<MobileHub />} />
         </Route>
       </Route>
       <Route path="*" element={<PageNotFound />} />

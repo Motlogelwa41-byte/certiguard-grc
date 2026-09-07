@@ -1,0 +1,45 @@
+{
+  "name": "Daily Cloud Evidence Collector",
+  "definition": {
+    "document": {
+      "dsl": "1.0.0",
+      "name": "daily_cloud_evidence_collector",
+      "version": "1.0",
+      "namespace": "base44"
+    },
+    "do": [
+      {
+        "collect_evidence": {
+          "call": "invoke_backend_function",
+          "with": {
+            "function_name": "collectCloudEvidence",
+            "args": {}
+          },
+          "then": "end",
+          "x-base44": {
+            "title": "Collect cloud evidence from integrations",
+            "description": "Pulls evidence from all connected cloud/security integrations and auto-attaches to matching controls"
+          }
+        }
+      }
+    ]
+  },
+  "description": "Daily collector that pulls evidence from all connected integrations (AWS, Defender, CrowdStrike, GitHub, etc.) and auto-attaches it to the right controls by category mapping",
+  "trigger": {
+    "condition": null,
+    "config": {
+      "trigger_type": "scheduled",
+      "events": [],
+      "schedule_mode": "recurring",
+      "cron_expression": "0 6 * * *",
+      "one_time_date": null,
+      "timezone": "Africa/Johannesburg",
+      "interval_value": null,
+      "interval_unit": null,
+      "interval_anchor": null,
+      "ends_type": "never",
+      "ends_on_date": null,
+      "ends_after_count": null
+    }
+  }
+}
