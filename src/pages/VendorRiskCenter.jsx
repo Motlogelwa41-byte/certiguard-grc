@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useCallback } from "react";
+import { Link } from "react-router-dom";
 import { base44 } from "@/api/base44Client";
 import { useToast } from "@/components/ui/use-toast";
 import { Button } from "@/components/ui/button";
@@ -44,6 +45,26 @@ const RISK_LEVEL_COLOR = {
   critical: "bg-red-100 text-red-700", high: "bg-orange-100 text-orange-700",
   medium: "bg-amber-100 text-amber-700", low: "bg-emerald-100 text-emerald-700",
 };
+
+const FREQ_DAYS = {
+  monthly: 30, quarterly: 90, semi_annually: 180, annually: 365, biennially: 730,
+};
+
+function getAssessmentStatus(vendor) {
+  const last = vendor.last_risk_assessment || vendor.last_assessment_date;
+  const freq = FREQ_DAYS[vendor.reassessment_frequency] || 365;
+  if (!last) {
+    return { status: "never_assessed", daysOverdue: Infinity, label: "Never assessed", urgency: "critical" };
+  }
+  const lastDate = new Date(last);
+  const dueDate = new Date(lastDate.getTime() + freq * 86400000);
+  const now = new Date();
+  const diffDays = Math.floor((dueDate - now) / 86400000);
+  if (diffDays < 0) return { status: "overdue", daysOverdue: -diffDays, dueDate, label: `${-diffDays}d overdue`, urgency: "critical" };
+  if (diffDays <= 30) return { status: "due_soon", daysOverdue: diffDays, dueDate, label: `Due in ${diffDays}d`, urgency: "high" };
+  if (diffDays <= 60) return { status: "approaching", daysOverdue: diffDays, dueDate, label: `Due in ${diffDays}d`, urgency: "medium" };
+  return { status: "current", daysOverdue: diffDays, dueDate, label: `Current (${diffDays}d left)`, urgency: "low" };
+}
 
 export default function VendorRiskCenter() {
   const { toast } = useToast();
@@ -91,6 +112,10 @@ export default function VendorRiskCenter() {
   const expiredCerts = certs.filter(c => c.status === "expired").length;
   const contractsWithSecurity = contracts.filter(c => c.security_requirements_embedded).length;
   const criticalVendors = vendors.filter(v => v.risk_level === "critical" || v.risk_level === "high").length;
+  const vendorsNeedingAssessment = vendors.filter(v => {
+    const s = getAssessmentStatus(v);
+    return s.urgency === "critical" || s.urgency === "high";
+  }).length;
 
   return (
     <div>
@@ -105,20 +130,22 @@ export default function VendorRiskCenter() {
         }
       />
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4 mb-6">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-6 gap-4 mb-6">
         <StatCard label="Critical Suppliers" value={criticalSuppliers} icon={Star} color={criticalSuppliers > 0 ? "red" : "green"} trendLabel="BIA-flagged" />
         <StatCard label="Valid Certs" value={validCerts} icon={Award} color="green" trendLabel={`${certs.length} total`} />
         <StatCard label="Expiring/Expired" value={expiringCerts + expiredCerts} icon={AlertTriangle} color={expiringCerts + expiredCerts > 0 ? "amber" : "green"} trendLabel={`${expiredCerts} expired`} />
         <StatCard label="Security Contracts" value={contractsWithSecurity} icon={FileBadge} color="blue" trendLabel={`${contracts.length} total`} />
         <StatCard label="High-Risk Vendors" value={criticalVendors} icon={ShieldCheck} color={criticalVendors > 0 ? "red" : "green"} trendLabel={`${vendors.length} total`} />
+        <StatCard label="Assessments Due" value={vendorsNeedingAssessment} icon={RefreshCw} color={vendorsNeedingAssessment > 0 ? "red" : "green"} trendLabel="Needs immediate update" />
       </div>
 
-      <Tabs defaultValue="critical" className="w-full">
+      <Tabs defaultValue="renewal" className="w-full">
         <TabsList className="mb-4">
           <TabsTrigger value="critical"><Star className="w-4 h-4 mr-1.5" />Critical Suppliers ({criticalSuppliers})</TabsTrigger>
           <TabsTrigger value="bia"><Activity className="w-4 h-4 mr-1.5" />Business Impact Assessments ({bias.length})</TabsTrigger>
           <TabsTrigger value="certs"><Award className="w-4 h-4 mr-1.5" />Security Certifications ({certs.length})</TabsTrigger>
           <TabsTrigger value="contracts"><FileText className="w-4 h-4 mr-1.5" />Contract Security ({contracts.length})</TabsTrigger>
+          <TabsTrigger value="renewal"><AlertTriangle className="w-4 h-4 mr-1.5" />Assessment Renewal ({vendorsNeedingAssessment})</TabsTrigger>
           <TabsTrigger value="vendors"><Building2 className="w-4 h-4 mr-1.5" />Vendor Posture ({vendors.length})</TabsTrigger>
         </TabsList>
 
@@ -314,6 +341,101 @@ export default function VendorRiskCenter() {
                   );
                 })
               )}
+            </div>
+          )}
+        </TabsContent>
+
+        {/* ASSESSMENT RENEWAL */}
+        <TabsContent value="renewal">
+          {loading ? <Spinner /> : (
+            <div className="space-y-5">
+              {(() => {
+                const assessed = vendors.map(v => ({ vendor: v, ...getAssessmentStatus(v) }));
+                const immediate = assessed.filter(a => a.urgency === "critical").sort((a, b) => b.daysOverdue - a.daysOverdue);
+                const dueSoon = assessed.filter(a => a.urgency === "high").sort((a, b) => a.daysOverdue - b.daysOverdue);
+                if (immediate.length === 0 && dueSoon.length === 0) {
+                  return <EmptyState icon={CheckCircle2} title="All assessments current" desc="No vendors have overdue or imminent security assessments. The supply chain is up to date." />;
+                }
+                return (
+                  <>
+                    {immediate.length > 0 && (
+                      <div>
+                        <div className="flex items-center gap-2 mb-3">
+                          <div className="p-1.5 rounded-lg bg-red-100 dark:bg-red-900/20">
+                            <AlertTriangle className="w-4 h-4 text-red-600" />
+                          </div>
+                          <h3 className="text-sm font-semibold text-foreground">Immediate Action Required — {immediate.length} vendor{immediate.length !== 1 ? "s" : ""}</h3>
+                        </div>
+                        <div className="space-y-3">
+                          {immediate.map(({ vendor, ...s }) => {
+                            const vendorBia = bias.find(b => b.vendor_id === vendor.id);
+                            return (
+                              <div key={vendor.id} className="bg-card rounded-xl border-2 border-red-300 dark:border-red-800 p-4 shadow-sm">
+                                <div className="flex items-start gap-3">
+                                  <div className="p-2.5 rounded-lg shrink-0 bg-red-100 dark:bg-red-900/20">
+                                    <AlertTriangle className="w-5 h-5 text-red-600" />
+                                  </div>
+                                  <div className="flex-1 min-w-0">
+                                    <div className="flex items-center gap-2 flex-wrap mb-1">
+                                      <h3 className="text-sm font-semibold text-foreground">{vendor.name}</h3>
+                                      <Badge className={`text-xs ${RISK_LEVEL_COLOR[vendor.risk_level] || RISK_LEVEL_COLOR.medium}`}>{vendor.risk_level}</Badge>
+                                      <Badge variant="outline" className="text-xs">{vendor.category?.replace(/_/g, " ")}</Badge>
+                                      {vendorBia?.critical_supplier && <Badge className="bg-red-100 text-red-700 text-xs"><Star className="w-3 h-3 mr-1" />Critical Supplier</Badge>}
+                                      <Badge className="bg-red-100 text-red-700 text-xs font-bold">{s.status === "never_assessed" ? "Never assessed" : `${s.daysOverdue}d overdue`}</Badge>
+                                    </div>
+                                    <div className="flex flex-wrap gap-3 text-xs text-muted-foreground">
+                                      <span>Last assessed: <strong className="text-foreground">{vendor.last_risk_assessment || vendor.last_assessment_date ? new Date(vendor.last_risk_assessment || vendor.last_assessment_date).toLocaleDateString() : "—"}</strong></span>
+                                      <span>Frequency: <strong className="text-foreground">{vendor.reassessment_frequency?.replace(/_/g, " ") || "annually"}</strong></span>
+                                      <span>Data access: <strong className="text-foreground">{vendor.data_access}</strong></span>
+                                      {vendor.contact_email && <span>Contact: <strong className="text-foreground">{vendor.contact_email}</strong></span>}
+                                    </div>
+                                    <div className="mt-2 flex gap-2">
+                                      <Link to="/vendor-assessments"><Button size="sm" variant="default" className="h-7 text-xs"><Plus className="w-3 h-3 mr-1" />Send Assessment</Button></Link>
+                                      <Link to="/vendors"><Button size="sm" variant="outline" className="h-7 text-xs"><Eye className="w-3 h-3 mr-1" />View Vendor</Button></Link>
+                                    </div>
+                                  </div>
+                                </div>
+                              </div>
+                            );
+                          })}
+                        </div>
+                      </div>
+                    )}
+                    {dueSoon.length > 0 && (
+                      <div>
+                        <div className="flex items-center gap-2 mb-3">
+                          <div className="p-1.5 rounded-lg bg-amber-100 dark:bg-amber-900/20">
+                            <Clock className="w-4 h-4 text-amber-600" />
+                          </div>
+                          <h3 className="text-sm font-semibold text-foreground">Due Soon (within 30 days) — {dueSoon.length} vendor{dueSoon.length !== 1 ? "s" : ""}</h3>
+                        </div>
+                        <div className="space-y-3">
+                          {dueSoon.map(({ vendor, ...s }) => (
+                            <div key={vendor.id} className="bg-card rounded-xl border border-amber-300 dark:border-amber-800 p-4 shadow-sm">
+                              <div className="flex items-start gap-3">
+                                <div className="p-2.5 rounded-lg shrink-0 bg-amber-100 dark:bg-amber-900/20">
+                                  <Clock className="w-5 h-5 text-amber-600" />
+                                </div>
+                                <div className="flex-1 min-w-0">
+                                  <div className="flex items-center gap-2 flex-wrap mb-1">
+                                    <h3 className="text-sm font-semibold text-foreground">{vendor.name}</h3>
+                                    <Badge className={`text-xs ${RISK_LEVEL_COLOR[vendor.risk_level] || RISK_LEVEL_COLOR.medium}`}>{vendor.risk_level}</Badge>
+                                    <Badge className="bg-amber-100 text-amber-700 text-xs font-bold">Due in {s.daysOverdue}d</Badge>
+                                  </div>
+                                  <div className="flex flex-wrap gap-3 text-xs text-muted-foreground">
+                                    <span>Last assessed: <strong className="text-foreground">{vendor.last_risk_assessment || vendor.last_assessment_date ? new Date(vendor.last_risk_assessment || vendor.last_assessment_date).toLocaleDateString() : "—"}</strong></span>
+                                    <span>Frequency: <strong className="text-foreground">{vendor.reassessment_frequency?.replace(/_/g, " ") || "annually"}</strong></span>
+                                  </div>
+                                </div>
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+                  </>
+                );
+              })()}
             </div>
           )}
         </TabsContent>
