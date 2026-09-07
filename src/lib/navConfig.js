@@ -1,5 +1,5 @@
 import {
-  LayoutDashboard, Shield, FileCheck, AlertTriangle, FileText, Paperclip,
+  LayoutDashboard, Shield, FileCheck, AlertTriangle, FileText, Paperclip, Search,
   ClipboardList, Building2, CheckSquare, ChevronLeft, ChevronRight, LogOut,
   ShieldCheck, FileSearch, Brain, Play, FileSpreadsheet, FileDown, BarChart3, LineChart,
   History, ShieldAlert, GraduationCap, Calendar, Bell, Users, Copy, SlidersHorizontal,
@@ -275,6 +275,7 @@ export const navSections = [
       { label: "Notifications", path: "/notifications", icon: Bell, roles: ["admin", "compliance_officer", "risk_manager", "auditor", "user"] },
       { label: "Notif. Preferences", path: "/notification-preferences", icon: SlidersHorizontal, roles: ["admin", "compliance_officer", "risk_manager"] },
       { label: "Connect AI Assistants", path: "/connect", icon: Plug, roles: ["admin", "compliance_officer", "risk_manager", "auditor", "user"] },
+      { label: "Google Search Console", path: "/search-console", icon: Search, roles: ["admin"] },
     ]
   },
 ];

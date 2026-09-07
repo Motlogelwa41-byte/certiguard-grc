@@ -248,6 +248,7 @@ import CustomDashboard from '@/pages/CustomDashboard';
 import UnifiedOnboarding from '@/pages/UnifiedOnboarding';
 import ClientPortal from '@/pages/ClientPortal';
 import BotusafeRfpResponse from '@/pages/BotusafeRfpResponse';
+import SearchConsoleDashboard from '@/pages/SearchConsoleDashboard';
 import { LanguageProvider } from '@/contexts/LanguageContext';
 
 const AuthenticatedApp = () => {
@@ -518,6 +519,7 @@ const AuthenticatedApp = () => {
           <Route path="/mobile-hub" element={<MobileHub />} />
           <Route path="/my-dashboard" element={<CustomDashboard />} />
           <Route path="/unified-onboarding" element={<UnifiedOnboarding />} />
+          <Route path="/search-console" element={<SearchConsoleDashboard />} />
         </Route>
       </Route>
       <Route path="*" element={<PageNotFound />} />
