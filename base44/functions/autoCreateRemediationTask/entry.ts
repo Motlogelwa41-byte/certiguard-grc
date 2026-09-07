@@ -42,9 +42,44 @@ export default async function (req) {
         return Response.json({ created: 0, reason: 'remediation task already exists', tag });
       }
 
+      // Use AI to generate specific, actionable remediation steps
+      let aiSteps = '';
+      try {
+        const llmRes = await base44.integrations.Core.InvokeLLM({
+          prompt: `A compliance control has been marked Non-Compliant and requires urgent remediation within 48 hours. Generate 3-5 specific, actionable step-by-step instructions for fixing this control. Each step must name the specific system, tool, or document to touch.
+
+Control: ${title}
+Category: ${c.category || 'unknown'}
+Severity: ${c.severity || 'unknown'}
+Automation Status: ${c.automation_status || 'manual'}
+Description: ${c.description || 'No description provided'}
+Frameworks: ${(c.framework_names || []).join(', ') || 'Not specified'}
+
+Return ONLY a JSON object with:
+- "action_steps": array of 3-5 concrete step-by-step instructions
+- "acceptance_criteria": array of 2-3 conditions that confirm the fix is complete
+- "tools_needed": array of specific systems/tools needed`,
+          response_json_schema: {
+            type: "object",
+            properties: {
+              action_steps: { type: "array", items: { type: "string" } },
+              acceptance_criteria: { type: "array", items: { type: "string" } },
+              tools_needed: { type: "array", items: { type: "string" } },
+            },
+            required: ["action_steps", "acceptance_criteria"],
+          },
+        });
+        if (llmRes) {
+          const stepsText = (llmRes.action_steps || []).map((s, i) => `  ${i + 1}. ${s}`).join('\n');
+          const criteriaText = (llmRes.acceptance_criteria || []).map((c) => `  ☐ ${c}`).join('\n');
+          const toolsText = (llmRes.tools_needed || []).join(', ');
+          aiSteps = `\n\nAction Steps:\n${stepsText}\n\nAcceptance Criteria:\n${criteriaText}${toolsText ? `\n\nTools/Systems: ${toolsText}` : ''}`;
+        }
+      } catch (e) { /* fall back to generic description */ }
+
       const task = await base44.asServiceRole.entities.ComplianceTask.create({
         title: `URGENT (48h): Remediate control — ${title}`,
-        description: `Control "${title}" was marked Non-Compliant. Immediate remediation is required within 48 hours. Review the control implementation and evidence, then restore compliance.`,
+        description: `Control "${title}" was marked Non-Compliant. Immediate remediation is required within 48 hours.${aiSteps || '\n\nReview the control implementation and evidence, then restore compliance.'}`,
         type: 'remediation',
         status: 'todo',
         priority: 'critical',
@@ -91,9 +126,44 @@ export default async function (req) {
         return Response.json({ created: 0, reason: 'remediation task already exists', tag });
       }
 
+      // Use AI to generate specific, actionable remediation steps
+      let aiSteps = '';
+      try {
+        const llmRes = await base44.integrations.Core.InvokeLLM({
+          prompt: `A risk has hit the critical (red) threshold and requires urgent remediation within 48 hours. Generate 3-5 specific, actionable step-by-step instructions for mitigating this risk. Each step must name the specific system, process, or document to touch.
+
+Risk: ${title}
+Category: ${r.category || 'unknown'}
+Score: ${score} (Likelihood ${r.likelihood || '?'} x Impact ${r.impact || '?'})
+Description: ${r.description || 'No description provided'}
+Mitigation Plan: ${r.mitigation_plan || 'Not specified'}
+Treatment: ${r.treatment || 'mitigate'}
+
+Return ONLY a JSON object with:
+- "action_steps": array of 3-5 concrete step-by-step instructions
+- "acceptance_criteria": array of 2-3 conditions that confirm the risk is mitigated
+- "tools_needed": array of specific systems/tools needed`,
+          response_json_schema: {
+            type: "object",
+            properties: {
+              action_steps: { type: "array", items: { type: "string" } },
+              acceptance_criteria: { type: "array", items: { type: "string" } },
+              tools_needed: { type: "array", items: { type: "string" } },
+            },
+            required: ["action_steps", "acceptance_criteria"],
+          },
+        });
+        if (llmRes) {
+          const stepsText = (llmRes.action_steps || []).map((s, i) => `  ${i + 1}. ${s}`).join('\n');
+          const criteriaText = (llmRes.acceptance_criteria || []).map((c) => `  ☐ ${c}`).join('\n');
+          const toolsText = (llmRes.tools_needed || []).join(', ');
+          aiSteps = `\n\nAction Steps:\n${stepsText}\n\nAcceptance Criteria:\n${criteriaText}${toolsText ? `\n\nTools/Systems: ${toolsText}` : ''}`;
+        }
+      } catch (e) { /* fall back to generic description */ }
+
       const task = await base44.asServiceRole.entities.ComplianceTask.create({
         title: `URGENT (48h): Remediate risk — ${title}`,
-        description: `Risk "${title}" has hit the critical (red) threshold with a score of ${score}. Immediate remediation is required within 48 hours. Review the risk and implement its mitigation plan.`,
+        description: `Risk "${title}" has hit the critical (red) threshold with a score of ${score}. Immediate remediation is required within 48 hours.${aiSteps || '\n\nReview the risk and implement its mitigation plan.'}`,
         type: 'remediation',
         status: 'todo',
         priority: 'critical',

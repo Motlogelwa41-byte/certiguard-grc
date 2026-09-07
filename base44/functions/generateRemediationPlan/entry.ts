@@ -46,7 +46,7 @@ Deno.serve(async (req) => {
 
     // Generate remediation plan using LLM
     const llmRes = await base44.integrations.Core.InvokeLLM({
-      prompt: `You are a senior GRC remediation advisor for a financial services organization. A security control has failed its compliance test and needs a structured, actionable remediation plan.
+      prompt: `You are a senior GRC remediation advisor for a financial services organization operating under POPIA, SADC, King V, SOC 2, and ISO 27001 frameworks. A security control has failed its compliance test and needs a structured, actionable remediation plan.
 
 Control details (JSON):
 ${JSON.stringify(context, null, 2)}
@@ -61,6 +61,11 @@ Generate a remediation plan with:
    - Verifiable: include a verification_method describing exactly how completion is confirmed (e.g. "Okta admin console shows 100% MFA enrollment")
    - Sequenced: list dependencies on prior tasks explicitly
    - Realistically estimated: days based on the effort for a mid-sized bank
+
+   Each task MUST include:
+   - action_steps: an ordered array of 3-6 concrete step-by-step instructions the owner follows to complete the task. Each step must name the specific tool, menu, document, or system to touch (e.g. "Log into Okta Admin → Security → Multifactor → Set 'Enforce MFA for all users' to ON"). Do NOT write steps like "Review the policy" — every step must produce a tangible change or artifact.
+   - acceptance_criteria: a checklist of 2-4 conditions that must all be true for the task to be considered complete (e.g. "All user accounts show MFA enrolled in Okta", "MFA enforcement policy is set to ON", "Exception list is documented and approved by CISO")
+   - tools_or_systems: list the specific systems, tools, or documents the owner will need access to (e.g. "Okta Admin Console", "Change Management Register", "HR Directory Export")
 
 3. SUCCESS CRITERIA — The exact evidence or test result that proves the control is back to passing, suitable for an auditor.
 
@@ -79,13 +84,28 @@ Avoid vague tasks like "Review the control" or "Assess the situation". Every tas
               properties: {
                 title: { type: "string", description: "Short actionable task title naming the specific system or artifact" },
                 description: { type: "string", description: "Detailed task description with concrete steps — name the system, config, or document to change" },
+                action_steps: {
+                  type: "array",
+                  items: { type: "string" },
+                  description: "Ordered step-by-step instructions (3-6 steps). Each step names the specific tool/menu/document to touch.",
+                },
+                acceptance_criteria: {
+                  type: "array",
+                  items: { type: "string" },
+                  description: "Checklist of 2-4 conditions that must all be true for task completion",
+                },
+                tools_or_systems: {
+                  type: "array",
+                  items: { type: "string" },
+                  description: "Specific systems, tools, or documents the owner needs access to",
+                },
                 suggested_owner_role: { type: "string", description: "Suggested role for the task owner (e.g. Security Engineer, IT Admin, Compliance Officer)" },
                 priority: { type: "string", enum: ["critical", "high", "medium", "low"], description: "Task priority" },
                 estimated_days: { type: "number", description: "Estimated days to complete this task" },
                 dependencies: { type: "string", description: "Any dependencies on other tasks (by title)" },
                 verification_method: { type: "string", description: "Exactly how to confirm this task is complete (e.g. 'Screenshot of enforced MFA policy in Okta admin console')" },
               },
-              required: ["title", "description", "suggested_owner_role", "priority", "estimated_days", "verification_method"],
+              required: ["title", "description", "action_steps", "acceptance_criteria", "suggested_owner_role", "priority", "estimated_days", "verification_method"],
             },
           },
           estimated_total_days: { type: "number", description: "Total estimated days for the full remediation accounting for parallelization" },
@@ -106,10 +126,27 @@ Avoid vague tasks like "Review the control" or "Assess the situation". Every tas
       cumulativeDays += task.estimated_days || 3;
       const dueDate = new Date(today.getTime() + cumulativeDays * 86400000).toISOString().slice(0, 10);
 
+      // Build a rich, actionable description with numbered steps and acceptance criteria
+      const stepsText = (task.action_steps || [])
+        .map((s, i) => `  ${i + 1}. ${s}`)
+        .join("\n");
+      const criteriaText = (task.acceptance_criteria || [])
+        .map((c) => `  ☐ ${c}`)
+        .join("\n");
+      const toolsText = (task.tools_or_systems || []).join(", ");
+
+      const fullDescription = [
+        task.description || "",
+        stepsText ? `\n\nAction Steps:\n${stepsText}` : "",
+        criteriaText ? `\n\nAcceptance Criteria:\n${criteriaText}` : "",
+        toolsText ? `\n\nTools/Systems: ${toolsText}` : "",
+        task.verification_method ? `\n\nVerification: ${task.verification_method}` : "",
+      ].join("");
+
       const created = await sr.entities.ComplianceTask.create({
         tenant_id: control.tenant_id,
         title: task.title,
-        description: task.description,
+        description: fullDescription,
         type: "remediation",
         status: "todo",
         priority: task.priority || "high",
@@ -128,6 +165,10 @@ Avoid vague tasks like "Review the control" or "Assess the situation". Every tas
           due_date: dueDate,
           suggested_owner_role: task.suggested_owner_role,
           estimated_days: task.estimated_days,
+          action_steps: task.action_steps || [],
+          acceptance_criteria: task.acceptance_criteria || [],
+          tools_or_systems: task.tools_or_systems || [],
+          verification_method: task.verification_method || "",
         });
       }
     }

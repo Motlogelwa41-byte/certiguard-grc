@@ -94,6 +94,41 @@ export default function RemediationPlanPanel({ control, onTasksCreated }) {
                       <span>· {task.suggested_owner_role}</span>
                       <span>· {task.estimated_days}d</span>
                     </div>
+                    {task.action_steps?.length > 0 && (
+                      <div className="mt-2.5">
+                        <p className="text-xs font-semibold text-foreground mb-1">Action Steps:</p>
+                        <ol className="text-xs text-muted-foreground space-y-0.5 list-decimal list-inside">
+                          {task.action_steps.map((step, si) => (
+                            <li key={si} className="leading-relaxed">{step}</li>
+                          ))}
+                        </ol>
+                      </div>
+                    )}
+                    {task.acceptance_criteria?.length > 0 && (
+                      <div className="mt-2">
+                        <p className="text-xs font-semibold text-foreground mb-1">Acceptance Criteria:</p>
+                        <ul className="text-xs text-muted-foreground space-y-0.5">
+                          {task.acceptance_criteria.map((c, ci) => (
+                            <li key={ci} className="flex items-start gap-1.5">
+                              <span className="text-emerald-500 mt-0.5">☐</span>
+                              <span className="leading-relaxed">{c}</span>
+                            </li>
+                          ))}
+                        </ul>
+                      </div>
+                    )}
+                    {task.tools_or_systems?.length > 0 && (
+                      <div className="mt-2 flex flex-wrap gap-1">
+                        {task.tools_or_systems.map((t, ti) => (
+                          <span key={ti} className="text-xs bg-muted px-1.5 py-0.5 rounded text-muted-foreground">{t}</span>
+                        ))}
+                      </div>
+                    )}
+                    {task.verification_method && (
+                      <div className="mt-2 text-xs text-blue-600 bg-blue-50 rounded px-2 py-1">
+                        ✓ Verify: {task.verification_method}
+                      </div>
+                    )}
                   </div>
                 ))}
               </div>

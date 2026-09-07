@@ -52,23 +52,98 @@ Deno.serve(async (req) => {
       return Response.json({ created: 0, score, threshold: THRESHOLD, reason: 'remediation task already exists' });
     }
 
-    const due = new Date();
-    due.setDate(due.getDate() + 14);
+    // Use AI to generate specific, actionable remediation tasks
+    let aiTasks = null;
+    try {
+      const llmRes = await base44.integrations.Core.InvokeLLM({
+        prompt: `A risk in the risk register has exceeded the tolerance threshold and requires remediation tasks. Generate 2-4 specific, actionable remediation tasks with step-by-step instructions.
 
-    const task = await base44.asServiceRole.entities.ComplianceTask.create({
-      title: `Remediate: ${title}`,
-      description: `Auto-generated because risk score ${score} (Likelihood ${likelihood} x Impact ${impact}) exceeds the tolerance threshold of ${THRESHOLD}. Review the risk and implement its mitigation plan.`,
-      type: 'remediation',
-      status: 'todo',
-      priority: score >= 20 ? 'critical' : score >= 15 ? 'high' : 'medium',
-      assignee_name: risk.owner_name || '',
-      assignee_id: risk.owner_id || '',
-      due_date: due.toISOString().slice(0, 10),
-      notes: `Auto-created from the Risk Register. ${tag}`,
-      tenant_id: tenantId,
-    });
+Risk: ${title}
+Category: ${risk.category || 'unknown'}
+Score: ${score} (Likelihood ${likelihood} x Impact ${impact})
+Description: ${risk.description || 'No description provided'}
+Mitigation Plan: ${risk.mitigation_plan || 'Not specified'}
+Treatment: ${risk.treatment || 'mitigate'}
 
-    return Response.json({ created: 1, score, threshold: THRESHOLD, task_id: task.id, due_date: task.due_date });
+Each task MUST include:
+- action_steps: 3-5 concrete step-by-step instructions naming the specific tool, system, or document to touch
+- acceptance_criteria: 2-3 conditions that confirm the task is complete
+- tools_needed: specific systems/tools needed
+
+Return ONLY a JSON object with a "tasks" array.`,
+        response_json_schema: {
+          type: "object",
+          properties: {
+            tasks: {
+              type: "array",
+              items: {
+                type: "object",
+                properties: {
+                  title: { type: "string", description: "Short actionable task title" },
+                  description: { type: "string", description: "What needs to be done and why" },
+                  action_steps: { type: "array", items: { type: "string" } },
+                  acceptance_criteria: { type: "array", items: { type: "string" } },
+                  tools_needed: { type: "array", items: { type: "string" } },
+                  priority: { type: "string", enum: ["critical", "high", "medium", "low"] },
+                  estimated_days: { type: "number" },
+                },
+                required: ["title", "description", "action_steps", "acceptance_criteria", "priority"],
+              },
+            },
+          },
+          required: ["tasks"],
+        },
+      });
+      aiTasks = llmRes?.tasks || null;
+    } catch (e) { /* fall back to generic task */ }
+
+    const today = new Date();
+    let cumulativeDays = 0;
+    const createdTaskIds = [];
+
+    if (aiTasks && aiTasks.length > 0) {
+      for (const aiTask of aiTasks) {
+        cumulativeDays += aiTask.estimated_days || 5;
+        const due = new Date(today.getTime() + cumulativeDays * 86400000);
+        const stepsText = (aiTask.action_steps || []).map((s, i) => `  ${i + 1}. ${s}`).join('\n');
+        const criteriaText = (aiTask.acceptance_criteria || []).map((c) => `  ☐ ${c}`).join('\n');
+        const toolsText = (aiTask.tools_needed || []).join(', ');
+        const fullDesc = `${aiTask.description || ''}\n\nAction Steps:\n${stepsText}\n\nAcceptance Criteria:\n${criteriaText}${toolsText ? `\n\nTools/Systems: ${toolsText}` : ''}`;
+
+        const created = await base44.asServiceRole.entities.ComplianceTask.create({
+          title: aiTask.title,
+          description: fullDesc,
+          type: 'remediation',
+          status: 'todo',
+          priority: aiTask.priority || (score >= 20 ? 'critical' : score >= 15 ? 'high' : 'medium'),
+          assignee_name: risk.owner_name || '',
+          assignee_id: risk.owner_id || '',
+          due_date: due.toISOString().slice(0, 10),
+          notes: `Auto-created from the Risk Register. ${tag}`,
+          tenant_id: tenantId,
+        }).catch(() => null);
+        if (created) createdTaskIds.push(created.id);
+      }
+    } else {
+      // Fallback: single generic task
+      const due = new Date();
+      due.setDate(due.getDate() + 14);
+      const created = await base44.asServiceRole.entities.ComplianceTask.create({
+        title: `Remediate: ${title}`,
+        description: `Auto-generated because risk score ${score} (Likelihood ${likelihood} x Impact ${impact}) exceeds the tolerance threshold of ${THRESHOLD}. Review the risk and implement its mitigation plan.`,
+        type: 'remediation',
+        status: 'todo',
+        priority: score >= 20 ? 'critical' : score >= 15 ? 'high' : 'medium',
+        assignee_name: risk.owner_name || '',
+        assignee_id: risk.owner_id || '',
+        due_date: due.toISOString().slice(0, 10),
+        notes: `Auto-created from the Risk Register. ${tag}`,
+        tenant_id: tenantId,
+      });
+      if (created) createdTaskIds.push(created.id);
+    }
+
+    return Response.json({ created: createdTaskIds.length, score, threshold: THRESHOLD, task_ids: createdTaskIds });
   } catch (error) {
     console.error('generateRiskRemediationTasks error:', error?.message || error);
     return Response.json({ error: error?.message || 'Failed to generate remediation task' }, { status: 500 });
