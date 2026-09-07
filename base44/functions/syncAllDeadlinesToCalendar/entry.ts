@@ -86,7 +86,7 @@ Deno.serve(async (req) => {
         ].filter(Boolean).join("\n"),
         start: { date: due, timeZone: "Africa/Johannesburg" },
         end: { date: end, timeZone: "Africa/Johannesburg" },
-        reminders: { useDefault: false, overrides: [{ method: "popup", minutes: 24 * 60 }, { method: "popup", minutes: 60 }] },
+        reminders: { useDefault: false, overrides: [{ method: "email", minutes: 24 * 60 }, { method: "email", minutes: 60 }, { method: "popup", minutes: 24 * 60 }, { method: "popup", minutes: 60 }] },
         extendedProperties: { private: { base44_source: "regtech_deadlines", base44_deadline_id: eventId } },
       };
       try {
@@ -117,7 +117,7 @@ Deno.serve(async (req) => {
         ].filter(Boolean).join("\n"),
         start: { date: due, timeZone: "Africa/Johannesburg" },
         end: { date: end, timeZone: "Africa/Johannesburg" },
-        reminders: { useDefault: false, overrides: [{ method: "popup", minutes: 24 * 60 }] },
+        reminders: { useDefault: false, overrides: [{ method: "email", minutes: 24 * 60 }, { method: "popup", minutes: 24 * 60 }] },
         extendedProperties: { private: { base44_source: "regtech_deadlines", base44_deadline_id: eventId } },
       };
       try {
@@ -149,7 +149,7 @@ Deno.serve(async (req) => {
         ].filter(Boolean).join("\n"),
         start: { date: due, timeZone: "Africa/Johannesburg" },
         end: { date: end, timeZone: "Africa/Johannesburg" },
-        reminders: { useDefault: false, overrides: [{ method: "popup", minutes: 24 * 60 }, { method: "popup", minutes: 60 }] },
+        reminders: { useDefault: false, overrides: [{ method: "email", minutes: 24 * 60 }, { method: "email", minutes: 60 }, { method: "popup", minutes: 24 * 60 }, { method: "popup", minutes: 60 }] },
         extendedProperties: { private: { base44_source: "regtech_deadlines", base44_deadline_id: eventId } },
       };
       try {
@@ -163,7 +163,42 @@ Deno.serve(async (req) => {
       } catch (e) { failed++; }
     }
 
-    // Delete events whose tasks/controls/policies no longer exist
+    // Sync evidence expiry dates (evidence submission deadlines)
+    const evidence = await base44.asServiceRole.entities.Evidence.list('-expiry_date', 500);
+    const evidenceDeadlines = (evidence || []).filter((e) => e.expiry_date && e.status !== "approved");
+    for (const ev of evidenceDeadlines) {
+      const eventId = `evidence_${ev.id}`;
+      seen.add(eventId);
+      const due = ev.expiry_date;
+      const end = fmtDate(new Date(new Date(due).getTime() + 24 * 60 * 60 * 1000));
+      const isMissing = ev.missing_evidence || ev.status === "missing" || ev.status === "expired";
+      const event = {
+        summary: `${isMissing ? "🚨" : "📎"} Evidence ${isMissing ? "Required" : "Expiring"}: ${ev.title || "Evidence"}`,
+        description: [
+          `Status: ${ev.status || "pending_review"}`,
+          ev.control_title ? `Control: ${ev.control_title}` : "",
+          ev.framework_name ? `Framework: ${ev.framework_name}` : "",
+          ev.owner_name ? `Owner: ${ev.owner_name}` : "",
+          isMissing ? "ACTION REQUIRED: Evidence must be collected/submitted" : `Expires on ${due} — renew before expiry`,
+          "\n— Synced from CertiGuard GRC",
+        ].filter(Boolean).join("\n"),
+        start: { date: due, timeZone: "Africa/Johannesburg" },
+        end: { date: end, timeZone: "Africa/Johannesburg" },
+        reminders: { useDefault: false, overrides: [{ method: "email", minutes: 24 * 60 }, { method: "email", minutes: 60 }, { method: "popup", minutes: 24 * 60 }, { method: "popup", minutes: 60 }] },
+        extendedProperties: { private: { base44_source: "regtech_deadlines", base44_deadline_id: eventId } },
+      };
+      try {
+        if (existing[eventId]) {
+          const r = await fetch(`${CAL_API}/${encodeURIComponent(existing[eventId])}`, { method: "PUT", headers, body: JSON.stringify(event) });
+          if (r.ok) updated++; else failed++;
+        } else {
+          const r = await fetch(CAL_API, { method: "POST", headers, body: JSON.stringify(event) });
+          if (r.ok) created++; else failed++;
+        }
+      } catch (e) { failed++; }
+    }
+
+    // Delete events whose tasks/controls/policies/evidence no longer exist
     let removed = 0;
     for (const [eventId, evId] of Object.entries(existing)) {
       if (!seen.has(eventId)) {
@@ -179,6 +214,7 @@ Deno.serve(async (req) => {
       taskDeadlines: taskDeadlines.length,
       controlReviews: controlReviews.length,
       policyReviews: policyReviews.length,
+      evidenceDeadlines: evidenceDeadlines.length,
       created, updated, removed, failed,
       lastSync: new Date().toISOString(),
     });
