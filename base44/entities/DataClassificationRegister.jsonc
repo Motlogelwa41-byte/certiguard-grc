@@ -1,0 +1,239 @@
+{
+  "name": "DataClassificationRegister",
+  "type": "object",
+  "properties": {
+    "tenant_id": {
+      "type": "string",
+      "description": "Tenant isolation key \u2014 mandatory on every record"
+    },
+    "register_id": {
+      "type": "string",
+      "description": "Unique register identifier e.g. DCR-001"
+    },
+    "asset_name": {
+      "type": "string",
+      "description": "Name of the data asset e.g. Customer Database, Employee HR Records"
+    },
+    "asset_id": {
+      "type": "string",
+      "description": "Linked ITAsset id if applicable"
+    },
+    "asset_type": {
+      "type": "string",
+      "enum": [
+        "database",
+        "file_share",
+        "api",
+        "saas_app",
+        "email_system",
+        "backup",
+        "document_repository",
+        "cloud_storage",
+        "other"
+      ],
+      "default": "database",
+      "description": "Type of data asset"
+    },
+    "data_categories": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "Data categories in this asset: [pii, financial, health, biometric, credentials, behavioral, special_category, government_id, payment_card]"
+    },
+    "classification_level": {
+      "type": "string",
+      "enum": [
+        "public",
+        "internal",
+        "confidential",
+        "restricted",
+        "secret"
+      ],
+      "default": "internal",
+      "description": "Data classification level \u2014 Public \u2192 Secret"
+    },
+    "description": {
+      "type": "string"
+    },
+    "data_owner_name": {
+      "type": "string",
+      "description": "Accountable data owner"
+    },
+    "data_owner_id": {
+      "type": "string"
+    },
+    "data_custodian_name": {
+      "type": "string",
+      "description": "Person or team responsible for day-to-day management"
+    },
+    "storage_location": {
+      "type": "string",
+      "description": "Where the data is stored e.g. AWS eu-west-1, on-prem Johannesburg"
+    },
+    "handling_rules": {
+      "type": "string",
+      "description": "Handling instructions for this classification level \u2014 encryption, access, sharing, disposal rules"
+    },
+    "encryption_at_rest": {
+      "type": "boolean",
+      "default": true
+    },
+    "encryption_in_transit": {
+      "type": "boolean",
+      "default": true
+    },
+    "access_restriction": {
+      "type": "string",
+      "enum": [
+        "all_employees",
+        "department_only",
+        "named_individuals",
+        "privileged_only",
+        "need_to_know"
+      ],
+      "default": "need_to_know",
+      "description": "Who can access this data"
+    },
+    "allowed_countries": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "Countries where this data can be stored/processed"
+    },
+    "retention_period_days": {
+      "type": "number",
+      "default": 0,
+      "description": "Retention period in days \u2014 0 means no defined retention"
+    },
+    "disposal_method": {
+      "type": "string",
+      "enum": [
+        "secure_deletion",
+        "crypto_shredding",
+        "physical_destruction",
+        "anonymization",
+        "overwrite",
+        "not_defined"
+      ],
+      "default": "secure_deletion"
+    },
+    "sharing_allowed": {
+      "type": "boolean",
+      "default": false,
+      "description": "Whether this data can be shared with third parties"
+    },
+    "sharing_approved_with": {
+      "type": "string",
+      "description": "Approved third parties this data can be shared with"
+    },
+    "backup_required": {
+      "type": "boolean",
+      "default": true
+    },
+    "backup_location": {
+      "type": "string"
+    },
+    "dpia_required": {
+      "type": "boolean",
+      "default": false,
+      "description": "Whether a DPIA is required for this data asset"
+    },
+    "dpia_completed": {
+      "type": "boolean",
+      "default": false
+    },
+    "linked_flow_ids": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "Linked DataFlowMap ids"
+    },
+    "linked_protection_rule_ids": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "Linked DataProtectionRule ids"
+    },
+    "last_classified_date": {
+      "type": "string",
+      "format": "date"
+    },
+    "next_review_date": {
+      "type": "string",
+      "format": "date"
+    },
+    "classification_review_frequency_months": {
+      "type": "number",
+      "default": 12
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "active",
+        "under_review",
+        "deprecated",
+        "unclassified"
+      ],
+      "default": "unclassified"
+    },
+    "notes": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "register_id",
+    "asset_name",
+    "classification_level"
+  ],
+  "rls": {
+    "create": {
+      "data.tenant_id": "{{user.data.tenant_id}}"
+    },
+    "read": {
+      "$or": [
+        {
+          "data.tenant_id": "{{user.data.tenant_id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "update": {
+      "$or": [
+        {
+          "data.tenant_id": "{{user.data.tenant_id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        },
+        {
+          "user_condition": {
+            "role": "compliance_officer"
+          }
+        }
+      ]
+    },
+    "delete": {
+      "$or": [
+        {
+          "data.tenant_id": "{{user.data.tenant_id}}",
+          "created_by_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    }
+  }
+}

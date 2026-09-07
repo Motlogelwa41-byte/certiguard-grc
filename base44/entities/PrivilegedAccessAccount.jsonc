@@ -1,0 +1,264 @@
+{
+  "name": "PrivilegedAccessAccount",
+  "type": "object",
+  "properties": {
+    "tenant_id": {
+      "type": "string",
+      "description": "Tenant isolation key \u2014 mandatory on every record"
+    },
+    "account_id": {
+      "type": "string",
+      "description": "Unique PAM account identifier e.g. PAM-001"
+    },
+    "account_name": {
+      "type": "string",
+      "description": "Display name for this privileged account"
+    },
+    "account_type": {
+      "type": "string",
+      "enum": [
+        "break_glass",
+        "service_account",
+        "admin_account",
+        "root_account",
+        "database_admin",
+        "cloud_admin",
+        "network_admin",
+        "domain_admin",
+        "application_admin"
+      ],
+      "default": "admin_account",
+      "description": "Type of privileged account"
+    },
+    "target_system": {
+      "type": "string",
+      "description": "The system this account has privileged access to"
+    },
+    "target_system_type": {
+      "type": "string",
+      "enum": [
+        "aws",
+        "azure",
+        "gcp",
+        "linux",
+        "windows",
+        "database",
+        "network_device",
+        "saas_app",
+        "hypervisor",
+        "active_directory",
+        "other"
+      ],
+      "default": "linux"
+    },
+    "assigned_to_name": {
+      "type": "string",
+      "description": "Person assigned to this privileged account"
+    },
+    "assigned_to_id": {
+      "type": "string"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "active",
+        "disabled",
+        "expired",
+        "locked",
+        "compromised"
+      ],
+      "default": "active"
+    },
+    "elevation_type": {
+      "type": "string",
+      "enum": [
+        "standing",
+        "just_in_time",
+        "break_glass"
+      ],
+      "default": "just_in_time",
+      "description": "How privileged access is granted: standing (always on), JIT (time-limited), break-glass (emergency only)"
+    },
+    "jit_approval_required": {
+      "type": "boolean",
+      "default": true,
+      "description": "Whether JIT elevation requires approval"
+    },
+    "jit_max_duration_minutes": {
+      "type": "number",
+      "default": 60,
+      "description": "Maximum duration JIT access is granted (minutes)"
+    },
+    "jit_request_reason": {
+      "type": "string",
+      "description": "Reason for the most recent JIT elevation"
+    },
+    "jit_requested_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "jit_approved_by": {
+      "type": "string"
+    },
+    "jit_approved_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "jit_expires_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "session_recording_enabled": {
+      "type": "boolean",
+      "default": true,
+      "description": "Whether privileged sessions are recorded"
+    },
+    "session_recording_url": {
+      "type": "string",
+      "description": "Link to the latest session recording"
+    },
+    "last_session_recorded_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "mfa_required": {
+      "type": "boolean",
+      "default": true
+    },
+    "mfa_enrolled": {
+      "type": "boolean",
+      "default": false
+    },
+    "password_vaulted": {
+      "type": "boolean",
+      "default": true,
+      "description": "Whether credentials are stored in a password vault (not shared)"
+    },
+    "password_last_rotated": {
+      "type": "string",
+      "format": "date"
+    },
+    "password_rotation_frequency_days": {
+      "type": "number",
+      "default": 90
+    },
+    "credential_checkout_required": {
+      "type": "boolean",
+      "default": true,
+      "description": "Whether credentials must be checked out from the vault (not visible to user)"
+    },
+    "access_justification": {
+      "type": "string",
+      "description": "Why this person needs privileged access"
+    },
+    "last_used_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "last_used_from_ip": {
+      "type": "string"
+    },
+    "last_used_action": {
+      "type": "string"
+    },
+    "usage_frequency": {
+      "type": "string",
+      "enum": [
+        "frequent",
+        "occasional",
+        "rare",
+        "emergency_only"
+      ],
+      "default": "occasional"
+    },
+    "monitoring_enabled": {
+      "type": "boolean",
+      "default": true
+    },
+    "alert_on_anomalous_use": {
+      "type": "boolean",
+      "default": true
+    },
+    "approved_by_name": {
+      "type": "string"
+    },
+    "approved_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "review_frequency_months": {
+      "type": "number",
+      "default": 6
+    },
+    "last_reviewed_date": {
+      "type": "string",
+      "format": "date"
+    },
+    "next_review_date": {
+      "type": "string",
+      "format": "date"
+    },
+    "linked_control_ids": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "notes": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "account_id",
+    "account_name",
+    "account_type",
+    "target_system"
+  ],
+  "rls": {
+    "create": {
+      "data.tenant_id": "{{user.data.tenant_id}}"
+    },
+    "read": {
+      "$or": [
+        {
+          "data.tenant_id": "{{user.data.tenant_id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "update": {
+      "$or": [
+        {
+          "data.tenant_id": "{{user.data.tenant_id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        },
+        {
+          "user_condition": {
+            "role": "compliance_officer"
+          }
+        }
+      ]
+    },
+    "delete": {
+      "$or": [
+        {
+          "data.tenant_id": "{{user.data.tenant_id}}",
+          "created_by_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    }
+  }
+}
