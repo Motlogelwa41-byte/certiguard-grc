@@ -1,14 +1,36 @@
 import React, { useState, useEffect, useRef } from "react";
 import { base44 } from "@/api/base44Client";
-import { Upload, X, CheckCircle2, AlertCircle, Link2, FileText, Loader2 } from "lucide-react";
+import { Upload, X, CheckCircle2, AlertCircle, Link2, FileText, FileSpreadsheet, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import PageHeader from "@/components/shared/PageHeader";
+import BulkImportModal from "@/components/shared/BulkImportModal";
 import { useToast } from "@/components/ui/use-toast";
 
 const evidenceTypes = ["screenshot", "document", "report", "log", "certificate", "configuration", "other"];
+
+const evidenceCsvColumns = [
+  { key: "title", label: "Title", required: true },
+  { key: "type", label: "Type", transform: (v) => (v || "document").toLowerCase() },
+  { key: "control_id", label: "Control ID" },
+  { key: "control_title", label: "Control Title" },
+  { key: "framework_name", label: "Framework" },
+  { key: "requirement_title", label: "Requirement" },
+  { key: "status", label: "Status", transform: (v) => v || "pending_review" },
+  { key: "owner_name", label: "Owner" },
+  { key: "collected_date", label: "Collected Date" },
+  { key: "expiry_date", label: "Expiry Date" },
+  { key: "file_url", label: "File URL" },
+  { key: "description", label: "Description" },
+  { key: "notes", label: "Notes" },
+];
+
+const evidenceSampleRows = [
+  { Title: "Q3 Access Review Report", Type: "report", "Control ID": "AC-2", "Control Title": "Account Management", Framework: "NIST 800-53", Status: "pending_review", Owner: "Jane Smith", "Collected Date": "2026-09-01", "Expiry Date": "2027-09-01", "File URL": "", Description: "Quarterly access review evidence", Notes: "" },
+  { Title: "Encryption Configuration Screenshot", Type: "screenshot", "Control ID": "SC-28", "Control Title": "Protection of Information at Rest", Framework: "NIST 800-53", Status: "approved", Owner: "John Doe", "Collected Date": "2026-08-15", "Expiry Date": "", "File URL": "", Description: "AES-256 encryption config", Notes: "" },
+];
 
 export default function BulkEvidenceUploader() {
   const [controls, setControls] = useState([]);
@@ -20,6 +42,7 @@ export default function BulkEvidenceUploader() {
   const [applyTypeToAll, setApplyTypeToAll] = useState("");
   const [applyFrameworkToAll, setApplyFrameworkToAll] = useState("");
   const [applyRequirementToAll, setApplyRequirementToAll] = useState("");
+  const [csvOpen, setCsvOpen] = useState(false);
   const dropRef = useRef(null);
   const { toast } = useToast();
 
@@ -197,11 +220,16 @@ export default function BulkEvidenceUploader() {
         title="Bulk Evidence Uploader"
         subtitle="Upload multiple files at once and link each to a control, framework, and compliance requirement"
         actions={
-          files.length > 0 && (
-            <Button onClick={handleUploadAll} disabled={uploading || pendingCount === 0}>
-              {uploading ? <><Loader2 className="w-4 h-4 mr-1 animate-spin" /> Uploading…</> : <><Upload className="w-4 h-4 mr-1" /> Upload All ({pendingCount})</>}
+          <div className="flex items-center gap-2">
+            <Button variant="outline" onClick={() => setCsvOpen(true)}>
+              <FileSpreadsheet className="w-4 h-4 mr-1" /> CSV Import
             </Button>
-          )
+            {files.length > 0 && (
+              <Button onClick={handleUploadAll} disabled={uploading || pendingCount === 0}>
+                {uploading ? <><Loader2 className="w-4 h-4 mr-1 animate-spin" /> Uploading…</> : <><Upload className="w-4 h-4 mr-1" /> Upload All ({pendingCount})</>}
+              </Button>
+            )}
+          </div>
         }
       />
 
@@ -359,6 +387,15 @@ export default function BulkEvidenceUploader() {
           </div>
         </>
       )}
+
+      <BulkImportModal
+        open={csvOpen}
+        onOpenChange={setCsvOpen}
+        entityName="Evidence"
+        columns={evidenceCsvColumns}
+        sampleRows={evidenceSampleRows}
+        onSuccess={() => toast({ title: "Evidence imported", description: "CSV records have been added to your evidence register." })}
+      />
     </div>
   );
 }

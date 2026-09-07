@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
-import { History, Search, ChevronDown, ChevronRight, FileDown } from "lucide-react";
+import { History, Search, ChevronDown, ChevronRight, FileDown, FileText, Settings, Users } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -12,6 +12,7 @@ import moment from "moment";
 
 const ENTITY_FILTERS = [
   { value: "all", label: "All Entities" },
+  { value: "Evidence", label: "Evidence / Documents" },
   { value: "Risk", label: "Risks" },
   { value: "Control", label: "Controls" },
   { value: "ComplianceTask", label: "Tasks" },
@@ -21,7 +22,7 @@ const ENTITY_FILTERS = [
   { value: "other", label: "Other" },
 ];
 
-const PRIMARY_ENTITY_TYPES = ["Risk", "Control", "ComplianceTask", "Policy", "Vendor", "User"];
+const PRIMARY_ENTITY_TYPES = ["Risk", "Control", "ComplianceTask", "Policy", "Vendor", "User", "Evidence"];
 
 const actionColors = {
   create: "bg-emerald-100 text-emerald-700",
@@ -135,6 +136,38 @@ export default function AuditTrailPage() {
           </SelectContent>
         </Select>
         <span className="text-xs text-muted-foreground ml-auto">{filtered.length} entries</span>
+      </div>
+
+      {/* Summary stats — clear at-a-glance for bank clients */}
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+        <div className="bg-card rounded-xl border border-border p-4">
+          <div className="flex items-center gap-2">
+            <History className="w-4 h-4 text-primary" />
+            <p className="text-xs text-muted-foreground">Total Entries</p>
+          </div>
+          <p className="text-2xl font-heading font-bold text-foreground mt-1">{filtered.length}</p>
+        </div>
+        <div className="bg-card rounded-xl border border-border p-4">
+          <div className="flex items-center gap-2">
+            <FileText className="w-4 h-4 text-blue-500" />
+            <p className="text-xs text-muted-foreground">Document Updates</p>
+          </div>
+          <p className="text-2xl font-heading font-bold text-foreground mt-1">{filtered.filter((l) => l.entity_type === "Evidence").length}</p>
+        </div>
+        <div className="bg-card rounded-xl border border-border p-4">
+          <div className="flex items-center gap-2">
+            <Settings className="w-4 h-4 text-amber-500" />
+            <p className="text-xs text-muted-foreground">System Changes</p>
+          </div>
+          <p className="text-2xl font-heading font-bold text-foreground mt-1">{filtered.filter((l) => ["login", "logout", "export"].includes(l.action) || !PRIMARY_ENTITY_TYPES.includes(l.entity_type)).length}</p>
+        </div>
+        <div className="bg-card rounded-xl border border-border p-4">
+          <div className="flex items-center gap-2">
+            <Users className="w-4 h-4 text-emerald-500" />
+            <p className="text-xs text-muted-foreground">Unique Actors</p>
+          </div>
+          <p className="text-2xl font-heading font-bold text-foreground mt-1">{new Set(filtered.map((l) => l.performed_by_name).filter(Boolean)).size}</p>
+        </div>
       </div>
 
       {filtered.length === 0 ? (
