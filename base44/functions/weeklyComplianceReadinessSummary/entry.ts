@@ -11,13 +11,14 @@ Deno.serve(async (req) => {
     const base44 = createClientFromRequest(req);
     const sr = base44.asServiceRole;
 
-    // Pull current compliance data (service-role, tenant-wide read)
-    const [frameworks, controls, risks, tasks, incidents] = await Promise.all([
+    // Pull current compliance data + active weekly report schedules (service-role, tenant-wide read)
+    const [frameworks, controls, risks, tasks, incidents, schedules] = await Promise.all([
       sr.entities.Framework.list('-updated_date', 200),
       sr.entities.Control.list('-updated_date', 500),
       sr.entities.Risk.list('-updated_date', 200),
       sr.entities.ComplianceTask.list('-updated_date', 300),
       sr.entities.Incident.list('-updated_date', 100),
+      sr.entities.ReportSchedule.filter({ is_active: true, frequency: 'weekly' }, '-updated_date', 100),
     ]);
 
     const fw = frameworks || [];
@@ -25,6 +26,7 @@ Deno.serve(async (req) => {
     const rsk = risks || [];
     const tsk = tasks || [];
     const inc = incidents || [];
+    const sch = (schedules || []).filter((s) => s.recipients);
 
     // Frameworks
     const fwTotal = fw.length;
@@ -141,15 +143,40 @@ Deno.serve(async (req) => {
       </div>
     `;
 
-    let emailResult = null;
-    try {
-      emailResult = await sendGmail(base44, SUPPORT_EMAIL, `Weekly Compliance Readiness Summary — ${verdictClean}`, emailHtml);
-    } catch (e) {
-      console.error('Weekly summary email failed:', e?.message || e);
+    // Collect recipient lists from active weekly schedules; fall back to support email
+    const recipientLists = sch.map((s) => ({
+      name: s.name,
+      emails: String(s.recipients || "").split(',').map((e) => e.trim()).filter(Boolean),
+    }));
+    const allRecipients = recipientLists.flatMap((r) => r.emails);
+    const targets = allRecipients.length > 0 ? [...new Set(allRecipients)] : [SUPPORT_EMAIL];
+
+    const subject = `Weekly Compliance Readiness Summary — ${verdictClean}`;
+    const emailResults = [];
+    for (const to of targets) {
+      try {
+        const res = await sendGmail(base44, to, subject, emailHtml);
+        emailResults.push({ to, ok: true, messageId: res?.id });
+      } catch (e) {
+        emailResults.push({ to, ok: false, error: e?.message || 'send failed' });
+        console.error(`Weekly summary email to ${to} failed:`, e?.message || e);
+      }
     }
 
+    // Stamp last-sent metadata on each schedule that contributed recipients
+    const today = new Date().toISOString().slice(0, 10);
+    await Promise.all(sch.map((s) =>
+      sr.entities.ReportSchedule.update(s.id, {
+        last_sent_at: today,
+        last_sent_status: 'sent',
+        total_sent: (s.total_sent || 0) + 1,
+      }).catch(() => null)
+    ));
+
+    const okCount = emailResults.filter((r) => r.ok).length;
     console.log('Weekly readiness summary posted:', JSON.stringify({
-      weekOf, avgReadiness, ctlPassRate, openRisks, criticalRisks, openIncidents, slackOk: slackData?.ok, emailOk: !!emailResult,
+      weekOf, avgReadiness, ctlPassRate, openRisks, criticalRisks, openIncidents,
+      slackOk: slackData?.ok, emailsSent: okCount, emailTargets: targets.length,
     }));
 
     return Response.json({
@@ -164,7 +191,7 @@ Deno.serve(async (req) => {
         incidents: { open: openIncidents, critical: criticalIncidents },
       },
       slack: slackData,
-      email: emailResult ? { ok: true, messageId: emailResult.id, to: SUPPORT_EMAIL } : { ok: false },
+      email: { ok: okCount > 0, sent: okCount, total: targets.length, recipients: targets, results: emailResults, fallback: allRecipients.length === 0 },
     });
   } catch (error) {
     console.error('weeklyComplianceReadinessSummary error:', error?.message || error);
