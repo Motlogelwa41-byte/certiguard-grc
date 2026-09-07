@@ -6,9 +6,10 @@ import { useToast } from "@/components/ui/use-toast";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import PageHeader from "@/components/shared/PageHeader";
+import { Link } from "react-router-dom";
 import {
   Shield, AlertTriangle, TrendingUp, Building, Bell, CheckCircle2,
-  FileCheck, Activity, Plus, X, GripVertical, Save, RotateCcw, Loader2
+  FileCheck, Activity, Plus, X, GripVertical, Save, RotateCcw, Loader2, ChevronRight
 } from "lucide-react";
 import {
   ComplianceScoreWidget, OverdueTasksWidget, OpenRisksWidget, VendorRiskWidget,
@@ -16,14 +17,14 @@ import {
 } from "@/components/dashboard/CustomWidgets";
 
 const WIDGET_CATALOG = [
-  { id: "compliance_score", title: "Compliance Score", icon: Shield, component: ComplianceScoreWidget, size: "large" },
-  { id: "overdue_tasks", title: "Overdue Tasks", icon: AlertTriangle, component: OverdueTasksWidget, size: "small" },
-  { id: "open_risks", title: "Open Risks", icon: TrendingUp, component: OpenRisksWidget, size: "small" },
-  { id: "vendor_risk", title: "Vendor Risk", icon: Building, component: VendorRiskWidget, size: "small" },
-  { id: "regulatory_alerts", title: "Regulatory Alerts", icon: Bell, component: RegulatoryAlertsWidget, size: "small" },
-  { id: "control_status", title: "Control Status", icon: CheckCircle2, component: ControlStatusWidget, size: "large" },
-  { id: "evidence_status", title: "Evidence Status", icon: FileCheck, component: EvidenceStatusWidget, size: "small" },
-  { id: "recent_activity", title: "Recent Activity", icon: Activity, component: RecentActivityWidget, size: "large" },
+  { id: "compliance_score", title: "Compliance Score", icon: Shield, component: ComplianceScoreWidget, size: "large", to: "/controls" },
+  { id: "overdue_tasks", title: "Overdue Tasks", icon: AlertTriangle, component: OverdueTasksWidget, size: "small", to: "/tasks" },
+  { id: "open_risks", title: "Open Risks", icon: TrendingUp, component: OpenRisksWidget, size: "small", to: "/risks" },
+  { id: "vendor_risk", title: "Vendor Risk", icon: Building, component: VendorRiskWidget, size: "small", to: "/vendors" },
+  { id: "regulatory_alerts", title: "Regulatory Alerts", icon: Bell, component: RegulatoryAlertsWidget, size: "small", to: "/regulatory-changes" },
+  { id: "control_status", title: "Control Status", icon: CheckCircle2, component: ControlStatusWidget, size: "large", to: "/controls" },
+  { id: "evidence_status", title: "Evidence Status", icon: FileCheck, component: EvidenceStatusWidget, size: "small", to: "/evidence" },
+  { id: "recent_activity", title: "Recent Activity", icon: Activity, component: RecentActivityWidget, size: "large", to: "/audit-trail" },
 ];
 
 const DEFAULT_LAYOUT = ["compliance_score", "overdue_tasks", "open_risks", "control_status"];
@@ -158,12 +159,21 @@ export default function CustomDashboard() {
                               <Icon className="w-4 h-4 text-primary" />
                               <h3 className="text-sm font-heading font-semibold text-foreground">{widget.title}</h3>
                             </div>
-                            <button
-                              onClick={() => removeWidget(widgetId)}
-                              className="opacity-0 group-hover:opacity-100 transition-opacity p-1 rounded hover:bg-destructive/10 text-muted-foreground hover:text-destructive"
-                            >
-                              <X className="w-3.5 h-3.5" />
-                            </button>
+                            <div className="flex items-center gap-0.5">
+                              <Link
+                                to={widget.to}
+                                className="opacity-0 group-hover:opacity-100 transition-opacity p-1 rounded hover:bg-muted text-muted-foreground hover:text-foreground"
+                                title="View all"
+                              >
+                                <ChevronRight className="w-3.5 h-3.5" />
+                              </Link>
+                              <button
+                                onClick={() => removeWidget(widgetId)}
+                                className="opacity-0 group-hover:opacity-100 transition-opacity p-1 rounded hover:bg-destructive/10 text-muted-foreground hover:text-destructive"
+                              >
+                                <X className="w-3.5 h-3.5" />
+                              </button>
+                            </div>
                           </div>
                           <CardContent className="pt-2">
                             <WidgetComponent />

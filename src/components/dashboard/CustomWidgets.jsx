@@ -7,15 +7,17 @@ import { Loader2, Shield, AlertTriangle, TrendingUp, Building, Bell, CheckCircle
 
 export function ComplianceScoreWidget() {
   const [data, setData] = useState(null);
+  const [error, setError] = useState(false);
   useEffect(() => {
     base44.entities.Control.list().then((controls) => {
       const passing = (controls || []).filter((c) => c.status === "passing").length;
       const total = (controls || []).length;
       const score = total > 0 ? Math.round((passing / total) * 100) : 0;
       setData({ score, passing, failing: total - passing, total });
-    }).catch(() => setData(null));
+    }).catch(() => setError(true));
   }, []);
 
+  if (error) return <WidgetError />;
   if (!data) return <WidgetSkeleton />;
   const color = data.score >= 70 ? "#16a34a" : data.score >= 40 ? "#d97706" : "#dc2626";
 
@@ -142,6 +144,7 @@ export function RegulatoryAlertsWidget() {
 
 export function ControlStatusWidget() {
   const [data, setData] = useState(null);
+  const [error, setError] = useState(false);
   useEffect(() => {
     base44.entities.Control.list().then((controls) => {
       const c = controls || [];
@@ -151,9 +154,10 @@ export function ControlStatusWidget() {
         notTested: c.filter((x) => x.status === "not_tested" || !x.status).length,
         total: c.length,
       });
-    }).catch(() => {});
+    }).catch(() => setError(true));
   }, []);
 
+  if (error) return <WidgetError />;
   if (!data) return <WidgetSkeleton />;
   const segments = [
     { label: "Passing", value: data.passing, color: "#16a34a" },
@@ -180,6 +184,7 @@ export function ControlStatusWidget() {
 
 export function EvidenceStatusWidget() {
   const [data, setData] = useState(null);
+  const [error, setError] = useState(false);
   useEffect(() => {
     base44.entities.Evidence.list("-created_date", 200).then((all) => {
       const e = all || [];
@@ -188,9 +193,10 @@ export function EvidenceStatusWidget() {
         pending: e.filter((x) => x.status === "pending_review").length,
         total: e.length,
       });
-    }).catch(() => {});
+    }).catch(() => setError(true));
   }, []);
 
+  if (error) return <WidgetError />;
   if (!data) return <WidgetSkeleton />;
 
   return (
@@ -240,6 +246,14 @@ function WidgetSkeleton() {
   return (
     <div className="flex items-center justify-center h-16">
       <Loader2 className="w-5 h-5 animate-spin text-muted-foreground" />
+    </div>
+  );
+}
+
+function WidgetError() {
+  return (
+    <div className="flex items-center justify-center h-16 text-xs text-muted-foreground">
+      Unable to load — try again later
     </div>
   );
 }
