@@ -11,6 +11,7 @@ import { useAuth } from "@/lib/AuthContext";
 import Can from "@/components/shared/Can";
 import TransferOwnershipDialog from "@/components/controls/TransferOwnershipDialog";
 import CommentThread from "@/components/shared/CommentThread";
+import RemediationPlanPanel from "@/components/controls/RemediationPlanPanel";
 
 function hashStr(s) {
   let h = 0;
@@ -165,6 +166,8 @@ export default function ControlDetail() {
           </CardContent>
         </Card>
       )}
+
+      <RemediationPlanPanel control={control} onTasksCreated={load} />
 
       <Card>
         <CardHeader><CardTitle className="text-base">Details</CardTitle></CardHeader>

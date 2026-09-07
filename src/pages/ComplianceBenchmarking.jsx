@@ -14,6 +14,7 @@ import {
 } from "@/components/ui/dialog";
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell } from "recharts";
 import { Plus, Trophy, Pencil, Trash2, Sparkles, Loader2, TrendingUp, TrendingDown } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
 
 const INDUSTRIES = ["Financial Services", "Healthcare", "Technology/SaaS", "Mining", "Retail", "Public Sector"];
 const FRAMEWORKS = [
@@ -41,6 +42,8 @@ export default function ComplianceBenchmarking() {
   const [saving, setSaving] = useState(false);
   const [aiInsight, setAiInsight] = useState(null);
   const [aiLoading, setAiLoading] = useState(false);
+  const [peerBenchmark, setPeerBenchmark] = useState(null);
+  const [peerLoading, setPeerLoading] = useState(false);
   const { toast } = useToast();
 
   const load = useCallback(() => {
@@ -52,6 +55,14 @@ export default function ComplianceBenchmarking() {
   }, [industry, toast]);
 
   useEffect(() => { load(); }, [load]);
+
+  useEffect(() => {
+    setPeerLoading(true);
+    base44.functions.invoke("getIndustryBenchmark", {})
+      .then((res) => setPeerBenchmark(res.data))
+      .catch(() => {})
+      .finally(() => setPeerLoading(false));
+  }, []);
 
   const openCreate = () => { setEditing(null); setForm({ ...emptyForm, industry }); setDialogOpen(true); };
   const openEdit = (b) => { setEditing(b); setForm({ ...emptyForm, ...b }); setDialogOpen(true); };
@@ -152,6 +163,44 @@ export default function ComplianceBenchmarking() {
           </div>
         }
       />
+
+      {peerBenchmark && !peerLoading && peerBenchmark.total_organizations > 0 && (
+        <div className="rounded-xl border border-primary/20 bg-gradient-to-br from-primary/5 to-transparent p-5 mb-6">
+          <div className="flex items-center gap-2 mb-3">
+            <Trophy className="w-5 h-5 text-primary" />
+            <h3 className="font-heading font-semibold text-foreground">Peer Benchmarking — Anonymized Industry Comparison</h3>
+            <Badge variant="secondary" className="ml-auto">{peerBenchmark.total_organizations} orgs</Badge>
+          </div>
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+            <div>
+              <p className="text-xs text-muted-foreground mb-0.5">Your Score</p>
+              <p className="text-2xl font-heading font-bold text-primary">{peerBenchmark.your_score}%</p>
+            </div>
+            <div>
+              <p className="text-xs text-muted-foreground mb-0.5">Industry Median</p>
+              <p className="text-2xl font-heading font-bold text-foreground">{peerBenchmark.industry_median}%</p>
+            </div>
+            <div>
+              <p className="text-xs text-muted-foreground mb-0.5">Top Quartile</p>
+              <p className="text-2xl font-heading font-bold text-emerald-600">{peerBenchmark.top_quartile}%</p>
+            </div>
+            <div>
+              <p className="text-xs text-muted-foreground mb-0.5">Percentile Rank</p>
+              <p className="text-2xl font-heading font-bold text-foreground">{peerBenchmark.percentile_rank}%</p>
+            </div>
+          </div>
+          <div className="flex items-center gap-2 mt-3 text-sm">
+            {peerBenchmark.gap_to_median > 0 ? (
+              <span className="text-emerald-600 font-medium">↑ {peerBenchmark.gap_to_median}% above industry median</span>
+            ) : peerBenchmark.gap_to_median < 0 ? (
+              <span className="text-rose-600 font-medium">↓ {Math.abs(peerBenchmark.gap_to_median)}% below industry median</span>
+            ) : (
+              <span className="text-muted-foreground font-medium">At industry median</span>
+            )}
+            <span className="text-muted-foreground">· Ranked #{peerBenchmark.your_rank} of {peerBenchmark.total_organizations} organizations</span>
+          </div>
+        </div>
+      )}
 
       <div className="flex items-center gap-3 mb-6">
         <Trophy className="w-5 h-5 text-primary" />

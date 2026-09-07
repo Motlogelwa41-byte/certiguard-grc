@@ -244,6 +244,7 @@ import Workspaces from '@/pages/Workspaces';
 import NotificationCenter from '@/pages/NotificationCenter';
 import CloudEvidenceCollector from '@/pages/CloudEvidenceCollector';
 import MobileHub from '@/pages/MobileHub';
+import CustomDashboard from '@/pages/CustomDashboard';
 import { LanguageProvider } from '@/contexts/LanguageContext';
 
 const AuthenticatedApp = () => {
@@ -510,6 +511,7 @@ const AuthenticatedApp = () => {
           <Route path="/notification-center" element={<NotificationCenter />} />
           <Route path="/cloud-evidence" element={<CloudEvidenceCollector />} />
           <Route path="/mobile-hub" element={<MobileHub />} />
+          <Route path="/my-dashboard" element={<CustomDashboard />} />
         </Route>
       </Route>
       <Route path="*" element={<PageNotFound />} />

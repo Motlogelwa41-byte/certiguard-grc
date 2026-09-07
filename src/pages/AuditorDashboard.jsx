@@ -1,12 +1,13 @@
 import React, { useState, useEffect, useMemo } from "react";
 import { base44 } from "@/api/base44Client";
 import { useAuth } from "@/lib/AuthContext";
-import { Loader2, ShieldCheck, FileText, Database, Download, LogOut, Search, CheckCircle2, XCircle, Clock, TrendingUp, AlertTriangle } from "lucide-react";
+import { Loader2, ShieldCheck, FileText, Database, Download, LogOut, Search, CheckCircle2, XCircle, Clock, TrendingUp, AlertTriangle, MessageSquare, FileDown, AlertCircle, Plus } from "lucide-react";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import StatusBadge from "@/components/shared/StatusBadge";
 import { generateAuditorPdf } from "@/lib/auditorPdfExport";
+import { AuditorEvidencePack, AuditorFindings, AuditorRequestList, AuditorRequestDialog } from "@/components/auditor/AuditorWorkbench";
 
 export default function AuditorDashboard() {
   const { user, logout } = useAuth();
@@ -17,6 +18,9 @@ export default function AuditorDashboard() {
   const [ledger, setLedger] = useState([]);
   const [controlSearch, setControlSearch] = useState("");
   const [policySearch, setPolicySearch] = useState("");
+  const [evidence, setEvidence] = useState([]);
+  const [findings, setFindings] = useState([]);
+  const [requestOpen, setRequestOpen] = useState(false);
 
   useEffect(() => {
     base44.functions
@@ -32,6 +36,15 @@ export default function AuditorDashboard() {
       })
       .catch(() => setError("Failed to load auditor data."))
       .finally(() => setLoading(false));
+
+    // Fetch evidence and findings for the auditor workbench
+    Promise.all([
+      base44.entities.Evidence.list("-created_date", 200).catch(() => []),
+      base44.entities.AuditFinding.list("-created_date", 100).catch(() => []),
+    ]).then(([ev, fnd]) => {
+      setEvidence(ev || []);
+      setFindings(fnd || []);
+    });
   }, []);
 
   const filteredControls = useMemo(() => {
@@ -115,6 +128,10 @@ export default function AuditorDashboard() {
             </div>
           </div>
           <div className="flex items-center gap-3">
+            <Button variant="outline" size="sm" onClick={() => setRequestOpen(true)}>
+              <MessageSquare className="w-4 h-4" />
+              <span className="hidden sm:inline">Request Evidence</span>
+            </Button>
             <Button variant="outline" size="sm" onClick={() => generateAuditorPdf({ controls, policies, ledger, user })} disabled={loading}>
               <Download className="w-4 h-4" />
               <span className="hidden sm:inline">Export PDF</span>
@@ -162,6 +179,9 @@ export default function AuditorDashboard() {
             <TabsTrigger value="controls">Universal Controls</TabsTrigger>
             <TabsTrigger value="policies">Active Policies</TabsTrigger>
             <TabsTrigger value="ledger">Evidence Ledger</TabsTrigger>
+            <TabsTrigger value="evidence-pack">Evidence Pack</TabsTrigger>
+            <TabsTrigger value="findings">Findings</TabsTrigger>
+            <TabsTrigger value="requests">Requests</TabsTrigger>
           </TabsList>
 
           {/* Universal Controls — read-only */}
@@ -326,8 +346,29 @@ export default function AuditorDashboard() {
               </div>
             </div>
           </TabsContent>
+          {/* Evidence Pack — grouped by control with download */}
+          <TabsContent value="evidence-pack" className="mt-4">
+            <AuditorEvidencePack evidence={evidence} controls={controls} />
+          </TabsContent>
+
+          {/* Findings — track open audit findings */}
+          <TabsContent value="findings" className="mt-4">
+            <AuditorFindings findings={findings} />
+          </TabsContent>
+
+          {/* Requests — auditor's evidence requests */}
+          <TabsContent value="requests" className="mt-4">
+            <AuditorRequestList controls={controls} auditor={user} onRequestNew={() => setRequestOpen(true)} />
+          </TabsContent>
         </Tabs>
       </main>
+
+      <AuditorRequestDialog
+        open={requestOpen}
+        onOpenChange={setRequestOpen}
+        controls={controls}
+        auditor={user}
+      />
     </div>
   );
 }
