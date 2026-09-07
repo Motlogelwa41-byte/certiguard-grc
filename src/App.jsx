@@ -250,6 +250,7 @@ import UnifiedOnboarding from '@/pages/UnifiedOnboarding';
 import ClientPortal from '@/pages/ClientPortal';
 import BotusafeRfpResponse from '@/pages/BotusafeRfpResponse';
 import SearchConsoleDashboard from '@/pages/SearchConsoleDashboard';
+import AuditorLanding from '@/pages/AuditorLanding';
 import { LanguageProvider } from '@/contexts/LanguageContext';
 
 const AuthenticatedApp = () => {
@@ -293,6 +294,7 @@ const AuthenticatedApp = () => {
       <Route path="/trust-center" element={<TrustCenterPublic />} />
       <Route path="/client-portal" element={<ClientPortal />} />
       <Route path="/botusafe-rfp" element={<BotusafeRfpResponse />} />
+      <Route path="/for-auditors" element={<AuditorLanding />} />
       <Route path="/privacy" element={<PrivacyPolicy />} />
       <Route path="/terms" element={<Terms />} />
       <Route path="/sla" element={<SLA />} />

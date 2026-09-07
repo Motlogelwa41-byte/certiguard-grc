@@ -1,0 +1,72 @@
+{
+  "name": "AuditorLead",
+  "type": "object",
+  "properties": {
+    "name": {
+      "type": "string",
+      "description": "Auditor's full name"
+    },
+    "email": {
+      "type": "string",
+      "description": "Auditor's work email"
+    },
+    "firm_name": {
+      "type": "string",
+      "description": "Audit firm or practice name"
+    },
+    "engagement_context": {
+      "type": "string",
+      "description": "Optional context about the upcoming engagement (client, framework, timeline)"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "new",
+        "contacted",
+        "qualified",
+        "converted",
+        "archived"
+      ],
+      "default": "new"
+    },
+    "source": {
+      "type": "string",
+      "default": "for-auditors-page",
+      "description": "Lead source tracking"
+    },
+    "contacted_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "notes": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "name",
+    "email",
+    "firm_name"
+  ],
+  "rls": {
+    "create": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "read": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "update": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "delete": {
+      "user_condition": {
+        "role": "admin"
+      }
+    }
+  }
+}

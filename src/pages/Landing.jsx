@@ -61,7 +61,7 @@ export default function Landing() {
       {/* Footer */}
       <footer className="border-t border-border bg-muted/30">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-10">
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
+          <div className="grid grid-cols-2 md:grid-cols-5 gap-8">
             <div className="col-span-2 md:col-span-1">
               <div className="flex items-center gap-2 mb-3">
                 <div className="flex items-center justify-center w-7 h-7 rounded-lg bg-primary">
@@ -95,6 +95,14 @@ export default function Landing() {
               <ul className="space-y-2 text-sm text-muted-foreground">
                 <li><Link to="/security-overview" className="hover:text-foreground transition-colors">Security Overview</Link></li>
                 <li><Link to="/data-privacy" className="hover:text-foreground transition-colors">Data Privacy</Link></li>
+              </ul>
+            </div>
+            <div>
+              <h4 className="text-xs font-semibold text-foreground uppercase tracking-wider mb-3">For Auditors</h4>
+              <ul className="space-y-2 text-sm text-muted-foreground">
+                <li><Link to="/for-auditors" className="hover:text-foreground transition-colors">Auditor Portal</Link></li>
+                <li><Link to="/for-auditors#how-it-works" className="hover:text-foreground transition-colors">Token Access</Link></li>
+                <li><Link to="/for-auditors#request-access" className="hover:text-foreground transition-colors">Request Access</Link></li>
               </ul>
             </div>
           </div>
