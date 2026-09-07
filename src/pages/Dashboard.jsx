@@ -24,6 +24,7 @@ import GeoCoverageStrip from "@/components/dashboard/GeoCoverageStrip";
 import FrameworkMaturityHeatmap from "@/components/dashboard/FrameworkMaturityHeatmap";
 import MaturityProgressTracker from "@/components/dashboard/MaturityProgressTracker";
 import FrameworkControlProgressCard from "@/components/dashboard/FrameworkControlProgressCard";
+import RevenueImpactWidget from "@/components/dashboard/RevenueImpactWidget";
 import { useAuth } from "@/lib/AuthContext";
 import RiskManagerDashboard from "@/components/dashboard/role/RiskManagerDashboard";
 import AuditorDashboard from "@/components/dashboard/role/AuditorDashboard";
@@ -246,6 +247,9 @@ export default function Dashboard() {
 
       {/* Readiness Insights — framework readiness + top missing controls */}
       <FrameworkReadinessInsights frameworks={frameworks} controls={controls} />
+
+      {/* Revenue Impact Analysis */}
+      <RevenueImpactWidget risks={risks} />
 
       {/* Interactive Compliance Risk Heatmap */}
       <div className="mb-8">
