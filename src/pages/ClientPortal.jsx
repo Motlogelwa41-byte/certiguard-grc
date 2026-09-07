@@ -12,8 +12,9 @@ export default function ClientPortal() {
       try {
         // Fetch public security rating (already designed for external consumption)
         const res = await base44.functions.invoke("getPublicSecurityRating", {}).catch(() => null);
-        if (res?.data && !res.data.error) {
-          setData(res.data);
+        const resData = res ? (res.data || res) : null;
+        if (resData && !resData.error) {
+          setData(resData);
         } else {
           // Fallback: fetch compliance data directly
           const [controls, frameworks, certifications] = await Promise.all([

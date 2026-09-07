@@ -8,7 +8,7 @@ export default function RiskForecastWidget() {
 
   useEffect(() => {
     base44.functions.invoke("predictRiskScore", {})
-      .then((res) => setData(res.data))
+      .then((res) => setData(res.data || res))
       .catch(() => {})
       .finally(() => setLoading(false));
   }, []);
