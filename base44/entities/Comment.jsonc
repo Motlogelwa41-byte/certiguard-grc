@@ -1,0 +1,96 @@
+{
+  "name": "Comment",
+  "type": "object",
+  "properties": {
+    "tenant_id": {
+      "type": "string",
+      "description": "Tenant isolation key"
+    },
+    "entity_type": {
+      "type": "string",
+      "description": "Type of record this comment is attached to: Control, Risk, Evidence, Policy, etc."
+    },
+    "entity_id": {
+      "type": "string",
+      "description": "ID of the linked record"
+    },
+    "entity_title": {
+      "type": "string",
+      "description": "Denormalized title of the linked record for display"
+    },
+    "author_name": {
+      "type": "string"
+    },
+    "author_id": {
+      "type": "string"
+    },
+    "body": {
+      "type": "string",
+      "description": "Comment text \u2014 supports @mentions"
+    },
+    "mentions": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "User names mentioned in the comment"
+    },
+    "parent_comment_id": {
+      "type": "string",
+      "description": "ID of parent comment for threaded replies"
+    },
+    "resolved": {
+      "type": "boolean",
+      "default": false,
+      "description": "Whether this comment thread is resolved/closed"
+    }
+  },
+  "required": [
+    "entity_type",
+    "entity_id",
+    "body"
+  ],
+  "rls": {
+    "create": {
+      "data.tenant_id": "{{user.data.tenant_id}}"
+    },
+    "read": {
+      "$or": [
+        {
+          "data.tenant_id": "{{user.data.tenant_id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "update": {
+      "$or": [
+        {
+          "data.tenant_id": "{{user.data.tenant_id}}",
+          "created_by_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "delete": {
+      "$or": [
+        {
+          "data.tenant_id": "{{user.data.tenant_id}}",
+          "created_by_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    }
+  }
+}

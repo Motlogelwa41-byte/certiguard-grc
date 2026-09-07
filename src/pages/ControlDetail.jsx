@@ -10,6 +10,7 @@ import { logAuditTrail } from "@/lib/auditLogger";
 import { useAuth } from "@/lib/AuthContext";
 import Can from "@/components/shared/Can";
 import TransferOwnershipDialog from "@/components/controls/TransferOwnershipDialog";
+import CommentThread from "@/components/shared/CommentThread";
 
 function hashStr(s) {
   let h = 0;
@@ -227,6 +228,12 @@ export default function ControlDetail() {
               ))}
             </div>
           )}
+        </CardContent>
+      </Card>
+
+      <Card className="mt-4">
+        <CardContent>
+          <CommentThread entityType="Control" entityId={control.id} entityTitle={control.title} />
         </CardContent>
       </Card>
 

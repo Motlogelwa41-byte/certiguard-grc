@@ -241,6 +241,7 @@ import PrivilegedAccessManagement from '@/pages/PrivilegedAccessManagement';
 import BankRegulatorDashboard from '@/pages/BankRegulatorDashboard';
 import RegulatoryRoadmap from '@/pages/RegulatoryRoadmap';
 import Workspaces from '@/pages/Workspaces';
+import NotificationCenter from '@/pages/NotificationCenter';
 import { LanguageProvider } from '@/contexts/LanguageContext';
 
 const AuthenticatedApp = () => {
@@ -504,6 +505,7 @@ const AuthenticatedApp = () => {
           <Route path="/workspaces" element={<Workspaces />} />
           <Route path="/regulator-dashboard" element={<BankRegulatorDashboard />} />
           <Route path="/regulatory-roadmap" element={<RegulatoryRoadmap />} />
+          <Route path="/notification-center" element={<NotificationCenter />} />
         </Route>
       </Route>
       <Route path="*" element={<PageNotFound />} />

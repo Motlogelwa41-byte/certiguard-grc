@@ -26,6 +26,7 @@ export const navSections = [
       { label: "Testing Guide", path: "/testing-guide", icon: ClipboardList, roles: ["admin", "compliance_officer", "risk_manager", "auditor", "user"] },
       { label: "Maturity Dashboard", path: "/maturity-dashboard", icon: LineChart, roles: ["admin", "compliance_officer", "risk_manager", "auditor"] },
       { label: "Alert Center", path: "/alert-center", icon: BellRing, roles: ["admin", "compliance_officer", "risk_manager", "auditor", "user"] },
+      { label: "Notification Center", path: "/notification-center", icon: BellRing, roles: ["admin", "compliance_officer", "risk_manager", "auditor", "user"] },
       { label: "Executive Briefing", path: "/executive-briefing", icon: Presentation, roles: ["admin", "compliance_officer", "risk_manager", "auditor", "external_auditor", "executive"] },
     ]
   },
