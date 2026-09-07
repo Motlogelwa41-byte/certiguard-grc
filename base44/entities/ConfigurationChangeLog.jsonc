@@ -146,13 +146,29 @@
       ]
     },
     "update": {
-      "user_condition": {
-        "role": "__append_only_denied__"
-      }
+      "$or": [
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        },
+        {
+          "$and": [
+            {
+              "data.tenant_id": "{{user.data.tenant_id}}"
+            },
+            {
+              "user_condition": {
+                "role": "compliance_officer"
+              }
+            }
+          ]
+        }
+      ]
     },
     "delete": {
       "user_condition": {
-        "role": "__append_only_denied__"
+        "role": "admin"
       }
     }
   }
