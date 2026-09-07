@@ -26,6 +26,30 @@ Deno.serve(async (req) => {
     const template = await getTemplate(template_code);
     if (!template) return Response.json({ error: `Template '${template_code}' not found` }, { status: 404 });
 
+    // Plan-limit guard: reject if applying this template would exceed the
+    // tenant's control cap. Mirrors createControlWithinPlan / bulkCreateControlsWithinPlan.
+    const TIER_MAX_CONTROLS = { trial: 50, starter: 100, professional: 1000, enterprise: 999999 };
+    const userTenantId = user.tenant_id || user.data?.tenant_id;
+    let tenant = userTenantId ? await base44.asServiceRole.entities.Tenant.get(userTenantId).catch(() => null) : null;
+    if (!tenant) {
+      const byEmail = await base44.asServiceRole.entities.Tenant.filter({ admin_email: user.email }).catch(() => []);
+      if (byEmail.length > 0) tenant = byEmail[0];
+    }
+    if (tenant) {
+      const tier = tenant.subscription_tier || 'trial';
+      const cap = tenant.max_controls ?? TIER_MAX_CONTROLS[tier] ?? 50;
+      const visible = await base44.entities.Control.list().catch(() => []);
+      const existing = (visible || []).length;
+      if (existing + template.controls.length > cap) {
+        return Response.json({
+          error: `Control limit reached (${existing}/${cap}). Applying '${template.name}' needs ${template.controls.length} controls — upgrade your plan.`,
+          limit: cap,
+          count: existing,
+          requested: template.controls.length,
+        }, { status: 402 });
+      }
+    }
+
     // 1. Create or find the RegulatoryFramework
     let framework;
     const existingFrameworks = await sr.entities.RegulatoryFramework.list("-created_date", 200).catch(() => []);
