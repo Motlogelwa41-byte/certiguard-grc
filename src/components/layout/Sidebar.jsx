@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { ChevronLeft, ChevronRight, LogOut, ShieldCheck } from "lucide-react";
 import { base44 } from "@/api/base44Client";
@@ -8,9 +8,20 @@ import { logLogout } from "@/lib/authAudit";
 
 export default function Sidebar() {
   const [collapsed, setCollapsed] = useState(false);
+  const [brand, setBrand] = useState({ name: "", logo_url: "" });
   const location = useLocation();
   const { role } = useRBAC();
   const sections = filterNavSections(role || "user");
+
+  useEffect(() => {
+    base44.entities.TenantSettings.list("-created_date", 1)
+      .then((items) => {
+        if (items && items.length > 0) {
+          setBrand({ name: items[0].brand_display_name || "", logo_url: items[0].brand_logo_url || "" });
+        }
+      })
+      .catch(() => {});
+  }, []);
 
   const isActive = (path) => {
     if (path === "/") return location.pathname === "/";
@@ -25,13 +36,13 @@ export default function Sidebar() {
     >
       {/* Logo */}
       <div className="flex items-center gap-2.5 px-4 h-16 border-b border-sidebar-border shrink-0 bg-gradient-to-r from-sidebar-background to-sidebar-accent">
-      <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-primary to-success flex items-center justify-center shrink-0 shadow-lg shadow-success/20">
-        <ShieldCheck className="w-5 h-5 text-white" />
+      <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-primary to-success flex items-center justify-center shrink-0 shadow-lg shadow-success/20 overflow-hidden">
+        {brand.logo_url ? <img src={brand.logo_url} alt="logo" className="w-full h-full object-contain" /> : <ShieldCheck className="w-5 h-5 text-white" />}
       </div>
       {!collapsed && (
         <div className="leading-tight">
           <span className="font-heading font-bold text-base tracking-tight truncate block text-sidebar-foreground">
-            CertiGuard GRC
+            {brand.name || "CertiGuard GRC"}
           </span>
           <span className="text-[9px] font-medium uppercase tracking-widest text-sidebar-primary/80">RegTech Platform</span>
         </div>

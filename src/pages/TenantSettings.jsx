@@ -48,6 +48,7 @@ export default function TenantSettings() {
     5: { min: 1000001, max: 5000000 },
   });
   const [appetiteLimit, setAppetiteLimit] = useState(500000);
+  const [dpo, setDpo] = useState({ name: "", email: "", phone: "", appointed_at: "", regulator: "POPIA", registration_ref: "" });
 
   useEffect(() => {
     Promise.all([
@@ -70,6 +71,14 @@ export default function TenantSettings() {
           });
         }
         if (s.risk_appetite_limit !== undefined) setAppetiteLimit(s.risk_appetite_limit);
+        setDpo({
+          name: s.dpo_name || "",
+          email: s.dpo_email || "",
+          phone: s.dpo_phone || "",
+          appointed_at: s.dpo_appointed_at || "",
+          regulator: s.dpo_regulator || "POPIA",
+          registration_ref: s.dpo_registration_ref || "",
+        });
       }
       setLoading(false);
     });
@@ -103,6 +112,12 @@ export default function TenantSettings() {
         impact_5_min: impactRanges[5].min,
         impact_5_max: impactRanges[5].max,
         risk_appetite_limit: appetiteLimit,
+        dpo_name: dpo.name,
+        dpo_email: dpo.email,
+        dpo_phone: dpo.phone,
+        dpo_appointed_at: dpo.appointed_at,
+        dpo_regulator: dpo.regulator,
+        dpo_registration_ref: dpo.registration_ref,
         updated_by_name: user?.full_name || user?.email,
       };
 
@@ -253,6 +268,50 @@ export default function TenantSettings() {
                 onChange={(e) => setAppetiteLimit(parseFloat(e.target.value) || 0)}
                 placeholder="e.g. 500000"
               />
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* DPO Registration (POPIA/GDPR Article 37) */}
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2 text-base">
+              <Shield className="w-4 h-4 text-primary" /> Data Protection Officer (POPIA/GDPR)
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <p className="text-sm text-muted-foreground mb-4">Register your designated DPO as required by POPIA Section 55 and GDPR Article 37. Clients and regulators will request this information.</p>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div>
+                <Label>DPO Full Name</Label>
+                <Input value={dpo.name} onChange={(e) => setDpo({ ...dpo, name: e.target.value })} placeholder="e.g. Jane Smith" />
+              </div>
+              <div>
+                <Label>DPO Email</Label>
+                <Input type="email" value={dpo.email} onChange={(e) => setDpo({ ...dpo, email: e.target.value })} placeholder="dpo@company.com" />
+              </div>
+              <div>
+                <Label>DPO Phone</Label>
+                <Input value={dpo.phone} onChange={(e) => setDpo({ ...dpo, phone: e.target.value })} placeholder="+27 11 123 4567" />
+              </div>
+              <div>
+                <Label>Appointment Date</Label>
+                <Input type="date" value={dpo.appointed_at} onChange={(e) => setDpo({ ...dpo, appointed_at: e.target.value })} />
+              </div>
+              <div>
+                <Label>Regulatory Authority</Label>
+                <select value={dpo.regulator} onChange={(e) => setDpo({ ...dpo, regulator: e.target.value })} className="w-full h-9 rounded-md border border-input bg-transparent px-3 text-sm">
+                  <option value="POPIA">POPIA (South Africa)</option>
+                  <option value="GDPR">GDPR (European Union)</option>
+                  <option value="BW_DPA">BW Data Protection Authority (Botswana)</option>
+                  <option value="NA_DPA">NA Data Protection Authority (Namibia)</option>
+                  <option value="OTHER">Other</option>
+                </select>
+              </div>
+              <div>
+                <Label>Registration Reference</Label>
+                <Input value={dpo.registration_ref} onChange={(e) => setDpo({ ...dpo, registration_ref: e.target.value })} placeholder="e.g. IR-2026-001" />
+              </div>
             </div>
           </CardContent>
         </Card>
