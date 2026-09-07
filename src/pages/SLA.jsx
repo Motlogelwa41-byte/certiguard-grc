@@ -1,6 +1,7 @@
 import React from "react";
 import { Link } from "react-router-dom";
 import { ShieldCheck, Clock, Activity, Database, RefreshCw, Bell, Server, AlertTriangle, Mail, FileText } from "lucide-react";
+// AlertTriangle already imported above; reused for Beta Notice
 
 const SEVERITIES = [
   { level: "Critical", desc: "Production service completely unavailable or security breach in progress.", response: "15 minutes", resolution: "4 hours", update: "Every 60 minutes" },
@@ -21,6 +22,10 @@ export default function SLA() {
           <h1 className="text-3xl sm:text-4xl font-extrabold text-white mb-2">Service Level Agreement</h1>
           <p className="text-slate-300 text-sm max-w-2xl mx-auto">Formal uptime, support, and recovery commitments for CertiGuard GRC platform customers.</p>
           <p className="text-xs text-slate-400 mt-3">Effective Date: 1 January 2026 · Version 2.0</p>
+          <div className="mt-4 inline-flex items-start gap-2 rounded-lg bg-amber-50 border border-amber-200 px-3 py-2 text-xs text-amber-800 max-w-2xl mx-auto text-left">
+            <AlertTriangle className="w-4 h-4 shrink-0 mt-0.5" />
+            <span><strong>Beta Notice:</strong> This SLA is a draft under legal review and may be revised before final publication. Uptime and response commitments are target service levels during the beta period and may be adjusted. For the current version, contact us directly.</span>
+          </div>
         </div>
       </div>
 

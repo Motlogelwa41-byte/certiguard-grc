@@ -1,6 +1,6 @@
 import React from "react";
 import { Link } from "react-router-dom";
-import { Shield, Mail } from "lucide-react";
+import { Shield, Mail, AlertTriangle } from "lucide-react";
 
 const SECTIONS = [
   { id: "intro", title: "1. Introduction" },
@@ -29,6 +29,10 @@ export default function PrivacyPolicy() {
           </div>
           <p className="text-slate-500">How CertiGuard GRC collects, uses, and protects your data</p>
           <p className="text-xs text-slate-400 mt-2">Last updated: 29 July 2026</p>
+          <div className="mt-4 inline-flex items-start gap-2 rounded-lg bg-amber-50 border border-amber-200 px-3 py-2 text-xs text-amber-800">
+            <AlertTriangle className="w-4 h-4 shrink-0 mt-0.5" />
+            <span><strong>Beta Notice:</strong> This policy is a draft under legal review and may be revised before final publication. It is not yet a legally binding document. For the current version, contact us directly.</span>
+          </div>
         </div>
       </div>
 

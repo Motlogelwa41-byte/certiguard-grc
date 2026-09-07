@@ -1,6 +1,6 @@
 import React from "react";
 import { Link } from "react-router-dom";
-import { FileText, Mail } from "lucide-react";
+import { FileText, Mail, AlertTriangle } from "lucide-react";
 
 const SECTIONS = [
   { id: "acceptance", title: "1. Acceptance of Terms" },
@@ -31,6 +31,10 @@ export default function Terms() {
           </div>
           <p className="text-slate-500">The terms under which you may access and use CertiGuard GRC</p>
           <p className="text-xs text-slate-400 mt-2">Last updated: 29 July 2026</p>
+          <div className="mt-4 inline-flex items-start gap-2 rounded-lg bg-amber-50 border border-amber-200 px-3 py-2 text-xs text-amber-800">
+            <AlertTriangle className="w-4 h-4 shrink-0 mt-0.5" />
+            <span><strong>Beta Notice:</strong> These Terms are a draft under legal review and may be revised before final publication. They are not yet a legally binding contract. For the current version, contact us directly.</span>
+          </div>
         </div>
       </div>
 
