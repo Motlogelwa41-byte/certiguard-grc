@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
-import { ClipboardList, Plus, Eye, Trash2, Send, CheckCircle, Copy, ExternalLink } from "lucide-react";
+import { ClipboardList, Plus, Eye, Trash2, Send, CheckCircle, Copy, ExternalLink, Brain } from "lucide-react";
+import AIVendorDocumentAnalysis from "@/components/vendors/AIVendorDocumentAnalysis";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
@@ -50,6 +51,8 @@ export default function VendorAssessments() {
   const [sending, setSending] = useState(false);
   const [reviewMode, setReviewMode] = useState(false);
   const [reviewNotes, setReviewNotes] = useState("");
+  const [aiAnalysisOpen, setAiAnalysisOpen] = useState(false);
+  const [aiAnalysisVendor, setAiAnalysisVendor] = useState(null);
   const { toast } = useToast();
 
   const getQuestionnaireUrl = (id) =>
@@ -167,7 +170,14 @@ export default function VendorAssessments() {
       <PageHeader
         title="Vendor Assessments"
         subtitle="Send security questionnaires and auto-score vendor risk"
-        actions={<Button size="sm" onClick={() => setCreateOpen(true)}><Plus className="w-4 h-4 mr-1" /> New Assessment</Button>}
+        actions={
+          <>
+            <Button size="sm" variant="outline" onClick={() => { setAiAnalysisVendor(null); setAiAnalysisOpen(true); }}>
+              <Brain className="w-4 h-4 mr-1" /> AI Analyze Document
+            </Button>
+            <Button size="sm" onClick={() => setCreateOpen(true)}><Plus className="w-4 h-4 mr-1" /> New Assessment</Button>
+          </>
+        }
       />
 
       {assessments.length === 0 ? (
@@ -340,6 +350,13 @@ export default function VendorAssessments() {
           </div>
         </DialogContent>
       </Dialog>
+
+      <AIVendorDocumentAnalysis
+        vendorId={aiAnalysisVendor?.id}
+        vendorName={aiAnalysisVendor?.name}
+        open={aiAnalysisOpen}
+        onOpenChange={setAiAnalysisOpen}
+      />
     </div>
   );
 }

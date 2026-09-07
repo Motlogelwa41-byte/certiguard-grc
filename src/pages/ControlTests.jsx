@@ -8,7 +8,9 @@ import StatusBadge from "@/components/shared/StatusBadge";
 import StatCard from "@/components/shared/StatCard";
 import ControlTestForm from "@/components/control-tests/ControlTestForm";
 import ControlTestResultsDialog from "@/components/control-tests/ControlTestResultsDialog";
+import AIControlFailureDiagnosis from "@/components/controls/AIControlFailureDiagnosis";
 import { controlTestByKey } from "@/lib/controlTestRegistry";
+import { Brain } from "lucide-react";
 
 function fmtDateTime(iso) {
   if (!iso) return "—";
@@ -25,6 +27,7 @@ export default function ControlTests() {
   const [formOpen, setFormOpen] = useState(false);
   const [editing, setEditing] = useState(null);
   const [historyTest, setHistoryTest] = useState(null);
+  const [diagnosisTest, setDiagnosisTest] = useState(null);
   const { toast } = useToast();
 
   const load = () => {
@@ -166,6 +169,11 @@ export default function ControlTests() {
                           <Button size="icon" variant="ghost" onClick={() => runOne(t)} disabled={running === t.id} title="Run now">
                             {running === t.id ? <Loader2 className="w-4 h-4 animate-spin" /> : <Play className="w-4 h-4" />}
                           </Button>
+                          {t.last_result === "fail" && (
+                            <Button size="icon" variant="ghost" onClick={() => setDiagnosisTest(t)} title="AI diagnose failure" className="text-primary">
+                              <Brain className="w-4 h-4" />
+                            </Button>
+                          )}
                           <Button size="icon" variant="ghost" onClick={() => setHistoryTest(t)} title="History"><History className="w-4 h-4" /></Button>
                           <Button size="icon" variant="ghost" onClick={() => toggleEnabled(t)} title="Toggle enabled">
                             <span className="text-xs">{t.enabled === false ? "Off" : "On"}</span>
@@ -185,6 +193,12 @@ export default function ControlTests() {
 
       <ControlTestForm open={formOpen} onOpenChange={setFormOpen} editing={editing} controls={controls} onSaved={load} />
       <ControlTestResultsDialog test={historyTest} open={!!historyTest} onOpenChange={(o) => !o && setHistoryTest(null)} />
+      <AIControlFailureDiagnosis
+        control={diagnosisTest ? controls.find((c) => (diagnosisTest.linked_control_ids || []).includes(c.id) || c.id === diagnosisTest.control_id) : null}
+        testResult={diagnosisTest ? { test_name: diagnosisTest.title, result: diagnosisTest.last_result, error_message: diagnosisTest.last_run_summary } : null}
+        open={!!diagnosisTest}
+        onOpenChange={(o) => !o && setDiagnosisTest(null)}
+      />
     </div>
   );
 }

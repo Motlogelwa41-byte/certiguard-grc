@@ -1,0 +1,47 @@
+{
+  "trigger": {
+    "condition": null,
+    "config": {
+      "trigger_type": "scheduled",
+      "events": [],
+      "schedule_mode": "recurring",
+      "cron_expression": "0 6 * * *",
+      "one_time_date": null,
+      "timezone": "Africa/Johannesburg",
+      "interval_value": null,
+      "interval_unit": null,
+      "interval_anchor": null,
+      "ends_type": "never",
+      "ends_on_date": null,
+      "ends_after_count": null
+    }
+  },
+  "name": "Daily Jira Ticket Status Sync",
+  "definition": {
+    "document": {
+      "dsl": "1.0.0",
+      "name": "daily_jira_ticket_status_sync",
+      "version": "1.0",
+      "namespace": "base44"
+    },
+    "do": [
+      {
+        "sync_jira": {
+          "call": "invoke_backend_function",
+          "with": {
+            "function_name": "syncJiraTicketStatus",
+            "args": {
+              "_internal_token": "${secrets.INTERNAL_INVOKE_TOKEN}"
+            }
+          },
+          "then": "end",
+          "x-base44": {
+            "title": "Sync Jira ticket statuses back to findings",
+            "description": "Pulls current status from Jira for all findings with linked tickets and updates finding status (resolved when Jira ticket is done/closed)"
+          }
+        }
+      }
+    ]
+  },
+  "description": "Bi-directional Jira sync \u2014 pulls current ticket status from Jira daily and updates linked SecurityFindings and RemediationTickets. When a Jira ticket is resolved, the finding is automatically marked as resolved."
+}
