@@ -75,6 +75,18 @@ export default function Register() {
       try {
         base44.analytics.track({ eventName: "trial_signup_completed" });
       } catch (e) { /* analytics is best-effort */ }
+      // If this registration came from a colleague invite, mark it as accepted
+      // and emit the referral-loop analytics event.
+      const tenantInvite = new URLSearchParams(window.location.search).get("tenant_invite");
+      if (tenantInvite) {
+        try {
+          await base44.functions.invoke("acceptColleagueInvite", {
+            tenant_id: tenantInvite,
+            invitee_email: email,
+          });
+          base44.analytics.track({ eventName: "colleague_invited_accepted" });
+        } catch (e) { /* invite acceptance is best-effort */ }
+      }
       // New registrants land in the guided onboarding flow so they're not
       // staring at an empty dashboard. If they came from a protected page
       // (returnTo is set), respect that destination instead.

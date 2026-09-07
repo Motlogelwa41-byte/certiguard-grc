@@ -26,6 +26,7 @@ import MaturityProgressTracker from "@/components/dashboard/MaturityProgressTrac
 import FrameworkControlProgressCard from "@/components/dashboard/FrameworkControlProgressCard";
 import RevenueImpactWidget from "@/components/dashboard/RevenueImpactWidget";
 import RiskForecastWidget from "@/components/dashboard/RiskForecastWidget";
+import InviteColleagueCard from "@/components/dashboard/InviteColleagueCard";
 import { useAuth } from "@/lib/AuthContext";
 import RiskManagerDashboard from "@/components/dashboard/role/RiskManagerDashboard";
 import AuditorDashboard from "@/components/dashboard/role/AuditorDashboard";
@@ -156,6 +157,11 @@ export default function Dashboard() {
       {/* Quick Actions */}
       <div className="mb-8">
         <QuickActions />
+      </div>
+
+      {/* Invite a Colleague */}
+      <div className="mb-8">
+        <InviteColleagueCard />
       </div>
 
       {/* Stats Row */}
