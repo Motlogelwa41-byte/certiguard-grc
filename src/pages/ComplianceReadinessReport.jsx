@@ -1,14 +1,16 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { base44 } from "@/api/base44Client";
 import { Link } from "react-router-dom";
 import {
   Shield, FileCheck, AlertTriangle, CheckCircle2, XCircle, Clock,
-  Printer, ArrowRight, TrendingUp, Target, AlertCircle, FileDown
+  Printer, ArrowRight, TrendingUp, Target, AlertCircle, FileDown, RefreshCw
 } from "lucide-react";
 import PageHeader from "@/components/shared/PageHeader";
 import StatusBadge from "@/components/shared/StatusBadge";
 import ComplianceScoreRing from "@/components/dashboard/ComplianceScoreRing";
 import { exportToCsv, exportToExcel } from "@/lib/exportCsv";
+import { exportElementToPDF } from "@/lib/boardReportExport";
+import { useToast } from "@/components/ui/use-toast";
 import { FileSpreadsheet } from "lucide-react";
 
 export default function ComplianceReadinessReport() {
@@ -17,6 +19,9 @@ export default function ComplianceReadinessReport() {
   const [tasks, setTasks] = useState([]);
   const [risks, setRisks] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [exporting, setExporting] = useState(false);
+  const printRef = useRef(null);
+  const { toast } = useToast();
 
   useEffect(() => {
     Promise.all([
@@ -72,6 +77,22 @@ export default function ComplianceReadinessReport() {
   const notTestedList = controls.filter((c) => c.status === "not_tested");
 
   const today = new Date().toLocaleDateString("en-ZA", { year: "numeric", month: "long", day: "numeric" });
+
+  const exportPDF = async () => {
+    if (!printRef.current) return;
+    setExporting(true);
+    try {
+      await exportElementToPDF(printRef.current, {
+        filename: `Compliance_Readiness_Report_${new Date().toISOString().slice(0, 10)}.pdf`,
+        title: "Compliance Readiness Report",
+        subtitle: "CertiGuard GRC",
+      });
+      toast({ title: "Professional PDF exported" });
+    } catch (e) {
+      toast({ title: "Export failed", description: e.message, variant: "destructive" });
+    }
+    setExporting(false);
+  };
 
   const scoreColor = (pct) => pct >= 80 ? "text-emerald-600" : pct >= 50 ? "text-amber-600" : "text-rose-600";
   const barColor = (pct) => pct >= 80 ? "#10B981" : pct >= 50 ? "#f59e0b" : "#ef4444";
@@ -137,13 +158,21 @@ export default function ComplianceReadinessReport() {
                 onClick={() => window.print()}
                 className="inline-flex items-center gap-2 text-sm font-medium text-foreground bg-card border border-border rounded-lg px-3 py-2 hover:bg-muted transition-colors"
               >
-                <Printer className="w-4 h-4" /> Print / PDF
+                <Printer className="w-4 h-4" /> Print
+              </button>
+              <button
+                onClick={exportPDF}
+                disabled={exporting}
+                className="inline-flex items-center gap-2 text-sm font-medium text-primary-foreground bg-primary border border-primary rounded-lg px-3 py-2 hover:bg-primary/90 transition-colors disabled:opacity-50"
+              >
+                {exporting ? <RefreshCw className="w-4 h-4 animate-spin" /> : <FileDown className="w-4 h-4" />} Export PDF
               </button>
             </div>
           }
         />
       </div>
 
+      <div ref={printRef}>
       {/* Print header (only visible when printing) */}
       <div className="hidden print:block mb-6">
         <h1 className="text-2xl font-bold">CertiGuard — Compliance Readiness Report</h1>
@@ -412,6 +441,7 @@ export default function ComplianceReadinessReport() {
             </div>
           )}
         </div>
+      </div>
       </div>
     </div>
   );
