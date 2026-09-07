@@ -132,7 +132,7 @@ export default function PrivacyPolicy() {
               <li><strong>Restriction:</strong> request that we restrict processing of your data in certain circumstances.</li>
               <li><strong>Withdraw consent:</strong> where processing is based on consent, withdraw it at any time.</li>
             </ul>
-            <p className="mt-2">To exercise any of these rights, contact us at <a href="mailto:privacy@certiguard.io" className="text-emerald-600 underline">privacy@certiguard.io</a>. We respond within 30 days. You also have the right to lodge a complaint with your local data protection authority.</p>
+            <p className="mt-2">To exercise any of these rights, contact us at <a href="mailto:privacy@ethicaledgegrcconsulting.com" className="text-emerald-600 underline">privacy@ethicaledgegrcconsulting.com</a>. We respond within 30 days. You also have the right to lodge a complaint with your local data protection authority.</p>
           </section>
 
           <section id="transfers">
@@ -160,7 +160,7 @@ export default function PrivacyPolicy() {
             <p>If you have questions about this Privacy Policy or your data rights, please contact our Information Officer:</p>
             <div className="bg-slate-50 rounded-xl p-4 mt-2 flex items-center gap-2 text-sm">
               <Mail className="w-4 h-4 text-emerald-600" />
-              <a href="mailto:privacy@certiguard.io" className="text-emerald-600 underline">privacy@certiguard.io</a>
+              <a href="mailto:privacy@ethicaledgegrcconsulting.com" className="text-emerald-600 underline">privacy@ethicaledgegrcconsulting.com</a>
             </div>
           </section>
 

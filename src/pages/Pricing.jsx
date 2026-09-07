@@ -255,7 +255,7 @@ export default function Pricing() {
                 disabled={checkout === plan.tier}
                 onClick={async () => {
                   if (plan.tier === "trial") { window.location.href = "/register"; return; }
-                  if (plan.tier === "enterprise") { window.location.href = "mailto:sales@certiguard.com"; return; }
+                  if (plan.tier === "enterprise") { window.location.href = "mailto:sales@ethicaledgegrcconsulting.com"; return; }
                   setCheckout(plan.tier);
                   try { await startDpoCheckout(plan.tier, billingCycle); }
                   finally { setCheckout(null); }
@@ -334,7 +334,7 @@ export default function Pricing() {
       <div className="text-center py-8 border-t border-border">
         <p className="text-sm text-muted-foreground">
           All prices in USD. NGO impact pricing requires valid non-profit registration. Volume discounts available for 500+ users.{" "}
-          <a href="mailto:sales@certiguard.com" className="text-primary underline">Contact sales</a>
+          <a href="mailto:sales@ethicaledgegrcconsulting.com" className="text-primary underline">Contact sales</a>
         </p>
       </div>
     </div>

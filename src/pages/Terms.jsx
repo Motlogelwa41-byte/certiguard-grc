@@ -151,7 +151,7 @@ export default function Terms() {
             <p>If you have questions about these Terms, please contact us:</p>
             <div className="bg-slate-50 rounded-xl p-4 mt-2 flex items-center gap-2 text-sm">
               <Mail className="w-4 h-4 text-emerald-600" />
-              <a href="mailto:legal@certiguard.io" className="text-emerald-600 underline">legal@certiguard.io</a>
+              <a href="mailto:legal@ethicaledgegrcconsulting.com" className="text-emerald-600 underline">legal@ethicaledgegrcconsulting.com</a>
             </div>
           </section>
 
