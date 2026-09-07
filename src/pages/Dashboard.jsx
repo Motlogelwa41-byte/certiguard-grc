@@ -3,7 +3,7 @@ import { base44 } from "@/api/base44Client";
 import { Link, Navigate } from "react-router-dom";
 import {
   Shield, FileCheck, AlertTriangle, CheckSquare,
-  FileText, ArrowRight, FileDown, CalendarClock, Rocket, ClipboardCheck
+  FileText, ArrowRight, FileDown, CalendarClock, ClipboardCheck
 } from "lucide-react";
 import { PieChart, Pie, Cell, ResponsiveContainer, BarChart, Bar, XAxis, YAxis, Tooltip } from "recharts";
 import PageHeader from "@/components/shared/PageHeader";
