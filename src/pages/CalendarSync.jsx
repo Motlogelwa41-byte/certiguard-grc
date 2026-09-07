@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from "react";
 import { base44 } from "@/api/base44Client";
-import { CalendarCheck as CalIcon, RefreshCw, CheckCircle2, AlertCircle, LogIn, Link2, Link2Off, ListChecks } from "lucide-react";
+import { CalendarCheck as CalIcon, RefreshCw, CheckCircle2, AlertCircle, LogIn, Link2, Link2Off, ListChecks, Bell } from "lucide-react";
 import PageHeader from "@/components/shared/PageHeader";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/components/ui/use-toast";
@@ -16,6 +16,8 @@ export default function CalendarSync() {
   const [loading, setLoading] = useState(true);
   const [syncing, setSyncing] = useState(false);
   const [result, setResult] = useState(null);
+  const [orgSyncing, setOrgSyncing] = useState(false);
+  const [orgResult, setOrgResult] = useState(null);
   const popupRef = useRef(null);
 
   // Rule 2: reusable fetch doubles as connection check + status loader (check_only = no writes).
@@ -91,6 +93,29 @@ export default function CalendarSync() {
       toast({ title: "Sync failed", description: e.message, variant: "destructive" });
     }
     setSyncing(false);
+  };
+
+  // Organization-wide sync: pushes ALL compliance deadlines (tasks, evidence,
+  // control reviews, policy reviews) to the shared business Google Calendar
+  // with automatic email + popup reminders at 24h and 1h before each deadline.
+  const handleOrgSync = async () => {
+    setOrgSyncing(true);
+    try {
+      const res = await base44.functions.invoke("syncAllDeadlinesToCalendar", {});
+      const data = res.data || res;
+      if (data.connected === false) {
+        toast({ title: "Google Calendar not connected", description: "Authorize the shared Google Calendar connector in the Base44 dashboard.", variant: "destructive" });
+      } else {
+        setOrgResult(data);
+        toast({
+          title: `Synced ${data.created + data.updated} deadline${(data.created + data.updated) !== 1 ? "s" : ""}`,
+          description: `${data.created} new · ${data.updated} updated · ${data.removed} removed`,
+        });
+      }
+    } catch (e) {
+      toast({ title: "Org sync failed", description: e.message, variant: "destructive" });
+    }
+    setOrgSyncing(false);
   };
 
   if (loading) {
@@ -212,6 +237,59 @@ export default function CalendarSync() {
                 </div>
               ))}
             </div>
+          </div>
+        )}
+      </div>
+
+      {/* Organization-wide deadline sync */}
+      <div className="bg-card rounded-xl border border-border p-6">
+        <div className="flex items-start justify-between gap-4 flex-wrap">
+          <div className="flex items-start gap-4">
+            <div className="w-12 h-12 rounded-lg flex items-center justify-center bg-primary/10">
+              <Bell className="w-6 h-6 text-primary" />
+            </div>
+            <div>
+              <h3 className="font-heading font-semibold text-foreground">Organization-Wide Deadline Sync</h3>
+              <p className="text-sm text-muted-foreground mt-0.5 max-w-2xl">
+                Push every compliance task deadline, evidence submission date, control review, and policy review to the shared business Google Calendar. Automatic email and popup reminders fire 24 hours and 1 hour before each deadline so your team never misses a submission.
+              </p>
+            </div>
+          </div>
+          <Button size="sm" onClick={handleOrgSync} disabled={orgSyncing}>
+            {orgSyncing ? <RefreshCw className="w-4 h-4 mr-1 animate-spin" /> : <RefreshCw className="w-4 h-4 mr-1" />}
+            {orgSyncing ? "Syncing all…" : "Sync All Deadlines"}
+          </Button>
+        </div>
+
+        {orgResult && (
+          <div className="mt-5">
+            <div className="grid grid-cols-2 sm:grid-cols-5 gap-3 text-sm">
+              <div className="rounded-lg border border-emerald-200 bg-emerald-50 px-3 py-2">
+                <p className="text-xs text-emerald-700">Tasks Synced</p>
+                <p className="font-bold text-emerald-800">{orgResult.taskDeadlines ?? 0}</p>
+              </div>
+              <div className="rounded-lg border border-blue-200 bg-blue-50 px-3 py-2">
+                <p className="text-xs text-blue-700">Evidence Dates</p>
+                <p className="font-bold text-blue-800">{orgResult.evidenceDeadlines ?? 0}</p>
+              </div>
+              <div className="rounded-lg border border-emerald-200 bg-emerald-50 px-3 py-2">
+                <p className="text-xs text-emerald-700">Created</p>
+                <p className="font-bold text-emerald-800">{orgResult.created}</p>
+              </div>
+              <div className="rounded-lg border border-blue-200 bg-blue-50 px-3 py-2">
+                <p className="text-xs text-blue-700">Updated</p>
+                <p className="font-bold text-blue-800">{orgResult.updated}</p>
+              </div>
+              <div className={`rounded-lg border px-3 py-2 ${orgResult.failed > 0 ? "border-red-200 bg-red-50" : "border-slate-200 bg-slate-50"}`}>
+                <p className="text-xs text-muted-foreground">Failed</p>
+                <p className="font-bold text-foreground">{orgResult.failed}</p>
+              </div>
+            </div>
+            {orgResult.lastSync && (
+              <p className="text-xs text-muted-foreground mt-3">
+                Last org sync: {new Date(orgResult.lastSync).toLocaleString()}
+              </p>
+            )}
           </div>
         )}
       </div>

@@ -73,6 +73,8 @@ export default function BankRegulatorDashboard() {
   const complianceScore = frameworks.length ? Math.round(controlScore * 0.6 + fwScore * 0.4) : controlScore;
   const healthVerdict =
     complianceScore >= 85 ? "Strong" : complianceScore >= 70 ? "Adequate" : complianceScore >= 50 ? "Weak" : "Critical";
+  const readinessGrade =
+    complianceScore >= 90 ? "A" : complianceScore >= 80 ? "B" : complianceScore >= 70 ? "C" : complianceScore >= 60 ? "D" : "F";
 
   // --- Critical Areas Needing Immediate Attention ---
   const overdueTasks = tasks.filter((t) => t.status === "overdue" || (t.due_date && new Date(t.due_date) < new Date() && t.status !== "done" && t.status !== "completed"));
@@ -117,6 +119,15 @@ export default function BankRegulatorDashboard() {
 
   // --- Risk Appetite vs Tolerance ---
   const aboveAppetite = risks.filter((r) => ["above_appetite", "unacceptable"].includes(r.appetite_band)).length;
+
+  // Critical security gaps by category (failing controls grouped)
+  const failingControls = controls.filter((c) => c.status === "failing");
+  const gapsByCategory = failingControls.reduce((acc, c) => {
+    const cat = (c.category || "uncategorized").replace(/_/g, " ");
+    acc[cat] = (acc[cat] || 0) + 1;
+    return acc;
+  }, {});
+  const sortedGaps = Object.entries(gapsByCategory).sort(([, a], [, b]) => b - a);
 
   return (
     <div className="space-y-6">
@@ -163,8 +174,14 @@ export default function BankRegulatorDashboard() {
               </Link>
             </div>
           </div>
-          <div className="shrink-0 rounded-2xl bg-white/5 border border-white/10 p-4 backdrop-blur">
+          <div className="shrink-0 rounded-2xl bg-white/5 border border-white/10 p-4 backdrop-blur text-center">
             <ComplianceScoreRing score={complianceScore} size={140} />
+            <div className="mt-2 flex items-center justify-center gap-1.5">
+              <span className="text-[11px] font-medium text-slate-400">Readiness Grade</span>
+              <span className={`text-lg font-heading font-bold ${
+                complianceScore >= 80 ? "text-emerald-400" : complianceScore >= 60 ? "text-amber-400" : "text-rose-400"
+              }`}>{readinessGrade}</span>
+            </div>
           </div>
         </div>
       </div>
@@ -210,6 +227,29 @@ export default function BankRegulatorDashboard() {
           </div>
         )}
       </div>
+
+      {/* Critical Security Gaps by Category */}
+      {sortedGaps.length > 0 && (
+        <div className="bg-card rounded-xl border border-border p-6">
+          <div className="flex items-center justify-between mb-4">
+            <div className="flex items-center gap-2">
+              <div className="w-8 h-8 rounded-lg bg-red-100 flex items-center justify-center">
+                <XCircle className="w-4 h-4 text-red-600" />
+              </div>
+              <h3 className="font-heading font-semibold text-foreground">Critical Security Gaps by Category</h3>
+            </div>
+            <Link to="/controls" className="text-xs text-primary hover:underline flex items-center gap-1">Control register <ArrowRight className="w-3 h-3" /></Link>
+          </div>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+            {sortedGaps.map(([cat, count]) => (
+              <div key={cat} className="flex items-center justify-between rounded-lg bg-red-50 border border-red-200 px-4 py-3">
+                <span className="text-sm font-medium text-red-900 capitalize">{cat}</span>
+                <span className="text-lg font-heading font-bold text-red-700">{count}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Banking Regulatory Framework Readiness */}
