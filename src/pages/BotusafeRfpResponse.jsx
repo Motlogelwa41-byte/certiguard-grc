@@ -25,7 +25,7 @@ const coverageData = [
     icon: FileText,
     status: "fully_covered",
     capabilities: [
-      "Multi-framework compliance registers: SOC 2, ISO 27001, NIST CSF, POPIA, GDPR, King V, SADC frameworks",
+      "Multi-framework compliance registers: SOC 2, ISO 27001, NIST CSF, Botswana Data Protection Act, POPIA, GDPR, King V, SADC frameworks",
       "Policy lifecycle management with version control, approval workflows, and attestations",
       "Automated evidence collection with versioning, expiry tracking, and integrity verification (blockchain-hashed audit ledger)",
       "Incident and breach management with response playbooks and timeline tracking",
@@ -119,7 +119,7 @@ const evaluationCriteria = [
   { criterion: "Fit & Functionality", weight: "30%", ourScore: "Exceptional — all minimum outcomes met plus 10+ additional modules at no extra cost" },
   { criterion: "Security & Architecture", weight: "20%", ourScore: "Multi-tenant isolation, blockchain audit trail, SSO/MFA, encryption, data residency controls" },
   { criterion: "Implementation/Support", weight: "15%", ourScore: "Guided onboarding wizard, autopilot setup, training materials, and ongoing support included" },
-  { criterion: "Experience/References", weight: "10%", ourScore: "Built for African regulatory landscape (POPIA, King V, SADC) with global framework coverage" },
+  { criterion: "Experience/References", weight: "10%", ourScore: "Built for African regulatory landscape (Botswana Data Protection Act, POPIA, King V, SADC) with global framework coverage" },
   { criterion: "Demo/Usability", weight: "10%", ourScore: "Live interactive demo available — all modules functional and production-ready" },
   { criterion: "Commercial Value", weight: "15%", ourScore: "Transparent tiered pricing (Starter / Professional / Enterprise) with no hidden module fees" },
 ];
@@ -256,7 +256,7 @@ export default function BotusafeRfpResponse() {
                     <div className="p-3 rounded-lg border">
                       <Shield className="w-5 h-5 text-primary mb-1" />
                       <p className="text-sm font-medium">African Regulatory Focus</p>
-                      <p className="text-xs text-muted-foreground">POPIA, King V, SADC frameworks built-in alongside SOC 2, ISO 27001, NIST</p>
+                      <p className="text-xs text-muted-foreground">Botswana Data Protection Act, POPIA, King V, SADC frameworks built-in alongside SOC 2, ISO 27001, NIST</p>
                     </div>
                     <div className="p-3 rounded-lg border">
                       <BarChart3 className="w-5 h-5 text-primary mb-1" />
@@ -275,8 +275,8 @@ export default function BotusafeRfpResponse() {
               <CardContent>
                 <p className="text-muted-foreground mb-4">
                   CertiGuard is designed and built by Ethical Edge GRC Consulting, a specialist GRC advisory firm. The platform
-                  is purpose-built for organizations operating under both African regulatory frameworks (POPIA, King V, SADC)
-                  and international standards (SOC 2, ISO 27001, NIST CSF, GDPR). References from advisory engagements and
+                  is purpose-built for organizations operating under both African regulatory frameworks (Botswana Data Protection Act, POPIA, King V, SADC)
+                                     and international standards (SOC 2, ISO 27001, NIST CSF, GDPR). References from advisory engagements and
                   platform deployments are available upon request following NDA execution.
                 </p>
                 <div className="flex flex-wrap gap-2">
@@ -285,6 +285,7 @@ export default function BotusafeRfpResponse() {
                   <Badge variant="secondary">SOC 2 Readiness</Badge>
                   <Badge variant="secondary">POPIA Compliance</Badge>
                   <Badge variant="secondary">King V Governance</Badge>
+                  <Badge variant="secondary">Botswana DPA Expertise</Badge>
                   <Badge variant="secondary">SADC Regulatory Expertise</Badge>
                 </div>
               </CardContent>
@@ -358,7 +359,7 @@ export default function BotusafeRfpResponse() {
                   <div className="grid md:grid-cols-2 gap-4">
                     {[
                       { icon: Lock, title: "Authentication & Access", points: ["SSO via SAML/OIDC (Google, Microsoft, custom IdP)", "Multi-factor authentication (MFA) enforcement", "Role-based access control (8+ roles)", "Screen lock with idle timeout", "SCIM-based automated user provisioning"] },
-                      { icon: Database, title: "Data Protection", points: ["Encryption at rest and in transit (TLS 1.2+)", "Multi-tenant data isolation with RLS enforcement", "Cryptographic audit trail (blockchain-style hashing)", "Data export and erasure capabilities (GDPR/POPIA)", "Configurable data retention schedules"] },
+                      { icon: Database, title: "Data Protection", points: ["Encryption at rest and in transit (TLS 1.2+)", "Multi-tenant data isolation with RLS enforcement", "Cryptographic audit trail (blockchain-style hashing)", "Data export and erasure capabilities (GDPR/POPIA/Botswana DPA)", "Configurable data retention schedules"] },
                       { icon: Shield, title: "Platform Security", points: ["Immutable, tamper-evident audit logging", "Tenant isolation testing and validation", "PAM (Privileged Access Management) module", "Data classification register", "DLP monitoring capabilities"] },
                       { icon: Server, title: "Infrastructure & DR", points: ["Cloud-hosted with high availability", "Automated backup and recovery", "BCDR plan tracking module", "Data residency configuration options", "Performance monitoring dashboard"] },
                     ].map((section, i) => (
@@ -386,8 +387,8 @@ export default function BotusafeRfpResponse() {
                     CertiGuard is deployed as a cloud-hosted SaaS platform. Data is stored with encryption at rest in
                     compliant cloud infrastructure. For Enterprise tier clients, dedicated instances with specific data
                     residency requirements can be configured. The platform includes a Data Residency module and Data
-                    Retention Schedule manager to ensure compliance with POPIA cross-border transfer requirements and
-                    regulatory retention obligations.
+                    Retention Schedule manager to ensure compliance with POPIA and Botswana Data Protection Act cross-border transfer requirements and
+                                         regulatory retention obligations.
                   </p>
                 </div>
 
@@ -481,7 +482,7 @@ export default function BotusafeRfpResponse() {
                     <p className="text-sm text-muted-foreground">
                       We migrate existing risk registers, compliance frameworks, policies, and control libraries from
                       spreadsheets or legacy systems via bulk CSV/Excel import. Framework templates for SOC 2, ISO 27001,
-                      NIST, and POPIA are pre-loaded and can be customized to BOTUSAFE's methodology.
+                      NIST, POPIA, and Botswana Data Protection Act are pre-loaded and can be customized to BOTUSAFE's methodology.
                     </p>
                   </div>
                   <div className="p-4 rounded-lg border">
@@ -611,7 +612,7 @@ export default function BotusafeRfpResponse() {
                 <div className="mt-6 p-4 rounded-lg bg-muted/30 border">
                   <h5 className="font-medium mb-2">Assumptions & Exclusions</h5>
                   <ul className="space-y-1 text-sm text-muted-foreground">
-                    <li>• Pricing is quoted in USD and billed via DPO Pay (secure payment gateway)</li>
+                    <li>• Pricing is quoted in Botswana Pula (BWP) and billed via DPO Pay (secure payment gateway)</li>
                     <li>• Implementation timeline assumes data availability and stakeholder availability for workshops</li>
                     <li>• Custom integrations beyond the standard set are available at an additional professional services rate</li>
                     <li>• On-premise deployment is available for Enterprise tier — quoted separately based on infrastructure requirements</li>
@@ -693,7 +694,7 @@ export default function BotusafeRfpResponse() {
                 <p className="text-muted-foreground leading-relaxed">
                   CertiGuard GRC meets 100% of BOTUSAFE's minimum functional outcomes and exceeds them with 10+ additional
                   modules included at no extra cost. The platform is purpose-built for the African regulatory environment
-                  (POPIA, King V, SADC) while maintaining full international framework coverage (SOC 2, ISO 27001, NIST).
+                                     (Botswana Data Protection Act, POPIA, King V, SADC) while maintaining full international framework coverage (SOC 2, ISO 27001, NIST).
                   With AI-native capabilities, blockchain-secured audit trails, configurable risk scoring, and a 4-week
                   implementation timeline, CertiGuard delivers exceptional commercial value and functionality fit.
                 </p>
