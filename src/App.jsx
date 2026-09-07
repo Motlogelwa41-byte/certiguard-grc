@@ -146,6 +146,7 @@ import MonteCarloForecast from '@/pages/MonteCarloForecast';
 import CrossBorderMatrix from '@/pages/CrossBorderMatrix';
 import BoardPackGenerator from '@/pages/BoardPackGenerator';
 import WhistleblowerPortal from '@/pages/WhistleblowerPortal';
+import WhistleblowerLanding from '@/pages/WhistleblowerLanding';
 import WhistleblowerCases from '@/pages/WhistleblowerCases';
 import TabletopSimulator from '@/pages/TabletopSimulator';
 import BoardResolutionRegister from '@/pages/BoardResolutionRegister';
@@ -290,7 +291,8 @@ const AuthenticatedApp = () => {
       <Route path="/vendor-questionnaire" element={<VendorQuestionnaire />} />
       <Route path="/vendor-portal" element={<VendorPortal />} />
       <Route path="/verify/vendor/:vendor_id" element={<VendorVerification />} />
-      <Route path="/whistleblower" element={<WhistleblowerPortal />} />
+      <Route path="/whistleblower" element={<WhistleblowerLanding />} />
+      <Route path="/whistleblower/report" element={<WhistleblowerPortal />} />
       <Route path="/trust-center" element={<TrustCenterPublic />} />
       <Route path="/client-portal" element={<ClientPortal />} />
       <Route path="/botusafe-rfp" element={<BotusafeRfpResponse />} />
