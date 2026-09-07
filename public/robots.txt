@@ -1,0 +1,36 @@
+# CertiGuard GRC — RegTech Compliance & Risk Platform
+# Allow all crawlers full access to public-facing pages
+
+User-agent: *
+Allow: /
+
+# Public marketing, legal, and trust pages
+Allow: /landing
+Allow: /pricing
+Allow: /trust-center
+Allow: /privacy
+Allow: /terms
+Allow: /sla
+Allow: /data-residency
+Allow: /security-overview
+Allow: /data-privacy
+Allow: /botusafe-rfp
+Allow: /api-docs
+
+# Disallow authenticated app routes from indexing (private tenant data)
+Disallow: /dashboard
+Disallow: /controls
+Disallow: /risks
+Disallow: /policies
+Disallow: /evidence
+Disallow: /audits
+Disallow: /vendors
+Disallow: /tasks
+Disallow: /frameworks
+Disallow: /reports
+Disallow: /settings
+Disallow: /billing
+Disallow: /users
+
+# Sitemap location
+Sitemap: https://app.ethicaledgegrcconsulting.com/sitemap.xml
