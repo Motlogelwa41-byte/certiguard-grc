@@ -33,6 +33,11 @@ Deno.serve(async (req) => {
 
     const headers = { Authorization: `Bearer ${accessToken}`, "Content-Type": "application/json" };
 
+    // Extract the app URL from the request so calendar events include a clickable link back to the task
+    const _origin = req.headers.get("origin");
+    const _referer = req.headers.get("referer");
+    const appUrl = _origin || (_referer ? new URL(_referer).origin : "") || "";
+
     // Fetch all compliance tasks with due dates (audit deadlines)
     const tasks = await base44.asServiceRole.entities.ComplianceTask.list('-due_date', 500);
     const taskDeadlines = (tasks || []).filter((t) => t.due_date);
@@ -82,6 +87,7 @@ Deno.serve(async (req) => {
           `Status: ${t.status || "todo"}`,
           t.assignee_name ? `Assignee: ${t.assignee_name}` : "",
           t.description ? `\n${t.description}` : "",
+          appUrl ? `\n🔗 Open task: ${appUrl}/tasks` : "",
           "\n— Synced from CertiGuard GRC",
         ].filter(Boolean).join("\n"),
         start: { date: due, timeZone: "Africa/Johannesburg" },

@@ -200,6 +200,7 @@ export async function generateOneClickReport() {
   const taskDone = tasks.filter((t) => t.status === "completed").length;
   const taskOver = tasks.filter((t) => t.status === "overdue").length;
   const evApproved = data.evidence.filter((e) => e.status === "approved").length;
+  const evidenceCompletionRate = data.evidence.length ? Math.round((evApproved / data.evidence.length) * 100) : 0;
   const polApproved = data.policies.filter((p) => p.status === "approved").length;
 
   drawKpiCards([
@@ -218,7 +219,7 @@ export async function generateOneClickReport() {
     `The organization tracks ${fwTotal} compliance framework(s) with an average readiness score of ${fwAvg}%.`,
     `Of ${ctrl.length} controls, ${ctrlPass} are passing (${complianceScore}%), ${ctrlFail} are failing, and ${ctrlNotTested} remain untested.`,
     `There are ${risks.length} risks in the register (${riskOpen} open) and ${tasks.length} compliance tasks (${taskOver} overdue).`,
-    `Evidence library contains ${data.evidence.length} items (${evApproved} approved). ${polApproved} policies are approved and active.`,
+    `Evidence library contains ${data.evidence.length} items (${evApproved} approved, ${evidenceCompletionRate}% completion rate). ${polApproved} policies are approved and active.`,
   ];
   summaryLines.forEach((line) => {
     const wrapped = doc.splitTextToSize(line, contentW);
@@ -319,7 +320,7 @@ export async function generateOneClickReport() {
   drawKpiCards([
     { label: "Tasks Done", value: taskDone, sub: `of ${tasks.length}`, color: C.green },
     { label: "Tasks Overdue", value: taskOver, sub: "needs attention", color: C.red },
-    { label: "Evidence Items", value: data.evidence.length, sub: `${evApproved} approved`, color: C.blue },
+    { label: "Evidence Items", value: data.evidence.length, sub: `${evApproved} approved · ${evidenceCompletionRate}% complete`, color: C.blue },
     { label: "Policies", value: data.policies.length, sub: `${polApproved} approved`, color: C.amber },
   ]);
 

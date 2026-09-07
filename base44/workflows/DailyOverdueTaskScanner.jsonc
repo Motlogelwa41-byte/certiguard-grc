@@ -1,0 +1,45 @@
+{
+  "name": "Daily Overdue Task Scanner",
+  "definition": {
+    "document": {
+      "dsl": "1.0.0",
+      "name": "daily_overdue_task_scanner",
+      "version": "1.0",
+      "namespace": "base44"
+    },
+    "do": [
+      {
+        "mark_overdue": {
+          "call": "invoke_backend_function",
+          "with": {
+            "function_name": "markOverdueTasks",
+            "args": {}
+          },
+          "then": "end",
+          "x-base44": {
+            "title": "Mark overdue tasks and notify assignees",
+            "description": "Updates task status to overdue when deadlines pass and emails assignees a summary"
+          }
+        }
+      }
+    ]
+  },
+  "description": "Daily scanner that marks compliance tasks as overdue when their deadline passes and sends a summary notification to each assignee",
+  "trigger": {
+    "condition": null,
+    "config": {
+      "trigger_type": "scheduled",
+      "events": [],
+      "schedule_mode": "recurring",
+      "cron_expression": "0 9 * * *",
+      "one_time_date": null,
+      "timezone": "Africa/Johannesburg",
+      "interval_value": null,
+      "interval_unit": null,
+      "interval_anchor": null,
+      "ends_type": "never",
+      "ends_on_date": null,
+      "ends_after_count": null
+    }
+  }
+}
