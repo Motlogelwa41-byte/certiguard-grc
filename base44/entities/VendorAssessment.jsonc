@@ -83,6 +83,10 @@
       "type": "string",
       "description": "JSON array of remediation actions: [{item, severity, due_date, status, owner_name}]"
     },
+    "verification_url": {
+      "type": "string",
+      "description": "Public verification URL for the embeddable security badge"
+    },
     "notes": {
       "type": "string"
     },
@@ -121,12 +125,16 @@
     "update": {
       "$or": [
         {
-          "data.tenant_id": "{{user.data.tenant_id}}",
-          "created_by_id": "{{user.id}}"
+          "data.tenant_id": "{{user.data.tenant_id}}"
         },
         {
           "user_condition": {
             "role": "admin"
+          }
+        },
+        {
+          "user_condition": {
+            "role": "compliance_officer"
           }
         }
       ]
