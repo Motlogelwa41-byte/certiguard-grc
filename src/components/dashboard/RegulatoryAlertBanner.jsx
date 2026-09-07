@@ -8,21 +8,34 @@ export default function RegulatoryAlertBanner() {
 
   useEffect(() => {
     let mounted = true;
-    base44.entities.RegulatoryAlert
-      .filter({ is_active: true }, "-created_date", 10)
-      .then((rows) => {
-        if (mounted) {
-          setAlerts(rows || []);
-          setLoading(false);
-        }
-      })
-      .catch(() => {
-        if (mounted) setLoading(false);
+    // Track compliance deadlines from existing RegulatoryChange records so we
+    // can suppress alerts that have already been addressed.
+    const addressedDeadlines = new Set();
+
+    // Fetch active alerts AND existing regulatory changes so we can suppress
+    // alerts that have already been addressed (matched by compliance deadline).
+    Promise.all([
+      base44.entities.RegulatoryAlert.filter({ is_active: true }, "-created_date", 10).catch(() => []),
+      base44.entities.RegulatoryChange.list("-created_date", 100).catch(() => []),
+    ]).then(([alertRows, changeRows]) => {
+      if (!mounted) return;
+      (changeRows || []).forEach((c) => {
+        if (c.compliance_deadline) addressedDeadlines.add(c.compliance_deadline);
       });
+      // Suppress alerts whose compliance_deadline matches an existing RegulatoryChange
+      const visible = (alertRows || []).filter(
+        (a) => !(a.compliance_deadline && addressedDeadlines.has(a.compliance_deadline))
+      );
+      setAlerts(visible);
+      setLoading(false);
+    });
 
     // Real-time subscription: update banner when new alerts arrive
     const unsubscribe = base44.entities.RegulatoryAlert.subscribe((event) => {
       if (event.type === "create" && event.data?.is_active) {
+        // Only add if not already addressed by an existing RegulatoryChange
+        const dl = event.data?.compliance_deadline;
+        if (dl && addressedDeadlines.has(dl)) return;
         setAlerts((prev) => [event.data, ...prev].slice(0, 10));
       } else if (event.type === "update" && event.data?.is_active === false) {
         setAlerts((prev) => prev.filter((a) => a.id !== event.data.id));
