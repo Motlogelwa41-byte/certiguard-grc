@@ -13,7 +13,7 @@ import VendorAssessmentWidget from "@/components/dashboard/VendorAssessmentWidge
 import ComplianceScoreRing from "@/components/dashboard/ComplianceScoreRing";
 import ActivityFeed from "@/components/dashboard/ActivityFeed";
 import QuickActions from "@/components/dashboard/QuickActions";
-import OnboardingProgress from "@/components/dashboard/OnboardingProgress";
+
 import ComplianceHeatmap from "@/components/dashboard/ComplianceHeatmap";
 import FrameworkReadinessInsights from "@/components/dashboard/FrameworkReadinessInsights";
 import ComplianceTrendChart from "@/components/dashboard/ComplianceTrendChart";
@@ -138,9 +138,7 @@ export default function Dashboard() {
               <Link to="/board-report" className="inline-flex items-center gap-1.5 text-xs font-medium text-white bg-white/10 hover:bg-white/20 border border-white/15 rounded-lg px-3 py-1.5 transition-colors">
                 <FileDown className="w-3.5 h-3.5" /> Generate PDF Report
               </Link>
-              <Link to="/guided-onboarding" className="inline-flex items-center gap-1.5 text-xs font-medium text-white bg-emerald-500/20 hover:bg-emerald-500/30 border border-emerald-400/30 rounded-lg px-3 py-1.5 transition-colors">
-                <Rocket className="w-3.5 h-3.5" /> Guided Onboarding
-              </Link>
+
               <Link to="/audit-readiness-report" className="inline-flex items-center gap-1.5 text-xs font-medium text-white bg-white/10 hover:bg-white/20 border border-white/15 rounded-lg px-3 py-1.5 transition-colors">
                 <ClipboardCheck className="w-3.5 h-3.5" /> Audit Readiness Report
               </Link>
@@ -154,9 +152,6 @@ export default function Dashboard() {
           </div>
         </div>
       </div>
-
-      {/* Onboarding Progress */}
-      <OnboardingProgress />
 
       {/* Quick Actions */}
       <div className="mb-8">
