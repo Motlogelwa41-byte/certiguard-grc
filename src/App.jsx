@@ -245,6 +245,8 @@ import NotificationCenter from '@/pages/NotificationCenter';
 import CloudEvidenceCollector from '@/pages/CloudEvidenceCollector';
 import MobileHub from '@/pages/MobileHub';
 import CustomDashboard from '@/pages/CustomDashboard';
+import UnifiedOnboarding from '@/pages/UnifiedOnboarding';
+import ClientPortal from '@/pages/ClientPortal';
 import { LanguageProvider } from '@/contexts/LanguageContext';
 
 const AuthenticatedApp = () => {
@@ -285,6 +287,7 @@ const AuthenticatedApp = () => {
       <Route path="/vendor-portal" element={<VendorPortal />} />
       <Route path="/whistleblower" element={<WhistleblowerPortal />} />
       <Route path="/trust-center" element={<TrustCenterPublic />} />
+      <Route path="/client-portal" element={<ClientPortal />} />
       <Route path="/privacy" element={<PrivacyPolicy />} />
       <Route path="/terms" element={<Terms />} />
       <Route path="/sla" element={<SLA />} />
@@ -512,6 +515,7 @@ const AuthenticatedApp = () => {
           <Route path="/cloud-evidence" element={<CloudEvidenceCollector />} />
           <Route path="/mobile-hub" element={<MobileHub />} />
           <Route path="/my-dashboard" element={<CustomDashboard />} />
+          <Route path="/unified-onboarding" element={<UnifiedOnboarding />} />
         </Route>
       </Route>
       <Route path="*" element={<PageNotFound />} />

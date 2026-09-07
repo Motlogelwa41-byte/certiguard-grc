@@ -25,6 +25,7 @@ import FrameworkMaturityHeatmap from "@/components/dashboard/FrameworkMaturityHe
 import MaturityProgressTracker from "@/components/dashboard/MaturityProgressTracker";
 import FrameworkControlProgressCard from "@/components/dashboard/FrameworkControlProgressCard";
 import RevenueImpactWidget from "@/components/dashboard/RevenueImpactWidget";
+import RiskForecastWidget from "@/components/dashboard/RiskForecastWidget";
 import { useAuth } from "@/lib/AuthContext";
 import RiskManagerDashboard from "@/components/dashboard/role/RiskManagerDashboard";
 import AuditorDashboard from "@/components/dashboard/role/AuditorDashboard";
@@ -188,6 +189,11 @@ export default function Dashboard() {
       {/* Compliance Score Trend — stored daily snapshots for month-over-month trending */}
       <div className="mb-8">
         <ComplianceScoreTrendChart />
+      </div>
+
+      {/* AI Risk Forecast — predicted risk score in 90 days */}
+      <div className="mb-8">
+        <RiskForecastWidget />
       </div>
 
       {/* Charts Row */}

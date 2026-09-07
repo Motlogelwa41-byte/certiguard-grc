@@ -29,6 +29,7 @@ export const navSections = [
       { label: "Notification Center", path: "/notification-center", icon: BellRing, roles: ["admin", "compliance_officer", "risk_manager", "auditor", "user"] },
       { label: "Mobile Hub", path: "/mobile-hub", icon: Smartphone, roles: ["admin", "compliance_officer", "risk_manager", "auditor", "executive", "user"] },
       { label: "My Dashboard", path: "/my-dashboard", icon: SlidersHorizontal, roles: ["admin", "compliance_officer", "risk_manager", "auditor", "executive", "user"] },
+      { label: "Guided Onboarding", path: "/unified-onboarding", icon: Rocket, roles: ["admin", "compliance_officer"] },
       { label: "Executive Briefing", path: "/executive-briefing", icon: Presentation, roles: ["admin", "compliance_officer", "risk_manager", "auditor", "external_auditor", "executive"] },
     ]
   },

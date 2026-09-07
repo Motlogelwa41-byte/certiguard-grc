@@ -6,6 +6,34 @@ import { Card } from "@/components/ui/card";
 
 const endpoints = [
   {
+    method: "GET",
+    path: "/api/v1/public/score",
+    description: "Get your current compliance score (0-100), grade, and control counts. Rate-limited to 100 requests/hour per API key.",
+    auth: "X-API-Key header",
+    body: null,
+  },
+  {
+    method: "GET",
+    path: "/api/v1/public/controls",
+    description: "List all controls with status, category, severity, and effectiveness scores. Rate-limited to 100 requests/hour per API key.",
+    auth: "X-API-Key header",
+    body: null,
+  },
+  {
+    method: "GET",
+    path: "/api/v1/public/evidence",
+    description: "List evidence metadata (titles, types, status, collection dates). No file contents returned. Rate-limited to 100 requests/hour per API key.",
+    auth: "X-API-Key header",
+    body: null,
+  },
+  {
+    method: "GET",
+    path: "/api/v1/public/frameworks",
+    description: "List active compliance frameworks with readiness scores. Rate-limited to 100 requests/hour per API key.",
+    auth: "X-API-Key header",
+    body: null,
+  },
+  {
     method: "POST",
     path: "/api/v1/evidence/ingest",
     description: "Submit evidence via API key for automated collection.",

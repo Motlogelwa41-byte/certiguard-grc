@@ -3,11 +3,12 @@ import { base44 } from "@/api/base44Client";
 import { useAuth } from "@/lib/AuthContext";
 import {
   Paperclip, Plus, Pencil, Trash2, Search, Upload, ExternalLink, Link2, Layers,
-  CheckSquare, Clock, XCircle, CheckCircle2, ClipboardCheck, History, GitCommit
+  CheckSquare, Clock, XCircle, CheckCircle2, ClipboardCheck, History, GitCommit, MessageSquare
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import BulkUploadPanel from "@/components/evidence/BulkUploadPanel";
+import CommentThread from "@/components/shared/CommentThread";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -45,6 +46,7 @@ export default function EvidenceManager() {
   const [reviewNotes, setReviewNotes] = useState("");
   const [submitting, setSubmitting] = useState(false);
   const [versionHistoryOpen, setVersionHistoryOpen] = useState(null);
+  const [commentsOpen, setCommentsOpen] = useState(null);
   const { toast } = useToast();
 
   const load = async () => {
@@ -258,6 +260,7 @@ export default function EvidenceManager() {
                         {(e.version || 1) > 1 && (
                           <button onClick={() => setVersionHistoryOpen(e)} title="Version history" className="p-1.5 rounded hover:bg-muted text-primary"><History className="w-3.5 h-3.5" /></button>
                         )}
+                        <button onClick={() => setCommentsOpen(e)} title="Comments" className="p-1.5 rounded hover:bg-muted"><MessageSquare className="w-3.5 h-3.5 text-muted-foreground" /></button>
                         <button onClick={() => handleEdit(e)} className="p-1.5 rounded hover:bg-muted"><Pencil className="w-3.5 h-3.5 text-muted-foreground" /></button>
                         <button onClick={() => handleDelete(e.id)} className="p-1.5 rounded hover:bg-muted"><Trash2 className="w-3.5 h-3.5 text-destructive" /></button>
                       </div>
@@ -449,6 +452,22 @@ export default function EvidenceManager() {
                   </div>
                 ));
               })()}
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
+
+      {/* Comments dialog — collaborate on evidence items */}
+      <Dialog open={!!commentsOpen} onOpenChange={(v) => !v && setCommentsOpen(null)}>
+        <DialogContent className="max-w-lg">
+          <DialogHeader><DialogTitle className="flex items-center gap-2"><MessageSquare className="w-5 h-5 text-primary" /> Evidence Comments</DialogTitle></DialogHeader>
+          {commentsOpen && (
+            <div>
+              <div className="rounded-lg bg-muted/40 border border-border p-3 mb-3">
+                <div className="font-medium text-foreground text-sm">{commentsOpen.title}</div>
+                {commentsOpen.control_title && <div className="text-xs text-muted-foreground mt-0.5">Control: {commentsOpen.control_title}</div>}
+              </div>
+              <CommentThread entityType="Evidence" entityId={commentsOpen.id} entityTitle={commentsOpen.title} />
             </div>
           )}
         </DialogContent>
