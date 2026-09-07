@@ -9,6 +9,7 @@ import {
   Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter
 } from "@/components/ui/dialog";
 import { useToast } from "@/components/ui/use-toast";
+import { useAuth } from "@/lib/AuthContext";
 import {
   Rocket, ArrowRight, ArrowLeft, Check, Loader2, Building2, Target,
   Upload, Play, ShieldCheck, AlertTriangle, FileDown, Sparkles, TrendingUp
@@ -30,6 +31,7 @@ POPIA data subject request delays | 3 | 3 | compliance`;
 export default function GuidedOnboarding() {
   const navigate = useNavigate();
   const { toast } = useToast();
+  const { user } = useAuth();
   const [step, setStep] = useState(0);
 
   // Step 1 — company
@@ -61,6 +63,15 @@ export default function GuidedOnboarding() {
   useEffect(() => {
     (async () => {
       try {
+        // Provision tenant on first login (idempotent) — seeds 4 default frameworks + settings
+        try {
+          const res = await base44.functions.invoke("provisionTenant", {});
+          const data = res?.data || res;
+          if (data?.tenant_id) {
+            await base44.auth.updateMe({ data: { ...(user?.data || {}), tenant_id: data.tenant_id } }).catch(() => {});
+          }
+        } catch (e) { /* already provisioned or not needed */ }
+
         const [fws, ctls] = await Promise.all([
           base44.entities.Framework.list("-updated_date", 100),
           base44.entities.Control.list("-updated_date", 300),
