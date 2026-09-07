@@ -232,7 +232,7 @@ export function RecentActivityWidget() {
             <div className="w-1 h-1 rounded-full bg-primary mt-1.5 shrink-0" />
             <div className="min-w-0">
               <p className="text-foreground truncate">{l.entity_name || l.action || "Activity"}</p>
-              <p className="text-muted-foreground">{l.action} · {l.user_name || "System"}</p>
+              <p className="text-muted-foreground">{l.action} · {l.performed_by_name || l.user_name || "System"}</p>
             </div>
           </div>
         ))}

@@ -31,6 +31,7 @@ Deno.serve(async (req) => {
       status: control.status,
       owner: control.owner_name,
       automation_status: control.automation_status,
+      frameworks: control.framework_names || [],
       evidence_count: control.evidence_count || linkedEvidence.length,
       evidence_items: linkedEvidence.slice(0, 5).map((e) => ({
         title: e.title,
@@ -38,44 +39,57 @@ Deno.serve(async (req) => {
         status: e.status,
         collected_date: e.collected_date,
       })),
+      evidence_gap: linkedEvidence.length === 0 ? "No evidence has been collected for this control"
+        : ["missing", "expired"].includes(linkedEvidence[0]?.status) ? "Evidence is missing or expired"
+        : "Evidence exists but control still failing — likely a configuration or process gap",
     };
 
     // Generate remediation plan using LLM
     const llmRes = await base44.integrations.Core.InvokeLLM({
-      prompt: `You are a senior GRC remediation advisor. A security control has failed and needs a structured remediation project plan.
+      prompt: `You are a senior GRC remediation advisor for a financial services organization. A security control has failed its compliance test and needs a structured, actionable remediation plan.
 
 Control details (JSON):
 ${JSON.stringify(context, null, 2)}
 
-Generate a comprehensive remediation plan with:
-1. Root cause analysis — why this control likely failed
-2. 3-5 specific remediation tasks with clear actions, suggested owner roles, priorities, and estimated days to complete
-3. Success criteria — how to verify the control is back to passing
-4. Overall estimated timeline (total days)
+Generate a remediation plan with:
 
-Be specific and actionable. Each task should be independently assignable and trackable.`,
+1. ROOT CAUSE — Analyze why this control likely failed. Reference the control's category, automation status, framework obligations, and evidence gap specifically. Do not give generic advice.
+
+2. REMEDIATION TASKS (3-5) — Each task must be:
+   - Concrete: name the specific system, policy, configuration, or process to change (e.g. "Enable MFA enforcement on the Okta tenant" not "Improve authentication")
+   - Actionable: a single owner can complete it without ambiguity
+   - Verifiable: include a verification_method describing exactly how completion is confirmed (e.g. "Okta admin console shows 100% MFA enrollment")
+   - Sequenced: list dependencies on prior tasks explicitly
+   - Realistically estimated: days based on the effort for a mid-sized bank
+
+3. SUCCESS CRITERIA — The exact evidence or test result that proves the control is back to passing, suitable for an auditor.
+
+4. ESTIMATED TOTAL DAYS — Sum of task durations accounting for sequencing (run parallel where possible).
+
+Avoid vague tasks like "Review the control" or "Assess the situation". Every task must produce a tangible artifact or configuration change.`,
       response_json_schema: {
         type: "object",
         properties: {
-          root_cause: { type: "string", description: "Likely root cause of the control failure" },
-          severity_assessment: { type: "string", description: "Assessment of remediation urgency" },
+          root_cause: { type: "string", description: "Specific root cause referencing the control's category, automation status, and evidence gap" },
+          severity_assessment: { type: "string", description: "Assessment of remediation urgency based on control severity and regulatory impact" },
           tasks: {
             type: "array",
             items: {
               type: "object",
               properties: {
-                title: { type: "string", description: "Short actionable task title" },
-                description: { type: "string", description: "Detailed task description with specific actions" },
+                title: { type: "string", description: "Short actionable task title naming the specific system or artifact" },
+                description: { type: "string", description: "Detailed task description with concrete steps — name the system, config, or document to change" },
                 suggested_owner_role: { type: "string", description: "Suggested role for the task owner (e.g. Security Engineer, IT Admin, Compliance Officer)" },
                 priority: { type: "string", enum: ["critical", "high", "medium", "low"], description: "Task priority" },
                 estimated_days: { type: "number", description: "Estimated days to complete this task" },
                 dependencies: { type: "string", description: "Any dependencies on other tasks (by title)" },
+                verification_method: { type: "string", description: "Exactly how to confirm this task is complete (e.g. 'Screenshot of enforced MFA policy in Okta admin console')" },
               },
-              required: ["title", "description", "suggested_owner_role", "priority", "estimated_days"],
+              required: ["title", "description", "suggested_owner_role", "priority", "estimated_days", "verification_method"],
             },
           },
-          estimated_total_days: { type: "number", description: "Total estimated days for the full remediation" },
-          success_criteria: { type: "string", description: "How to verify the control is back to passing" },
+          estimated_total_days: { type: "number", description: "Total estimated days for the full remediation accounting for parallelization" },
+          success_criteria: { type: "string", description: "The exact evidence or test result that proves the control is passing, suitable for an auditor" },
         },
         required: ["root_cause", "tasks", "estimated_total_days", "success_criteria"],
       },
@@ -103,7 +117,7 @@ Be specific and actionable. Each task should be independently assignable and tra
         assignee_id: control.owner_id || "",
         due_date: dueDate,
         related_control_id: control.id,
-        notes: `Auto-generated by AI Remediation Plan. Owner role: ${task.suggested_owner_role}. Dependencies: ${task.dependencies || "none"}. Success criteria: ${plan.success_criteria || "n/a"}`,
+        notes: `Auto-generated by AI Remediation Plan. Owner role: ${task.suggested_owner_role}. Dependencies: ${task.dependencies || "none"}. Verification: ${task.verification_method || "n/a"}. Success criteria: ${plan.success_criteria || "n/a"}`,
       }).catch((e) => null);
 
       if (created) {
