@@ -247,6 +247,7 @@ import MobileHub from '@/pages/MobileHub';
 import CustomDashboard from '@/pages/CustomDashboard';
 import UnifiedOnboarding from '@/pages/UnifiedOnboarding';
 import ClientPortal from '@/pages/ClientPortal';
+import BotusafeRfpResponse from '@/pages/BotusafeRfpResponse';
 import { LanguageProvider } from '@/contexts/LanguageContext';
 
 const AuthenticatedApp = () => {
@@ -288,6 +289,7 @@ const AuthenticatedApp = () => {
       <Route path="/whistleblower" element={<WhistleblowerPortal />} />
       <Route path="/trust-center" element={<TrustCenterPublic />} />
       <Route path="/client-portal" element={<ClientPortal />} />
+      <Route path="/botusafe-rfp" element={<BotusafeRfpResponse />} />
       <Route path="/privacy" element={<PrivacyPolicy />} />
       <Route path="/terms" element={<Terms />} />
       <Route path="/sla" element={<SLA />} />
