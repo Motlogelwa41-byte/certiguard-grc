@@ -129,16 +129,16 @@ const pricingTiers = [
     name: "Starter",
     description: "For small teams getting started with GRC",
     features: ["Up to 2 frameworks", "Up to 5 users", "Core risk & compliance modules", "Standard dashboards", "Email support"],
-    implementation: "Self-service guided onboarding included",
-    recurring: "Contact for pricing",
+    implementation: "BWP 40,000 one-time",
+    recurring: "BWP 5,500/mo (BWP 55,000/yr)",
     badge: "Entry"
   },
   {
     name: "Professional",
     description: "For growing organizations with active compliance programs",
     features: ["Up to 5 frameworks", "Up to 25 users", "All core + advanced modules", "Custom dashboards & reports", "Vendor risk management", "Audit portal", "Priority support", "API access"],
-    implementation: "Guided implementation + data migration included",
-    recurring: "Contact for pricing",
+    implementation: "BWP 75,000 one-time",
+    recurring: "BWP 16,500/mo (BWP 158,400/yr)",
     badge: "Recommended",
     highlighted: true
   },
@@ -146,11 +146,25 @@ const pricingTiers = [
     name: "Enterprise",
     description: "For large organizations with complex multi-entity needs",
     features: ["Unlimited frameworks", "Unlimited users", "All modules included", "White-label branding", "Multi-tenant hierarchy", "SSO + SCIM", "Dedicated support", "Custom integrations", "Data residency controls"],
-    implementation: "Full implementation, migration & training included",
-    recurring: "Contact for pricing",
+    implementation: "BWP 120,000 one-time",
+    recurring: "BWP 280,000/yr",
     badge: "Full Suite"
   }
 ];
+
+const bundledOffering = {
+  title: "Bundled Platform + Advisory (Recommended for BOTUSAFE)",
+  description: "As a GRC advisory firm, Ethical Edge can bundle implementation, platform licensing, and ISO 27001 readiness advisory — a package no software-only competitor can offer.",
+  components: [
+    { name: "Platform Implementation", price: "BWP 120,000", type: "One-time", detail: "4-week setup, data migration, training, SSO configuration" },
+    { name: "Annual Platform Licence (Professional)", price: "BWP 158,400/yr", type: "Recurring", detail: "All modules included, no per-module fees. ~BWP 13,200/mo equivalent" },
+    { name: "ISO 27001 Readiness Advisory (Optional)", price: "BWP 180,000", type: "One-time", detail: "Gap assessment, remediation roadmap, Stage 1 audit preparation" },
+    { name: "Ongoing Quarterly Reviews (Optional)", price: "BWP 60,000/yr", type: "Recurring", detail: "Quarterly compliance health checks and audit support" }
+  ],
+  yearOneTotal: "BWP 458,400 (Platform + Advisory)",
+  yearTwoPlus: "BWP 158,400/yr (Platform licence only)",
+  note: "Advisory components are optional and can be scoped separately. Platform pricing is all-inclusive — no hidden module fees."
+};
 
 const implementationTimeline = [
   { phase: "Week 1", title: "Discovery & Configuration", activities: ["Requirements workshop", "Tenant setup & SSO configuration", "Risk/compliance methodology mapping", "User roles & access configuration"] },
@@ -609,15 +623,51 @@ export default function BotusafeRfpResponse() {
                     </div>
                   ))}
                 </div>
+                {/* Bundled Offering */}
+                <div className="mt-6 p-5 rounded-lg border-2 border-primary bg-primary/5">
+                  <div className="flex items-center gap-2 mb-3">
+                    <Award className="w-5 h-5 text-primary" />
+                    <h4 className="font-heading font-bold text-lg">{bundledOffering.title}</h4>
+                  </div>
+                  <p className="text-sm text-muted-foreground mb-4">{bundledOffering.description}</p>
+                  <div className="space-y-2 mb-4">
+                    {bundledOffering.components.map((comp, i) => (
+                      <div key={i} className="flex items-start justify-between p-3 rounded-lg bg-card border">
+                        <div className="flex-1">
+                          <div className="flex items-center gap-2">
+                            <span className="font-medium text-sm">{comp.name}</span>
+                            <Badge variant="outline" className="text-xs">{comp.type}</Badge>
+                          </div>
+                          <p className="text-xs text-muted-foreground mt-1">{comp.detail}</p>
+                        </div>
+                        <span className="font-bold text-sm text-primary whitespace-nowrap ml-4">{comp.price}</span>
+                      </div>
+                    ))}
+                  </div>
+                  <div className="flex flex-col sm:flex-row gap-4 pt-3 border-t">
+                    <div className="flex-1 p-3 rounded-lg bg-success/10">
+                      <p className="text-xs font-medium text-muted-foreground">Year 1 Total (Platform + Advisory)</p>
+                      <p className="text-lg font-bold text-success">{bundledOffering.yearOneTotal}</p>
+                    </div>
+                    <div className="flex-1 p-3 rounded-lg bg-muted/30">
+                      <p className="text-xs font-medium text-muted-foreground">Year 2+ (Platform only)</p>
+                      <p className="text-lg font-bold">{bundledOffering.yearTwoPlus}</p>
+                    </div>
+                  </div>
+                  <p className="text-xs text-muted-foreground mt-3 italic">{bundledOffering.note}</p>
+                </div>
+
                 <div className="mt-6 p-4 rounded-lg bg-muted/30 border">
                   <h5 className="font-medium mb-2">Assumptions & Exclusions</h5>
                   <ul className="space-y-1 text-sm text-muted-foreground">
                     <li>• Pricing is quoted in Botswana Pula (BWP) and billed via DPO Pay (secure payment gateway)</li>
                     <li>• Implementation timeline assumes data availability and stakeholder availability for workshops</li>
+                    <li>• Advisory services (ISO 27001 readiness, quarterly reviews) are optional and can be scoped separately</li>
                     <li>• Custom integrations beyond the standard set are available at an additional professional services rate</li>
                     <li>• On-premise deployment is available for Enterprise tier — quoted separately based on infrastructure requirements</li>
                     <li>• Training is delivered remotely (in-person training available at additional cost for travel)</li>
                     <li>• All prices exclude applicable taxes (VAT where applicable)</li>
+                    <li>• 10% annual discount applied to yearly billing vs. monthly</li>
                   </ul>
                 </div>
               </CardContent>
