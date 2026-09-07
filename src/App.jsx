@@ -125,6 +125,7 @@ import AuditorExport from '@/pages/AuditorExport';
 import TenantSettings from '@/pages/TenantSettings';
 import MyPolicies from '@/pages/MyPolicies';
 import VendorPortal from '@/pages/VendorPortal';
+import VendorVerification from '@/pages/VendorVerification';
 import AuditorDashboard from '@/pages/AuditorDashboard';
 import ExecutiveReport from '@/pages/ExecutiveReport';
 import ApiDocs from '@/pages/ApiDocs';
@@ -287,6 +288,7 @@ const AuthenticatedApp = () => {
       <Route path="/pricing" element={<Pricing />} />
       <Route path="/vendor-questionnaire" element={<VendorQuestionnaire />} />
       <Route path="/vendor-portal" element={<VendorPortal />} />
+      <Route path="/verify/vendor/:vendor_id" element={<VendorVerification />} />
       <Route path="/whistleblower" element={<WhistleblowerPortal />} />
       <Route path="/trust-center" element={<TrustCenterPublic />} />
       <Route path="/client-portal" element={<ClientPortal />} />

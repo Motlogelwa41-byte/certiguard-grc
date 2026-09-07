@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
-import { CheckCircle, Shield, AlertCircle, Loader2 } from "lucide-react";
+import { CheckCircle, Shield, AlertCircle, Loader2, Copy, Code } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 const QUESTIONNAIRE = [
@@ -28,6 +28,9 @@ export default function VendorPortal() {
   const [submitted, setSubmitted] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState(null);
+  const [verificationUrl, setVerificationUrl] = useState(null);
+  const [riskLevel, setRiskLevel] = useState(null);
+  const [copied, setCopied] = useState(false);
 
   useEffect(() => {
     if (!token) {
@@ -65,6 +68,8 @@ export default function VendorPortal() {
         setSubmitting(false);
         return;
       }
+      setVerificationUrl(res?.verification_url || null);
+      setRiskLevel(res?.risk_level || null);
       setSubmitted(true);
     } catch {
       setError("Failed to submit. Please try again.");
@@ -95,21 +100,64 @@ export default function VendorPortal() {
       </div>
     );
 
-  if (submitted)
+  if (submitted) {
+    const riskLabel = riskLevel ? riskLevel.charAt(0).toUpperCase() + riskLevel.slice(1) : "Verified";
+    const badgeImgUrl = "https://media.base44.com/images/public/6a35358668f36d27123b5f0f/003ab4734_generated_image.png";
+    const embedSnippet = verificationUrl
+      ? `<a href="${verificationUrl}" target="_blank" rel="noopener noreferrer">\n  <img src="${badgeImgUrl}" alt="Security Verified — ${riskLabel} Risk" style="height:40px;border:0;" />\n</a>`
+      : "";
     return (
-      <div className="min-h-screen bg-slate-950 flex items-center justify-center px-4">
-        <div className="text-center max-w-md">
-          <div className="w-16 h-16 bg-emerald-500/20 rounded-full flex items-center justify-center mx-auto mb-4">
-            <CheckCircle className="w-8 h-8 text-emerald-400" />
+      <div className="min-h-screen bg-slate-950 flex items-center justify-center px-4 py-8">
+        <div className="max-w-md w-full">
+          <div className="text-center mb-6">
+            <div className="w-16 h-16 bg-emerald-500/20 rounded-full flex items-center justify-center mx-auto mb-4">
+              <CheckCircle className="w-8 h-8 text-emerald-400" />
+            </div>
+            <h2 className="text-2xl font-bold text-white mb-2">Questionnaire Submitted</h2>
+            <p className="text-slate-400">
+              Thank you, {vendor?.vendor_name}. Your responses have been recorded and sent to the compliance team for
+              review.
+            </p>
           </div>
-          <h2 className="text-2xl font-bold text-white mb-2">Questionnaire Submitted</h2>
-          <p className="text-slate-400">
-            Thank you, {vendor?.vendor_name}. Your responses have been recorded and sent to the compliance team for
-            review.
-          </p>
+
+          {verificationUrl && (
+            <div className="bg-slate-900 rounded-xl border border-slate-800 p-5">
+              <div className="flex items-center gap-2 mb-3">
+                <Shield className="w-4 h-4 text-blue-400" />
+                <h3 className="text-sm font-semibold text-white">Share your security posture</h3>
+              </div>
+              <p className="text-xs text-slate-400 mb-4">
+                Embed this badge on your website to show customers your verified security status. It links to your public verification page.
+              </p>
+
+              <div className="bg-slate-950 rounded-lg p-4 mb-3 flex items-center justify-center border border-slate-800">
+                <a href={verificationUrl} target="_blank" rel="noopener noreferrer">
+                  <img src={badgeImgUrl} alt={`Security Verified — ${riskLabel} Risk`} style={{ height: 40 }} />
+                </a>
+              </div>
+
+              <div className="relative">
+                <pre className="bg-slate-950 rounded-lg p-3 pr-20 text-xs text-slate-300 overflow-x-auto border border-slate-800 max-h-32 overflow-y-auto whitespace-pre-wrap break-all">{embedSnippet}</pre>
+                <button
+                  onClick={() => { navigator.clipboard?.writeText(embedSnippet); setCopied(true); setTimeout(() => setCopied(false), 2000); }}
+                  className="absolute top-2 right-2 px-2 py-1 text-xs bg-slate-800 hover:bg-slate-700 text-slate-300 rounded transition-colors flex items-center gap-1"
+                >
+                  {copied ? <><CheckCircle className="w-3 h-3" /> Copied</> : <><Copy className="w-3 h-3" /> Copy</>}
+                </button>
+              </div>
+
+              <div className="mt-3 flex items-center gap-2 text-xs text-slate-500">
+                <Code className="w-3 h-3 shrink-0" />
+                <a href={verificationUrl} target="_blank" rel="noopener noreferrer" className="text-blue-400 hover:text-blue-300 truncate">
+                  {verificationUrl}
+                </a>
+              </div>
+            </div>
+          )}
         </div>
       </div>
     );
+  }
 
   const answered = Object.keys(answers).length;
   const pct = Math.round((answered / QUESTIONNAIRE.length) * 100);
