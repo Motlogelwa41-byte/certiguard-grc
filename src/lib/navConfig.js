@@ -254,6 +254,7 @@ export const navSections = [
       { label: "Data Privacy", path: "/data-privacy", icon: Lock, roles: ["admin", "compliance_officer"] },
       { label: "API Docs", path: "/api-docs", icon: Code, roles: ["admin", "compliance_officer"] },
       { label: "Business Units", path: "/business-units", icon: Building2, roles: ["admin", "compliance_officer", "risk_manager"] },
+      { label: "Workspaces", path: "/workspaces", icon: Layers, roles: ["admin", "compliance_officer", "risk_manager", "auditor"] },
       { label: "BCDR Tracker", path: "/bcdr-tracker", icon: Shield, roles: ["admin", "compliance_officer", "risk_manager"] },
       { label: "Tabletop Simulator", path: "/tabletop-simulator", icon: AlertTriangle, roles: ["admin", "compliance_officer", "risk_manager"] },
       { label: "Statutory Calendar", path: "/statutory-calendar", icon: FileBadge, roles: ["admin", "compliance_officer", "risk_manager"] },

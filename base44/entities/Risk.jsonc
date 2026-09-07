@@ -111,6 +111,22 @@
       "default": 0,
       "description": "Aggregate effectiveness of linked controls (0-100) \u2014 drives residual risk reduction"
     },
+    "revenue_impact_annual": {
+      "type": "number",
+      "description": "Estimated annual revenue impact if this risk materializes (in risk currency) \u2014 tracks direct revenue loss exposure"
+    },
+    "revenue_at_risk_pct": {
+      "type": "number",
+      "description": "Percentage of annual organizational revenue at risk if this materializes (0-100)"
+    },
+    "business_process_impacted": {
+      "type": "string",
+      "description": "Primary business process or revenue stream impacted by this risk e.g. 'Card Issuance', 'Online Banking', 'Cross-border Payments'"
+    },
+    "customer_impact_count": {
+      "type": "number",
+      "description": "Estimated number of customers affected if this risk materializes"
+    },
     "status": {
       "type": "string",
       "enum": [
@@ -249,6 +265,21 @@
     "acceptance_signature": {
       "type": "string",
       "description": "Typed full-name signature confirming formal sign-off authority"
+    },
+    "workspace_id": {
+      "type": "string",
+      "description": "Linked Workspace id for multi-business-unit segmentation"
+    },
+    "workspace_name": {
+      "type": "string",
+      "description": "Denormalized workspace/business-unit display name"
+    },
+    "custom_fields": {
+      "type": "string",
+      "description": "JSON array of tenant-defined custom fields: [{key, label, value, type}] where type is text|number|date|select|boolean"
+    },
+    "notes": {
+      "type": "string"
     }
   },
   "required": [

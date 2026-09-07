@@ -20,9 +20,10 @@ import { useToast } from "@/components/ui/use-toast";
 import { logAuditTrail } from "@/lib/auditLogger";
 import { useAuth } from "@/lib/AuthContext";
 import Can from "@/components/shared/Can";
+import CustomFieldsEditor from "@/components/shared/CustomFieldsEditor";
 
 const categories = ["access_control","data_protection","incident_response","change_management","risk_management","security_operations","business_continuity","network_security","physical_security","compliance","human_resources","asset_management"];
-const defaultForm = { control_id: "", title: "", description: "", category: "access_control", status: "not_tested", severity: "medium", automation_status: "manual", owner_name: "", notes: "", framework_ids: [], framework_names: [] };
+const defaultForm = { control_id: "", title: "", description: "", category: "access_control", status: "not_tested", severity: "medium", automation_status: "manual", owner_name: "", notes: "", framework_ids: [], framework_names: [], workspace_id: "", workspace_name: "", custom_fields: "[]" };
 
 export default function Controls() {
   const { user } = useAuth();
@@ -31,6 +32,7 @@ export default function Controls() {
   const frameworkFilterName = searchParams.get("name");
   const [items, setItems] = useState([]);
   const [frameworks, setFrameworks] = useState([]);
+  const [workspaces, setWorkspaces] = useState([]);
   const [loading, setLoading] = useState(true);
   const [open, setOpen] = useState(false);
   const [form, setForm] = useState(defaultForm);
@@ -64,9 +66,10 @@ export default function Controls() {
   ];
 
   const load = async () => {
-    const [ctls, fws] = await Promise.all([base44.entities.Control.list(), base44.entities.Framework.list()]);
+    const [ctls, fws, wss] = await Promise.all([base44.entities.Control.list(), base44.entities.Framework.list(), base44.entities.Workspace.list().catch(() => [])]);
     setItems(ctls);
     setFrameworks(fws);
+    setWorkspaces(wss);
     setLoading(false);
   };
   useEffect(() => { load(); }, []);
@@ -94,7 +97,7 @@ export default function Controls() {
   };
 
   const handleEdit = (item) => {
-    setForm({ control_id: item.control_id || "", title: item.title || "", description: item.description || "", category: item.category || "access_control", status: item.status || "not_tested", severity: item.severity || "medium", automation_status: item.automation_status || "manual", owner_name: item.owner_name || "", notes: item.notes || "", framework_ids: item.framework_ids || [], framework_names: item.framework_names || [] });
+    setForm({ control_id: item.control_id || "", title: item.title || "", description: item.description || "", category: item.category || "access_control", status: item.status || "not_tested", severity: item.severity || "medium", automation_status: item.automation_status || "manual", owner_name: item.owner_name || "", notes: item.notes || "", framework_ids: item.framework_ids || [], framework_names: item.framework_names || [], workspace_id: item.workspace_id || "", workspace_name: item.workspace_name || "", custom_fields: item.custom_fields || "[]" });
     setEditId(item.id); setOpen(true);
   };
 
@@ -341,7 +344,19 @@ export default function Controls() {
               </Select>
             </div>
             <div><Label>Description</Label><Textarea value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })} rows={3} /></div>
+            {workspaces.length > 0 && (
+              <div><Label>Workspace / Business Unit</Label>
+                <Select value={form.workspace_id || "none"} onValueChange={(v) => { const ws = workspaces.find(w => w.id === v); setForm({ ...form, workspace_id: v === "none" ? "" : v, workspace_name: v === "none" ? "" : ws?.name || "" }); }}>
+                  <SelectTrigger><SelectValue placeholder="Unassigned" /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="none">Unassigned</SelectItem>
+                    {workspaces.map(w => <SelectItem key={w.id} value={w.id}>{w.name}</SelectItem>)}
+                  </SelectContent>
+                </Select>
+              </div>
+            )}
             <div><Label>Notes</Label><Textarea value={form.notes} onChange={(e) => setForm({ ...form, notes: e.target.value })} rows={2} /></div>
+            <CustomFieldsEditor value={form.custom_fields} onChange={(v) => setForm({ ...form, custom_fields: v })} />
             {frameworks.length > 0 && (
               <div>
                 <Label>Frameworks</Label>

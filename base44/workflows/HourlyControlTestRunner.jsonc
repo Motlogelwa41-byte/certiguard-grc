@@ -1,0 +1,48 @@
+{
+  "trigger": {
+    "condition": null,
+    "config": {
+      "trigger_type": "scheduled",
+      "events": [],
+      "schedule_mode": "recurring",
+      "cron_expression": "0 * * * *",
+      "one_time_date": null,
+      "timezone": "Africa/Johannesburg",
+      "interval_value": null,
+      "interval_unit": null,
+      "interval_anchor": null,
+      "ends_type": "never",
+      "ends_on_date": null,
+      "ends_after_count": null
+    }
+  },
+  "name": "Hourly Control Test Runner",
+  "definition": {
+    "document": {
+      "dsl": "1.0.0",
+      "name": "hourly_control_test_runner",
+      "version": "1.0",
+      "namespace": "base44"
+    },
+    "do": [
+      {
+        "run_hourly_tests": {
+          "call": "invoke_backend_function",
+          "with": {
+            "function_name": "runControlTests",
+            "args": {
+              "priority": "high",
+              "_internal_token": "${secrets.INTERNAL_INVOKE_TOKEN}"
+            }
+          },
+          "then": "end",
+          "x-base44": {
+            "title": "Run high-priority automated control tests",
+            "description": "Executes automated control tests for critical and high-severity controls every hour, enabling near-real-time compliance monitoring instead of daily-only testing"
+          }
+        }
+      }
+    ]
+  },
+  "description": "Hourly execution of automated control tests for critical and high-severity controls \u2014 enables near-real-time compliance posture monitoring for high-priority controls while the daily runner handles the full suite."
+}

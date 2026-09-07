@@ -120,6 +120,18 @@
       "type": "string",
       "format": "date-time"
     },
+    "workspace_id": {
+      "type": "string",
+      "description": "Linked Workspace id for multi-business-unit segmentation"
+    },
+    "workspace_name": {
+      "type": "string",
+      "description": "Denormalized workspace/business-unit display name"
+    },
+    "custom_fields": {
+      "type": "string",
+      "description": "JSON array of tenant-defined custom fields: [{key, label, value, type}] where type is text|number|date|select|boolean"
+    },
     "notes": {
       "type": "string"
     }

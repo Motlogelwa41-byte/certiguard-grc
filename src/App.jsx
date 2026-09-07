@@ -239,6 +239,7 @@ import BackgroundChecks from '@/pages/BackgroundChecks';
 import DataClassificationRegister from '@/pages/DataClassificationRegister';
 import PrivilegedAccessManagement from '@/pages/PrivilegedAccessManagement';
 import BankRegulatorDashboard from '@/pages/BankRegulatorDashboard';
+import Workspaces from '@/pages/Workspaces';
 import { LanguageProvider } from '@/contexts/LanguageContext';
 
 const AuthenticatedApp = () => {
@@ -499,6 +500,7 @@ const AuthenticatedApp = () => {
           <Route path="/data-classification" element={<DataClassificationRegister />} />
           <Route path="/pam" element={<PrivilegedAccessManagement />} />
           <Route path="/connect" element={<Connect />} />
+          <Route path="/workspaces" element={<Workspaces />} />
           <Route path="/regulator-dashboard" element={<BankRegulatorDashboard />} />
         </Route>
       </Route>

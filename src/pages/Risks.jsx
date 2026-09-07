@@ -22,15 +22,17 @@ import RiskAcceptanceDialog from "@/components/risks/RiskAcceptanceDialog";
 import BulkActionBar from "@/components/shared/BulkActionBar";
 import Can from "@/components/shared/Can";
 import { useRBAC } from "@/lib/useRBAC";
+import CustomFieldsEditor from "@/components/shared/CustomFieldsEditor";
 
 const riskCategories = ["operational","technical","compliance","financial","strategic","reputational","third_party"];
-const defaultForm = { risk_id: "", title: "", description: "", category: "operational", likelihood: 3, impact: 3, status: "open", treatment: "mitigate", owner_name: "", mitigation_plan: "", due_date: "", related_control_ids: [], tolerance_justification: "" };
+const defaultForm = { risk_id: "", title: "", description: "", category: "operational", likelihood: 3, impact: 3, status: "open", treatment: "mitigate", owner_name: "", mitigation_plan: "", due_date: "", related_control_ids: [], tolerance_justification: "", workspace_id: "", workspace_name: "", revenue_impact_annual: "", revenue_at_risk_pct: "", business_process_impacted: "", customer_impact_count: "", custom_fields: "[]" };
 
 export default function Risks() {
   const { user } = useAuth();
   const { can } = useRBAC();
   const [items, setItems] = useState([]);
   const [controls, setControls] = useState([]);
+  const [workspaces, setWorkspaces] = useState([]);
   const [loading, setLoading] = useState(true);
   const [open, setOpen] = useState(false);
   const [form, setForm] = useState(defaultForm);
@@ -84,13 +86,15 @@ export default function Risks() {
   ];
 
   const load = async () => {
-    const [risks, ctls, settings] = await Promise.all([
+    const [risks, ctls, settings, wss] = await Promise.all([
       base44.entities.Risk.list(),
       base44.entities.Control.list(),
       base44.entities.TenantSettings.list().catch(() => []),
+      base44.entities.Workspace.list().catch(() => []),
     ]);
     setItems(risks);
     setControls(ctls);
+    setWorkspaces(wss);
     setTenantSettings(settings?.[0] || null);
     setLoading(false);
   };
@@ -113,7 +117,7 @@ export default function Risks() {
   };
 
   const handleEdit = (item) => {
-    setForm({ risk_id: item.risk_id || "", title: item.title || "", description: item.description || "", category: item.category || "operational", likelihood: item.likelihood || 3, impact: item.impact || 3, status: item.status || "open", treatment: item.treatment || "mitigate", owner_name: item.owner_name || "", mitigation_plan: item.mitigation_plan || "", due_date: item.due_date || "", related_control_ids: item.related_control_ids || [], tolerance_justification: item.tolerance_justification || "" });
+    setForm({ risk_id: item.risk_id || "", title: item.title || "", description: item.description || "", category: item.category || "operational", likelihood: item.likelihood || 3, impact: item.impact || 3, status: item.status || "open", treatment: item.treatment || "mitigate", owner_name: item.owner_name || "", mitigation_plan: item.mitigation_plan || "", due_date: item.due_date || "", related_control_ids: item.related_control_ids || [], tolerance_justification: item.tolerance_justification || "", workspace_id: item.workspace_id || "", workspace_name: item.workspace_name || "", revenue_impact_annual: item.revenue_impact_annual || "", revenue_at_risk_pct: item.revenue_at_risk_pct || "", business_process_impacted: item.business_process_impacted || "", customer_impact_count: item.customer_impact_count || "", custom_fields: item.custom_fields || "[]" });
     setEditId(item.id); setOpen(true);
   };
 
@@ -380,6 +384,26 @@ export default function Risks() {
               </div>
             </div>
             <div><Label>Due Date</Label><Input type="date" value={form.due_date} onChange={(e) => setForm({ ...form, due_date: e.target.value })} /></div>
+            {workspaces.length > 0 && (
+              <div><Label>Workspace / Business Unit</Label>
+                <Select value={form.workspace_id || "none"} onValueChange={(v) => { const ws = workspaces.find(w => w.id === v); setForm({ ...form, workspace_id: v === "none" ? "" : v, workspace_name: v === "none" ? "" : ws?.name || "" }); }}>
+                  <SelectTrigger><SelectValue placeholder="Unassigned" /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="none">Unassigned</SelectItem>
+                    {workspaces.map(w => <SelectItem key={w.id} value={w.id}>{w.name}</SelectItem>)}
+                  </SelectContent>
+                </Select>
+              </div>
+            )}
+            <div className="border border-border rounded-lg p-3 space-y-3 bg-muted/20">
+              <p className="text-sm font-medium">Revenue Impact Tracking</p>
+              <div className="grid grid-cols-2 gap-3">
+                <div><Label className="text-xs">Annual Revenue Impact ({tenantSettings?.base_currency || "ZAR"})</Label><Input type="number" value={form.revenue_impact_annual} onChange={(e) => setForm({ ...form, revenue_impact_annual: e.target.value ? parseFloat(e.target.value) : "" })} placeholder="e.g. 5000000" /></div>
+                <div><Label className="text-xs">Revenue at Risk (%)</Label><Input type="number" min="0" max="100" value={form.revenue_at_risk_pct} onChange={(e) => setForm({ ...form, revenue_at_risk_pct: e.target.value ? parseFloat(e.target.value) : "" })} placeholder="e.g. 15" /></div>
+              </div>
+              <div><Label className="text-xs">Business Process Impacted</Label><Input value={form.business_process_impacted} onChange={(e) => setForm({ ...form, business_process_impacted: e.target.value })} placeholder="e.g. Card Issuance, Online Banking" /></div>
+              <div><Label className="text-xs">Customers Affected (count)</Label><Input type="number" value={form.customer_impact_count} onChange={(e) => setForm({ ...form, customer_impact_count: e.target.value ? parseInt(e.target.value) : "" })} placeholder="e.g. 50000" /></div>
+            </div>
             <div><Label>Description</Label><Textarea value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })} rows={3} /></div>
             <div><Label>Mitigation Plan</Label><Textarea value={form.mitigation_plan} onChange={(e) => setForm({ ...form, mitigation_plan: e.target.value })} rows={3} /></div>
             <div>
@@ -407,6 +431,7 @@ export default function Risks() {
                 </div>
               </div>
             )}
+            <CustomFieldsEditor value={form.custom_fields} onChange={(v) => setForm({ ...form, custom_fields: v })} />
             <Button className="w-full" onClick={handleSave} disabled={!form.title}>{editId ? "Update" : "Create"}</Button>
           </div>
         </DialogContent>
