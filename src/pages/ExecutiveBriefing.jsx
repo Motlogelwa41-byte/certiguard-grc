@@ -51,7 +51,7 @@ export default function ExecutiveBriefing() {
           activeFrameworks: fws.length,
         });
         setRecentIncidents(incidents.slice(0, 5));
-        setTopRisks(risks.sort((a, b) => (b.likelihood * b.impact) - (a.likelihood * a.impact)).slice(0, 5));
+        setTopRisks(risks.sort((a, b) => ((b.likelihood||0) * (b.impact||0)) - ((a.likelihood||0) * (a.impact||0))).slice(0, 5));
         setFrameworks(fws);
       } catch (e) {
         // silent
@@ -91,7 +91,7 @@ export default function ExecutiveBriefing() {
         </div>
       </header>
 
-      <main className="px-4 py-5 space-y-5 max-w-md mx-auto">
+      <main className="px-4 py-5 space-y-5 max-w-3xl mx-auto">
         {/* Compliance Score Hero */}
         <div className={`rounded-3xl bg-gradient-to-br ${scoreBg} p-6 text-white shadow-lg`}>
           <p className="text-sm font-medium opacity-90 mb-1">Overall Compliance Score</p>
