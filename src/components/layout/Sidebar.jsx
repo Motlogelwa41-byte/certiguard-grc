@@ -54,7 +54,7 @@ export default function Sidebar() {
         {sections.map((section) => (
           <div key={section.label} className="mb-3.5">
             {!collapsed && (
-              <p className="text-[10px] font-bold uppercase tracking-widest text-sidebar-foreground/35 px-2.5 mb-1">
+              <p className="text-[10px] font-bold uppercase tracking-widest text-sidebar-foreground/50 px-2.5 mb-1">
                 {section.label}
               </p>
             )}
@@ -68,15 +68,15 @@ export default function Sidebar() {
                     to={item.path}
                     className={`group relative flex items-center gap-2.5 px-2.5 py-2 rounded-lg text-sm font-medium transition-all duration-200 ${
                       active
-                        ? "bg-gradient-to-r from-sidebar-primary/20 to-sidebar-primary/5 text-white shadow-sm shadow-sidebar-primary/10"
-                        : "text-sidebar-foreground/65 hover:text-sidebar-foreground hover:bg-sidebar-accent/50"
+                        ? "bg-gradient-to-r from-sidebar-primary/25 to-sidebar-primary/10 text-white shadow-sm shadow-sidebar-primary/20"
+                        : "text-sidebar-foreground/90 hover:text-white hover:bg-sidebar-accent/70"
                     }`}
                     title={collapsed ? item.label : undefined}
                   >
                     {active && (
                       <span className="absolute left-0 top-1/2 -translate-y-1/2 h-6 w-1 rounded-r-full bg-sidebar-primary shadow-[0_0_8px] shadow-sidebar-primary/50" />
                     )}
-                    <Icon className={`w-[18px] h-[18px] shrink-0 transition-colors ${active ? "text-sidebar-primary" : "text-sidebar-foreground/45 group-hover:text-sidebar-foreground/90"}`} />
+                    <Icon className={`w-[18px] h-[18px] shrink-0 transition-colors ${active ? "text-sidebar-primary" : "text-sidebar-foreground/70 group-hover:text-white"}`} />
                     {!collapsed && <span className="truncate">{item.label}</span>}
                   </Link>
                 );
@@ -90,7 +90,7 @@ export default function Sidebar() {
       <div className="px-2 py-3 border-t border-sidebar-border/50 space-y-0.5 bg-sidebar-background/40">
         <button
           onClick={() => setCollapsed(!collapsed)}
-          className="flex items-center gap-2.5 px-2.5 py-2 rounded-lg text-sm font-medium text-sidebar-foreground/65 hover:text-sidebar-foreground hover:bg-sidebar-accent/50 w-full transition-colors"
+          className="flex items-center gap-2.5 px-2.5 py-2 rounded-lg text-sm font-medium text-sidebar-foreground/85 hover:text-white hover:bg-sidebar-accent/70 w-full transition-colors"
         >
           {collapsed ? (
             <ChevronRight className="w-[18px] h-[18px] shrink-0" />
@@ -101,7 +101,7 @@ export default function Sidebar() {
         </button>
         <button
           onClick={async () => { await logLogout(); base44.auth.logout("/"); }}
-          className="flex items-center gap-2.5 px-2.5 py-2 rounded-lg text-sm font-medium text-sidebar-foreground/65 hover:text-destructive hover:bg-destructive/10 w-full transition-colors"
+          className="flex items-center gap-2.5 px-2.5 py-2 rounded-lg text-sm font-medium text-sidebar-foreground/85 hover:text-destructive hover:bg-destructive/10 w-full transition-colors"
         >
           <LogOut className="w-[18px] h-[18px] shrink-0" />
           {!collapsed && <span>Logout</span>}
