@@ -30,13 +30,13 @@ export default function Sidebar() {
 
   return (
     <aside
-      className={`fixed left-0 top-0 h-screen bg-gradient-to-b from-sidebar-accent via-sidebar-background to-sidebar-background text-sidebar-foreground flex flex-col transition-all duration-300 z-50 shadow-2xl shadow-black/30 ${
+      className={`fixed left-0 top-0 h-screen bg-sidebar text-sidebar-foreground flex flex-col transition-all duration-300 z-50 border-r border-sidebar-border ${
         collapsed ? "w-16" : "w-60"
       }`}
     >
       {/* Logo */}
-      <div className="flex items-center gap-2.5 px-4 h-16 border-b border-sidebar-border/50 shrink-0 bg-gradient-to-r from-sidebar-background/60 to-transparent backdrop-blur-sm">
-        <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-sidebar-primary to-primary flex items-center justify-center shrink-0 shadow-lg shadow-sidebar-primary/30 overflow-hidden ring-1 ring-white/10">
+      <div className="flex items-center gap-2.5 px-4 h-16 border-b border-sidebar-border shrink-0">
+        <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-primary to-primary/80 flex items-center justify-center shrink-0 shadow-md shadow-primary/20 overflow-hidden">
           {brand.logo_url ? <img src={brand.logo_url} alt="logo" className="w-full h-full object-contain" /> : <ShieldCheck className="w-5 h-5 text-white" />}
         </div>
         {!collapsed && (
@@ -44,7 +44,7 @@ export default function Sidebar() {
             <span className="font-heading font-bold text-base tracking-tight truncate block text-sidebar-foreground">
               {brand.name || "CertiGuard GRC"}
             </span>
-            <span className="text-[9px] font-semibold uppercase tracking-widest text-sidebar-primary/90">RegTech Platform</span>
+            <span className="text-[9px] font-semibold uppercase tracking-widest text-primary/70">RegTech Platform</span>
           </div>
         )}
       </div>
@@ -54,7 +54,7 @@ export default function Sidebar() {
         {sections.map((section) => (
           <div key={section.label} className="mb-3.5">
             {!collapsed && (
-              <p className="text-[10px] font-bold uppercase tracking-widest text-sidebar-foreground/50 px-2.5 mb-1">
+              <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground/60 px-2.5 mb-1">
                 {section.label}
               </p>
             )}
@@ -68,15 +68,15 @@ export default function Sidebar() {
                     to={item.path}
                     className={`group relative flex items-center gap-2.5 px-2.5 py-2 rounded-lg text-sm font-medium transition-all duration-200 ${
                       active
-                        ? "bg-gradient-to-r from-sidebar-primary/25 to-sidebar-primary/10 text-white shadow-sm shadow-sidebar-primary/20"
-                        : "text-sidebar-foreground/90 hover:text-white hover:bg-sidebar-accent/70"
+                        ? "bg-primary/10 text-primary"
+                        : "text-sidebar-foreground/70 hover:text-sidebar-foreground hover:bg-muted"
                     }`}
                     title={collapsed ? item.label : undefined}
                   >
                     {active && (
-                      <span className="absolute left-0 top-1/2 -translate-y-1/2 h-6 w-1 rounded-r-full bg-sidebar-primary shadow-[0_0_8px] shadow-sidebar-primary/50" />
+                      <span className="absolute left-0 top-1/2 -translate-y-1/2 h-5 w-1 rounded-r-full bg-primary" />
                     )}
-                    <Icon className={`w-[18px] h-[18px] shrink-0 transition-colors ${active ? "text-sidebar-primary" : "text-sidebar-foreground/70 group-hover:text-white"}`} />
+                    <Icon className={`w-[18px] h-[18px] shrink-0 transition-colors ${active ? "text-primary" : "text-muted-foreground group-hover:text-sidebar-foreground"}`} />
                     {!collapsed && <span className="truncate">{item.label}</span>}
                   </Link>
                 );
@@ -87,10 +87,10 @@ export default function Sidebar() {
       </nav>
 
       {/* Bottom */}
-      <div className="px-2 py-3 border-t border-sidebar-border/50 space-y-0.5 bg-sidebar-background/40">
+      <div className="px-2 py-3 border-t border-sidebar-border space-y-0.5">
         <button
           onClick={() => setCollapsed(!collapsed)}
-          className="flex items-center gap-2.5 px-2.5 py-2 rounded-lg text-sm font-medium text-sidebar-foreground/85 hover:text-white hover:bg-sidebar-accent/70 w-full transition-colors"
+          className="flex items-center gap-2.5 px-2.5 py-2 rounded-lg text-sm font-medium text-sidebar-foreground/70 hover:text-sidebar-foreground hover:bg-muted w-full transition-colors"
         >
           {collapsed ? (
             <ChevronRight className="w-[18px] h-[18px] shrink-0" />
@@ -101,7 +101,7 @@ export default function Sidebar() {
         </button>
         <button
           onClick={async () => { await logLogout(); base44.auth.logout("/"); }}
-          className="flex items-center gap-2.5 px-2.5 py-2 rounded-lg text-sm font-medium text-sidebar-foreground/85 hover:text-destructive hover:bg-destructive/10 w-full transition-colors"
+          className="flex items-center gap-2.5 px-2.5 py-2 rounded-lg text-sm font-medium text-sidebar-foreground/70 hover:text-destructive hover:bg-destructive/10 w-full transition-colors"
         >
           <LogOut className="w-[18px] h-[18px] shrink-0" />
           {!collapsed && <span>Logout</span>}
