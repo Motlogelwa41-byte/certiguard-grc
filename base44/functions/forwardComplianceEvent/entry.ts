@@ -1,4 +1,5 @@
 import { createClientFromRequest } from 'npm:@base44/sdk@0.8.38';
+import { secrets } from 'base44:runtime';
 
 // Forwards a compliance event to all active tenant WebhookEndpoints subscribed to the event type.
 // Invoked by workflows (control failure, risk exceeded, etc.) or manually from the SIEM Webhooks page.
@@ -13,16 +14,26 @@ Deno.serve(async (req) => {
       return Response.json({ ok: false, error: 'event_type is required' }, { status: 400 });
     }
 
-    // Resolve tenant: explicit override (workflow/service-role) → authenticated user
-    let tenant_id = body.tenant_id;
+    // Resolve tenant strictly from the authenticated user, or from a verified
+    // internal service-role token (workflow invocations). Never from untrusted
+    // body input alone — prevents cross-tenant authorization bypass.
+    let tenant_id = null;
+    try {
+      const user = await base44.auth.me();
+      tenant_id = user?.data?.tenant_id || null;
+    } catch (_) { /* not a user request — check service-role token below */ }
+
     if (!tenant_id) {
-      try {
-        const user = await base44.auth.me();
-        tenant_id = user?.data?.tenant_id;
-      } catch (_) { /* service-role invocation */ }
+      const internalToken = req.headers.get('x-internal-token') || body.internal_token;
+      const expectedToken = secrets.get('INTERNAL_INVOKE_TOKEN');
+      if (internalToken && expectedToken && internalToken === expectedToken) {
+        // Verified service-role invocation — allow tenant_id from body
+        tenant_id = body.tenant_id;
+      }
     }
+
     if (!tenant_id) {
-      return Response.json({ ok: false, error: 'Unable to resolve tenant for event forwarding' }, { status: 403 });
+      return Response.json({ ok: false, error: 'Authentication required to forward compliance events' }, { status: 401 });
     }
 
     const endpoints = await base44.asServiceRole.entities.WebhookEndpoint.filter({

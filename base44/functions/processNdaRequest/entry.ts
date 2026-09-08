@@ -296,9 +296,19 @@ export default async function(req) {
       const user = await base44.auth.me();
       if (!user) return Response.json({ error: 'Unauthorized' }, { status: 401 });
 
+      const tenantId = user.data?.tenant_id;
+      if (!tenantId) return Response.json({ error: 'Tenant context required' }, { status: 403 });
+
+      // Require admin or compliance_officer role to access analytics
+      const role = user.role || user.data?.role;
+      if (role !== 'admin' && role !== 'compliance_officer') {
+        return Response.json({ error: 'Insufficient permissions — admin or compliance officer role required' }, { status: 403 });
+      }
+
+      // Filter by tenant_id to prevent cross-tenant data exposure
       const [accessReqs, activities] = await Promise.all([
-        base44.asServiceRole.entities.TrustCenterAccess.list(),
-        base44.asServiceRole.entities.TrustCenterActivity.list()
+        base44.asServiceRole.entities.TrustCenterAccess.filter({ tenant_id: tenantId }),
+        base44.asServiceRole.entities.TrustCenterActivity.filter({ tenant_id: tenantId })
       ]);
 
       // Group by account domain

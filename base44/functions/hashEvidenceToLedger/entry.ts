@@ -1,5 +1,30 @@
 import { createClientFromRequest } from 'npm:@base44/sdk@0.8.40';
 
+// Validates a file URL before fetching — blocks SSRF to internal/private hosts
+function validateFileUrl(url: string): { valid: boolean; error?: string } {
+  let parsed: URL;
+  try {
+    parsed = new URL(url);
+  } catch {
+    return { valid: false, error: "Invalid file URL format" };
+  }
+  if (parsed.protocol !== "https:") {
+    return { valid: false, error: "File URL must use HTTPS" };
+  }
+  const hostname = parsed.hostname.toLowerCase();
+  if (hostname === "localhost" || hostname === "127.0.0.1" || hostname === "0.0.0.0" || hostname === "::1") {
+    return { valid: false, error: "File URL must not point to a local address" };
+  }
+  const ipMatch = hostname.match(/^(\d+)\.(\d+)\.(\d+)\.(\d+)$/);
+  if (ipMatch) {
+    const [a, b] = [Number(ipMatch[1]), Number(ipMatch[2])];
+    if (a === 10 || (a === 172 && b >= 16 && b <= 31) || (a === 192 && b === 168) || a === 127 || (a === 169 && b === 254)) {
+      return { valid: false, error: "File URL must not point to a private or link-local IP address" };
+    }
+  }
+  return { valid: true };
+}
+
 /**
  * Evidence Integrity Hook — SHA-256 Append-Only Ledger
  *
@@ -23,6 +48,12 @@ export default async function(req: Request): Promise<Response> {
 
     if (!file_url) {
       return Response.json({ error: 'file_url is required' }, { status: 400 });
+    }
+
+    // Validate the file URL before fetching to prevent SSRF
+    const urlCheck = validateFileUrl(file_url);
+    if (!urlCheck.valid) {
+      return Response.json({ error: `Invalid file URL: ${urlCheck.error}` }, { status: 400 });
     }
 
     // Fetch the uploaded file content for hashing

@@ -16,6 +16,20 @@ function dpoBase() {
   return mode === 'test' ? 'https://secure1.dpopg.com' : 'https://secure.3gdirectpay.com';
 }
 
+// Allowlist of trusted application origins for payment redirect URLs
+const ALLOWED_ORIGINS = [
+  'https://app.ethicaledgegrcconsulting.com',
+  'https://app.base44.com'
+];
+
+function getValidOrigin(req: Request): string {
+  const origin = req.headers.get('origin');
+  if (origin && ALLOWED_ORIGINS.includes(origin)) {
+    return origin;
+  }
+  return ALLOWED_ORIGINS[0];
+}
+
 export default async function (req) {
   try {
     const body = await req.json().catch(() => ({}));
@@ -32,7 +46,7 @@ export default async function (req) {
     }
 
     const amount = (amountCents / 100).toFixed(2);
-    const origin = req.headers.get('origin') || 'https://app.base44.com';
+    const origin = getValidOrigin(req);
     const companyRef = `CG-${tier}-${billing_cycle}-${Date.now()}`;
     const serviceDate = new Date().toISOString().slice(0, 10);
 

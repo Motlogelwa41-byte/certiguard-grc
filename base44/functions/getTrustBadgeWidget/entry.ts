@@ -1,5 +1,15 @@
 import { createClientFromRequest } from "npm:@base44/sdk@0.8.44";
 
+// HTML-escape user-supplied text before embedding in the widget HTML template
+function escapeHtml(str: string): string {
+  return String(str || "")
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#39;");
+}
+
 export default async function(req: Request): Promise<Response> {
   try {
     const base44 = createClientFromRequest(req);
@@ -46,7 +56,7 @@ export default async function(req: Request): Promise<Response> {
     } catch { /* best effort */ }
 
     const style = tc.accent_color || "#2563eb";
-    const companyName = tc.company_name || "Our Company";
+    const companyName = escapeHtml(tc.company_name || "Our Company");
 
     // --- Return JSON for API consumers ---
     if (format === "json") {
@@ -65,10 +75,10 @@ export default async function(req: Request): Promise<Response> {
 
     // --- Return HTML widget ---
     const frameworkBadges = frameworkNames
-      .map(f => `<span class="cg-fw">${f}</span>`)
+      .map(f => `<span class="cg-fw">${escapeHtml(f)}</span>`)
       .join("");
     const certBadges = certNames
-      .map(c => `<span class="cg-cert">✓ ${c}</span>`)
+      .map(c => `<span class="cg-cert">✓ ${escapeHtml(c)}</span>`)
       .join("");
 
     const html = `<!DOCTYPE html>
