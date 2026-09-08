@@ -29,6 +29,7 @@ import RevenueImpactWidget from "@/components/dashboard/RevenueImpactWidget";
 import RiskForecastWidget from "@/components/dashboard/RiskForecastWidget";
 import InviteColleagueCard from "@/components/dashboard/InviteColleagueCard";
 import { useAuth } from "@/lib/AuthContext";
+import { useToast } from "@/components/ui/use-toast";
 import RiskManagerDashboard from "@/components/dashboard/role/RiskManagerDashboard";
 import AuditorDashboard from "@/components/dashboard/role/AuditorDashboard";
 import ExecutiveDashboard from "@/components/dashboard/role/ExecutiveDashboard";
@@ -71,6 +72,50 @@ export default function Dashboard() {
       setLoading(false);
     }).catch(() => setLoading(false));
   }, [role]);
+
+  const { toast } = useToast();
+
+  useEffect(() => {
+    const SESSION_KEY = "certiguard_deadline_toast_shown";
+    if (sessionStorage.getItem(SESSION_KEY)) return;
+    Promise.all([
+      base44.entities.ComplianceTask.list().catch(() => []),
+      base44.entities.Evidence.list().catch(() => []),
+    ]).then(([t, e]) => {
+      const today = new Date().toISOString().slice(0, 10);
+      const in7 = new Date(Date.now() + 7 * 86400000).toISOString().slice(0, 10);
+      const in30 = new Date(Date.now() + 30 * 86400000).toISOString().slice(0, 10);
+      let overdue = 0, upcoming = 0, expiring = 0, missing = 0;
+      (t || []).forEach((task) => {
+        if (!task.due_date || task.status === "completed") return;
+        const d = String(task.due_date).slice(0, 10);
+        if (d < today) overdue++;
+        else if (d <= in7) upcoming++;
+      });
+      (e || []).forEach((ev) => {
+        if (ev.missing_evidence) { missing++; return; }
+        if (ev.expiry_date && ev.status === "approved") {
+          const d = String(ev.expiry_date).slice(0, 10);
+          if (d <= in30) expiring++;
+        }
+      });
+      const total = overdue + upcoming + expiring + missing;
+      if (total > 0) {
+        sessionStorage.setItem(SESSION_KEY, "1");
+        const parts = [
+          overdue && `${overdue} overdue`,
+          upcoming && `${upcoming} due this week`,
+          expiring && `${expiring} evidence expiring`,
+          missing && `${missing} missing evidence`,
+        ].filter(Boolean);
+        toast({
+          title: `⏰ ${total} deadline${total !== 1 ? "s" : ""} need attention`,
+          description: `${parts.join(" · ")} — review in Notification Center`,
+          duration: 9000,
+        });
+      }
+    }).catch(() => {});
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   if (role === "external_auditor") return <Navigate to="/auditor-portal" replace />;
   if (role === "risk_manager") return <RiskManagerDashboard />;
