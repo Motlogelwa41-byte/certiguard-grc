@@ -279,40 +279,51 @@ function buildDocumentList(certifications, penTests, trustCenter) {
   return docs;
 }
 
+function escapeHtml(str) {
+  if (str == null) return '';
+  return String(str)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
+}
+
 function generateBuyerHtml(feed) {
+  const esc = escapeHtml;
   const frameworkRows = (feed.frameworks || []).map(f => {
     const color = f.certified ? '#16a34a' : f.compliance_score >= 70 ? '#f59e0b' : '#ef4444';
     const statusLabel = f.certified ? '✓ Certified' : f.compliance_score >= 90 ? 'Active' : f.compliance_score >= 70 ? 'In Progress' : 'Gaps';
     return `<tr style="border-bottom:1px solid #e2e8f0;">
-      <td style="padding:10px 12px;font-weight:600;color:#1e293b;">${f.name}</td>
-      <td style="padding:10px 12px;color:${color};font-weight:600;">${statusLabel}</td>
-      <td style="padding:10px 12px;text-align:right;font-weight:600;color:#0A2463;">${f.compliance_score}%</td>
-      <td style="padding:10px 12px;text-align:right;color:#64748b;">${f.controls_passing}/${f.controls_total}</td>
+      <td style="padding:10px 12px;font-weight:600;color:#1e293b;">${esc(f.name)}</td>
+      <td style="padding:10px 12px;color:${color};font-weight:600;">${esc(statusLabel)}</td>
+      <td style="padding:10px 12px;text-align:right;font-weight:600;color:#0A2463;">${esc(f.compliance_score)}%</td>
+      <td style="padding:10px 12px;text-align:right;color:#64748b;">${esc(f.controls_passing)}/${esc(f.controls_total)}</td>
     </tr>`;
   }).join('');
 
   const certRows = (feed.certifications || []).map(c => {
     const statusColor = c.status === 'active' ? '#16a34a' : c.status === 'expiring' ? '#f59e0b' : '#64748b';
     return `<tr style="border-bottom:1px solid #e2e8f0;">
-      <td style="padding:10px 12px;font-weight:600;color:#1e293b;">${c.name || c.type}</td>
-      <td style="padding:10px 12px;color:${statusColor};font-weight:600;text-transform:capitalize;">${c.status}</td>
-      <td style="padding:10px 12px;color:#64748b;">${c.certifying_body || '—'}</td>
-      <td style="padding:10px 12px;color:#64748b;">${c.expiry_date || 'Non-expiring'}</td>
+      <td style="padding:10px 12px;font-weight:600;color:#1e293b;">${esc(c.name || c.type)}</td>
+      <td style="padding:10px 12px;color:${statusColor};font-weight:600;text-transform:capitalize;">${esc(c.status)}</td>
+      <td style="padding:10px 12px;color:#64748b;">${esc(c.certifying_body || '—')}</td>
+      <td style="padding:10px 12px;color:#64748b;">${esc(c.expiry_date || 'Non-expiring')}</td>
     </tr>`;
   }).join('');
 
   const subprocessorRows = (feed.subprocessors || []).map(s => {
     return `<tr style="border-bottom:1px solid #e2e8f0;">
-      <td style="padding:10px 12px;font-weight:600;color:#1e293b;">${s.name}</td>
-      <td style="padding:10px 12px;color:#64748b;">${s.category}</td>
-      <td style="padding:10px 12px;color:#64748b;">${s.location || s.country || '—'}</td>
-      <td style="padding:10px 12px;color:#64748b;">${s.data_access_level}</td>
+      <td style="padding:10px 12px;font-weight:600;color:#1e293b;">${esc(s.name)}</td>
+      <td style="padding:10px 12px;color:#64748b;">${esc(s.category)}</td>
+      <td style="padding:10px 12px;color:#64748b;">${esc(s.location || s.country || '—')}</td>
+      <td style="padding:10px 12px;color:#64748b;">${esc(s.data_access_level)}</td>
     </tr>`;
   }).join('');
 
   return `<!DOCTYPE html>
 <html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>${feed.company.name} — AWS Marketplace Compliance</title>
+<title>${esc(feed.company.name)} — AWS Marketplace Compliance</title>
 <style>
   *{margin:0;padding:0;box-sizing:border-box;}
   body{font-family:Inter,system-ui,sans-serif;background:#f8fafc;color:#1e293b;line-height:1.6;}
@@ -339,18 +350,18 @@ function generateBuyerHtml(feed) {
 </head><body>
 <div class="container">
   <div class="header">
-    <h1>${feed.company.name || feed.aws_marketplace.seller_name}</h1>
-    <p>${feed.company.tagline || feed.company.description || 'Security & Compliance Profile'}</p>
+    <h1>${esc(feed.company.name || feed.aws_marketplace.seller_name)}</h1>
+    <p>${esc(feed.company.tagline || feed.company.description || 'Security & Compliance Profile')}</p>
     <div class="badge">🔒 AWS Marketplace Verified Compliance Feed</div>
   </div>
 
   <div class="section">
     <h2>📊 Security Posture</h2>
     <div class="score-grid">
-      <div class="score-card"><div class="value">${feed.security_posture.overall_compliance_score}%</div><div class="label">Overall Score</div></div>
-      <div class="score-card"><div class="value">${feed.security_posture.certified_frameworks}</div><div class="label">Certified</div></div>
-      <div class="score-card"><div class="value">${feed.security_posture.total_frameworks}</div><div class="label">Frameworks</div></div>
-      <div class="score-card"><div class="value">${feed.security_posture.uptime_sla_percentage}%</div><div class="label">Uptime SLA</div></div>
+      <div class="score-card"><div class="value">${esc(feed.security_posture.overall_compliance_score)}%</div><div class="label">Overall Score</div></div>
+      <div class="score-card"><div class="value">${esc(feed.security_posture.certified_frameworks)}</div><div class="label">Certified</div></div>
+      <div class="score-card"><div class="value">${esc(feed.security_posture.total_frameworks)}</div><div class="label">Frameworks</div></div>
+      <div class="score-card"><div class="value">${esc(feed.security_posture.uptime_sla_percentage)}%</div><div class="label">Uptime SLA</div></div>
     </div>
   </div>
 
@@ -367,18 +378,18 @@ function generateBuyerHtml(feed) {
   <div class="section">
     <h2>🔐 Encryption & Data Protection</h2>
     <div class="info-grid">
-      <div class="info-item"><div class="label">At Rest</div><div class="value">${feed.encryption.at_rest}</div></div>
-      <div class="info-item"><div class="label">In Transit</div><div class="value">${feed.encryption.in_transit}</div></div>
-      <div class="info-item"><div class="label">Key Management</div><div class="value">${feed.encryption.kms_provider}</div></div>
-      <div class="info-item"><div class="label">Support Plan</div><div class="value">${feed.service_level_agreements.support_plan}</div></div>
+      <div class="info-item"><div class="label">At Rest</div><div class="value">${esc(feed.encryption.at_rest)}</div></div>
+      <div class="info-item"><div class="label">In Transit</div><div class="value">${esc(feed.encryption.in_transit)}</div></div>
+      <div class="info-item"><div class="label">Key Management</div><div class="value">${esc(feed.encryption.kms_provider)}</div></div>
+      <div class="info-item"><div class="label">Support Plan</div><div class="value">${esc(feed.service_level_agreements.support_plan)}</div></div>
     </div>
   </div>
 
   ${feed.data_residency ? `<div class="section">
     <h2>🌍 Data Residency</h2>
     <div class="info-grid">
-      <div class="info-item"><div class="label">Hosting Regions</div><div class="value">${(feed.data_residency.hosting_regions || []).join(', ') || '—'}</div></div>
-      <div class="info-item"><div class="label">Residency Statement</div><div class="value" style="font-size:12px;font-weight:400;">${feed.data_residency.residency_statement || 'Available on request'}</div></div>
+      <div class="info-item"><div class="label">Hosting Regions</div><div class="value">${esc((feed.data_residency.hosting_regions || []).join(', ') || '—')}</div></div>
+      <div class="info-item"><div class="label">Residency Statement</div><div class="value" style="font-size:12px;font-weight:400;">${esc(feed.data_residency.residency_statement || 'Available on request')}</div></div>
     </div>
   </div>` : ''}
 
@@ -390,17 +401,17 @@ function generateBuyerHtml(feed) {
   <div class="section">
     <h2>📋 Service Level Agreements</h2>
     <div class="info-grid">
-      <div class="info-item"><div class="label">Incident Response</div><div class="value">${feed.service_level_agreements.incident_response_sla_hours}h</div></div>
-      <div class="info-item"><div class="label">Breach Notification</div><div class="value">${feed.service_level_agreements.breach_notification_sla_hours}h</div></div>
-      <div class="info-item"><div class="label">Uptime SLA</div><div class="value">${feed.service_level_agreements.uptime_sla_percentage}%</div></div>
-      <div class="info-item"><div class="label">Support Plan</div><div class="value">${feed.service_level_agreements.support_plan}</div></div>
+      <div class="info-item"><div class="label">Incident Response</div><div class="value">${esc(feed.service_level_agreements.incident_response_sla_hours)}h</div></div>
+      <div class="info-item"><div class="label">Breach Notification</div><div class="value">${esc(feed.service_level_agreements.breach_notification_sla_hours)}h</div></div>
+      <div class="info-item"><div class="label">Uptime SLA</div><div class="value">${esc(feed.service_level_agreements.uptime_sla_percentage)}%</div></div>
+      <div class="info-item"><div class="label">Support Plan</div><div class="value">${esc(feed.service_level_agreements.support_plan)}</div></div>
     </div>
   </div>
 
   <div class="section" style="text-align:center;">
     <h2>📄 Request Compliance Documents</h2>
     <p style="color:#64748b;font-size:14px;margin-bottom:12px;">Access full audit reports, certifications, and penetration test results.</p>
-    <a href="mailto:${feed.aws_marketplace.nda_request_email || feed.company.contact_email || ''}" class="cta">Request Access</a>
+    <a href="mailto:${esc(feed.aws_marketplace.nda_request_email || feed.company.contact_email || '')}" class="cta">Request Access</a>
   </div>
 
   <div class="footer">Powered by CertiGuard GRC · Feed generated ${new Date(feed.aws_marketplace.feed_generated_at).toLocaleString()}</div>
