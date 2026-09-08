@@ -9,6 +9,7 @@ import useIdleLock from "@/hooks/useIdleLock";
 import ScreenLockOverlay from "@/components/shared/ScreenLockOverlay";
 import MfaEnforcementGate from "@/components/shared/MfaEnforcementGate";
 import SecurityPolicyBanner from "@/components/shared/SecurityPolicyBanner";
+import NotificationBadge from "@/components/shared/NotificationBadge";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { Globe } from "lucide-react";
 import { base44 } from "@/api/base44Client";
@@ -82,7 +83,10 @@ export default function AppLayout() {
             <span className="flex-1 text-left">Search everything…</span>
             <kbd className="hidden sm:inline-flex px-1.5 py-0.5 rounded bg-background border border-border text-xs font-mono">⌘K</kbd>
           </button>
-          <LanguageSwitcher />
+          <div className="flex items-center gap-2">
+            <NotificationBadge />
+            <LanguageSwitcher />
+          </div>
         </div>
         <div className="p-6 lg:p-8 max-w-[1400px] mx-auto">
           <SubscriptionGate>
