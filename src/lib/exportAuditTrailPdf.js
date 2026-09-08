@@ -43,6 +43,38 @@ export async function exportAuditTrailPdf({ auditLogs } = {}) {
   let y = M;
   const contentW = W - M * 2;
 
+  const coverPage = () => {
+    doc.setFillColor(...C.navy);
+    doc.rect(0, 0, W, H, "F");
+    doc.setFillColor(...C.blue);
+    doc.rect(0, H - 120, W, 6, "F");
+    doc.setTextColor(...C.white);
+    doc.setFont("helvetica", "bold");
+    doc.setFontSize(28);
+    doc.text("CertiGuard GRC", M, H / 2 - 80);
+    doc.setFont("helvetica", "normal");
+    doc.setFontSize(11);
+    doc.setTextColor(...C.light);
+    doc.text("Governance, Risk & Compliance Platform", M, H / 2 - 60);
+    doc.setFont("helvetica", "bold");
+    doc.setFontSize(22);
+    doc.setTextColor(...C.white);
+    doc.text("Audit Trail Report", M, H / 2 + 10);
+    doc.setFont("helvetica", "normal");
+    doc.setFontSize(10);
+    doc.setTextColor(...C.muted);
+    doc.text(`Organization: ${orgName}`, M, H / 2 + 35);
+    doc.text(`Generated: ${new Date().toLocaleString()}`, M, H / 2 + 52);
+    doc.text(`Total Entries: ${logs.length}`, M, H / 2 + 69);
+    doc.text(`Unique Users: ${new Set(logs.map((l) => l.performed_by_id).filter(Boolean)).size}`, M, H / 2 + 86);
+    doc.setFontSize(8);
+    doc.setTextColor(...C.muted);
+    doc.text("CONFIDENTIAL — Tamper-evident (SHA-256 hash-chained). Prepared for auditor / board review.", M, H - 40);
+    doc.text("Page 1", W - M, H - 40, { align: "right" });
+    doc.addPage();
+    page = 2;
+  };
+
   const header = () => {
     doc.setFillColor(...C.navy);
     doc.rect(0, 0, W, 58, "F");
@@ -74,6 +106,7 @@ export async function exportAuditTrailPdf({ auditLogs } = {}) {
     if (y + h > H - 48) { footer(); doc.addPage(); page++; header(); }
   };
 
+  coverPage();
   header();
 
   // Summary band

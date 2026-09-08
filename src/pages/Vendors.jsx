@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
-import { Building2, Plus, Pencil, Trash2, Search, ExternalLink, ShieldCheck, Link2, X, ChevronDown, ChevronUp, UserMinus } from "lucide-react";
+import { Building2, Plus, Pencil, Trash2, Search, ExternalLink, ShieldCheck, Link2, X, ChevronDown, ChevronUp, UserMinus, Upload } from "lucide-react";
 import OffboardingChecklist from "@/components/vendors/OffboardingChecklist";
+import BulkImportModal from "@/components/shared/BulkImportModal";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
@@ -49,6 +50,22 @@ export default function Vendors() {
   const [bulkStatus, setBulkStatus] = useState("");
   const [bulkRisk, setBulkRisk] = useState("");
   const { toast } = useToast();
+  const [importOpen, setImportOpen] = useState(false);
+
+  const vendorImportColumns = [
+    { key: "name", label: "Name", required: true },
+    { key: "description", label: "Description" },
+    { key: "category", label: "Category" },
+    { key: "risk_level", label: "Risk Level" },
+    { key: "status", label: "Status" },
+    { key: "contact_name", label: "Contact Name" },
+    { key: "contact_email", label: "Contact Email" },
+    { key: "website", label: "Website" },
+    { key: "contract_start", label: "Contract Start" },
+    { key: "contract_end", label: "Contract End" },
+    { key: "data_access", label: "Data Access" },
+    { key: "compliance_notes", label: "Compliance Notes" },
+  ];
 
   const toggleSelect = (id) => {
     const next = new Set(selected);
@@ -163,9 +180,14 @@ export default function Vendors() {
         subtitle="Track third-party compliance status and link vendors to specific controls"
         actions={
           <Can permission="vendors:write">
-            <Button size="sm" onClick={() => { setForm(defaultForm); setEditId(null); setOpen(true); }}>
-              <Plus className="w-4 h-4 mr-1" /> Add Vendor
-            </Button>
+            <div className="flex items-center gap-2">
+              <Button size="sm" variant="outline" onClick={() => setImportOpen(true)}>
+                <Upload className="w-4 h-4 mr-1" /> Import CSV
+              </Button>
+              <Button size="sm" onClick={() => { setForm(defaultForm); setEditId(null); setOpen(true); }}>
+                <Plus className="w-4 h-4 mr-1" /> Add Vendor
+              </Button>
+            </div>
           </Can>
         }
       />
@@ -450,6 +472,14 @@ export default function Vendors() {
           </div>
         </DialogContent>
       </Dialog>
+
+      <BulkImportModal
+        open={importOpen}
+        onOpenChange={setImportOpen}
+        entityName="Vendor"
+        columns={vendorImportColumns}
+        onSuccess={load}
+      />
     </div>
   );
 }
