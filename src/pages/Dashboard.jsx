@@ -263,7 +263,7 @@ export default function Dashboard() {
             <span className="text-[11px] text-muted-foreground font-medium uppercase tracking-wider">{controls.length} Total</span>
           </div>
           {controlStatusData.length > 0 ? (
-            <div className="flex items-center gap-6">
+            <div className="flex flex-col sm:flex-row items-center gap-4 sm:gap-6">
               <ResponsiveContainer width={160} height={160}>
                 <PieChart>
                   <Pie data={controlStatusData} cx="50%" cy="50%" innerRadius={45} outerRadius={70} dataKey="value" strokeWidth={2} stroke="hsl(var(--card))">
@@ -333,8 +333,8 @@ export default function Dashboard() {
             {frameworks.map((fw) => {
               const pct = fw.total_controls > 0 ? Math.round((fw.passing_controls / fw.total_controls) * 100) : fw.readiness_score || 0;
               return (
-                <div key={fw.id} className="flex items-center gap-4">
-                  <span className="text-sm font-medium text-foreground w-32 truncate">{fw.name}</span>
+                <div key={fw.id} className="flex items-center gap-2 sm:gap-4">
+                  <span className="text-sm font-medium text-foreground w-20 sm:w-32 truncate">{fw.name}</span>
                   <div className="flex-1 h-2 bg-muted rounded-full overflow-hidden">
                     <div
                       className="h-full rounded-full transition-all duration-500"

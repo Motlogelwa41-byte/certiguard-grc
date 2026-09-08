@@ -65,6 +65,7 @@ export default function GuidedOnboarding() {
   const [assessment, setAssessment] = useState(null);
 
   useEffect(() => {
+    base44.analytics.track({ eventName: "onboarding_started" });
     (async () => {
       try {
         // Provision tenant on first login (idempotent) — seeds 4 default frameworks + settings
@@ -116,8 +117,13 @@ export default function GuidedOnboarding() {
   };
 
   const next = () => {
+    const stepName = STEPS[step]?.toLowerCase().replace(/\s/g, "_");
+    base44.analytics.track({ eventName: "onboarding_step_completed", properties: { step: stepName, step_index: step } });
     if (step === 0) saveCompany();
     if (step === 1) saveGoal();
+    if (step === STEPS.length - 2) {
+      base44.analytics.track({ eventName: "onboarding_completed" });
+    }
     setStep((s) => Math.min(STEPS.length - 1, s + 1));
   };
   const back = () => setStep((s) => Math.max(0, s - 1));
@@ -155,6 +161,7 @@ export default function GuidedOnboarding() {
         return;
       }
       await base44.entities.Risk.bulkCreate(records);
+      base44.analytics.track({ eventName: "onboarding_risks_imported", properties: { count: records.length } });
       setImportedCount(records.length);
       toast({ title: `${records.length} risks imported`, description: "Your risk register is ready to review." });
       next();
@@ -196,6 +203,7 @@ export default function GuidedOnboarding() {
       });
 
       setAssessment({ score, passing, failing, notTested, na, total, perFw });
+      base44.analytics.track({ eventName: "onboarding_assessment_completed", properties: { score, total_controls: total } });
       toast({ title: "Assessment complete", description: `Compliance score: ${score}%` });
       next();
     } catch (e) {
