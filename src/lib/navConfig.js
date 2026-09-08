@@ -300,18 +300,27 @@ export function matchingRoute(pathname) {
   return best;
 }
 
+// Admin-level roles all get full access — normalize them to "admin" so the
+// nav item role arrays (which list "admin") match correctly.
+const ADMIN_ROLES = ["admin", "platform_admin", "tenant_admin"];
+function normalizeRole(role) {
+  return ADMIN_ROLES.includes(role) ? "admin" : role;
+}
+
 export function canAccessRoute(role, pathname) {
   const item = matchingRoute(pathname);
   if (!item) return true; // public or unlisted route — allow (auth handled elsewhere)
   if (!item.roles) return true;
-  return item.roles.includes(role);
+  const r = normalizeRole(role);
+  return item.roles.includes(r);
 }
 
 export function filterNavSections(role) {
+  const r = normalizeRole(role);
   return navSections
     .map((section) => ({
       ...section,
-      items: section.items.filter((item) => !item.roles || item.roles.includes(role)),
+      items: section.items.filter((item) => !item.roles || item.roles.includes(r)),
     }))
     .filter((section) => section.items.length > 0);
 }

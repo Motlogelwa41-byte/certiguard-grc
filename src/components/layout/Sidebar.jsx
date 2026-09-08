@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { ChevronLeft, ChevronRight, LogOut, ShieldCheck } from "lucide-react";
 import { base44 } from "@/api/base44Client";
-import { filterNavSections } from "@/lib/navConfig";
+import { navSections, filterNavSections } from "@/lib/navConfig";
 import { useRBAC } from "@/lib/useRBAC";
 import { logLogout } from "@/lib/authAudit";
 
@@ -10,8 +10,10 @@ export default function Sidebar() {
   const [collapsed, setCollapsed] = useState(false);
   const [brand, setBrand] = useState({ name: "", logo_url: "" });
   const location = useLocation();
-  const { role } = useRBAC();
-  const sections = filterNavSections(role || "user");
+  const { role, isAdmin } = useRBAC();
+  // Admin-level roles (admin, platform_admin, tenant_admin) see everything;
+  // other roles get filtered to their permitted items.
+  const sections = isAdmin ? navSections : filterNavSections(role || "user");
 
   useEffect(() => {
     base44.entities.TenantSettings.list("-created_date", 1)
