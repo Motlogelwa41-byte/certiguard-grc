@@ -51,6 +51,7 @@ export const navSections = [
       { label: "Gap Analysis", path: "/gap-analysis", icon: FileSearch, roles: ["admin", "compliance_officer", "risk_manager", "auditor"] },
       { label: "Framework Map", path: "/framework-map", icon: Network, roles: ["admin", "compliance_officer", "risk_manager", "auditor"] },
       { label: "Framework Progress", path: "/framework-progress", icon: BarChart2, roles: ["admin", "compliance_officer", "risk_manager", "auditor"] },
+      { label: "Completion Summary", path: "/framework-completion", icon: PieChart, roles: ["admin", "compliance_officer", "risk_manager", "auditor", "external_auditor", "regulator", "executive"] },
       { label: "Control Libraries", path: "/control-libraries", icon: Library, roles: ["admin", "compliance_officer"] },
       { label: "Framework Templates", path: "/framework-templates", icon: Library, roles: ["admin", "compliance_officer"] },
       { label: "SADC Frameworks", path: "/sadc-frameworks", icon: MapPin, roles: ["admin", "compliance_officer", "risk_manager", "auditor"] },
