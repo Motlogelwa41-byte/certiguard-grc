@@ -1,6 +1,43 @@
 import { createClientFromRequest } from 'npm:@base44/sdk@0.8.44';
 import { resolveTenantContext, tenantScopedFilter } from "../../shared/tenantGuard.ts";
 
+// Validates a user-provided base_url before transmitting secret tokens.
+// Blocks SSRF (private/loopback IPs) and exfiltration (hostname must match env default if set).
+function validateBaseUrl(baseUrl: string, envDefault?: string): { valid: boolean; error?: string } {
+  let parsed: URL;
+  try {
+    parsed = new URL(baseUrl);
+  } catch {
+    return { valid: false, error: "Invalid base URL format" };
+  }
+  if (parsed.protocol !== "https:") {
+    return { valid: false, error: "Base URL must use HTTPS" };
+  }
+  const hostname = parsed.hostname.toLowerCase();
+  // Block loopback
+  if (hostname === "localhost" || hostname === "127.0.0.1" || hostname === "0.0.0.0" || hostname === "::1") {
+    return { valid: false, error: "Base URL must not point to a local address" };
+  }
+  // Block private / link-local IP ranges (SSRF protection)
+  const ipMatch = hostname.match(/^(\d+)\.(\d+)\.(\d+)\.(\d+)$/);
+  if (ipMatch) {
+    const [a, b] = [Number(ipMatch[1]), Number(ipMatch[2])];
+    if (a === 10 || (a === 172 && b >= 16 && b <= 31) || (a === 192 && b === 168) || a === 127 || (a === 169 && b === 254)) {
+      return { valid: false, error: "Base URL must not point to a private or link-local IP address" };
+    }
+  }
+  // If an env default is configured, the hostname must match it (exfiltration protection)
+  if (envDefault) {
+    try {
+      const envParsed = new URL(envDefault);
+      if (hostname !== envParsed.hostname.toLowerCase()) {
+        return { valid: false, error: "Base URL hostname does not match the configured instance" };
+      }
+    } catch { /* ignore malformed env default */ }
+  }
+  return { valid: true };
+}
+
 export default async function(req: Request): Promise<Response> {
   try {
     const base44 = createClientFromRequest(req);
@@ -36,12 +73,14 @@ async function testConnection(base44, body, ctx) {
     }
   }
 
-  let baseUrl, token;
+  let baseUrl, token, envDefault;
   if (platform === "confluence_dc") {
-    baseUrl = integration?.base_url || process.env.CONFLUENCE_DC_BASE_URL;
+    envDefault = process.env.CONFLUENCE_DC_BASE_URL;
+    baseUrl = integration?.base_url || envDefault;
     token = process.env.CONFLUENCE_DC_TOKEN;
   } else if (platform === "jira_dc") {
-    baseUrl = integration?.base_url || process.env.JIRA_DC_BASE_URL;
+    envDefault = process.env.JIRA_DC_BASE_URL;
+    baseUrl = integration?.base_url || envDefault;
     token = process.env.JIRA_DC_TOKEN;
   }
 
@@ -50,6 +89,12 @@ async function testConnection(base44, body, ctx) {
       connected: false,
       error: "Missing configuration. Set the instance Base URL and configure the PAT secret in Settings."
     });
+  }
+
+  // Validate the base URL before transmitting the secret token
+  const urlCheck = validateBaseUrl(baseUrl, envDefault);
+  if (!urlCheck.valid) {
+    return Response.json({ connected: false, error: `Base URL validation failed: ${urlCheck.error}` });
   }
 
   try {
@@ -124,14 +169,20 @@ async function syncIntegration(base44, body, ctx) {
 
   try {
     const platform = integration.platform;
-    const baseUrl = integration.base_url ||
-      (platform === "confluence_dc" ? process.env.CONFLUENCE_DC_BASE_URL : process.env.JIRA_DC_BASE_URL);
+    const envDefault = platform === "confluence_dc" ? process.env.CONFLUENCE_DC_BASE_URL : process.env.JIRA_DC_BASE_URL;
+    const baseUrl = integration.base_url || envDefault;
     const token = platform === "confluence_dc"
       ? process.env.CONFLUENCE_DC_TOKEN
       : process.env.JIRA_DC_TOKEN;
 
     if (!baseUrl || !token) {
       throw new Error("Missing secrets for this platform. Configure them in Settings.");
+    }
+
+    // Validate the base URL before transmitting the secret token
+    const urlCheck = validateBaseUrl(baseUrl, envDefault);
+    if (!urlCheck.valid) {
+      throw new Error(`Base URL validation failed: ${urlCheck.error}`);
     }
 
     const headers = buildHeaders(platform, token);

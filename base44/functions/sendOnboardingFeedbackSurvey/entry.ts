@@ -1,22 +1,66 @@
 import { createClientFromRequest } from 'npm:@base44/sdk@0.8.44';
 
+// HTML-escape user-supplied text before embedding in email bodies
+function escapeHtml(str) {
+  return String(str || '')
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
+}
+
+// Called by the Onboarding Feedback Survey workflow 24h after onboarding completion.
+// The recipient email is always resolved from the database (never from user input)
+// to prevent open mail relay abuse. User-supplied name is HTML-escaped.
 export default async function(req) {
   try {
     const base44 = createClientFromRequest(req);
-    const user = await base44.auth.me();
-    if (!user) return Response.json({ error: 'Unauthorized' }, { status: 401 });
-
     const body = await req.json();
-    const { onboarding_check_id, user_id, user_email, user_name, tenant_id } = body;
+    const { onboarding_check_id, user_id, user_name, tenant_id } = body;
 
-    if (!user_email) return Response.json({ error: 'user_email is required' }, { status: 400 });
+    if (!onboarding_check_id && !user_id) {
+      return Response.json({ error: 'onboarding_check_id or user_id is required' }, { status: 400 });
+    }
+
+    // Resolve the recipient email from the database — never from user input
+    let resolvedUserId = user_id || '';
+    let resolvedName = user_name || '';
+
+    if (onboarding_check_id) {
+      const check = await base44.asServiceRole.entities.OnboardingHealthCheck.get(onboarding_check_id);
+      if (check) {
+        resolvedUserId = check.created_by_id || resolvedUserId;
+        resolvedName = check.triggered_by || resolvedName;
+      }
+    }
+
+    if (!resolvedUserId) {
+      return Response.json({ error: 'Could not resolve user from onboarding record' }, { status: 400 });
+    }
+
+    // Look up the user's verified email from the User entity
+    let recipientEmail = '';
+    try {
+      const userRec = await base44.asServiceRole.entities.User.get(resolvedUserId);
+      if (userRec && userRec.email) {
+        recipientEmail = userRec.email;
+      }
+    } catch (e) { /* user lookup failed */ }
+
+    if (!recipientEmail) {
+      return Response.json({ error: 'Could not resolve recipient email from user record' }, { status: 400 });
+    }
+
+    // Escape user-supplied name to prevent HTML injection
+    const safeName = escapeHtml(resolvedName || 'there');
 
     // Create a survey record with status "sent"
     const survey = await base44.asServiceRole.entities.UserFeedbackSurvey.create({
-      tenant_id: tenant_id || user.data?.tenant_id || '',
-      user_id: user_id || user.id,
-      user_name: user_name || user.full_name || '',
-      user_email,
+      tenant_id: tenant_id || '',
+      user_id: resolvedUserId,
+      user_name: resolvedName,
+      user_email: recipientEmail,
       onboarding_check_id: onboarding_check_id || '',
       status: 'sent',
       survey_sent_at: new Date().toISOString()
@@ -26,7 +70,7 @@ export default async function(req) {
     const surveyUrl = `${req.headers.get('origin') || 'https://app.ethicaledgegrcconsulting.com'}/feedback-survey?survey_id=${survey.id}`;
 
     await base44.asServiceRole.integrations.Core.SendEmail({
-      to: user_email,
+      to: recipientEmail,
       subject: 'How was your CertiGuard onboarding? (2-min survey)',
       html: `
         <div style="font-family: Inter, sans-serif; max-width: 600px; margin: 0 auto; padding: 24px;">
@@ -34,7 +78,7 @@ export default async function(req) {
             <h1 style="color: white; margin: 0; font-size: 24px;">CertiGuard GRC</h1>
             <p style="color: #94a3b8; margin: 4px 0 0;">We'd love your feedback</p>
           </div>
-          <p style="font-size: 16px; color: #1e293b;">Hi ${user_name || 'there'},</p>
+          <p style="font-size: 16px; color: #1e293b;">Hi ${safeName},</p>
           <p style="font-size: 15px; color: #475569; line-height: 1.6;">
             You recently completed your onboarding on CertiGuard GRC. Your first impressions matter to us —
             they help us improve the platform for you and future users.
