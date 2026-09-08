@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
 import { useToast } from "@/components/ui/use-toast";
-import { Loader2, Palette, Save, Building2, Eye } from "lucide-react";
+import { Loader2, Palette, Save, Building2, Eye, Upload } from "lucide-react";
 import PageHeader from "@/components/shared/PageHeader";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -24,6 +24,7 @@ export default function WhiteLabelSettings() {
   const [form, setForm] = useState(DEFAULTS);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const [uploading, setUploading] = useState(false);
   const { toast } = useToast();
 
   useEffect(() => {
@@ -58,6 +59,20 @@ export default function WhiteLabelSettings() {
     }
   };
 
+  const handleLogoUpload = async (file) => {
+    if (!file) return;
+    setUploading(true);
+    try {
+      const { file_url } = await base44.integrations.Core.UploadFile({ file });
+      setForm((prev) => ({ ...prev, brand_logo_url: file_url }));
+      toast({ title: "Logo uploaded", description: "Click Save Branding to apply it across the platform." });
+    } catch (e) {
+      toast({ title: "Upload failed", description: e.message, variant: "destructive" });
+    } finally {
+      setUploading(false);
+    }
+  };
+
   const applyBranding = (b) => {
     const root = document.documentElement;
     if (b.brand_primary_color) root.style.setProperty("--primary", hexToHsl(b.brand_primary_color));
@@ -81,8 +96,41 @@ export default function WhiteLabelSettings() {
               <p className="text-xs text-muted-foreground mt-1">Shown in sidebar header and report covers</p>
             </div>
             <div>
-              <Label>Logo URL</Label>
-              <Input value={form.brand_logo_url || ""} onChange={(e) => setForm({ ...form, brand_logo_url: e.target.value })} placeholder="https://…/logo.png" />
+              <Label>Logo</Label>
+              <div className="flex items-center gap-3">
+                <div className="w-14 h-14 rounded-lg border border-border bg-muted/30 flex items-center justify-center overflow-hidden shrink-0">
+                  {form.brand_logo_url ? (
+                    <img src={form.brand_logo_url} alt="logo" className="w-full h-full object-contain" />
+                  ) : (
+                    <Building2 className="w-5 h-5 text-muted-foreground" />
+                  )}
+                </div>
+                <label className="inline-flex items-center gap-2 text-sm font-medium border border-input bg-transparent rounded-md px-3 py-2 cursor-pointer hover:bg-accent transition-colors">
+                  {uploading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Upload className="w-4 h-4" />}
+                  {uploading ? "Uploading…" : "Upload Logo"}
+                  <input
+                    type="file"
+                    accept="image/png,image/jpeg,image/svg+xml,image/webp"
+                    className="hidden"
+                    onChange={(e) => handleLogoUpload(e.target.files?.[0])}
+                  />
+                </label>
+                {form.brand_logo_url && (
+                  <button
+                    onClick={() => setForm({ ...form, brand_logo_url: "" })}
+                    className="text-xs text-destructive hover:underline"
+                  >
+                    Remove
+                  </button>
+                )}
+              </div>
+              <Input
+                value={form.brand_logo_url || ""}
+                onChange={(e) => setForm({ ...form, brand_logo_url: e.target.value })}
+                placeholder="…or paste a URL"
+                className="mt-2"
+              />
+              <p className="text-xs text-muted-foreground mt-1">PNG, JPG, SVG, or WebP. Recommended: square, transparent background, min 128×128px.</p>
             </div>
             <div>
               <Label>Footer Text</Label>

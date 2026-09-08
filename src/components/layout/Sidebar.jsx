@@ -36,9 +36,9 @@ export default function Sidebar() {
     >
       {/* Logo */}
       <div className="flex items-center gap-3 px-4 h-16 border-b border-sidebar-border shrink-0">
-        <div className="w-9 h-9 rounded-lg bg-sidebar-primary flex items-center justify-center shrink-0 overflow-hidden shadow-md">
+        <div className={`w-9 h-9 rounded-lg flex items-center justify-center shrink-0 overflow-hidden shadow-md ${brand.logo_url ? "bg-white border border-border" : "bg-sidebar-primary"}`}>
           {brand.logo_url ? (
-            <img src={brand.logo_url} alt="logo" className="w-full h-full object-contain" />
+            <img src={brand.logo_url} alt="logo" className="w-full h-full object-contain p-0.5" />
           ) : (
             <ShieldCheck className="w-5 h-5 text-white" />
           )}
