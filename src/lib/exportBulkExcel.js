@@ -28,7 +28,8 @@ export async function exportBulkExcel() {
         Severity: l.severity || "",
       })),
       `CertiGuard_AuditTrail_${stamp}`,
-      ["#", "Timestamp", "Action", "Entity Type", "Entity Name", "Performed By", "IP Address", "Severity"]
+      ["#", "Timestamp", "Action", "Entity Type", "Entity Name", "Performed By", "IP Address", "Severity"],
+      { title: "CertiGuard GRC — Audit Trail Report", subtitle: `Generated ${new Date().toLocaleString()} • ${auditLogs.length} entries` }
     );
   }
 
@@ -45,7 +46,8 @@ export async function exportBulkExcel() {
         "Expiry Date": f.expiry_date || "",
       })),
       `CertiGuard_Frameworks_${stamp}`,
-      ["Name", "Version", "Status", "Readiness Score", "Total Controls", "Passing Controls", "Certification Date", "Expiry Date"]
+      ["Name", "Version", "Status", "Readiness Score", "Total Controls", "Passing Controls", "Certification Date", "Expiry Date"],
+      { title: "CertiGuard GRC — Compliance Frameworks", subtitle: `Generated ${new Date().toLocaleString()} • ${frameworks.length} frameworks` }
     );
   }
 
@@ -64,7 +66,8 @@ export async function exportBulkExcel() {
         "Next Review": c.next_review || "",
       })),
       `CertiGuard_Controls_${stamp}`,
-      ["Control ID", "Title", "Category", "Status", "Severity", "Owner", "Automation Status", "Effectiveness Score", "Last Tested", "Next Review"]
+      ["Control ID", "Title", "Category", "Status", "Severity", "Owner", "Automation Status", "Effectiveness Score", "Last Tested", "Next Review"],
+      { title: "CertiGuard GRC — Controls Register", subtitle: `Generated ${new Date().toLocaleString()} • ${controls.length} controls` }
     );
   }
 
@@ -83,7 +86,8 @@ export async function exportBulkExcel() {
         "Due Date": r.due_date || "",
       })),
       `CertiGuard_Risks_${stamp}`,
-      ["Risk ID", "Title", "Category", "Likelihood", "Impact", "Risk Score", "Status", "Treatment", "Owner", "Due Date"]
+      ["Risk ID", "Title", "Category", "Likelihood", "Impact", "Risk Score", "Status", "Treatment", "Owner", "Due Date"],
+      { title: "CertiGuard GRC — Risk Register", subtitle: `Generated ${new Date().toLocaleString()} • ${risks.length} risks` }
     );
   }
 

@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { base44 } from "@/api/base44Client";
-import { Shield, Plus, Pencil, Trash2, ArrowRight, Library, Wand2 } from "lucide-react";
+import { Shield, Plus, Pencil, Trash2, ArrowRight, Library, Wand2, FileSpreadsheet } from "lucide-react";
 import FrameworkBuilder from "@/components/frameworks/FrameworkBuilder";
+import { exportBulkExcel } from "@/lib/exportBulkExcel";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
@@ -66,6 +67,15 @@ export default function Frameworks() {
     toast({ title: "Framework deleted" });
   };
 
+  const handleBulkExport = async () => {
+    try {
+      const res = await exportBulkExcel();
+      toast({ title: "Export complete", description: `${res.auditLogs} audit logs, ${res.frameworks} frameworks, ${res.controls} controls, ${res.risks} risks exported` });
+    } catch (e) {
+      toast({ title: "Export failed", description: e.message, variant: "destructive" });
+    }
+  };
+
   if (loading) return <div className="flex items-center justify-center h-64"><div className="w-8 h-8 border-4 border-primary/20 border-t-primary rounded-full animate-spin" /></div>;
 
   return (
@@ -73,6 +83,7 @@ export default function Frameworks() {
       <PageHeader title="Frameworks" subtitle="Manage compliance frameworks and track readiness" actions={
         <div className="flex items-center gap-3">
           {fwLimit && <span className="text-xs text-muted-foreground">{items.length} / {fwLimit} frameworks</span>}
+          <Button size="sm" variant="outline" onClick={handleBulkExport}><FileSpreadsheet className="w-4 h-4 mr-1" /> Export Excel</Button>
           <Button size="sm" variant="outline" onClick={() => navigate('/control-libraries')}><Library className="w-4 h-4 mr-1" /> Import Library</Button>
           <Button size="sm" variant="outline" onClick={() => setBuilderOpen(true)}><Wand2 className="w-4 h-4 mr-1" /> Build Custom</Button>
           <Button size="sm" onClick={() => { setForm(defaultForm); setEditId(null); setOpen(true); }}><Plus className="w-4 h-4 mr-1" /> Add Framework</Button>
