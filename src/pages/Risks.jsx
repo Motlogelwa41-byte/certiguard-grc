@@ -40,6 +40,7 @@ export default function Risks() {
   const [search, setSearch] = useState("");
   const [filterStatus, setFilterStatus] = useState("all");
   const [filterCategory, setFilterCategory] = useState("all");
+  const [sortBy, setSortBy] = useState("score_desc");
   const [importOpen, setImportOpen] = useState(false);
   const [selected, setSelected] = useState(new Set());
   const [bulkStatus, setBulkStatus] = useState("");
@@ -138,6 +139,22 @@ export default function Risks() {
     const matchStatus = filterStatus === "all" || r.status === filterStatus;
     const matchCategory = filterCategory === "all" || r.category === filterCategory;
     return matchSearch && matchStatus && matchCategory;
+  }).sort((a, b) => {
+    const scoreA = (a.likelihood || 0) * (a.impact || 0);
+    const scoreB = (b.likelihood || 0) * (b.impact || 0);
+    switch (sortBy) {
+      case "score_desc": return scoreB - scoreA;
+      case "score_asc": return scoreA - scoreB;
+      case "title_asc": return (a.title || "").localeCompare(b.title || "");
+      case "due_date_asc": {
+        if (!a.due_date) return 1;
+        if (!b.due_date) return -1;
+        return new Date(a.due_date) - new Date(b.due_date);
+      }
+      case "owner_asc": return (a.owner_name || "ZZZ").localeCompare(b.owner_name || "ZZZ");
+      case "updated_desc": return new Date(b.updated_date || 0) - new Date(a.updated_date || 0);
+      default: return 0;
+    }
   });
 
   const toggleSelect = (id) => {
@@ -262,6 +279,17 @@ export default function Risks() {
             <SelectItem value="accepted">Accepted</SelectItem>
             <SelectItem value="transferred">Transferred</SelectItem>
             <SelectItem value="closed">Closed</SelectItem>
+          </SelectContent>
+        </Select>
+        <Select value={sortBy} onValueChange={setSortBy}>
+          <SelectTrigger className="w-[180px]"><SelectValue /></SelectTrigger>
+          <SelectContent>
+            <SelectItem value="score_desc">Risk Score (High → Low)</SelectItem>
+            <SelectItem value="score_asc">Risk Score (Low → High)</SelectItem>
+            <SelectItem value="due_date_asc">Due Date (Soonest)</SelectItem>
+            <SelectItem value="title_asc">Title (A → Z)</SelectItem>
+            <SelectItem value="owner_asc">Owner (A → Z)</SelectItem>
+            <SelectItem value="updated_desc">Recently Updated</SelectItem>
           </SelectContent>
         </Select>
       </div>
