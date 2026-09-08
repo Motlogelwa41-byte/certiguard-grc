@@ -3,6 +3,7 @@ import { Check, X, Shield, Zap, Building2, ArrowRight, Star, Lock, Sparkles, Hea
 import { Button } from "@/components/ui/button";
 import { startDpoCheckout } from "@/lib/billing";
 import { base44 } from "@/api/base44Client";
+import BookDemoDialog from "@/components/landing/BookDemoDialog";
 
 const plans = [
   {
@@ -145,6 +146,7 @@ const industries = [
 export default function Pricing() {
   const [billingCycle, setBillingCycle] = useState("annual");
   const [checkout, setCheckout] = useState(null);
+  const [demoOpen, setDemoOpen] = useState(false);
 
   return (
     <div className="min-h-screen bg-background">
@@ -175,10 +177,7 @@ export default function Pricing() {
 
         <div className="mt-6">
           <button
-            onClick={() => {
-              try { base44.analytics.track({ eventName: "demo_requested" }); } catch (e) { /* best-effort */ }
-              window.location.href = "/register?returnTo=/guided-onboarding";
-            }}
+            onClick={() => setDemoOpen(true)}
             className="inline-flex items-center gap-1.5 text-sm font-medium text-primary-foreground bg-primary hover:bg-primary/90 rounded-lg px-4 py-2 transition-colors"
           >
             <Sparkles className="w-4 h-4" /> Request a Demo
@@ -337,6 +336,8 @@ export default function Pricing() {
           <a href="mailto:sales@ethicaledgegrcconsulting.com" className="text-primary underline">Contact sales</a>
         </p>
       </div>
+
+      <BookDemoDialog open={demoOpen} onOpenChange={setDemoOpen} source="pricing-page" />
     </div>
   );
 }

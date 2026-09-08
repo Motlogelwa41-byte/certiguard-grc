@@ -1,7 +1,8 @@
-import React from "react";
+import React, { useState } from "react";
 import { Link } from "react-router-dom";
 import { Shield, ArrowRight, CheckCircle2, Sparkles } from "lucide-react";
 import { base44 } from "@/api/base44Client";
+import BookDemoDialog from "@/components/landing/BookDemoDialog";
 import LandingHero from "@/components/landing/LandingHero";
 import LandingStats from "@/components/landing/LandingStats";
 import LandingFeatures from "@/components/landing/LandingFeatures";
@@ -11,6 +12,7 @@ import LandingCTA from "@/components/landing/LandingCTA";
 import ProductTour from "@/components/landing/ProductTour";
 
 export default function Landing() {
+  const [demoOpen, setDemoOpen] = useState(false);
   return (
     <div className="min-h-screen bg-background">
       {/* Slim public nav */}
@@ -34,10 +36,7 @@ export default function Landing() {
               Sign in
             </Link>
             <button
-              onClick={() => {
-                try { base44.analytics.track({ eventName: "demo_requested" }); } catch (e) { /* best-effort */ }
-                window.location.href = "/register?returnTo=/guided-onboarding";
-              }}
+              onClick={() => setDemoOpen(true)}
               className="hidden sm:inline-flex text-sm font-medium text-muted-foreground hover:text-foreground px-3 py-1.5 transition-colors"
             >
               Request a demo
@@ -120,6 +119,8 @@ export default function Landing() {
           </div>
         </div>
       </footer>
+
+      <BookDemoDialog open={demoOpen} onOpenChange={setDemoOpen} source="landing-page" />
     </div>
   );
 }

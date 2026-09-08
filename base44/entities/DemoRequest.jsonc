@@ -1,0 +1,99 @@
+{
+  "name": "DemoRequest",
+  "type": "object",
+  "properties": {
+    "name": {
+      "type": "string",
+      "description": "Full name of the person requesting the demo"
+    },
+    "email": {
+      "type": "string",
+      "description": "Work email address"
+    },
+    "company": {
+      "type": "string",
+      "description": "Company or organization name"
+    },
+    "company_size": {
+      "type": "string",
+      "enum": [
+        "1-10",
+        "11-50",
+        "51-200",
+        "201-1000",
+        "1000+"
+      ],
+      "description": "Employee count band"
+    },
+    "role": {
+      "type": "string",
+      "description": "Job title or role (e.g. CISO, Compliance Officer, Risk Manager)"
+    },
+    "frameworks_of_interest": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "Compliance frameworks the prospect is evaluating (SOC 2, ISO 27001, POPIA, BDPA, etc.)"
+    },
+    "preferred_date": {
+      "type": "string",
+      "format": "date",
+      "description": "Preferred demo date"
+    },
+    "message": {
+      "type": "string",
+      "description": "Additional context or questions from the prospect"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "new",
+        "contacted",
+        "scheduled",
+        "converted",
+        "archived"
+      ],
+      "default": "new"
+    },
+    "source": {
+      "type": "string",
+      "default": "landing-page",
+      "description": "Where the demo request originated (landing, pricing, etc.)"
+    },
+    "contacted_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "notes": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "name",
+    "email",
+    "company"
+  ],
+  "rls": {
+    "create": {
+      "user_condition": {
+        "role": "__public__"
+      }
+    },
+    "read": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "update": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "delete": {
+      "user_condition": {
+        "role": "admin"
+      }
+    }
+  }
+}
