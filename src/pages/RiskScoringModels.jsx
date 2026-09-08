@@ -77,7 +77,7 @@ export default function RiskScoringModels() {
 
   const loadModels = useCallback(async () => {
     try {
-      const data = await base44.functions.calculateRiskScoreWithModel({ action: "list_models" });
+      const data = await base44.functions.invoke("calculateRiskScoreWithModel", { action: "list_models" });
       setModels(data.models || []);
     } catch (err) {
       toast({ title: "Error", description: "Failed to load scoring models", variant: "destructive" });
@@ -170,7 +170,7 @@ export default function RiskScoringModels() {
   const applyToAll = async (model) => {
     setApplying(model.id);
     try {
-      const result = await base44.functions.calculateRiskScoreWithModel({
+      const result = await base44.functions.invoke("calculateRiskScoreWithModel", {
         action: "apply_to_all",
         model_id: model.id
       });
@@ -187,7 +187,7 @@ export default function RiskScoringModels() {
     setPreviewing(true);
     setPreviewResult(null);
     try {
-      const result = await base44.functions.calculateRiskScoreWithModel({
+      const result = await base44.functions.invoke("calculateRiskScoreWithModel", {
         action: "preview",
         risk_data: { likelihood: 4, impact: 5, velocity: 3, control_effectiveness_pct: 60, annualized_loss_expectancy: 250000 },
         model_id: editing ? editing.id : null
