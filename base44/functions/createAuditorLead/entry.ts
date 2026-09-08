@@ -24,6 +24,26 @@ export default async function (req) {
       source: "for-auditors-page",
     });
 
+    // Notify the team so the enquiry doesn't sit unread in the database
+    try {
+      const bodyHtml = `
+        <h2>New Auditor Portal Access Request</h2>
+        <p><strong>Name:</strong> ${String(name).trim()}</p>
+        <p><strong>Email:</strong> ${String(email).trim().toLowerCase()}</p>
+        <p><strong>Firm:</strong> ${String(firm_name).trim()}</p>
+        <p><strong>Engagement Context:</strong> ${engagement_context ? String(engagement_context).trim() : "Not specified"}</p>
+        <hr/>
+        <p>Follow up within one business day to set up portal access.</p>
+      `;
+      await base44.asServiceRole.integrations.Core.SendEmail({
+        to: "sales@ethicaledgegrcconsulting.com",
+        subject: `New Auditor Access Request — ${String(firm_name).trim()}`,
+        body: bodyHtml,
+      });
+    } catch (emailErr) {
+      console.error("Auditor lead email notification failed:", emailErr?.message || emailErr);
+    }
+
     return Response.json({
       success: true,
       lead_id: lead.id,

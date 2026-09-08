@@ -41,6 +41,19 @@ export default async function(req) {
         submitted_at: new Date().toISOString(),
       });
 
+      // Notify the compliance team that a new report was submitted.
+      // Only the case number and category are included — the whistleblower's
+      // anonymous identity and report details stay in the secure portal.
+      try {
+        await base44.asServiceRole.integrations.Core.SendEmail({
+          to: "compliance@ethicaledgegrcconsulting.com",
+          subject: `New Whistleblower Report — ${caseNumber}`,
+          body: `A new whistleblower report has been submitted.\n\nCase Number: ${caseNumber}\nCategory: ${category || "other"}\nSubject: ${subject || "Untitled Report"}\n\nReview the full report in the Whistleblower Cases dashboard.`,
+        });
+      } catch (emailErr) {
+        console.error("Whistleblower notification email failed:", emailErr?.message || emailErr);
+      }
+
       return Response.json({
         success: true,
         case_number: caseNumber,
