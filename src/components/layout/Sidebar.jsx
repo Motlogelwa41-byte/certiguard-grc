@@ -84,10 +84,10 @@ export default function Sidebar() {
                       key={item.path}
                       to={item.path}
                       title={item.label}
-                      className={`group flex items-center justify-center w-9 h-9 mx-auto rounded-lg transition-all ${
+                      className={`group flex items-center justify-center w-9 h-9 mx-auto rounded-lg transition-colors ${
                         active
                           ? "bg-primary/10 text-primary"
-                          : "text-sidebar-foreground/60 hover:text-sidebar-foreground hover:bg-muted"
+                          : "text-sidebar-foreground/70 hover:text-sidebar-foreground hover:bg-muted"
                       }`}
                     >
                       <Icon className="w-[18px] h-[18px]" />
@@ -119,10 +119,10 @@ export default function Sidebar() {
                       <Link
                         key={item.path}
                         to={item.path}
-                        className={`group relative flex items-center gap-2.5 px-2.5 py-1.5 rounded-lg text-[13px] font-medium transition-all duration-150 ${
+                        className={`group relative flex items-center gap-2.5 px-2.5 py-1.5 rounded-lg text-[13px] font-medium transition-colors ${
                           active
                             ? "bg-primary/10 text-primary"
-                            : "text-sidebar-foreground/70 hover:text-sidebar-foreground hover:bg-muted"
+                            : "text-sidebar-foreground/80 hover:text-sidebar-foreground hover:bg-muted"
                         }`}
                       >
                         {active && (
