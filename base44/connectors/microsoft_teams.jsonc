@@ -1,0 +1,7 @@
+{
+  "type": "microsoft_teams",
+  "scopes": [
+    "offline_access",
+    "User.Read"
+  ]
+}
