@@ -29,13 +29,15 @@ export default function FeedbackSurvey() {
 
   useEffect(() => {
     if (!surveyId) { setLoading(false); return; }
-    base44.entities.UserFeedbackSurvey.get(surveyId)
-      .then((s) => {
+    base44.functions.invoke("feedbackSurveyPublic", { action: "get", survey_id: surveyId })
+      .then((res) => {
+        const s = res.data;
+        if (!s || s.error) { setSurvey(null); setLoading(false); return; }
         setSurvey(s);
         if (s.status === "responded") setSubmitted(true);
         setLoading(false);
       })
-      .catch(() => setLoading(false));
+      .catch(() => { setSurvey(null); setLoading(false); });
   }, [surveyId]);
 
   const submit = async () => {
@@ -45,13 +47,17 @@ export default function FeedbackSurvey() {
     }
     setSubmitting(true);
     try {
-      await base44.entities.UserFeedbackSurvey.update(surveyId, {
+      const res = await base44.functions.invoke("feedbackSurveyPublic", {
+        action: "submit",
+        survey_id: surveyId,
         ...form,
-        status: "responded",
-        responded_at: new Date().toISOString(),
       });
-      setSubmitted(true);
-      toast({ title: "Thank you for your feedback!" });
+      if (res.data?.error) {
+        toast({ title: res.data.error, variant: "destructive" });
+      } else {
+        setSubmitted(true);
+        toast({ title: "Thank you for your feedback!" });
+      }
     } catch (e) {
       toast({ title: "Failed to submit feedback", variant: "destructive" });
     }
