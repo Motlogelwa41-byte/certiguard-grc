@@ -1,0 +1,41 @@
+{
+  "name": "New Task Slack Alert",
+  "description": "Posts a Slack alert to #compliance whenever a new compliance task is assigned to someone, so the team can pick up assignments in real time.",
+  "trigger": {
+    "config": {
+      "trigger_type": "entity",
+      "entity_name": "ComplianceTask",
+      "events": [
+        "create"
+      ]
+    },
+    "condition": "${ .trigger.data.assignee_name != null and .trigger.data.assignee_name != \"\" and .trigger.data.status != \"completed\" }"
+  },
+  "definition": {
+    "document": {
+      "dsl": "1.0.0",
+      "name": "new_task_slack_alert",
+      "version": "1.0",
+      "namespace": "base44"
+    },
+    "do": [
+      {
+        "post_slack_alert": {
+          "call": "invoke_backend_function",
+          "with": {
+            "function_name": "sendSlackAlert",
+            "args": {
+              "_internal_token": "cg-internal-invoke-7f3a9c2e1b8d4a6f9e2c",
+              "text": "\ud83d\udccb *New Task Assigned*\n*Title:* ${ .trigger.data.title }\n*Priority:* ${ .trigger.data.priority }\n*Type:* ${ .trigger.data.type }\n*Due:* ${ .trigger.data.due_date }\n*Assignee:* ${ .trigger.data.assignee_name }"
+            }
+          },
+          "then": "end",
+          "x-base44": {
+            "title": "Post Slack alert for new task",
+            "description": "Notifies #compliance channel when a task is assigned"
+          }
+        }
+      }
+    ]
+  }
+}
