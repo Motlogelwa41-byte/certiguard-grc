@@ -39,7 +39,7 @@ const entityDomains = [
 ];
 
 const functionCategories = [
-  { label: "Sync & Collection", items: ["syncAwsSecurityHub", "syncEdrFindings", "syncGithubSecurity", "syncHrisDirectory", "syncIdpDirectory", "syncAllDirectories", "automatedEvidenceCollection", "runCspmScan"] },
+  { label: "Sync & Collection", items: ["syncAwsIntegration", "syncEdrFindings", "syncGithubSecurity", "syncHrisDirectory", "syncIdpDirectory", "syncAllDirectories", "automatedEvidenceCollection", "runCspmScan"] },
   { label: "Risk & Remediation", items: ["calculateRiskMetrics", "aggregateCrossOrgRisk", "autoCreateRemediationTask", "generateRiskRemediationTasks", "escalateSlaBreachedFindings"] },
   { label: "Compliance & Controls", items: ["calculateComplianceScore", "runControlTests", "runAutomatedComplianceTest", "continuousControlMonitoring", "handleControlRegression", "importControlLibrary"] },
   { label: "AI / LLM", items: ["aiCrossMapFrameworks", "autoFillQuestionnaire", "fetchRegulatoryIntelligence"] },
@@ -59,8 +59,10 @@ const workflowCategories = [
 const connectors = [
   { name: "Gmail", icon: Mail, color: "text-rose-500 bg-rose-50 border-rose-200" },
   { name: "Slack Bot", icon: Slack, color: "text-purple-500 bg-purple-50 border-purple-200" },
+  { name: "MS Teams", icon: Network, color: "text-indigo-500 bg-indigo-50 border-indigo-200" },
   { name: "Google Drive", icon: FileCheck, color: "text-blue-500 bg-blue-50 border-blue-200" },
   { name: "Google Calendar", icon: Calendar, color: "text-emerald-500 bg-emerald-50 border-emerald-200" },
+  { name: "Search Console", icon: Activity, color: "text-teal-500 bg-teal-50 border-teal-200" },
   { name: "GitHub", icon: GitBranch, color: "text-slate-600 bg-slate-50 border-slate-300" },
   { name: "AWS Sec Hub", icon: Cloud, color: "text-amber-500 bg-amber-50 border-amber-200" },
   { name: "Jira", icon: Bug, color: "text-sky-500 bg-sky-50 border-sky-200" },
@@ -68,7 +70,7 @@ const connectors = [
 
 const dataFlows = [
   { label: "Signup & Provisioning", flow: "Pricing → Register → OTP → provisionTenant → Tenant + TenantSettings created → Dashboard" },
-  { label: "Billing", flow: "Pricing → Stripe Checkout → Tenant subscription tier upgraded" },
+  { label: "Billing", flow: "Pricing → DPO Pay Checkout → Tenant subscription tier upgraded (local BWP/USD pricing)" },
   { label: "Daily EDR Sync", flow: "Scheduled → syncEdrFindings → CrowdStrike + Defender APIs → SecurityFinding (with SLA + control linkage)" },
   { label: "Critical Risk → Kanban", flow: "Risk score ≥ 20 → Auto-Remediation workflow → autoCreateRemediationTask → ComplianceTask (48h deadline) + Slack alert" },
   { label: "Evidence Pack", flow: "Select controls/evidence → generate PDF (SHA-256 + file content hashes) → UploadFile → AuditEvidenceLedger (append-only)" },
@@ -96,7 +98,7 @@ export default function Architecture() {
           </div>
           <div>
             <h2 className="text-xl font-heading font-bold text-white">CertiGuard GRC Platform</h2>
-            <p className="text-sm text-slate-300 mt-0.5">Multi-tenant RegTech · React + Base44 BaaS · 60+ entities · 90+ backend functions · 40+ workflows · 150+ pages · 7 integrations</p>
+            <p className="text-sm text-slate-300 mt-0.5">Multi-tenant RegTech · React + Base44 BaaS · 100+ entities · 130+ backend functions · 45+ workflows · 200+ pages · 9 live integrations</p>
           </div>
         </div>
       </div>
@@ -313,7 +315,7 @@ export default function Architecture() {
           <Network className="w-4 h-4 text-primary" />
           <h3 className="text-sm font-heading font-bold text-foreground uppercase tracking-wide">Layer 8 — External Integrations & Connectors</h3>
         </div>
-        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-7 gap-3">
+        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-9 gap-3">
           {connectors.map((c) => (
             <div key={c.name} className={`flex flex-col items-center gap-2 rounded-xl p-3 border ${c.color}`}>
               <c.icon className="w-6 h-6" />
