@@ -1,0 +1,128 @@
+{
+  "name": "UserFeedbackSurvey",
+  "type": "object",
+  "properties": {
+    "tenant_id": {
+      "type": "string",
+      "description": "Tenant isolation key \u2014 mandatory on every record"
+    },
+    "user_id": {
+      "type": "string",
+      "description": "ID of the user who was surveyed"
+    },
+    "user_name": {
+      "type": "string"
+    },
+    "user_email": {
+      "type": "string"
+    },
+    "onboarding_check_id": {
+      "type": "string",
+      "description": "Linked OnboardingHealthCheck record that triggered this survey"
+    },
+    "overall_rating": {
+      "type": "number",
+      "description": "Overall experience rating 1-5 (1=very poor, 5=excellent)"
+    },
+    "ease_of_use": {
+      "type": "number",
+      "description": "How easy was the platform to use 1-5"
+    },
+    "would_recommend": {
+      "type": "boolean",
+      "description": "Net Promoter \u2014 would the user recommend CertiGuard to a colleague"
+    },
+    "nps_score": {
+      "type": "number",
+      "description": "NPS score 0-10 (0=not at all likely, 10=extremely likely)"
+    },
+    "most_useful_feature": {
+      "type": "string",
+      "description": "Feature the user found most valuable during onboarding"
+    },
+    "least_useful_feature": {
+      "type": "string",
+      "description": "Feature the user found least valuable or confusing"
+    },
+    "what_could_be_improved": {
+      "type": "string",
+      "description": "Open-text feedback on what could be improved"
+    },
+    "additional_comments": {
+      "type": "string"
+    },
+    "survey_sent_at": {
+      "type": "string",
+      "format": "date-time",
+      "description": "When the survey email was sent (24h after onboarding completion)"
+    },
+    "responded_at": {
+      "type": "string",
+      "format": "date-time",
+      "description": "When the user submitted their survey response"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "sent",
+        "responded",
+        "expired",
+        "dismissed"
+      ],
+      "default": "sent"
+    }
+  },
+  "required": [
+    "user_id",
+    "user_email"
+  ],
+  "rls": {
+    "create": {
+      "$or": [
+        {
+          "data.tenant_id": "{{user.data.tenant_id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "read": {
+      "$or": [
+        {
+          "data.tenant_id": "{{user.data.tenant_id}}"
+        },
+        {
+          "data.user_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "update": {
+      "$or": [
+        {
+          "data.tenant_id": "{{user.data.tenant_id}}"
+        },
+        {
+          "data.user_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "delete": {
+      "user_condition": {
+        "role": "admin"
+      }
+    }
+  }
+}

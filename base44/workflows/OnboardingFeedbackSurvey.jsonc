@@ -1,0 +1,52 @@
+{
+  "name": "Onboarding Feedback Survey",
+  "description": "Triggers 24 hours after a user completes onboarding (OnboardingHealthCheck scan_status \u2192 completed), then sends a brief feedback survey email to capture first impressions.",
+  "trigger": {
+    "config": {
+      "trigger_type": "entity",
+      "entity_name": "OnboardingHealthCheck",
+      "events": [
+        "update"
+      ]
+    },
+    "condition": "${ .trigger.data.scan_status == \"completed\" and .trigger.old_data.scan_status != \"completed\" }"
+  },
+  "definition": {
+    "document": {
+      "dsl": "1.0.0",
+      "name": "onboarding_feedback_survey",
+      "version": "1.0",
+      "namespace": "base44"
+    },
+    "do": [
+      {
+        "wait_24h": {
+          "wait": "PT24H",
+          "then": "send_survey",
+          "x-base44": {
+            "title": "Wait 24 hours",
+            "description": "Delay before sending feedback survey"
+          }
+        }
+      },
+      {
+        "send_survey": {
+          "call": "invoke_backend_function",
+          "with": {
+            "function_name": "sendOnboardingFeedbackSurvey",
+            "args": {
+              "onboarding_check_id": "${ .trigger.entity_id }",
+              "tenant_id": "${ .trigger.data.tenant_id }",
+              "user_name": "${ .trigger.data.triggered_by }"
+            }
+          },
+          "then": "end",
+          "x-base44": {
+            "title": "Send feedback survey",
+            "description": "Email the user a 2-min survey"
+          }
+        }
+      }
+    ]
+  }
+}
