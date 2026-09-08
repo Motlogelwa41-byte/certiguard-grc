@@ -35,7 +35,7 @@ export default function ComplianceScoreRing({ score = 0, size = 120 }) {
             filter={`url(#${glowId})`}
             style={{ transition: "stroke-dashoffset 1.2s cubic-bezier(0.4, 0, 0.2, 1)" }}
           />
-          <text x="50" y="45" textAnchor="middle" fontSize="20" fontWeight="800" fill="white" className="fill-foreground">{score}%</text>
+          <text x="50" y="45" textAnchor="middle" fontSize="20" fontWeight="800" style={{ fill: "hsl(var(--foreground))" }}>{score}%</text>
           <text x="50" y="60" textAnchor="middle" fontSize="8" fontWeight="600" fill={color} className="uppercase tracking-wider">{label}</text>
         </svg>
       </div>
