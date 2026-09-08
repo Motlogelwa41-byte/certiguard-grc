@@ -220,10 +220,10 @@ export default function Tasks() {
                       )}
                       <div className="flex items-center justify-between pt-1">
                         <span className="text-xs text-muted-foreground">{t.assignee_name || "Unassigned"}</span>
-                        <div className="flex items-center gap-0.5">
-                          <Can permission="tasks:write"><button onClick={() => handleEdit(t)} className="p-1 rounded hover:bg-muted"><Pencil className="w-3 h-3 text-muted-foreground" /></button></Can>
-                          <Can permission="tasks:write"><button onClick={() => handleDelete(t.id)} className="p-1 rounded hover:bg-muted"><Trash2 className="w-3 h-3 text-destructive" /></button></Can>
-                          {t.status === "completed" && <button onClick={() => setFeedbackTask(t)} className="p-1 rounded hover:bg-muted" title="Submit feedback"><MessageSquare className="w-3 h-3 text-success" /></button>}
+                        <div className="flex items-center gap-1">
+                          <Can permission="tasks:write"><button onClick={() => handleEdit(t)} className="p-1.5 rounded hover:bg-muted"><Pencil className="w-3.5 h-3.5 text-muted-foreground" /></button></Can>
+                          <Can permission="tasks:write"><button onClick={() => handleDelete(t.id)} className="p-1.5 rounded hover:bg-muted"><Trash2 className="w-3.5 h-3.5 text-destructive" /></button></Can>
+                          {t.status === "completed" && <button onClick={() => setFeedbackTask(t)} className="p-1.5 rounded hover:bg-muted" title="Submit feedback"><MessageSquare className="w-3.5 h-3.5 text-success" /></button>}
                         </div>
                       </div>
                     </div>
@@ -240,7 +240,7 @@ export default function Tasks() {
           <DialogHeader><DialogTitle>{editId ? "Edit Task" : "Add Task"}</DialogTitle></DialogHeader>
           <div className="space-y-4 max-h-[70vh] overflow-y-auto pr-1">
             <div><Label>Title</Label><Input value={form.title} onChange={(e) => setForm({ ...form, title: e.target.value })} /></div>
-            <div className="grid grid-cols-2 gap-3">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <div><Label>Type</Label>
                 <Select value={form.type} onValueChange={(v) => setForm({ ...form, type: v })}>
                   <SelectTrigger><SelectValue /></SelectTrigger>
@@ -271,7 +271,7 @@ export default function Tasks() {
                 </SelectContent>
               </Select>
             </div>
-            <div className="grid grid-cols-2 gap-3">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <div><Label>Assignee Name</Label><Input value={form.assignee_name} onChange={(e) => setForm({ ...form, assignee_name: e.target.value })} /></div>
               <div><Label>Due Date</Label><Input type="date" value={form.due_date} onChange={(e) => setForm({ ...form, due_date: e.target.value })} /></div>
             </div>
