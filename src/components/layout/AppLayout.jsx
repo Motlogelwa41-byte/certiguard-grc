@@ -70,7 +70,7 @@ export default function AppLayout() {
     <MfaEnforcementGate>
     <div className="min-h-screen bg-background">
       <Sidebar />
-      <main className="ml-16 lg:ml-60 transition-all duration-300">
+      <main className="ml-16 lg:ml-64 transition-all duration-300">
         {/* Top bar with global search */}
         <SecurityPolicyBanner />
         <div className="sticky top-0 z-40 bg-background/80 backdrop-blur border-b border-border px-6 lg:px-8 h-14 flex items-center justify-between">
