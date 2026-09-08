@@ -207,6 +207,7 @@ import CrossTenantExecutiveDashboard from '@/pages/CrossTenantExecutiveDashboard
 import FrameworkMaturityComparison from '@/pages/FrameworkMaturityComparison';
 import HRDCBQAReport from '@/pages/HRDCBQAReport';
 import BDPAComplianceReport from '@/pages/BDPAComplianceReport';
+import SadcReadinessSummary from '@/pages/SadcReadinessSummary';
 import WebhookManagement from '@/pages/WebhookManagement';
 import RiskScenarioLibrary from '@/pages/RiskScenarioLibrary';
 import CustomReportBuilder from '@/pages/CustomReportBuilder';
@@ -487,6 +488,7 @@ const AuthenticatedApp = () => {
           <Route path="/framework-maturity-comparison" element={<FrameworkMaturityComparison />} />
           <Route path="/hrdc-bqa-report" element={<HRDCBQAReport />} />
           <Route path="/bdpa-report" element={<BDPAComplianceReport />} />
+          <Route path="/sadc-readiness-summary" element={<SadcReadinessSummary />} />
           <Route path="/webhooks" element={<WebhookManagement />} />
           <Route path="/risk-scenario-library" element={<RiskScenarioLibrary />} />
           <Route path="/custom-reports" element={<CustomReportBuilder />} />

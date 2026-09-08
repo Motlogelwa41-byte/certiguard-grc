@@ -39,6 +39,7 @@ export const navSections = [
       { label: "SADC Frameworks", path: "/sadc-frameworks", icon: MapPin, roles: ["admin", "compliance_officer", "risk_manager", "auditor"] },
       { label: "HRDC & BQA Report", path: "/hrdc-bqa-report", icon: GraduationCap, roles: ["admin", "compliance_officer", "risk_manager", "auditor"] },
       { label: "BDPA Compliance Report", path: "/bdpa-report", icon: ShieldCheck, roles: ["admin", "compliance_officer", "risk_manager", "auditor", "regulator"] },
+      { label: "POPIA & BDPA Readiness Summary", path: "/sadc-readiness-summary", icon: ClipboardCheck, roles: ["admin", "compliance_officer", "risk_manager", "auditor", "executive"] },
       { label: "Regulatory Changes", path: "/regulatory-changes", icon: ScrollText, roles: ["admin", "compliance_officer", "risk_manager", "auditor"] },
       { label: "Regulatory Roadmap", path: "/regulatory-roadmap", icon: CalendarCheck, roles: ["admin", "compliance_officer", "risk_manager", "auditor", "executive"] },
       { label: "SADC Exec Dashboard", path: "/sadc-executive-dashboard", icon: Globe, roles: ["admin", "compliance_officer", "risk_manager", "auditor"] },

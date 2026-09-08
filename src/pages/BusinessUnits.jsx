@@ -13,7 +13,7 @@ import EmptyState from "@/components/shared/EmptyState";
 import Can from "@/components/shared/Can";
 import { useToast } from "@/components/ui/use-toast";
 
-const defaultForm = { name: "", description: "", parent_id: "", head_name: "", cost_center: "", location: "", risk_appetite_level: "moderate", status: "active", notes: "" };
+const defaultForm = { name: "", description: "", parent_id: "", sector: "other", head_name: "", cost_center: "", location: "", risk_appetite_level: "moderate", status: "active", notes: "" };
 
 export default function BusinessUnits() {
   const [items, setItems] = useState([]);
@@ -45,7 +45,7 @@ export default function BusinessUnits() {
   };
 
   const handleEdit = (item) => {
-    setForm({ name: item.name || "", description: item.description || "", parent_id: item.parent_id || "", head_name: item.head_name || "", cost_center: item.cost_center || "", location: item.location || "", risk_appetite_level: item.risk_appetite_level || "moderate", status: item.status || "active", notes: item.notes || "" });
+    setForm({ name: item.name || "", description: item.description || "", parent_id: item.parent_id || "", sector: item.sector || "other", head_name: item.head_name || "", cost_center: item.cost_center || "", location: item.location || "", risk_appetite_level: item.risk_appetite_level || "moderate", status: item.status || "active", notes: item.notes || "" });
     setEditId(item.id); setOpen(true);
   };
 
@@ -67,6 +67,7 @@ export default function BusinessUnits() {
           <div>
             <h3 className="font-heading font-semibold text-foreground text-sm">{unit.name}</h3>
             <div className="flex items-center gap-2 text-xs text-muted-foreground mt-0.5">
+              {unit.sector && unit.sector !== "other" && <span className="px-1.5 py-0.5 rounded bg-primary/10 text-primary font-medium capitalize">{unit.sector.replace(/_/g, " ")}</span>}
               {unit.head_name && <span>Head: {unit.head_name}</span>}
               {unit.cost_center && <span>· CC: {unit.cost_center}</span>}
               {unit.location && <span>· {unit.location}</span>}
@@ -138,6 +139,28 @@ export default function BusinessUnits() {
               <div><Label>Location</Label><Input value={form.location} onChange={(e) => setForm({ ...form, location: e.target.value })} /></div>
             </div>
             <div className="grid grid-cols-2 gap-3">
+              <div><Label>Sector</Label>
+                <Select value={form.sector} onValueChange={(v) => setForm({ ...form, sector: v })}>
+                  <SelectTrigger><SelectValue placeholder="Select sector" /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="mining">Mining</SelectItem>
+                    <SelectItem value="financial_services">Financial Services</SelectItem>
+                    <SelectItem value="healthcare">Healthcare</SelectItem>
+                    <SelectItem value="telecommunications">Telecommunications</SelectItem>
+                    <SelectItem value="retail">Retail</SelectItem>
+                    <SelectItem value="manufacturing">Manufacturing</SelectItem>
+                    <SelectItem value="energy">Energy</SelectItem>
+                    <SelectItem value="agriculture">Agriculture</SelectItem>
+                    <SelectItem value="government">Government</SelectItem>
+                    <SelectItem value="education">Education</SelectItem>
+                    <SelectItem value="technology">Technology</SelectItem>
+                    <SelectItem value="hospitality">Hospitality</SelectItem>
+                    <SelectItem value="construction">Construction</SelectItem>
+                    <SelectItem value="transportation">Transportation</SelectItem>
+                    <SelectItem value="other">Other</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
               <div><Label>Risk Appetite</Label>
                 <Select value={form.risk_appetite_level} onValueChange={(v) => setForm({ ...form, risk_appetite_level: v })}>
                   <SelectTrigger><SelectValue /></SelectTrigger>

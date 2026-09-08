@@ -20,6 +20,28 @@
     "parent_name": {
       "type": "string"
     },
+    "sector": {
+      "type": "string",
+      "enum": [
+        "mining",
+        "financial_services",
+        "healthcare",
+        "telecommunications",
+        "retail",
+        "manufacturing",
+        "energy",
+        "agriculture",
+        "government",
+        "education",
+        "technology",
+        "hospitality",
+        "construction",
+        "transportation",
+        "other"
+      ],
+      "default": "other",
+      "description": "Business sector for industry-specific compliance scoping (e.g. mining, financial_services)"
+    },
     "head_name": {
       "type": "string",
       "description": "Business unit head / director"
