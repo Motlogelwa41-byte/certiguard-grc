@@ -27,7 +27,7 @@ Deno.serve(async (req) => {
       has_mitigation: !!r.mitigation_plan,
     }));
 
-    const llmRes = await base44.integrations.Core.InvokeLLM({
+    const llmRes = await base44.asServiceRole.integrations.Core.InvokeLLM({
       prompt: `You are a predictive risk analyst for a GRC platform. Based on the current risk and control posture, predict the organization's risk score in 90 days.
 
 Current state:

@@ -52,27 +52,8 @@ export default function OnboardingWizard() {
     setAiLoading(true);
     const brief = cs.map((c) => ({ id: c.id, control_id: c.control_id, title: c.title, category: c.category }));
     try {
-      const out = await base44.integrations.Core.InvokeLLM({
-        prompt: `You are a GRC automation expert. Given a list of compliance controls and a ${provider} cloud connection, determine which controls ${provider} can AUTOMATICALLY monitor or collect evidence for (e.g. IAM, logging, encryption, configuration, inventory, access reviews). For each control return: id (match exactly), monitorable (boolean), evidence_source (short, the ${provider} service that provides it), confidence (high/medium/low). Controls: ${JSON.stringify(brief)}`,
-        response_json_schema: {
-          type: "object",
-          properties: {
-            mappings: {
-              type: "array",
-              items: {
-                type: "object",
-                properties: {
-                  id: { type: "string" },
-                  monitorable: { type: "boolean" },
-                  evidence_source: { type: "string" },
-                  confidence: { type: "string", enum: ["high", "medium", "low"] },
-                },
-              },
-            },
-          },
-        },
-      });
-      const maps = out?.mappings || out?.data?.mappings || [];
+      const out = await base44.functions.invoke('aiOnboardingMapping', { provider, controls: brief });
+      const maps = out?.data?.mappings || [];
       const m = {};
       cs.forEach((c) => {
         const found = maps.find((x) => x.id === c.id || x.id === c.control_id);

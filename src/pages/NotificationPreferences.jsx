@@ -131,7 +131,7 @@ ${expiringEvidence.map(e => `  • ${e.title} — Expires: ${e.expiry_date}`).jo
 
 Your notification preferences: ${prefs.digest_frequency} digest`;
 
-      await base44.integrations.Core.SendEmail({ to: me.email, subject: "CertiGuard — Test Digest", body });
+      await base44.functions.invoke('sendAppEmail', { to: me.email, subject: "CertiGuard — Test Digest", body });
       toast({ title: "Test digest sent to " + me.email });
     } catch (e) {
       toast({ title: "Failed", description: e.message, variant: "destructive" });

@@ -137,7 +137,7 @@ export default function Policies() {
       let sent = 0;
       for (const u of users) {
         try {
-          await base44.integrations.Core.SendEmail({
+          await base44.functions.invoke('sendAppEmail', {
             to: u.email,
             subject: `Policy Acknowledgment Required: ${policy.title} (v${policy.version})`,
             body: `Hello ${u.full_name || u.email},\n\nAn updated policy requires your acknowledgment:\n\nTitle: ${policy.title}\nVersion: v${policy.version}\nCategory: ${(policy.category || "").replace(/_/g, " ")}\n\nPlease log in to CertiGuard and acknowledge this policy by visiting the Policy Acknowledgments page.\n\nThank you,\nCertiGuard GRC Platform`,

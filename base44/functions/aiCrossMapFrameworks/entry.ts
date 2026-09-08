@@ -25,7 +25,7 @@ Return a JSON array of mappings. Each mapping should have:
 
 Only include mappings where coverage_pct is 50 or higher. Return at most 15 mappings.`;
 
-    const result = await base44.integrations.Core.InvokeLLM({
+    const result = await base44.asServiceRole.integrations.Core.InvokeLLM({
       prompt,
       response_json_schema: {
         type: "object",

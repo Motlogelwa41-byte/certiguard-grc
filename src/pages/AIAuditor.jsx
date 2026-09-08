@@ -36,36 +36,18 @@ export default function AIAuditor() {
     setFileUploading(true);
     try {
       const { file_url } = await base44.integrations.Core.UploadFile({ file });
-      const result = await base44.integrations.Core.ExtractDataFromUploadedFile({ file_url, json_schema: { type: "object", properties: { text: { type: "string" } } } });
-      if (result?.output?.text) setDocumentText(result.output.text);
-      else if (result?.output) setDocumentText(JSON.stringify(result.output, null, 2));
+      const extractRes = await base44.functions.invoke('extractDocumentText', { file_url });
+      const text = extractRes.data?.text;
+      if (text) setDocumentText(text);
       toast({ title: "Document loaded" });
     } catch (err) { toast({ title: "Upload failed", description: err.message, variant: "destructive" }); }
     setFileUploading(false);
   };
 
   const auditGate = async (gate) => {
-    const prompt = `ROLE: You are the AI Automated Auditor for the Ethical Edge Open GRC platform.
-
-TARGET GATE: ${gate.id}
-DOMAIN: ${gate.domain}
-REQUIREMENT: ${gate.requirement}
-
-EVALUATION DOCUMENT: ${documentText.substring(0, 8000)}
-
-Evaluate the document against the requirement. Be deterministic and strict — only mark PASSED if you find explicit auditable evidence.
-
-Return JSON:
-{
-  "gate_id": "${gate.id}",
-  "is_passed": boolean,
-  "confidence_score": number (0-1),
-  "evidence_citation": "exact quote or explanation of gap",
-  "risk_rating": "LOW" | "MEDIUM" | "HIGH"
-}`;
     try {
-      const result = await base44.integrations.Core.InvokeLLM({ prompt, response_json_schema: { type: "object", properties: { gate_id: { type: "string" }, is_passed: { type: "boolean" }, confidence_score: { type: "number" }, evidence_citation: { type: "string" }, risk_rating: { type: "string" } }, required: ["gate_id", "is_passed"] } });
-      return result;
+      const res = await base44.functions.invoke('aiAuditGate', { gates: [gate], document_text: documentText });
+      return res.data?.results?.[0] || { gate_id: gate.id, is_passed: false, confidence_score: 0, evidence_citation: "Error: no result", risk_rating: "HIGH" };
     } catch (e) { return { gate_id: gate.id, is_passed: false, confidence_score: 0, evidence_citation: "Error: " + e.message, risk_rating: "HIGH" }; }
   };
 

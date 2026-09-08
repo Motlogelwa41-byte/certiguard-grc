@@ -287,27 +287,8 @@ export default function PolicyTemplates() {
     if (!aiForm.framework || !aiForm.companyName) return;
     setGenerating(true);
     try {
-      const result = await base44.integrations.Core.InvokeLLM({
-        prompt: `Generate a professional, detailed ${aiForm.framework} compliance policy for a company called "${aiForm.companyName}" in the ${aiForm.industry || "technology"} industry. 
-        
-        Include:
-        1. Purpose & Scope
-        2. Policy Statement
-        3. Roles & Responsibilities
-        4. Key Requirements (specific to ${aiForm.framework})
-        5. Compliance & Review
-        
-        Use [PLACEHOLDER] format for company-specific values that need to be filled in.
-        Make it production-ready for a GRC compliance platform.`,
-        response_json_schema: {
-          type: "object",
-          properties: {
-            title: { type: "string" },
-            content: { type: "string" },
-            category: { type: "string" }
-          }
-        }
-      });
+      const response = await base44.functions.invoke('aiGeneratePolicy', { framework: aiForm.framework, companyName: aiForm.companyName, industry: aiForm.industry });
+      const result = response.data?.result;
 
       await base44.entities.Policy.create({
         title: result.title || `${aiForm.framework} Policy — ${aiForm.companyName}`,

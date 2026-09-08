@@ -115,10 +115,8 @@ export default function ComplianceBenchmarking() {
         metric: b.metric_name, your: b.your_value, median: b.industry_median,
         top: b.top_quartile, percentile: b.percentile_rank, better: b.better_direction,
       }));
-      const res = await base44.integrations.Core.InvokeLLM({
-        prompt: `You are a GRC benchmarking analyst. Compare this organisation's compliance metrics against industry peers and provide actionable insights.\n\nIndustry: ${industry}\nMetrics (JSON): ${JSON.stringify(summary)}\n\nProvide:\n1. Top 3 areas where the organisation LAGS peers (with specific gap and recommended action)\n2. Top 2 areas where the organisation LEADS peers\n3. Overall percentile assessment and one strategic recommendation\n\nBe concise and specific. Use bullet points.`,
-      });
-      setAiInsight(res || "No insight generated.");
+      const res = await base44.functions.invoke('aiBenchmarkInsight', { industry, benchmarks: summary });
+      setAiInsight(res?.data?.result || "No insight generated.");
     } catch (e) {
       toast({ title: "AI analysis failed", description: e.message, variant: "destructive" });
     } finally {

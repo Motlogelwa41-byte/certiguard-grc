@@ -32,12 +32,9 @@ export default function AIControlMapper() {
     setFileUploading(true);
     try {
       const { file_url } = await base44.integrations.Core.UploadFile({ file });
-      const result = await base44.integrations.Core.ExtractDataFromUploadedFile({
-        file_url,
-        json_schema: { type: "object", properties: { text: { type: "string" } } }
-      });
-      if (result?.output?.text) setDocumentText(result.output.text);
-      else if (result?.output) setDocumentText(JSON.stringify(result.output, null, 2));
+      const extractRes = await base44.functions.invoke('extractDocumentText', { file_url });
+      const text = extractRes.data?.text;
+      if (text) setDocumentText(text);
       toast({ title: "Document loaded", description: "Document text extracted. Ready to map controls." });
     } catch (err) {
       toast({ title: "Upload failed", description: err.message, variant: "destructive" });
@@ -77,32 +74,8 @@ DOCUMENT TO ANALYZE:
 ${documentText.substring(0, 10000)}`;
 
     try {
-      const result = await base44.integrations.Core.InvokeLLM({
-        prompt,
-        model: "claude_sonnet_4_6",
-        response_json_schema: {
-          type: "object",
-          properties: {
-            controls: {
-              type: "array",
-              items: {
-                type: "object",
-                properties: {
-                  title: { type: "string" },
-                  category: { type: "string" },
-                  severity: { type: "string" },
-                  description: { type: "string" },
-                  framework_references: { type: "array", items: { type: "string" } },
-                  evidence_quote: { type: "string" },
-                  suggested_id_prefix: { type: "string" }
-                }
-              }
-            }
-          }
-        }
-      });
-
-      const found = result?.controls || [];
+      const res = await base44.functions.invoke('aiMapControlsFromDoc', { document_text: documentText, framework_context: frameworkContext });
+      const found = res.data?.controls || [];
       const numbered = found.map((c, i) => ({
         ...c,
         suggested_control_id: `${c.suggested_id_prefix || "CTL"}-${String(i + 1).padStart(3, "0")}`,

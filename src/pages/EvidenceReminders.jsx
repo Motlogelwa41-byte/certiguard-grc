@@ -97,7 +97,7 @@ export default function EvidenceReminders() {
       ? `\n\nNote: This evidence ${isPast(parseISO(item.expiry_date)) ? "expired" : `expires in ${daysLeft} day${daysLeft !== 1 ? "s" : ""}`} on ${item.expiry_date}.`
       : "";
 
-    await base44.integrations.Core.SendEmail({
+    await base44.functions.invoke('sendAppEmail', {
       to: email,
       subject: `${urgency}Evidence Submission Reminder — ${item.title}`,
       body: `

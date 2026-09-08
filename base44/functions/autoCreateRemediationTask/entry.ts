@@ -45,7 +45,7 @@ export default async function (req) {
       // Use AI to generate specific, actionable remediation steps
       let aiSteps = '';
       try {
-        const llmRes = await base44.integrations.Core.InvokeLLM({
+        const llmRes = await base44.asServiceRole.integrations.Core.InvokeLLM({
           prompt: `A compliance control has been marked Non-Compliant and requires urgent remediation within 48 hours. Generate 3-5 specific, actionable step-by-step instructions for fixing this control. Each step must name the specific system, tool, or document to touch.
 
 Control: ${title}
@@ -129,7 +129,7 @@ Return ONLY a JSON object with:
       // Use AI to generate specific, actionable remediation steps
       let aiSteps = '';
       try {
-        const llmRes = await base44.integrations.Core.InvokeLLM({
+        const llmRes = await base44.asServiceRole.integrations.Core.InvokeLLM({
           prompt: `A risk has hit the critical (red) threshold and requires urgent remediation within 48 hours. Generate 3-5 specific, actionable step-by-step instructions for mitigating this risk. Each step must name the specific system, process, or document to touch.
 
 Risk: ${title}

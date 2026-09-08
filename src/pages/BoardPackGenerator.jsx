@@ -80,30 +80,11 @@ Generate a JSON object with this exact schema:
 
 Start with an executive summary slide, then cover: compliance posture, top risks, audit findings, KPI/KRI performance, regulatory landscape, incidents, and end with recommendations. Make it concise, data-driven, and executive-ready.`;
 
-      const response = await base44.integrations.Core.InvokeLLM({
-        prompt,
-        response_json_schema: {
-          type: "object",
-          properties: {
-            slides: {
-              type: "array",
-              items: {
-                type: "object",
-                properties: {
-                  slide_number: { type: "number" },
-                  title: { type: "string" },
-                  bullet_points: { type: "array", items: { type: "string" } },
-                  speaker_notes: { type: "string" },
-                  recommendation: { type: "string" },
-                },
-              },
-            },
-          },
-        },
-      });
+      const response = await base44.functions.invoke('aiGenerateBoardPack', { compliance_score: complianceScore, passing, total, fw_ready: fwReady, top_risks: topRisks.map(r => ({ title: r.title, score: r.risk_score, status: r.status, category: r.category })), sev_counts: sevCounts, at_risk_kpis: atRiskKpis.map(k => ({ name: k.name, type: k.indicator_type, status: k.status, actual: k.actual_value, target: k.target_value })), regulatory_changes: rawData.regulatoryChanges.slice(0, 5).map(r => ({ title: r.title, jurisdiction: r.jurisdiction, impact: r.impact_level })), open_incidents: openIncidents.length });
 
-      setSlides(response.slides || []);
-      toast({ title: "Board pack generated", description: `${(response.slides || []).length} slides synthesized from live data.` });
+      const slides = response?.data?.result?.slides || [];
+      setSlides(slides);
+      toast({ title: "Board pack generated", description: `${slides.length} slides synthesized from live data.` });
     } catch (e) {
       toast({ title: "Generation failed", description: e.message, variant: "destructive" });
     }

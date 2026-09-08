@@ -51,7 +51,7 @@ Deno.serve(async (req) => {
 
         if (tier === "remind") {
           try {
-            await base44.integrations.Core.SendEmail({
+            await base44.asServiceRole.integrations.Core.SendEmail({
               to: u.email,
               subject: `Reminder: Acknowledge policy "${policy.title}"`,
               body: `Hi ${u.full_name || u.email},\n\nThis is a reminder that you have not yet acknowledged the policy "${policy.title}" (v${policy.version || "1.0"}), which was published on ${new Date(policy.published_at).toLocaleDateString()}.\n\nPlease log in to the GRC platform and acknowledge this policy at your earliest convenience.\n\n— GRC Platform`,
@@ -62,7 +62,7 @@ Deno.serve(async (req) => {
 
         if (tier === "escalate") {
           try {
-            await base44.integrations.Core.SendEmail({
+            await base44.asServiceRole.integrations.Core.SendEmail({
               to: u.email,
               subject: `ESCALATION: Policy "${policy.title}" acknowledgment overdue (${daysOverdue} days)`,
               body: `Hi ${u.full_name || u.email},\n\nYour acknowledgment of policy "${policy.title}" (v${policy.version || "1.0"}) is now ${daysOverdue} days overdue. This has been escalated to your manager and the compliance team.\n\nPlease acknowledge immediately. Continued non-acknowledgment will result in system access restrictions.\n\n— GRC Platform`,

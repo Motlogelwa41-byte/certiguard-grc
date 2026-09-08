@@ -79,7 +79,7 @@ export default function TaskReminders() {
     const days = daysUntil(task.due_date);
     const urgencyLabel = days < 0 ? `OVERDUE by ${Math.abs(days)} day(s)` : days === 0 ? "due TODAY" : `due in ${days} day(s)`;
     try {
-      await base44.integrations.Core.SendEmail({
+      await base44.functions.invoke('sendAppEmail', {
         to: email,
         subject: `⚠️ Compliance Task Reminder: "${task.title}" is ${urgencyLabel}`,
         body: `
@@ -153,7 +153,7 @@ export default function TaskReminders() {
       const days = daysUntil(task.due_date);
       const urgencyLabel = days < 0 ? `OVERDUE by ${Math.abs(days)} day(s)` : days === 0 ? "due TODAY" : `due in ${days} day(s)`;
       try {
-        await base44.integrations.Core.SendEmail({
+        await base44.functions.invoke('sendAppEmail', {
           to: email,
           subject: `⚠️ Compliance Task Reminder: "${task.title}" is ${urgencyLabel}`,
           body: `Hi ${task.assignee_name || "Team"},\n\nThis is a reminder that "${task.title}" is ${urgencyLabel}.\n\nPriority: ${task.priority}\nDue: ${task.due_date}\n\nPlease log in to CertiGuard to take action.\n\n— CertiGuard`,

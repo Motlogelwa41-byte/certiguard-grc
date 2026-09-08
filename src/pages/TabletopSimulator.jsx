@@ -58,10 +58,11 @@ export default function TabletopSimulator() {
       const milestones = JSON.parse(scenario.milestones || "[]");
       const participants = JSON.parse(scenario.participants || "[]");
       const prompt = `Generate a post-action compliance improvement report for a tabletop exercise. Scenario: ${scenario.scenario_name} (${scenario.scenario_type}). Description: ${scenario.description}. Participants: ${participants.map(p => p.name).join(", ") || "N/A"}. Milestones recorded: ${JSON.stringify(milestones)}. Generate a structured report with: 1) Executive Summary, 2) Response Effectiveness Assessment, 3) Gaps Identified, 4) Recommended Improvement Actions (with owners and priority). Keep it concise and actionable.`;
-      const res = await base44.integrations.Core.InvokeLLM({ prompt });
-      await base44.entities.TabletopScenario.update(scenario.id, { after_action_report: res, status: "completed" });
+      const res = await base44.functions.invoke('aiTabletopReport', { scenario_name: scenario.scenario_name, scenario_type: scenario.scenario_type, description: scenario.description, participants, milestones });
+      const report = res?.data?.result;
+      await base44.entities.TabletopScenario.update(scenario.id, { after_action_report: report, status: "completed" });
       load();
-      setDetail({ ...scenario, after_action_report: res, status: "completed" });
+      setDetail({ ...scenario, after_action_report: report, status: "completed" });
       toast({ title: "After-action report generated" });
     } catch (e) { toast({ title: "Generation failed", description: e.message, variant: "destructive" }); }
     setGenerating(null);

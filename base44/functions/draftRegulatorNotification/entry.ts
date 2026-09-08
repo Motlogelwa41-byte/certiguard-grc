@@ -43,7 +43,7 @@ Deno.serve(async (req) => {
     const deadline = new Date(new Date(detectedAt).getTime() + 72 * 60 * 60 * 1000).toISOString();
 
     // Use InvokeLLM to draft the notification
-    const llmRes = await base44.integrations.Core.InvokeLLM({
+    const llmRes = await base44.asServiceRole.integrations.Core.InvokeLLM({
       prompt: `You are a Data Protection Officer drafting a regulator breach notification that complies with POPIA (South Africa) and GDPR (Article 33) requirements.
 
 Incident details:

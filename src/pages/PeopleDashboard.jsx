@@ -147,7 +147,7 @@ export default function PeopleDashboard() {
 
   const sendReminder = async (emp) => {
     try {
-      await base44.integrations.Core.SendEmail({
+      await base44.functions.invoke('sendAppEmail', {
         to: emp.email,
         subject: "Action Required: Compliance Training Overdue",
         body: `Hi ${emp.name},\n\nThis is a reminder that you have outstanding compliance requirements.\n\nPlease complete the following as soon as possible:\n${

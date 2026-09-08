@@ -73,21 +73,8 @@ Generate a JSON object:
   "key_terms": [{"source_term", "translated_term", "note"}]
 }`;
 
-      const res = await base44.integrations.Core.InvokeLLM({
-        prompt,
-        response_json_schema: {
-          type: "object",
-          properties: {
-            translated_text: { type: "string" },
-            source_language: { type: "string" },
-            target_language: { type: "string" },
-            content_type: { type: "string" },
-            legal_disclaimer: { type: "string" },
-            key_terms: { type: "array", items: { type: "object", properties: { source_term: { type: "string" }, translated_term: { type: "string" }, note: { type: "string" } } } },
-          },
-        },
-      });
-      setResult(res);
+      const res = await base44.functions.invoke('aiLocalizeRegulation', { source_text: sourceText, source_label: sourceLabel, target_label: targetLabel, content_type_label: typeLabel });
+      setResult(res?.data?.result);
       toast({ title: "Translation complete", description: `${typeLabel} translated to ${targetLabel}` });
     } catch (e) { toast({ title: "Translation failed", description: e.message, variant: "destructive" }); }
     setTranslating(false);

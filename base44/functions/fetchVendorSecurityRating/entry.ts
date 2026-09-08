@@ -39,7 +39,7 @@ Deno.serve(async (req) => {
     const domain = extractDomain(vendor.website) || (vendor.name || "").toLowerCase().replace(/\s+/g, "") + ".com";
 
     // Use InvokeLLM with web search to gather threat intel on the vendor domain
-    const llmRes = await base44.integrations.Core.InvokeLLM({
+    const llmRes = await base44.asServiceRole.integrations.Core.InvokeLLM({
       prompt: `You are a cybersecurity threat intelligence analyst. Assess the external security posture of the vendor "${vendor.name}" (domain: ${domain}, category: ${vendor.category || "unknown"}).
 
 Search the web for any public security incidents, breach history, vulnerability disclosures, CVEs, reputation data, SSL/TLS posture, and known threat actor mentions for this organization over the last 24 months.

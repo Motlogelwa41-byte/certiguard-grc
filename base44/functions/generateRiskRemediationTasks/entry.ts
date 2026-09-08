@@ -55,7 +55,7 @@ Deno.serve(async (req) => {
     // Use AI to generate specific, actionable remediation tasks
     let aiTasks = null;
     try {
-      const llmRes = await base44.integrations.Core.InvokeLLM({
+      const llmRes = await base44.asServiceRole.integrations.Core.InvokeLLM({
         prompt: `A risk in the risk register has exceeded the tolerance threshold and requires remediation tasks. Generate 2-4 specific, actionable remediation tasks with step-by-step instructions.
 
 Risk: ${title}

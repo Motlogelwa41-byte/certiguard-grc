@@ -98,7 +98,7 @@ DATA:
 ${JSON.stringify(sectionData, null, 2)}`;
 
       try {
-        const res = await base44.integrations.Core.InvokeLLM({
+        const res = await base44.asServiceRole.integrations.Core.InvokeLLM({
           prompt,
           response_json_schema: {
             type: "object",

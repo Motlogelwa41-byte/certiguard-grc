@@ -36,21 +36,8 @@ Generate a JSON object with this exact schema:
 
 Focus on: data protection gaps, liability caps, indemnity missing, audit rights, sub-processor disclosures, breach notification SLAs, and termination clauses.`;
 
-      const res = await base44.integrations.Core.InvokeLLM({
-        prompt,
-        response_json_schema: {
-          type: "object",
-          properties: {
-            risk_level: { type: "string" },
-            summary: { type: "string" },
-            high_risk_clauses: { type: "array", items: { type: "object", properties: { clause: { type: "string" }, risk: { type: "string" }, severity: { type: "string" } } } },
-            missing_clauses: { type: "array", items: { type: "string" } },
-            compliance_anomalies: { type: "array", items: { type: "object", properties: { issue: { type: "string" }, framework: { type: "string" }, severity: { type: "string" } } } },
-            recommendations: { type: "array", items: { type: "string" } },
-          },
-        },
-      });
-      setResult(res);
+      const response = await base44.functions.invoke('aiScanContract', { contract_text: contractText });
+      setResult(response.data?.result);
       toast({ title: "Contract scan complete" });
     } catch (e) { toast({ title: "Scan failed", description: e.message, variant: "destructive" }); }
     setScanning(false);

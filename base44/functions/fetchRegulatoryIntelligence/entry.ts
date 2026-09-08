@@ -31,7 +31,7 @@ For each significant regulatory change, new law, amendment, guidance, or enforce
 - source_url: the official source URL
 Return up to 10 of the most impactful changes, ordered by priority. Only include real, verifiable developments found via web search — do not fabricate.`;
 
-    const result = await base44.integrations.Core.InvokeLLM({
+    const result = await base44.asServiceRole.integrations.Core.InvokeLLM({
       prompt,
       add_context_from_internet: true,
       model: 'gemini_3_flash',

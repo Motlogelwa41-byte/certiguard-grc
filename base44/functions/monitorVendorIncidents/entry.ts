@@ -69,7 +69,7 @@ Only report REAL, publicly documented incidents. Do not fabricate. If no inciden
 Return JSON: { "incidents": [{ vendor_name, incident_type, severity, title, description, source_url, source_name, reported_date, affected_services, data_types_affected }] }`;
 
       try {
-        const res = await base44.integrations.Core.InvokeLLM({
+        const res = await base44.asServiceRole.integrations.Core.InvokeLLM({
           prompt,
           model: "gemini_3_flash",
           add_context_from_internet: true,

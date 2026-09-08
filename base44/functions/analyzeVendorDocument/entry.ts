@@ -43,7 +43,7 @@ Return a JSON object:
   "overall_recommendation": "approve/conditionally_approve/reject/require_followup"
 }`;
 
-    const result = await base44.integrations.Core.InvokeLLM({
+    const result = await base44.asServiceRole.integrations.Core.InvokeLLM({
       prompt,
       file_urls: [file_url],
       response_json_schema: {

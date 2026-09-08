@@ -181,7 +181,7 @@ export default async function(req) {
     let confidenceScore = 70;
 
     try {
-      const llmResponse = await base44.integrations.Core.InvokeLLM({
+      const llmResponse = await base44.asServiceRole.integrations.Core.InvokeLLM({
         prompt: `You are a GRC audit scoping expert. Analyze the following system usage data and provide adaptive scoping recommendations for a ${audit_type || 'SOC 2 Type II'} audit.
 
 Total systems analyzed: ${totalSystems}

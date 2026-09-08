@@ -43,7 +43,7 @@ export default function Notifications() {
 
       const me = await base44.auth.me().catch(() => ({ email: "" }));
       if (me.email) {
-        await base44.integrations.Core.SendEmail({
+        await base44.functions.invoke('sendAppEmail', {
           to: me.email, subject, body
         });
       }
@@ -74,7 +74,7 @@ ${expiringEvidence.map(e => `  • ${e.title} — Expires: ${e.expiry_date} — 
 
 Please log in to CertiGuard to address these items.`;
 
-      await base44.integrations.Core.SendEmail({ to: me.email, subject: "CertiGuard Daily Digest", body });
+      await base44.functions.invoke('sendAppEmail', { to: me.email, subject: "CertiGuard Daily Digest", body });
       toast({ title: "Digest email sent" });
     } catch (e) {
       toast({ title: "Failed to send digest", description: e.message, variant: "destructive" });

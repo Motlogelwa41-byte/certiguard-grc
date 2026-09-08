@@ -54,62 +54,8 @@ Provide a comprehensive JSON response with:
 3. compliance_priority_roadmap: 6-8 phased recommendations ordered by priority (phase 1 = immediate, phase 2 = 30-60 days, phase 3 = 60-90 days), each with action, rationale, and estimated_effort
 4. recommended_frameworks: 3-4 frameworks this organization should adopt based on industry and jurisdiction, with name and reason`;
 
-      const result = await base44.integrations.Core.InvokeLLM({
-        prompt,
-        response_json_schema: {
-          type: "object",
-          properties: {
-            industry_risk_profile: {
-              type: "array",
-              items: {
-                type: "object",
-                properties: {
-                  risk_name: { type: "string" },
-                  likelihood: { type: "number" },
-                  impact: { type: "number" },
-                  description: { type: "string" },
-                },
-              },
-            },
-            missing_controls: {
-              type: "array",
-              items: {
-                type: "object",
-                properties: {
-                  title: { type: "string" },
-                  category: { type: "string" },
-                  priority: { type: "string" },
-                  framework_reference: { type: "string" },
-                  rationale: { type: "string" },
-                },
-              },
-            },
-            compliance_priority_roadmap: {
-              type: "array",
-              items: {
-                type: "object",
-                properties: {
-                  phase: { type: "string" },
-                  action: { type: "string" },
-                  rationale: { type: "string" },
-                  estimated_effort: { type: "string" },
-                },
-              },
-            },
-            recommended_frameworks: {
-              type: "array",
-              items: {
-                type: "object",
-                properties: {
-                  name: { type: "string" },
-                  reason: { type: "string" },
-                },
-              },
-            },
-          },
-        },
-      });
-
+      const res = await base44.functions.invoke('aiGapAnalysisFull', { industry, jurisdiction, company_context: companyContext, control_brief: controlBrief, framework_names: fwNames });
+      const result = res.data?.result;
       setAnalysis(result);
       toast({ title: "Gap analysis complete", description: "AI recommendations generated successfully." });
     } catch (e) {

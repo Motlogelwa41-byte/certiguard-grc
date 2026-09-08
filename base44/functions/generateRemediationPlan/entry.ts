@@ -45,7 +45,7 @@ Deno.serve(async (req) => {
     };
 
     // Generate remediation plan using LLM
-    const llmRes = await base44.integrations.Core.InvokeLLM({
+    const llmRes = await base44.asServiceRole.integrations.Core.InvokeLLM({
       prompt: `You are a senior GRC remediation advisor for a financial services organization operating under POPIA, SADC, King V, SOC 2, and ISO 27001 frameworks. A security control has failed its compliance test and needs a structured, actionable remediation plan.
 
 Control details (JSON):

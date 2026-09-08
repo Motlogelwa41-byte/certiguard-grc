@@ -76,7 +76,7 @@ export default function RemediationDialog({ open, onOpenChange, control, onSucce
       // 4. Send email notification if assignee email provided
       if (form.assignee_email) {
         try {
-          await base44.integrations.Core.SendEmail({
+          await base44.functions.invoke('sendAppEmail', {
             to: form.assignee_email,
             subject: `Action Required: Control Remediation — ${control.title}`,
             body: `Hi ${form.assignee_name || "Team"},\n\nA compliance control has been flagged as FAILING and requires your attention:\n\n` +

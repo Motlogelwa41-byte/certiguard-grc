@@ -65,7 +65,7 @@ export async function sendReportToStakeholders({ base44, schedule, reportData = 
 
   for (const email of emails) {
     try {
-      await base44.integrations.Core.SendEmail({
+      await base44.functions.invoke('sendAppEmail', {
         to: email,
         subject,
         body: wrappedHtml,

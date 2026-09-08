@@ -148,7 +148,7 @@ export default function VendorAssessments() {
   const handleSendEmail = async () => {
     setSending(true);
     const url = getQuestionnaireUrl(sendTarget.id);
-    await base44.integrations.Core.SendEmail({
+    await base44.functions.invoke('sendAppEmail', {
       to: recipientEmail,
       subject: `Security Questionnaire: ${sendTarget.title}`,
       body: `Dear ${sendTarget.vendor_name} team,\n\nPlease complete the security questionnaire below at your earliest convenience.\n\nAssessment: ${sendTarget.title}\nDue Date: ${sendTarget.due_date || "As soon as possible"}\n\nClick here to begin: ${url}\n\nThank you,\nCompliance Team`,

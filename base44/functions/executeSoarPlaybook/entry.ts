@@ -34,7 +34,7 @@ export default async function(req) {
             break;
           }
           case "send_slack_alert": {
-            await base44.integrations.Core.SendEmail({
+            await base44.asServiceRole.integrations.Core.SendEmail({
               to: user.email,
               subject: `SOAR Alert: ${playbook_type}`,
               body: action.message || `SOAR playbook ${playbook_type} triggered at ${now}`,

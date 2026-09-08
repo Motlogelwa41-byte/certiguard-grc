@@ -79,7 +79,7 @@ export default function Tasks() {
     // Only send if there's an email — assignee_email may not be on the entity, so we use a stored value
     const email = task.assignee_email;
     if (!email) return;
-    await base44.integrations.Core.SendEmail({
+    await base44.functions.invoke('sendAppEmail', {
       to: email,
       subject: `📋 New Compliance Task Assigned: "${task.title}"`,
       body: `

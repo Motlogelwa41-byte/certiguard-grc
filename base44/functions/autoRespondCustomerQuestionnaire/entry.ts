@@ -127,7 +127,7 @@ ${questionsBlock}
 Return JSON: { "answers": [{ "index": number, "answer": string, "confidence": "drafted"|"needs_input", "source_control_id": string|null, "source_evidence_id": string|null }] }`;
 
       try {
-        const res = await base44.integrations.Core.InvokeLLM({
+        const res = await base44.asServiceRole.integrations.Core.InvokeLLM({
           prompt,
           response_json_schema: {
             type: "object",

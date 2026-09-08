@@ -37,7 +37,7 @@ Deno.serve(async (req) => {
 
     const prompt = `You are a security compliance assistant drafting responses to a third-party security questionnaire for ${questionnaire.client_name || "our organization"}. Using the organizational context below (policies and controls), write a concise, accurate answer (max 300 chars) for each question. If context is insufficient, still give a best-effort answer and set confidence to "needs_input"; otherwise "drafted".\n\nCONTEXT:\n${context}\n\nQUESTIONS:\n${questionsBlock}\n\nReturn JSON: { "answers": [{ "index": number, "answer": string, "confidence": "drafted"|"needs_input" }] }`;
 
-    const res = await base44.integrations.Core.InvokeLLM({
+    const res = await base44.asServiceRole.integrations.Core.InvokeLLM({
       prompt,
       response_json_schema: {
         type: "object",

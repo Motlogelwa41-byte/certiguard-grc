@@ -57,7 +57,8 @@ Return a JSON with:
   "findings": "Detailed findings summary with each gap explained",
   "remediation_plan": "Prioritized remediation plan"
 }`;
-      const result = await base44.integrations.Core.InvokeLLM({ prompt, response_json_schema: { type: "object", properties: { total_gaps: { type: "number" }, critical_gaps: { type: "number" }, high_gaps: { type: "number" }, medium_gaps: { type: "number" }, low_gaps: { type: "number" }, findings: { type: "string" }, remediation_plan: { type: "string" } }, required: ["total_gaps"] } });
+      const res = await base44.functions.invoke('aiGapAnalysis', { framework_name: form.framework_name, description: form.description, controls: frameworkControls.map(c => ({ control_id: c.control_id, title: c.title, status: c.status, severity: c.severity })) });
+      const result = res.data?.result;
       setAiResult(result);
       setForm({ ...form, ...result });
       toast({ title: "AI Gap Analysis complete" });
