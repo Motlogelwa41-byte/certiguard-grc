@@ -55,6 +55,7 @@ export const navSections = [
       { label: "Framework Templates", path: "/framework-templates", icon: Library, roles: ["admin", "compliance_officer"] },
       { label: "SADC Frameworks", path: "/sadc-frameworks", icon: MapPin, roles: ["admin", "compliance_officer", "risk_manager", "auditor"] },
       { label: "HRDC & BQA Report", path: "/hrdc-bqa-report", icon: GraduationCap, roles: ["admin", "compliance_officer", "risk_manager", "auditor"] },
+      { label: "BDPA Compliance Report", path: "/bdpa-report", icon: ShieldCheck, roles: ["admin", "compliance_officer", "risk_manager", "auditor", "regulator"] },
       { label: "Regulatory Changes", path: "/regulatory-changes", icon: ScrollText, roles: ["admin", "compliance_officer", "risk_manager", "auditor"] },
       { label: "Regulatory Roadmap", path: "/regulatory-roadmap", icon: CalendarCheck, roles: ["admin", "compliance_officer", "risk_manager", "auditor", "executive"] },
       { label: "Audit Checklists", path: "/audit-checklists", icon: ListChecks, roles: ["admin", "compliance_officer", "auditor"] },

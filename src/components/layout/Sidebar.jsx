@@ -59,13 +59,13 @@ export default function Sidebar() {
           <div key={section.label} className={sIdx > 0 ? "mt-5" : ""}>
             {!collapsed ? (
               <div className="flex items-center gap-2 px-2 mb-1.5">
-                <span className="text-[10px] font-bold uppercase tracking-[0.12em] text-muted-foreground">
+                <span className="text-[11px] font-bold uppercase tracking-[0.12em] text-foreground/70">
                   {section.label}
                 </span>
-                <div className="flex-1 h-px bg-border" />
+                <div className="flex-1 h-px bg-border/80" />
               </div>
             ) : (
-              <div className="h-px bg-border mx-2 my-2.5" />
+              <div className="h-px bg-border/80 mx-2 my-2.5" />
             )}
             <div className="space-y-0.5">
               {section.items.map((item) => {
