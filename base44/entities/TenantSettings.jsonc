@@ -104,6 +104,10 @@
       "type": "string",
       "description": "Custom welcome message on the login page"
     },
+    "calendly_url": {
+      "type": "string",
+      "description": "Calendly scheduling URL for sales demos (e.g. https://calendly.com/your-handle/30min) \u2014 embedded in the Book a Demo dialog and dashboard"
+    },
     "require_sso": {
       "type": "boolean",
       "default": false,

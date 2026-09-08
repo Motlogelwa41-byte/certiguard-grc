@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
 import { useAuth } from "@/lib/AuthContext";
 import { useTenant } from "@/lib/TenantContext";
-import { Settings, Save, Shield, DollarSign, Globe } from "lucide-react";
+import { Settings, Save, Shield, DollarSign, Globe, Calendar } from "lucide-react";
 import PageHeader from "@/components/shared/PageHeader";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -49,6 +49,7 @@ export default function TenantSettings() {
   });
   const [appetiteLimit, setAppetiteLimit] = useState(500000);
   const [dpo, setDpo] = useState({ name: "", email: "", phone: "", appointed_at: "", regulator: "POPIA", registration_ref: "" });
+  const [calendlyUrl, setCalendlyUrl] = useState("");
 
   useEffect(() => {
     Promise.all([
@@ -71,6 +72,7 @@ export default function TenantSettings() {
           });
         }
         if (s.risk_appetite_limit !== undefined) setAppetiteLimit(s.risk_appetite_limit);
+        if (s.calendly_url) setCalendlyUrl(s.calendly_url);
         setDpo({
           name: s.dpo_name || "",
           email: s.dpo_email || "",
@@ -118,6 +120,7 @@ export default function TenantSettings() {
         dpo_appointed_at: dpo.appointed_at,
         dpo_regulator: dpo.regulator,
         dpo_registration_ref: dpo.registration_ref,
+        calendly_url: calendlyUrl,
         updated_by_name: user?.full_name || user?.email,
       };
 
@@ -313,6 +316,24 @@ export default function TenantSettings() {
                 <Input value={dpo.registration_ref} onChange={(e) => setDpo({ ...dpo, registration_ref: e.target.value })} placeholder="e.g. IR-2026-001" />
               </div>
             </div>
+          </CardContent>
+        </Card>
+        {/* Calendly Sales Meeting Booking */}
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2 text-base">
+              <Calendar className="w-4 h-4 text-primary" /> Sales Meeting Booking (Calendly)
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <p className="text-sm text-muted-foreground mb-4">Enter your Calendly scheduling URL to let prospects book sales meetings directly from the marketing pages and in-app dashboard.</p>
+            <Label>Calendly Scheduling URL</Label>
+            <Input
+              value={calendlyUrl}
+              onChange={(e) => setCalendlyUrl(e.target.value)}
+              placeholder="https://calendly.com/your-handle/30min"
+            />
+            <p className="text-xs text-muted-foreground mt-2">Find this in your Calendly account under the event type you want prospects to book.</p>
           </CardContent>
         </Card>
       </div>

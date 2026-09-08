@@ -3,7 +3,7 @@ import { base44 } from "@/api/base44Client";
 import { Link, Navigate } from "react-router-dom";
 import {
   Shield, FileCheck, AlertTriangle, CheckSquare,
-  FileText, ArrowRight, FileDown, CalendarClock, ClipboardCheck
+  FileText, ArrowRight, FileDown, CalendarClock, ClipboardCheck, Calendar
 } from "lucide-react";
 import { PieChart, Pie, Cell, ResponsiveContainer, BarChart, Bar, XAxis, YAxis, Tooltip } from "recharts";
 import PageHeader from "@/components/shared/PageHeader";
@@ -13,6 +13,7 @@ import VendorAssessmentWidget from "@/components/dashboard/VendorAssessmentWidge
 import ComplianceScoreRing from "@/components/dashboard/ComplianceScoreRing";
 import ActivityFeed from "@/components/dashboard/ActivityFeed";
 import QuickActions from "@/components/dashboard/QuickActions";
+import { openCalendlyPopup } from "@/components/landing/CalendlyEmbed";
 
 import ComplianceHeatmap from "@/components/dashboard/ComplianceHeatmap";
 import FrameworkReadinessInsights from "@/components/dashboard/FrameworkReadinessInsights";
@@ -43,6 +44,7 @@ export default function Dashboard() {
   const [tasks, setTasks] = useState([]);
   const [vendors, setVendors] = useState([]);
   const [assessments, setAssessments] = useState([]);
+  const [calendlyUrl, setCalendlyUrl] = useState("");
   const [loading, setLoading] = useState(true);
 
   const { user } = useAuth();
@@ -57,13 +59,15 @@ export default function Dashboard() {
       base44.entities.ComplianceTask.list().catch(() => []),
       base44.entities.Vendor.list().catch(() => []),
       base44.entities.VendorAssessment.list().catch(() => []),
-    ]).then(([f, c, r, t, v, a]) => {
+      base44.entities.TenantSettings.list("-created_date", 1).catch(() => []),
+    ]).then(([f, c, r, t, v, a, ts]) => {
       setFrameworks(f || []);
       setControls(c || []);
       setRisks(r || []);
       setTasks(t || []);
       setVendors(v || []);
       setAssessments(a || []);
+      if (ts?.[0]?.calendly_url) setCalendlyUrl(ts[0].calendly_url);
       setLoading(false);
     }).catch(() => setLoading(false));
   }, [role]);
@@ -146,6 +150,14 @@ export default function Dashboard() {
               <Link to="/scheduled-reports" className="inline-flex items-center gap-1.5 text-xs font-medium text-white bg-white/10 hover:bg-white/20 border border-white/15 rounded-lg px-3 py-1.5 transition-colors">
                 <CalendarClock className="w-3.5 h-3.5" /> Schedule Weekly Email
               </Link>
+              {calendlyUrl && (
+                <button
+                  onClick={() => openCalendlyPopup(calendlyUrl)}
+                  className="inline-flex items-center gap-1.5 text-xs font-medium text-white bg-white/10 hover:bg-white/20 border border-white/15 rounded-lg px-3 py-1.5 transition-colors"
+                >
+                  <Calendar className="w-3.5 h-3.5" /> Book a Meeting
+                </button>
+              )}
             </div>
           </div>
           <div className="shrink-0 rounded-2xl bg-white/5 border border-white/10 p-4 backdrop-blur">

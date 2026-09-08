@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -8,6 +8,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Calendar, Mail, Building2, User, Loader2, CheckCircle2, Sparkles } from "lucide-react";
 import { useToast } from "@/components/ui/use-toast";
 import { base44 } from "@/api/base44Client";
+import { openCalendlyPopup } from "@/components/landing/CalendlyEmbed";
 
 const COMPANY_SIZES = ["1-10", "11-50", "51-200", "201-1000", "1000+"];
 const FRAMEWORK_OPTIONS = ["SOC 2", "ISO 27001", "NIST CSF", "POPIA", "Botswana DPA", "GDPR", "King IV", "SADC Model Law"];
@@ -26,6 +27,15 @@ export default function BookDemoDialog({ open, onOpenChange, source = "landing-p
     message: "",
   });
   const [frameworks, setFrameworks] = useState([]);
+  const [calendlyUrl, setCalendlyUrl] = useState("");
+
+  useEffect(() => {
+    base44.entities.TenantSettings.list("-created_date", 1)
+      .then((items) => {
+        if (items?.[0]?.calendly_url) setCalendlyUrl(items[0].calendly_url);
+      })
+      .catch(() => {});
+  }, []);
 
   const toggleFramework = (fw) => {
     setFrameworks((prev) => (prev.includes(fw) ? prev.filter((f) => f !== fw) : [...prev, fw]));
@@ -164,11 +174,23 @@ export default function BookDemoDialog({ open, onOpenChange, source = "landing-p
               </div>
             </div>
 
+            {calendlyUrl && (
+              <div className="flex items-center gap-3 mt-3 mb-1">
+                <div className="flex-1 h-px bg-border" />
+                <span className="text-xs text-muted-foreground">or</span>
+                <div className="flex-1 h-px bg-border" />
+              </div>
+            )}
             <DialogFooter>
               <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>Cancel</Button>
               <Button type="submit" disabled={submitting}>
                 {submitting ? (<><Loader2 className="w-4 h-4 mr-1 animate-spin" /> Submitting…</>) : "Request Demo"}
               </Button>
+              {calendlyUrl && (
+                <Button type="button" variant="secondary" className="w-full sm:w-auto" onClick={() => openCalendlyPopup(calendlyUrl)}>
+                  <Calendar className="w-4 h-4 mr-1" /> Book on Calendly
+                </Button>
+              )}
             </DialogFooter>
           </form>
         )}
