@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
-import { History, Search, ChevronDown, ChevronRight, FileDown, FileText, Settings, Users } from "lucide-react";
+import { History, Search, ChevronDown, ChevronRight, FileDown, FileText, FileSpreadsheet, Settings, Users } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -8,6 +8,7 @@ import PageHeader from "@/components/shared/PageHeader";
 import EmptyState from "@/components/shared/EmptyState";
 import { exportEvidencePack } from "@/lib/exportEvidencePack";
 import { exportAuditTrailPdf } from "@/lib/exportAuditTrailPdf";
+import { exportBulkExcel } from "@/lib/exportBulkExcel";
 import moment from "moment";
 
 const ENTITY_FILTERS = [
@@ -79,6 +80,18 @@ export default function AuditTrailPage() {
     }
   };
 
+  const [exportingBulk, setExportingBulk] = useState(false);
+  const handleBulkExport = async () => {
+    setExportingBulk(true);
+    try {
+      await exportBulkExcel();
+    } catch (e) {
+      // best-effort export
+    } finally {
+      setExportingBulk(false);
+    }
+  };
+
   useEffect(() => {
     base44.entities.AuditTrail.list("-created_date", 500).then((d) => { setLogs(d); setLoading(false); });
   }, []);
@@ -105,6 +118,9 @@ export default function AuditTrailPage() {
           <div className="flex items-center gap-2">
             <Button size="sm" variant="outline" onClick={handleExportTrail} disabled={exportingTrail}>
               <FileDown className="w-4 h-4 mr-1" /> {exportingTrail ? "Generating…" : "Audit Trail PDF"}
+            </Button>
+            <Button size="sm" variant="outline" onClick={handleBulkExport} disabled={exportingBulk}>
+              <FileSpreadsheet className="w-4 h-4 mr-1" /> {exportingBulk ? "Gathering…" : "Bulk Excel Export"}
             </Button>
             <Button size="sm" onClick={handleExport} disabled={exporting}>
               <FileDown className="w-4 h-4 mr-1" /> {exporting ? "Generating…" : "Evidence Pack"}

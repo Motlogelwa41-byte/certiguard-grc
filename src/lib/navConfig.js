@@ -15,7 +15,6 @@ export const navSections = [
     label: "Overview",
     items: [
       { label: "Dashboard", path: "/", icon: LayoutDashboard, roles: ["admin", "compliance_officer", "risk_manager", "auditor", "external_auditor", "regulator", "executive", "user"] },
-      { label: "Regulator Dashboard", path: "/regulator-dashboard", icon: Landmark, roles: ["admin", "compliance_officer", "risk_manager", "auditor", "external_auditor", "regulator", "executive"] },
       { label: "Client Dashboard", path: "/client-dashboard", icon: Presentation, roles: ["admin", "compliance_officer", "risk_manager", "auditor", "external_auditor", "regulator"] },
       { label: "24/7 Protection", path: "/protection-center", icon: Shield, roles: ["admin", "compliance_officer", "risk_manager", "auditor", "external_auditor", "regulator", "user"] },
       { label: "About CertiGuard", path: "/about", icon: Info, roles: ["admin", "compliance_officer", "risk_manager", "auditor", "user"] },
@@ -31,6 +30,19 @@ export const navSections = [
       { label: "My Dashboard", path: "/my-dashboard", icon: SlidersHorizontal, roles: ["admin", "compliance_officer", "risk_manager", "auditor", "executive", "user"] },
       { label: "Guided Onboarding", path: "/unified-onboarding", icon: Rocket, roles: ["admin", "compliance_officer"] },
       { label: "Executive Briefing", path: "/executive-briefing", icon: Presentation, roles: ["admin", "compliance_officer", "risk_manager", "auditor", "external_auditor", "executive"] },
+    ]
+  },
+  {
+    label: "Regulatory & SADC",
+    items: [
+      { label: "Regulator Dashboard", path: "/regulator-dashboard", icon: Landmark, roles: ["admin", "compliance_officer", "risk_manager", "auditor", "external_auditor", "regulator", "executive"] },
+      { label: "SADC Frameworks", path: "/sadc-frameworks", icon: MapPin, roles: ["admin", "compliance_officer", "risk_manager", "auditor"] },
+      { label: "HRDC & BQA Report", path: "/hrdc-bqa-report", icon: GraduationCap, roles: ["admin", "compliance_officer", "risk_manager", "auditor"] },
+      { label: "BDPA Compliance Report", path: "/bdpa-report", icon: ShieldCheck, roles: ["admin", "compliance_officer", "risk_manager", "auditor", "regulator"] },
+      { label: "Regulatory Changes", path: "/regulatory-changes", icon: ScrollText, roles: ["admin", "compliance_officer", "risk_manager", "auditor"] },
+      { label: "Regulatory Roadmap", path: "/regulatory-roadmap", icon: CalendarCheck, roles: ["admin", "compliance_officer", "risk_manager", "auditor", "executive"] },
+      { label: "SADC Exec Dashboard", path: "/sadc-executive-dashboard", icon: Globe, roles: ["admin", "compliance_officer", "risk_manager", "auditor"] },
+      { label: "Cross-Border Matrix", path: "/cross-border-matrix", icon: Globe, roles: ["admin", "compliance_officer", "risk_manager", "auditor"] },
     ]
   },
   {
@@ -54,11 +66,6 @@ export const navSections = [
       { label: "Completion Summary", path: "/framework-completion", icon: PieChart, roles: ["admin", "compliance_officer", "risk_manager", "auditor", "external_auditor", "regulator", "executive"] },
       { label: "Control Libraries", path: "/control-libraries", icon: Library, roles: ["admin", "compliance_officer"] },
       { label: "Framework Templates", path: "/framework-templates", icon: Library, roles: ["admin", "compliance_officer"] },
-      { label: "SADC Frameworks", path: "/sadc-frameworks", icon: MapPin, roles: ["admin", "compliance_officer", "risk_manager", "auditor"] },
-      { label: "HRDC & BQA Report", path: "/hrdc-bqa-report", icon: GraduationCap, roles: ["admin", "compliance_officer", "risk_manager", "auditor"] },
-      { label: "BDPA Compliance Report", path: "/bdpa-report", icon: ShieldCheck, roles: ["admin", "compliance_officer", "risk_manager", "auditor", "regulator"] },
-      { label: "Regulatory Changes", path: "/regulatory-changes", icon: ScrollText, roles: ["admin", "compliance_officer", "risk_manager", "auditor"] },
-      { label: "Regulatory Roadmap", path: "/regulatory-roadmap", icon: CalendarCheck, roles: ["admin", "compliance_officer", "risk_manager", "auditor", "executive"] },
       { label: "Audit Checklists", path: "/audit-checklists", icon: ListChecks, roles: ["admin", "compliance_officer", "auditor"] },
       { label: "Control Monitoring", path: "/control-monitoring", icon: Activity, roles: ["admin", "compliance_officer", "auditor"] },
       { label: "Control Tests", path: "/control-tests", icon: FlaskRound, roles: ["admin", "compliance_officer", "auditor"] },
@@ -88,7 +95,6 @@ export const navSections = [
       { label: "Framework Cross-Map", path: "/risk-framework-crossmap", icon: GitCompare, roles: ["admin", "compliance_officer", "risk_manager", "auditor"] },
       { label: "KPI / KRI Tracker", path: "/kpi-kri", icon: Target, roles: ["admin", "compliance_officer", "risk_manager", "auditor"] },
       { label: "Monte Carlo Forecast", path: "/monte-carlo-forecast", icon: Activity, roles: ["admin", "compliance_officer", "risk_manager", "auditor"] },
-      { label: "Cross-Border Matrix", path: "/cross-border-matrix", icon: Globe, roles: ["admin", "compliance_officer", "risk_manager", "auditor"] },
       { label: "Cost of Compliance", path: "/cost-of-compliance", icon: DollarSign, roles: ["admin", "compliance_officer", "risk_manager", "auditor"] },
       { label: "Risk Scenario Library", path: "/risk-scenario-library", icon: Library, roles: ["admin", "compliance_officer", "risk_manager", "auditor"] },
       { label: "Cross-Org Rollup", path: "/cross-org-risk", icon: Building2, roles: ["admin", "risk_manager"] },
@@ -216,7 +222,6 @@ export const navSections = [
       { label: "Exec Summary", path: "/executive-summary", icon: FileDown, roles: ["admin", "compliance_officer", "risk_manager", "auditor", "executive"] },
       { label: "Readiness Report", path: "/compliance-readiness-report", icon: ClipboardCheck, roles: ["admin", "compliance_officer", "risk_manager", "auditor"] },
       { label: "Mgmt Dashboard", path: "/management-dashboard", icon: BarChart2, roles: ["admin", "compliance_officer", "risk_manager", "auditor", "executive"] },
-      { label: "SADC Exec Dashboard", path: "/sadc-executive-dashboard", icon: Globe, roles: ["admin", "compliance_officer", "risk_manager", "auditor"] },
       { label: "Industry Dashboard", path: "/industry-dashboard", icon: Factory, roles: ["admin", "compliance_officer", "risk_manager", "auditor"] },
       { label: "Financial Dashboard", path: "/financial-dashboard", icon: Landmark, roles: ["admin", "compliance_officer", "risk_manager", "auditor"] },
       { label: "Compliance Benchmarking", path: "/compliance-benchmarking", icon: Trophy, roles: ["admin", "compliance_officer", "risk_manager", "auditor"] },
