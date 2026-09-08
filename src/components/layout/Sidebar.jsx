@@ -45,7 +45,7 @@ export default function Sidebar() {
         </div>
         {!collapsed && (
           <div className="leading-tight overflow-hidden">
-            <span className="font-heading font-bold text-base text-sidebar-foreground block truncate">
+            <span className="font-heading font-bold text-base text-white block truncate">
               {brand.name || "CertiGuard GRC"}
             </span>
             <span className="text-[9px] font-semibold uppercase tracking-widest text-sidebar-primary">RegTech Platform</span>
@@ -56,14 +56,14 @@ export default function Sidebar() {
       {/* Nav */}
       <nav className="flex-1 py-3 px-2 overflow-y-auto overflow-x-hidden">
         {sections.map((section) => (
-          <div key={section.label} className="mb-3">
+          <div key={section.label} className="mb-4">
             {!collapsed && (
-              <p className="text-[10px] font-bold uppercase tracking-widest text-sidebar-foreground/50 px-2.5 mb-1">
+              <p className="text-[10px] font-bold uppercase tracking-widest text-sidebar-foreground/60 px-2.5 mb-1.5">
                 {section.label}
               </p>
             )}
-            {collapsed && <div className="h-px bg-sidebar-border/50 mx-1 my-1.5" />}
-            <div className="space-y-0.5">
+            {collapsed && <div className="h-px bg-sidebar-border mx-2 my-2" />}
+            <div className="space-y-1">
               {section.items.map((item) => {
                 const Icon = item.icon;
                 const active = isActive(item.path);
@@ -89,7 +89,7 @@ export default function Sidebar() {
       </nav>
 
       {/* Bottom */}
-      <div className="px-2 py-3 border-t border-sidebar-border space-y-0.5">
+      <div className="px-2 py-3 border-t border-sidebar-border space-y-1">
         <button
           onClick={() => setCollapsed(!collapsed)}
           className="flex items-center gap-2.5 px-2.5 py-2 rounded-lg text-sm font-medium text-sidebar-foreground hover:bg-sidebar-accent hover:text-white w-full"
@@ -108,7 +108,7 @@ export default function Sidebar() {
             await logLogout();
             base44.auth.logout("/");
           }}
-          className="flex items-center gap-2.5 px-2.5 py-2 rounded-lg text-sm font-medium text-sidebar-foreground hover:bg-destructive/10 hover:text-destructive w-full"
+          className="flex items-center gap-2.5 px-2.5 py-2 rounded-lg text-sm font-medium text-sidebar-foreground hover:bg-destructive hover:text-white w-full"
         >
           {collapsed ? (
             <LogOut className="w-[18px] h-[18px] shrink-0 mx-auto" />
