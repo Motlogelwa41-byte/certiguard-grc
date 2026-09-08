@@ -255,6 +255,9 @@ import ClientPortal from '@/pages/ClientPortal';
 import BotusafeRfpResponse from '@/pages/BotusafeRfpResponse';
 import SearchConsoleDashboard from '@/pages/SearchConsoleDashboard';
 import AuditorLanding from '@/pages/AuditorLanding';
+import PostLaunchChecklist from '@/pages/PostLaunchChecklist';
+import FeedbackSurveys from '@/pages/FeedbackSurveys';
+import FeedbackSurvey from '@/pages/FeedbackSurvey';
 import { LanguageProvider } from '@/contexts/LanguageContext';
 
 const AuthenticatedApp = () => {
@@ -300,6 +303,7 @@ const AuthenticatedApp = () => {
       <Route path="/client-portal" element={<ClientPortal />} />
       <Route path="/botusafe-rfp" element={<BotusafeRfpResponse />} />
       <Route path="/for-auditors" element={<AuditorLanding />} />
+      <Route path="/feedback-survey" element={<FeedbackSurvey />} />
       <Route path="/privacy" element={<PrivacyPolicy />} />
       <Route path="/terms" element={<Terms />} />
       <Route path="/sla" element={<SLA />} />
@@ -489,6 +493,8 @@ const AuthenticatedApp = () => {
           <Route path="/hrdc-bqa-report" element={<HRDCBQAReport />} />
           <Route path="/bdpa-report" element={<BDPAComplianceReport />} />
           <Route path="/sadc-readiness-summary" element={<SadcReadinessSummary />} />
+          <Route path="/post-launch-checklist" element={<PostLaunchChecklist />} />
+          <Route path="/feedback-surveys" element={<FeedbackSurveys />} />
           <Route path="/webhooks" element={<WebhookManagement />} />
           <Route path="/risk-scenario-library" element={<RiskScenarioLibrary />} />
           <Route path="/custom-reports" element={<CustomReportBuilder />} />
