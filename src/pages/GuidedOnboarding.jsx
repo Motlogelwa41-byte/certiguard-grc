@@ -49,6 +49,10 @@ export default function GuidedOnboarding() {
   const [goalFrameworkId, setGoalFrameworkId] = useState(null);
   const [targetScore, setTargetScore] = useState(80);
   const [targetDate, setTargetDate] = useState("");
+  const [goalTaskCreated, setGoalTaskCreated] = useState(false);
+  const [savedGoal, setSavedGoal] = useState(() => {
+    try { return JSON.parse(localStorage.getItem("rg_goal") || "null"); } catch { return null; }
+  });
 
   // Step 3 — import risks
   const [riskText, setRiskText] = useState("");
@@ -91,8 +95,29 @@ export default function GuidedOnboarding() {
     localStorage.setItem("rg_company", JSON.stringify(profile));
   };
 
+  const saveGoal = async () => {
+    const goal = { frameworkId: goalFrameworkId, frameworkName: goalFw?.name, targetScore, targetDate };
+    localStorage.setItem("rg_goal", JSON.stringify(goal));
+    setSavedGoal(goal);
+    if (goalFrameworkId && goalFw && !goalTaskCreated) {
+      try {
+        await base44.entities.ComplianceTask.create({
+          title: `Reach ${targetScore}% readiness on ${goalFw.name}`,
+          type: "control_implementation",
+          priority: "high",
+          status: "todo",
+          related_framework_id: goalFrameworkId,
+          due_date: targetDate || undefined,
+          notes: "Onboarding goal set during guided onboarding.",
+        });
+        setGoalTaskCreated(true);
+      } catch (e) { /* ignore */ }
+    }
+  };
+
   const next = () => {
     if (step === 0) saveCompany();
+    if (step === 1) saveGoal();
     setStep((s) => Math.min(STEPS.length - 1, s + 1));
   };
   const back = () => setStep((s) => Math.max(0, s - 1));
@@ -381,14 +406,38 @@ export default function GuidedOnboarding() {
 
         {/* Step 5 — Done */}
         {step === 4 && (
-          <div className="text-center py-6">
-            <div className="w-14 h-14 rounded-full bg-emerald-500/15 flex items-center justify-center mx-auto mb-4">
-              <ShieldCheck className="w-7 h-7 text-emerald-400" />
+          <div className="py-6">
+            <div className="text-center mb-6">
+              <div className="w-14 h-14 rounded-full bg-emerald-500/15 flex items-center justify-center mx-auto mb-4">
+                <ShieldCheck className="w-7 h-7 text-emerald-400" />
+              </div>
+              <h2 className="text-xl font-heading font-bold text-foreground mb-1">You're all set!</h2>
+              <p className="text-sm text-muted-foreground max-w-md mx-auto">
+                {companyName || "Your tenant"} is onboarded and ready for compliance tracking.
+              </p>
             </div>
-            <h2 className="text-xl font-heading font-bold text-foreground mb-1">You're all set!</h2>
-            <p className="text-sm text-muted-foreground max-w-md mx-auto mb-6">
-              {companyName || "Your tenant"} is onboarded. {importedCount > 0 && `${importedCount} risks imported. `}Your first assessment scored {assessment?.score ?? 0}%.
-            </p>
+            <div className="max-w-2xl mx-auto grid grid-cols-1 sm:grid-cols-2 gap-3 mb-6">
+              <div className="rounded-xl border border-border p-4">
+                <p className="text-xs font-medium text-muted-foreground mb-2 flex items-center gap-1.5"><Building2 className="w-3.5 h-3.5" /> Company</p>
+                <p className="text-sm font-semibold text-foreground">{companyName || "—"}</p>
+                <p className="text-xs text-muted-foreground mt-1">{industry} • {region} • {size}</p>
+              </div>
+              <div className="rounded-xl border border-border p-4">
+                <p className="text-xs font-medium text-muted-foreground mb-2 flex items-center gap-1.5"><Target className="w-3.5 h-3.5" /> Compliance Goal</p>
+                <p className="text-sm font-semibold text-foreground">{savedGoal?.frameworkName || "—"}</p>
+                <p className="text-xs text-muted-foreground mt-1">Target: {savedGoal?.targetScore ?? targetScore}%{savedGoal?.targetDate ? ` by ${savedGoal.targetDate}` : ""}</p>
+              </div>
+              <div className="rounded-xl border border-border p-4">
+                <p className="text-xs font-medium text-muted-foreground mb-2 flex items-center gap-1.5"><Upload className="w-3.5 h-3.5" /> Risks Imported</p>
+                <p className="text-sm font-semibold text-foreground">{importedCount} risks</p>
+                <p className="text-xs text-muted-foreground mt-1">{importedCount > 0 ? "Added to your risk register" : "Skipped — add risks later"}</p>
+              </div>
+              <div className="rounded-xl border border-border p-4">
+                <p className="text-xs font-medium text-muted-foreground mb-2 flex items-center gap-1.5"><TrendingUp className="w-3.5 h-3.5" /> First Assessment</p>
+                <p className="text-sm font-semibold text-foreground">{assessment?.score ?? 0}% compliance score</p>
+                <p className="text-xs text-muted-foreground mt-1">{assessment ? `${assessment.passing} passing, ${assessment.failing} failing` : "Not run"}</p>
+              </div>
+            </div>
             <div className="flex flex-wrap items-center justify-center gap-2">
               <Button onClick={() => navigate("/")}><Rocket className="w-4 h-4 mr-1" /> Go to Dashboard</Button>
               <Button variant="outline" onClick={() => navigate("/risk-heatmap")}><AlertTriangle className="w-4 h-4 mr-1" /> View Risk Heatmap</Button>
@@ -401,7 +450,11 @@ export default function GuidedOnboarding() {
         {step < 3 && (
           <div className="flex items-center justify-between mt-8 pt-6 border-t border-border">
             <Button variant="ghost" onClick={back} disabled={step === 0}><ArrowLeft className="w-4 h-4 mr-1" /> Back</Button>
-            {step !== 2 && <Button onClick={next} disabled={step === 0 && !companyName}>Continue <ArrowRight className="w-4 h-4 ml-1" /></Button>}
+            {step === 2 ? (
+              <Button variant="ghost" onClick={next}>Skip for now <ArrowRight className="w-4 h-4 ml-1" /></Button>
+            ) : (
+              <Button onClick={next} disabled={step === 0 && !companyName}>Continue <ArrowRight className="w-4 h-4 ml-1" /></Button>
+            )}
           </div>
         )}
         {step === 3 && !assessment && (
