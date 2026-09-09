@@ -8,6 +8,9 @@ import { createClientFromRequest } from 'npm:@base44/sdk@0.8.38';
 Deno.serve(async (req) => {
   try {
     const base44 = createClientFromRequest(req);
+    const user = await base44.auth.me().catch(() => null);
+    if (!user) return Response.json({ ok: false, error: "Unauthorized" }, { status: 401 });
+    if (user.role !== "admin") return Response.json({ ok: false, error: "Admin privileges required" }, { status: 403 });
     const body = await req.json().catch(() => ({}));
     const dryRun = !!body.dry_run;
     const graceDays = body.grace_days || 30;
