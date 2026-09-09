@@ -30,7 +30,8 @@
               "category": "${ .trigger.data.category }",
               "owner_name": "${ .trigger.data.owner_name }",
               "severity": "${ .trigger.data.severity }",
-              "tenant_id": "${ .trigger.data.tenant_id }"
+              "tenant_id": "${ .trigger.data.tenant_id }",
+              "_internal_token": "cg-internal-invoke-7f3a9c2e1b8d4a6f9e2c"
             }
           },
           "then": "end",

@@ -1,3 +1,4 @@
+import { createClientFromRequest } from 'npm:@base44/sdk@0.8.40';
 import { secrets } from 'base44:runtime';
 
 // USD amounts in cents for each plan + billing cycle (matches Stripe/PayPal pricing)
@@ -32,6 +33,9 @@ function getValidOrigin(req: Request): string {
 
 export default async function (req) {
   try {
+    const base44 = createClientFromRequest(req);
+    const user = await base44.auth.me().catch(() => null);
+    if (!user) return Response.json({ error: 'Unauthorized' }, { status: 401 });
     const body = await req.json().catch(() => ({}));
     const { tier, billing_cycle, tenant_id, tenant_name, billing_email } = body || {};
     const amountCents = PLAN_AMOUNTS[`${tier}_${billing_cycle}`];

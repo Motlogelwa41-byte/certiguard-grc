@@ -1,4 +1,5 @@
 import { createClientFromRequest } from 'npm:@base44/sdk@0.8.40';
+import { secrets } from 'base44:runtime';
 
 // Triggered the instant a Control regresses from PASSING to FAILING.
 // Posts a Slack alert and creates a high-priority remediation task.
@@ -12,6 +13,17 @@ Deno.serve(async (req) => {
   try {
     const base44 = createClientFromRequest(req);
     const body = await req.json().catch(() => ({}));
+
+    // Auth: authenticated user or internal workflow token
+    let user = null;
+    try { user = await base44.auth.me(); } catch (_) { user = null; }
+    if (!user) {
+      const expected = secrets.get('INTERNAL_INVOKE_TOKEN');
+      if (!expected || body._internal_token !== expected) {
+        return Response.json({ ok: false, error: 'Unauthorized' }, { status: 401 });
+      }
+    }
+
     const {
       control_id = '',
       title = '',

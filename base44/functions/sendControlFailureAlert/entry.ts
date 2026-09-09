@@ -1,11 +1,11 @@
 import { createClientFromRequest } from 'npm:@base44/sdk@0.8.40';
 import { sendGmail } from "../../shared/gmailSender.ts";
-
-const SUPPORT_EMAIL = "support.certiguardgrc@gmail.com";
+import { secrets } from 'base44:runtime';
 
 export default async function(req: Request): Promise<Response> {
   try {
     const base44 = createClientFromRequest(req);
+    const SUPPORT_EMAIL = secrets.get('SUPPORT_EMAIL') || '';
     const body = await req.json().catch(() => ({}));
 
     const {

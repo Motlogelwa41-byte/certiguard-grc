@@ -1,14 +1,22 @@
 import { createClientFromRequest } from 'npm:@base44/sdk@0.8.38';
 import { sendGmail } from '../../shared/gmailSender.ts';
+import { secrets } from 'base44:runtime';
 
 Deno.serve(async (req) => {
   try {
     const base44 = createClientFromRequest(req);
     const sr = base44.asServiceRole;
 
-    // Auth: block authenticated non-privileged users. Allow no-auth (workflow) calls.
+    // Auth: authenticated user (role-checked below) or internal workflow token.
     let authUser = null;
     try { authUser = await base44.auth.me(); } catch (_) { authUser = null; }
+    if (!authUser) {
+      const tokenBody = await req.json().catch(() => ({}));
+      const expected = secrets.get('INTERNAL_INVOKE_TOKEN');
+      if (!expected || tokenBody._internal_token !== expected) {
+        return Response.json({ error: 'Unauthorized' }, { status: 401 });
+      }
+    }
     if (authUser && !['admin', 'compliance_officer'].includes(authUser.role)) {
       return Response.json({ error: 'Insufficient permissions' }, { status: 403 });
     }

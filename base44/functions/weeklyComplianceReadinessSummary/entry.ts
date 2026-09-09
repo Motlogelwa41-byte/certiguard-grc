@@ -1,7 +1,6 @@
 import { createClientFromRequest } from 'npm:@base44/sdk@0.8.38';
 import { sendGmail } from "../../shared/gmailSender.ts";
-
-const SUPPORT_EMAIL = "support.certiguardgrc@gmail.com";
+import { secrets } from 'base44:runtime';
 
 // Computes a weekly compliance readiness summary and posts it to the
 // #compliance Slack channel by reusing the existing sendSlackAlert function.
@@ -10,6 +9,7 @@ Deno.serve(async (req) => {
   try {
     const base44 = createClientFromRequest(req);
     const sr = base44.asServiceRole;
+    const SUPPORT_EMAIL = secrets.get('SUPPORT_EMAIL') || '';
 
     // Pull current compliance data + active weekly report schedules (service-role, tenant-wide read)
     const [frameworks, controls, risks, tasks, incidents, schedules] = await Promise.all([

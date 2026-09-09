@@ -1,5 +1,6 @@
 import { createClientFromRequest } from 'npm:@base44/sdk@0.8.40';
 import { sendGmail } from '../../shared/gmailSender.ts';
+import { secrets } from 'base44:runtime';
 
 // Daily scan for evidence expiring within 7 days or already expired.
 // Posts a Slack alert listing flagged items, sends email reminders to
@@ -21,6 +22,18 @@ function escapeHtml(str) {
 Deno.serve(async (req) => {
   try {
     const base44 = createClientFromRequest(req);
+
+    // Auth: authenticated user or internal workflow token
+    let user = null;
+    try { user = await base44.auth.me(); } catch (_) { user = null; }
+    if (!user) {
+      const tokenBody = await req.json().catch(() => ({}));
+      const expected = secrets.get('INTERNAL_INVOKE_TOKEN');
+      if (!expected || tokenBody._internal_token !== expected) {
+        return Response.json({ ok: false, error: 'Unauthorized' }, { status: 401 });
+      }
+    }
+
     const today = new Date();
     today.setHours(0, 0, 0, 0);
     const horizon = new Date(today);

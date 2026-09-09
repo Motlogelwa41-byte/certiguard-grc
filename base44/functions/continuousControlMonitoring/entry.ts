@@ -1,4 +1,5 @@
 import { createClientFromRequest } from 'npm:@base44/sdk@0.8.38';
+import { secrets } from 'base44:runtime';
 
 function hashStr(s) {
   let h = 0;
@@ -19,8 +20,17 @@ Deno.serve(async (req) => {
       if (user) { authUser = user; triggeredBy = user.full_name || user.email || "manual"; }
     } catch (_) { /* scheduled run — no user */ }
 
+    // Auth: authenticated user (role-checked below) or internal workflow token.
+    if (!authUser) {
+      const tokenBody = await req.json().catch(() => ({}));
+      const expected = secrets.get('INTERNAL_INVOKE_TOKEN');
+      if (!expected || tokenBody._internal_token !== expected) {
+        return Response.json({ error: 'Unauthorized' }, { status: 401 });
+      }
+    }
+
     // Least privilege: only admins or compliance officers may trigger this tenant-wide
-    // operation manually. Scheduled (no-auth) runs are allowed.
+    // operation manually. Scheduled (internal-token) runs are allowed.
     if (authUser && !["admin", "compliance_officer"].includes(authUser.role)) {
       return Response.json({ error: "Insufficient permissions — only admins or compliance officers may trigger this operation." }, { status: 403 });
     }
