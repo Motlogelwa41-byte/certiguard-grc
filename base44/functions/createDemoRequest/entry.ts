@@ -2,6 +2,16 @@ import { createClientFromRequest } from 'npm:@base44/sdk@0.8.44';
 
 // Public endpoint (no user auth) — prospects requesting a demo are not app users.
 // Creates a DemoRequest record and emails the sales team.
+function escapeHtml(str) {
+  if (str == null) return '';
+  return String(str)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
+}
+
 export default async function (req) {
   try {
     const base44 = createClientFromRequest(req);
@@ -33,24 +43,25 @@ export default async function (req) {
       const fwList = Array.isArray(frameworks_of_interest) && frameworks_of_interest.length
         ? frameworks_of_interest.join(", ")
         : "Not specified";
+      const esc = escapeHtml;
       const bodyHtml = `
         <h2>New Demo Request</h2>
-        <p><strong>Name:</strong> ${String(name).trim()}</p>
-        <p><strong>Email:</strong> ${String(email).trim().toLowerCase()}</p>
-        <p><strong>Company:</strong> ${String(company).trim()}</p>
-        <p><strong>Company Size:</strong> ${company_size || "Not specified"}</p>
-        <p><strong>Role:</strong> ${role || "Not specified"}</p>
-        <p><strong>Frameworks of Interest:</strong> ${fwList}</p>
-        <p><strong>Preferred Date:</strong> ${preferred_date || "Not specified"}</p>
+        <p><strong>Name:</strong> ${esc(String(name).trim())}</p>
+        <p><strong>Email:</strong> ${esc(String(email).trim().toLowerCase())}</p>
+        <p><strong>Company:</strong> ${esc(String(company).trim())}</p>
+        <p><strong>Company Size:</strong> ${esc(company_size || "Not specified")}</p>
+        <p><strong>Role:</strong> ${esc(role || "Not specified")}</p>
+        <p><strong>Frameworks of Interest:</strong> ${esc(fwList)}</p>
+        <p><strong>Preferred Date:</strong> ${esc(preferred_date || "Not specified")}</p>
         <p><strong>Message:</strong></p>
-        <p>${message ? String(message).trim().replace(/\n/g, "<br/>") : "None"}</p>
-        <p><strong>Source:</strong> ${source || "landing-page"}</p>
+        <p>${message ? esc(String(message).trim()).replace(/\n/g, "<br/>") : "None"}</p>
+        <p><strong>Source:</strong> ${esc(source || "landing-page")}</p>
         <hr/>
         <p>Follow up within one business day to schedule the demo.</p>
       `;
       await base44.asServiceRole.integrations.Core.SendEmail({
         to: "sales@ethicaledgegrcconsulting.com",
-        subject: `New Demo Request — ${String(company).trim()}`,
+        subject: `New Demo Request — ${esc(String(company).trim())}`,
         body: bodyHtml,
       });
     } catch (emailErr) {

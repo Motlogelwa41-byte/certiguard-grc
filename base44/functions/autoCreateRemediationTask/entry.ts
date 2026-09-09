@@ -19,6 +19,11 @@ export default async function (req) {
       }
     }
 
+    // When invoked by an authenticated user, enforce tenant isolation:
+    // the payload's tenant_id must match the caller's session tenant.
+    // Workflow invocations (internal token, no user) are trusted cross-tenant.
+    const callerTenantId = user?.data?.tenant_id || null;
+
     const { entity_type, control, risk, control_id, risk_id } = body;
     const now = new Date();
     const due = new Date(now.getTime() + 48 * 60 * 60 * 1000); // 48 hours
@@ -27,6 +32,9 @@ export default async function (req) {
     if (entity_type === 'control' || control) {
       const c = control || {};
       const tenantId = c.tenant_id || '';
+      if (callerTenantId && tenantId && tenantId !== callerTenantId) {
+        return Response.json({ error: 'Cross-tenant access denied' }, { status: 403 });
+      }
       const cId = control_id || c.id || c.control_id || '';
       const title = c.title || 'Untitled control';
       const ownerName = c.owner_name || '';
@@ -110,6 +118,9 @@ Return ONLY a JSON object with:
     if (entity_type === 'risk' || risk) {
       const r = risk || {};
       const tenantId = r.tenant_id || '';
+      if (callerTenantId && tenantId && tenantId !== callerTenantId) {
+        return Response.json({ error: 'Cross-tenant access denied' }, { status: 403 });
+      }
       const rId = risk_id || r.id || r.risk_id || '';
       const title = r.title || 'Untitled risk';
       const score = Number(r.risk_score || (Number(r.likelihood || 0) * Number(r.impact || 0)));
